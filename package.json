@@ -4,7 +4,8 @@
   "scripts": {
     "dev": "vite",
     "build": "vue-tsc --noEmit && vite build",
-    "serve": "vite preview"
+    "serve": "vite preview",
+    "docs": "npm run build && node ./scripts/docs.js"
   },
   "dependencies": {
     "codemirror": "^5.62.0",
