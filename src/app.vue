@@ -6,7 +6,7 @@
         <Editor />
       </template>
       <template #right>
-        <div>Right</div>
+        <Preview />
       </template>
     </Box>
   </div>
@@ -17,6 +17,7 @@ import { defineComponent } from 'vue';
 import Box from './components/box.vue';
 import Nav from './components/nav.vue';
 import Editor from './components/editor.vue';
+import Preview from './components/preview/index.vue';
 
 export default defineComponent({
   name: 'App',
@@ -24,6 +25,7 @@ export default defineComponent({
     Box,
     Nav,
     Editor,
+    Preview,
   }
 })
 </script>
