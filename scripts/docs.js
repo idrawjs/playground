@@ -6,11 +6,18 @@ const distDir = path.join(__dirname, '..', 'dist');
 if (fs.existsSync(pageDir)) {
   removeFullDir(pageDir);
 }
-
+fixPageAssetsPath();
 copyDir(distDir, pageDir, () => {
   console.log('Copy files success!');
-})
+});
 
+
+function fixPageAssetsPath() {
+  const htmlPath = path.join(distDir, 'index.html');
+  let html = fs.readFileSync(htmlPath, {encoding: 'utf8' });
+  html = html.replace(/src="\//ig, 'src="./').replace(/href="\//ig, 'href="./');
+  fs.writeFileSync(htmlPath, html);
+}
 
 function removeFullDir(dirPath) {
   let files = [];
