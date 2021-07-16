@@ -3,7 +3,7 @@
   <div class="container">
     <Box>
       <template #left>
-        <div>Left</div>
+        <Editor />
       </template>
       <template #right>
         <div>Right</div>
@@ -16,12 +16,14 @@
 import { defineComponent } from 'vue';
 import Box from './components/box.vue';
 import Nav from './components/nav.vue';
+import Editor from './components/editor.vue';
 
 export default defineComponent({
   name: 'App',
   components: {
     Box,
     Nav,
+    Editor,
   }
 })
 </script>
