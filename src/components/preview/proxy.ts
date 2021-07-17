@@ -1,5 +1,5 @@
-// ReplProxy and srcdoc implementation from Svelte REPL
-// MIT License https://github.com/sveltejs/svelte-repl/blob/master/LICENSE
+// PreviewProxy implementation from Vue.js
+// MIT License https://github.com/vuejs/vue-next/blob/master/LICENSE
 
 let uid = 1
 

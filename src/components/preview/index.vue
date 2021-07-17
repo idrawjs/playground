@@ -6,7 +6,7 @@
 import { ref, onMounted, onUnmounted, watchEffect, watch } from 'vue'
 import type { WatchStopHandle } from 'vue'
 import srcdoc from './srcdoc.html?raw'
-import { PreviewProxy } from './proxy'
+import {} from './proxy'
 
 const container = ref()
 const runtimeError = ref()

@@ -1,7 +1,8 @@
 
 <script setup lang="ts">
-// import { downloadProject } from './download/download'
-// import { setVersion, resetVersion } from './sfcCompiler'
+//implementation from Vue.js
+// MIT License https://github.com/vuejs/vue-next/blob/master/LICENSE
+
 import { ref, onMounted } from 'vue'
 
 const activeVersion = ref(`@0.0.1`)

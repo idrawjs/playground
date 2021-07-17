@@ -13,6 +13,9 @@
 </template>
 
 <script setup lang="ts">
+  //implementation from Vue.js
+  // MIT License https://github.com/vuejs/vue-next/blob/master/LICENSE
+
   import Box from './components/box.vue';
   import Nav from './components/nav.vue';
   import Editor from './components/editor/index.vue';

@@ -6,6 +6,9 @@
 </template>
 
 <script setup lang="ts">
+//implementation from Vue.js
+// MIT License https://github.com/vuejs/vue-next/blob/master/LICENSE
+
 import CodeMirror from '../codemirror/index.vue';
 import Tab from './tab.vue';
 import { ref, watch, computed } from 'vue';
