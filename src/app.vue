@@ -12,22 +12,24 @@
   </div>
 </template>
 
-<script lang="ts">
-import { defineComponent } from 'vue';
-import Box from './components/box.vue';
-import Nav from './components/nav.vue';
-import Editor from './components/editor.vue';
-import Preview from './components/preview/index.vue';
-
-export default defineComponent({
-  name: 'App',
-  components: {
-    Box,
-    Nav,
-    Editor,
-    Preview,
+<script setup lang="ts">
+  import Box from './components/box.vue';
+  import Nav from './components/nav.vue';
+  import Editor from './components/editor.vue';
+  import Preview from './components/preview/index.vue';
+  import { getUrlParams, getExampleFiles } from './util/data';
+  
+  async function main() {
+    const exampleName = getUrlParams('example') || 'basic';
+    try {
+      const files = await getExampleFiles(exampleName);
+    } catch (err) {
+      console.log(err);
+    }
   }
-})
+  
+  main();
+
 </script>
 
 <style lang="less">

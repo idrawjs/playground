@@ -1,5 +1,6 @@
 <template>
   <div class="tab-selector">
+
     <div class="tab" >
       <span class="label">tab-2</span>
     </div>
@@ -22,6 +23,7 @@
 </template>
 
 <script setup lang="ts">
+import { store } from './../util/store';
 
 </script>
 
