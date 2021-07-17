@@ -1,12 +1,13 @@
 <template>
-  <!-- <FileSelector/> -->
+  <Tab />
   <div class="editor-container">
     <CodeMirror @change="onChange" :value="activeCode" :mode="activeMode" />
   </div>
 </template>
 
 <script setup lang="ts">
-import CodeMirror from './codemirror/index.vue'
+import CodeMirror from './codemirror/index.vue';
+import Tab from './tab.vue';
 import { ref, watch, computed } from 'vue';
 // import { debounce } from './../util/time';
 
