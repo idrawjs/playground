@@ -15,14 +15,16 @@
 <script setup lang="ts">
   import Box from './components/box.vue';
   import Nav from './components/nav.vue';
-  import Editor from './components/editor.vue';
+  import Editor from './components/editor/index.vue';
   import Preview from './components/preview/index.vue';
   import { getUrlParams, getExampleFiles } from './util/data';
+  import { setFiles } from './util/store';
   
   async function main() {
     const exampleName = getUrlParams('example') || 'basic';
     try {
       const files = await getExampleFiles(exampleName);
+      setFiles(files);
     } catch (err) {
       console.log(err);
     }

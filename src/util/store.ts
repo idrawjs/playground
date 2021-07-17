@@ -18,15 +18,14 @@ export const store: Store = reactive({
   activeIndex: 0
 })
 
-export function setActiveFile(index: number) {
+export function setActiveIndex(index: number) {
   store.activeIndex = index;
 }
 
 export function addFile(file: TypeCodeFile) {
-  files.push(file);
+  store.files.push(file);
 }
 
-
 export function setFiles(files: TypeCodeFile[]) {
-  files = files;
+  store.files = files;
 }
