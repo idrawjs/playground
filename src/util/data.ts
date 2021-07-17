@@ -22,8 +22,8 @@ export async function getExampleFiles(name: string): Promise<TypeCodeFile[]> {
   });
   const cssModule = await import(`${basePath}/${name}/index.css?raw`);
   files.push({
-    name: 'index.css',
-    code: (cssModule.default || '').replace(/^export default \"/i, '').replace(/\"$/i, ''),
+    name: 'index.css', 
+    code: (cssModule.default || '').replace(/^export default \"/i, '').replace(/\"$/i, '').replace(/\\n/g, '\n'),
     type: 'css',
   });
   return files;

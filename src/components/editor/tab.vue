@@ -13,7 +13,6 @@
 <script setup lang="ts">
 import { store, setActiveIndex } from '../../util/store';
 
-
 </script>
 
 <style scoped>

@@ -9,42 +9,31 @@
 import CodeMirror from '../codemirror/index.vue';
 import Tab from './tab.vue';
 import { ref, watch, computed } from 'vue';
-// import { debounce } from './../util/time';
-
-function debounce(fn: Function, n = 100) {
-  let handle: any
-  return (...args: any[]) => {
-    if (handle) clearTimeout(handle)
-    handle = setTimeout(() => {
-      fn(...args)
-    }, n)
-  }
-}
+import { debounce } from './../../util/time';
+import { store } from './../../util/store';
 
 const onChange = debounce((code: string) => {
-  console.log('code =', code);
-}, 250)
+  // console.log('code =', code);
+}, 300)
 
-// const activeCode = ref(store.activeFile.code)
+const activeCode = ref(store.files[store.activeIndex]?.code || '');
 
-const activeCode = ref(`
-function add(a, b) {
-  return a + b;
+const modeMap = {
+  'js': 'javascript',
+  'css': 'css',
+  'html': 'htmlmixed',
 };
-console.log(add(1, 2));
-`)
 
-const activeMode = 'javascript';
-// const activeMode = computed(
-//   () => (store.activeFilename.endsWith('.vue') ? 'htmlmixed' : 'javascript')
-// )
+const activeMode = computed(() => {
+  return modeMap[store.files[store.activeIndex]?.type]
+});
 
-// watch(
-//   () => store.activeFilename,
-//   () => {
-//     activeCode.value = store.activeFile.code
-//   }
-// )
+watch(() => {
+  return store.activeIndex
+}, () => {
+  activeCode.value = store.files[store.activeIndex]?.code || '';
+})
+
 </script>
 
 <style scoped>

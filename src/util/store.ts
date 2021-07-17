@@ -15,7 +15,7 @@ let files:TypeCodeFile[] = [];
 
 export const store: Store = reactive({
   files,
-  activeIndex: 0
+  activeIndex: -1
 })
 
 export function setActiveIndex(index: number) {
@@ -26,6 +26,12 @@ export function addFile(file: TypeCodeFile) {
   store.files.push(file);
 }
 
-export function setFiles(files: TypeCodeFile[]) {
-  store.files = files;
+export function setFiles(codefiles: TypeCodeFile[]) {
+  while (store.files.length > 0) {
+    store.files.pop();
+  }
+  codefiles.forEach((f) => {
+    store.files.push(f);
+  });
+  setActiveIndex(0);
 }
