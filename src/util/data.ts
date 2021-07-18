@@ -15,7 +15,10 @@ function fetchText(url: string): Promise<string> {
 
 let basePath = './../../public';
 if (import.meta.env.PROD) {
-  basePath = './../../'
+  basePath = './';
+  // if (window.location.host === 'idrawjs.github.io') {
+  //   basePath = './';
+  // }
 }
 
 export async function getExampleFiles(name: string): Promise<TypeCodeFile[]> {
