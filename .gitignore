@@ -110,4 +110,4 @@ dist
 dist-ssr
 *.local
 
-docs/
+#docs/
