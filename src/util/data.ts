@@ -5,26 +5,50 @@ export function getUrlParams(name: string): string | null {
   return urlParams.get(name);
 }
 
-const basePath = './../examples';
+function fetchText(url: string): Promise<string> {
+  return new Promise((resolve, reject) => {
+    fetch(url).then(res => res.text()).then((text) => {
+      resolve(text);
+    }).catch(reject)
+  });
+}
+
+let basePath = './../../public';
+if (import.meta.env.PROD) {
+  basePath = './../../'
+}
+
 export async function getExampleFiles(name: string): Promise<TypeCodeFile[]> {
   const files: TypeCodeFile[] = [];
-  const jsModue = await import(`${basePath}/${name}/index.js?raw`);
+  const jsModue = await fetchText(`${basePath}/data/${name}/index.js`);
   files.push({
     name: 'index.js',
-    code: jsModue.default,
+    code: jsModue,
     type: 'js',
   });
-  const htmlModule = await import(`${basePath}/${name}/index.html?raw`);
+  const htmlModule = await fetchText(`${basePath}/data/${name}/index.html`);
   files.push({
     name: 'index.html',
-    code: htmlModule.default,
+    code: htmlModule,
     type: 'html',
   });
-  const cssModule = await import(`${basePath}/${name}/index.css?raw`);
+  let cssModule = await fetchText(`${basePath}/data/${name}/index.css`);
+  if (import.meta.env.DEV) {
+    const lines = cssModule.replace(/\r\n/ig, '\n').split('\n');
+    cssModule = '';
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i];
+      if (line.startsWith('const css = "')) {
+        cssModule = line.replace('const css = "', '').replace(/^\"/, '').replace(/\"$/, '').replace(/\\n/g, '\n').trim();
+        break;
+      }
+    }
+  }
   files.push({
-    name: 'index.css', 
-    code: (cssModule.default || '').replace(/^export default \"/i, '').replace(/\"$/i, '').replace(/\\n/g, '\n'),
+    name: 'index.css',
+    code: cssModule,
     type: 'css',
   });
+
   return files;
 }
