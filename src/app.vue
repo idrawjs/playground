@@ -6,26 +6,35 @@
         <Editor />
       </template>
       <template #right>
-        <div>Right</div>
+        <Preview />
       </template>
     </Box>
   </div>
 </template>
 
-<script lang="ts">
-import { defineComponent } from 'vue';
-import Box from './components/box.vue';
-import Nav from './components/nav.vue';
-import Editor from './components/editor.vue';
+<script setup lang="ts">
+  //implementation from Vue.js
+  // MIT License https://github.com/vuejs/vue-next/blob/master/LICENSE
 
-export default defineComponent({
-  name: 'App',
-  components: {
-    Box,
-    Nav,
-    Editor,
+  import Box from './components/box.vue';
+  import Nav from './components/nav.vue';
+  import Editor from './components/editor/index.vue';
+  import Preview from './components/preview/index.vue';
+  import { getUrlParams, getExampleFiles } from './util/data';
+  import { setFiles } from './util/store';
+  
+  async function main() {
+    const exampleName = getUrlParams('example') || 'basic';
+    try {
+      const files = await getExampleFiles(exampleName);
+      setFiles(files);
+    } catch (err) {
+      console.log(err);
+    }
   }
-})
+  
+  main();
+
 </script>
 
 <style lang="less">

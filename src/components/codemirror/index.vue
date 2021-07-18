@@ -3,6 +3,9 @@
 </template>
 
 <script setup lang="ts">
+//implementation from Vue.js
+// MIT License https://github.com/vuejs/vue-next/blob/master/LICENSE
+
 import { ref, onMounted, defineProps, defineEmits, watchEffect } from 'vue'
 import CodeMirror from './codemirror'
 
