@@ -7,16 +7,21 @@ import { ref, onMounted, onUnmounted, watchEffect, watch } from 'vue'
 import type { WatchStopHandle } from 'vue'
 import srcdoc from './srcdoc.html?raw'
 import { store } from './../../util/store';
+import { PreviewProxy } from './proxy';
 
 const container = ref()
+const runtimeError = ref()
+const runtimeWarning = ref()
 
 let sandbox: HTMLIFrameElement
-// let stopUpdateWatcher: WatchStopHandle
+let proxy: PreviewProxy
+let stopUpdateWatcher: WatchStopHandle
 
 // create sandbox on mount
 onMounted(createSandbox)
 
 onUnmounted(() => {
+  proxy.destroy();
   // stopUpdateWatcher && stopUpdateWatcher()
 })
 
@@ -32,6 +37,7 @@ watch(() => {
 
 function createSandbox() {
   if (sandbox) {
+    proxy.destroy();
     container.value.removeChild(sandbox)
   }
 
@@ -48,7 +54,61 @@ function createSandbox() {
   
   const sandboxSrc: string = getPreivewHTML();
   sandbox.srcdoc = sandboxSrc;
-  container.value.appendChild(sandbox)
+  container.value.appendChild(sandbox);
+
+
+  proxy = new PreviewProxy(sandbox, {
+    on_fetch_progress: (progress: any) => {
+      // pending_imports = progress;
+    },
+    on_error: (event: any) => {
+      const msg = event.value instanceof Error ? event.value.message : event.value
+      if (
+        msg.includes('Failed to resolve module specifier') ||
+        msg.includes('Error resolving module specifier')
+      ) {
+        runtimeError.value = msg.replace(/\. Relative references must.*$/, '') +
+        `.\nTip: add an "import-map.json" file to specify import paths for dependencies.`
+      } else {
+        runtimeError.value = event.value
+      }
+    },
+    on_unhandled_rejection: (event: any) => {
+      let error = event.value
+      if (typeof error === 'string') {
+        error = { message: error }
+      }
+      runtimeError.value = 'Uncaught (in promise): ' + error.message
+    },
+    on_console: (log: any) => {
+      if (log.duplicate) {
+        return
+      }
+      if (log.level === 'error') {
+        if (log.args[0] instanceof Error) {
+          runtimeError.value = log.args[0].message
+        } else {
+          runtimeError.value = log.args[0]
+        }
+      } else if (log.level === 'warn') {
+        if (log.args[0].toString().includes('[Vue warn]')) {
+          runtimeWarning.value = log.args
+            .join('')
+            .replace(/\[Vue warn\]:/, '')
+            .trim()
+        }
+      }
+    },
+    on_console_group: (action: any) => {
+      // group_logs(action.label, false);
+    },
+    on_console_group_end: () => {
+      // ungroup_logs();
+    },
+    on_console_group_collapsed: (action: any) => {
+      // group_logs(action.label, true);
+    }
+  })
 }
 
 function getPreivewHTML() {
