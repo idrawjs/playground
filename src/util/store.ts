@@ -26,6 +26,12 @@ export function addFile(file: TypeCodeFile) {
   store.files.push(file);
 }
 
+export function updateActiveFileCode(code: string) {
+  if (store.files[store.activeIndex]) {
+    store.files[store.activeIndex].code = code;
+  }
+}
+
 export function setFiles(codefiles: TypeCodeFile[]) {
   while (store.files.length > 0) {
     store.files.pop();

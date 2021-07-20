@@ -6,29 +6,32 @@
 import { ref, onMounted, onUnmounted, watchEffect, watch } from 'vue'
 import type { WatchStopHandle } from 'vue'
 import srcdoc from './srcdoc.html?raw'
-import { PreviewProxy } from './proxy'
+import { store } from './../../util/store';
 
 const container = ref()
-const runtimeError = ref()
-const runtimeWarning = ref()
 
 let sandbox: HTMLIFrameElement
-let proxy: PreviewProxy
-let stopUpdateWatcher: WatchStopHandle
+// let stopUpdateWatcher: WatchStopHandle
 
 // create sandbox on mount
 onMounted(createSandbox)
 
 onUnmounted(() => {
-  proxy.destroy()
-  stopUpdateWatcher && stopUpdateWatcher()
+  // stopUpdateWatcher && stopUpdateWatcher()
 })
+
+watch(() => {
+  return [
+    store?.files[0]?.code,
+    store?.files[1]?.code,
+    store?.files[2]?.code
+  ]
+}, () => {
+  createSandbox();
+});
 
 function createSandbox() {
   if (sandbox) {
-    // clear prev sandbox
-    proxy.destroy()
-    stopUpdateWatcher()
     container.value.removeChild(sandbox)
   }
 
@@ -42,99 +45,33 @@ function createSandbox() {
     'allow-scripts',
     'allow-top-navigation-by-user-activation'
   ].join(' '))
-
-  let importMap: Record<string, any>
-  try {
-    importMap = JSON.parse(`{}`)
-  } catch (e) {
-    console.log(e);
-    return
-  }
-
-  if (!importMap.imports) {
-    importMap.imports = {}
-  }
-  const sandboxSrc = srcdoc.replace(/<!--IMPORT_MAP-->/, JSON.stringify(importMap))
-  sandbox.srcdoc = sandboxSrc
+  
+  const sandboxSrc: string = getPreivewHTML();
+  sandbox.srcdoc = sandboxSrc;
   container.value.appendChild(sandbox)
+}
 
-  proxy = new PreviewProxy(sandbox, {
-    on_fetch_progress: (progress: any) => {
-      // pending_imports = progress;
-    },
-    on_error: (event: any) => {
-      const msg = event.value instanceof Error ? event.value.message : event.value
-      if (
-        msg.includes('Failed to resolve module specifier') ||
-        msg.includes('Error resolving module specifier')
-      ) {
-        runtimeError.value = msg.replace(/\. Relative references must.*$/, '') +
-        `.\nTip: add an "import-map.json" file to specify import paths for dependencies.`
-      } else {
-        runtimeError.value = event.value
-      }
-    },
-    on_unhandled_rejection: (event: any) => {
-      let error = event.value
-      if (typeof error === 'string') {
-        error = { message: error }
-      }
-      runtimeError.value = 'Uncaught (in promise): ' + error.message
-    },
-    on_console: (log: any) => {
-      if (log.duplicate) {
-        return
-      }
-      if (log.level === 'error') {
-        if (log.args[0] instanceof Error) {
-          runtimeError.value = log.args[0].message
-        } else {
-          runtimeError.value = log.args[0]
-        }
-      } else if (log.level === 'warn') {
-        if (log.args[0].toString().includes('[Vue warn]')) {
-          runtimeWarning.value = log.args
-            .join('')
-            .replace(/\[Vue warn\]:/, '')
-            .trim()
-        }
-      }
-    },
-    on_console_group: (action: any) => {
-      // group_logs(action.label, false);
-    },
-    on_console_group_end: () => {
-      // ungroup_logs();
-    },
-    on_console_group_collapsed: (action: any) => {
-      // group_logs(action.label, true);
+function getPreivewHTML() {
+  const assets = { html: '', css: '', js: '' };
+  let previewHTML: string = '';
+  for (let i = 0; i < store.files.length; i++) {
+    if (store.files[i].type === 'html') {
+      assets.html = store.files[i].code;
+    } else if (store.files[i].type === 'css') {
+      assets.css = store.files[i].code;
+    } else if (store.files[i].type === 'js') {
+      assets.js = store.files[i].code;
     }
-  })
-
-  sandbox.addEventListener('load', () => {
-    proxy.handle_links()
-    stopUpdateWatcher = watchEffect(updatePreview)
-  })
+  }
+  previewHTML = assets.html;
+  previewHTML = previewHTML.replace('<!-- @inject-css -->', `<style>${assets.css}</style>`);
+  previewHTML = previewHTML.replace('<!-- @inject-js -->', `\<script type="module"\>${assets.js}\</script\>`);
+  
+  console.log('previewHTML ==', previewHTML);
+  
+  return assets.html;
 }
 
-async function updatePreview() {
-  // @ts-ignore
-  if (import.meta.env.PROD) {
-    console.clear()
-  }
-  runtimeError.value = null
-  runtimeWarning.value = null
-  try {
-    // reset modules
-    await proxy.eval([
-      `console.log('hello 001')`,
-      `
-      console.log('hello 002')`.trim()
-    ])
-  } catch (e) {
-    runtimeError.value = e.message
-  }
-}
 </script>
 
 <style>
