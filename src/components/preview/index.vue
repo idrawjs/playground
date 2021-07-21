@@ -6,7 +6,9 @@
 import { ref, onMounted, onUnmounted, watchEffect, watch } from 'vue'
 import type { WatchStopHandle } from 'vue'
 import srcdoc from './srcdoc.html?raw'
-import { PreviewProxy } from './proxy'
+import { store } from './../../util/store';
+import { PreviewProxy } from './proxy';
+import { parsePreivewJavaScript } from './../../util/data';
 
 const container = ref()
 const runtimeError = ref()
@@ -20,19 +22,28 @@ let stopUpdateWatcher: WatchStopHandle
 onMounted(createSandbox)
 
 onUnmounted(() => {
-  proxy.destroy()
-  stopUpdateWatcher && stopUpdateWatcher()
+  proxy.destroy();
+  // stopUpdateWatcher && stopUpdateWatcher()
 })
+
+watch(() => {
+  return [
+    store?.files[0]?.code,
+    store?.files[1]?.code,
+    store?.files[2]?.code
+  ]
+}, () => {
+  createSandbox();
+});
 
 function createSandbox() {
   if (sandbox) {
-    // clear prev sandbox
-    proxy.destroy()
-    stopUpdateWatcher()
+    proxy.destroy();
     container.value.removeChild(sandbox)
   }
 
-  sandbox = document.createElement('iframe')
+  const assets = getPreivewAssets();
+  sandbox = document.createElement('iframe');
   sandbox.setAttribute('sandbox', [
     'allow-forms',
     'allow-modals',
@@ -42,23 +53,20 @@ function createSandbox() {
     'allow-scripts',
     'allow-top-navigation-by-user-activation'
   ].join(' '))
+  
+  const sandboxSrc = srcdoc
+    .replace(/<!--__INJECT_STYLE__-->/, `\<style\>${assets.css}\</style\>`)
+    .replace(/<!--__INJECT_IMPORTMAP__-->/, `\<script type="importmap"\>${assets.importmap}\</script\>`)
+    .replace(/<!--__INJECT_HTML__-->/, assets.html.replace(/<script[\s\S]*?<\/script>/ig, ''))
+    .replace(/<!--__INJECT_JS__-->/, `\<script type="module"\>${assets.js}\</script\>`);
 
-  let importMap: Record<string, any>
-  try {
-    importMap = JSON.parse(`{}`)
-  } catch (e) {
-    console.log(e);
-    return
-  }
+  sandbox.srcdoc = sandboxSrc;
+  container.value.appendChild(sandbox);
+  proxy = createPreviewProxy(sandbox);
+}
 
-  if (!importMap.imports) {
-    importMap.imports = {}
-  }
-  const sandboxSrc = srcdoc.replace(/<!--IMPORT_MAP-->/, JSON.stringify(importMap))
-  sandbox.srcdoc = sandboxSrc
-  container.value.appendChild(sandbox)
-
-  proxy = new PreviewProxy(sandbox, {
+function createPreviewProxy(sandbox: HTMLIFrameElement): PreviewProxy {
+  return new PreviewProxy(sandbox, {
     on_fetch_progress: (progress: any) => {
       // pending_imports = progress;
     },
@@ -110,31 +118,24 @@ function createSandbox() {
       // group_logs(action.label, true);
     }
   })
-
-  sandbox.addEventListener('load', () => {
-    proxy.handle_links()
-    stopUpdateWatcher = watchEffect(updatePreview)
-  })
 }
 
-async function updatePreview() {
-  // @ts-ignore
-  if (import.meta.env.PROD) {
-    console.clear()
+function getPreivewAssets(): { html: string, css: string, js: string, importmap: string } {
+  const assets = { html: '', css: '', js: '', importmap: '{}' };
+  for (let i = 0; i < store.files.length; i++) {
+    if (store.files[i].name === 'index.html') {
+      assets.html = store.files[i].code;
+    } else if (store.files[i].name === 'index.css') {
+      assets.css = store.files[i].code;
+    } else if (store.files[i].name === 'index.js') {
+      assets.js = store.files[i].code;
+    } else if (store.files[i].name === 'import-map.json') {
+      assets.importmap = store.files[i].code;
+    }
   }
-  runtimeError.value = null
-  runtimeWarning.value = null
-  try {
-    // reset modules
-    await proxy.eval([
-      `console.log('hello 001')`,
-      `
-      console.log('hello 002')`.trim()
-    ])
-  } catch (e) {
-    runtimeError.value = e.message
-  }
+  return assets;
 }
+
 </script>
 
 <style>

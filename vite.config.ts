@@ -8,5 +8,10 @@ export default defineConfig({
   plugins: [
     vue(),
     vueJsx({})
-  ]
+  ],
+  esbuild: {
+    exclude: [
+      'idraw'
+    ]
+  }
 })

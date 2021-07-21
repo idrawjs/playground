@@ -13,10 +13,10 @@ import CodeMirror from '../codemirror/index.vue';
 import Tab from './tab.vue';
 import { ref, watch, computed } from 'vue';
 import { debounce } from './../../util/time';
-import { store } from './../../util/store';
+import { store, updateActiveFileCode } from './../../util/store';
 
 const onChange = debounce((code: string) => {
-  // console.log('code =', code);
+  updateActiveFileCode(code)
 }, 300)
 
 const activeCode = ref(store.files[store.activeIndex]?.code || '');
@@ -25,6 +25,7 @@ const modeMap = {
   'js': 'javascript',
   'css': 'css',
   'html': 'htmlmixed',
+  'json': 'javascript',
 };
 
 const activeMode = computed(() => {
@@ -36,7 +37,6 @@ watch(() => {
 }, () => {
   activeCode.value = store.files[store.activeIndex]?.code || '';
 })
-
 </script>
 
 <style scoped>
