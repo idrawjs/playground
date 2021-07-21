@@ -13,7 +13,7 @@ const data = {
       desc: {
         color: "#f0f0f0",
         borderRadius: 20,
-        borderWidth: 10,
+        borderWidth: 6,
         borderColor: "#bd0b64",
       },
     },
@@ -28,7 +28,7 @@ const data = {
       desc: {
         color: "#cccccc",
         borderRadius: 60,
-        borderWidth: 10,
+        borderWidth: 6,
         borderColor: "#bd0b64",
       },
     },
@@ -43,14 +43,14 @@ const data = {
       desc: {
         color: "#c0c0c0",
         borderRadius: 20,
-        borderWidth: 10,
+        borderWidth: 6,
         borderColor: "#bd0b64",
       },
     },
     {
       name: "rect-004",
-      x: 400 - 10,
-      y: 300 - 10,
+      x: 400 - 20,
+      y: 300 - 20,
       w: 200,
       h: 100,
       type: "rect",
@@ -58,7 +58,7 @@ const data = {
       desc: {
         color: "#e0e0e0",
         borderRadius: 20,
-        borderWidth: 10,
+        borderWidth: 6,
         borderColor: "#bd0b64",
       },
     },
