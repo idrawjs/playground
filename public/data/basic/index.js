@@ -5,3 +5,5 @@ const h2 = document.createElement('h2');
 h2.innerText = 'Hello JS';
 
 body.appendChild(h2);
+
+console.log('Hello JS')
