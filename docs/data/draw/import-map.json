@@ -1,0 +1,5 @@
+{
+  "imports": {
+    "idraw": "https://unpkg.com/idraw/dist/index.es.js"
+  }
+}
