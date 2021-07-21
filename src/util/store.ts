@@ -3,19 +3,21 @@ import { reactive } from 'vue';
 export interface TypeCodeFile {
   name: string;
   code: string;
-  type: 'js' | 'css' | 'html'
+  type: 'js' | 'css' | 'html' | 'json';
 }
 
 interface Store {
   files: TypeCodeFile[],
   activeIndex: number,
+  errors: string[],
 }
 
 let files:TypeCodeFile[] = [];
 
 export const store: Store = reactive({
   files,
-  activeIndex: -1
+  activeIndex: -1,
+  errors: [],
 })
 
 export function setActiveIndex(index: number) {

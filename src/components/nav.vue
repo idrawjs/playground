@@ -1,6 +1,6 @@
 
 <script setup lang="ts">
-//implementation from Vue.js
+// Playground implementation from Vue.js
 // MIT License https://github.com/vuejs/vue-next/blob/master/LICENSE
 
 import { ref, onMounted } from 'vue'

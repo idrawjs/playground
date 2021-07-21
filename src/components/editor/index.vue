@@ -25,6 +25,7 @@ const modeMap = {
   'js': 'javascript',
   'css': 'css',
   'html': 'htmlmixed',
+  'json': 'javascript',
 };
 
 const activeMode = computed(() => {
@@ -36,8 +37,6 @@ watch(() => {
 }, () => {
   activeCode.value = store.files[store.activeIndex]?.code || '';
 })
-
-
 </script>
 
 <style scoped>

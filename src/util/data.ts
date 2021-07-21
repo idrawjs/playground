@@ -53,5 +53,12 @@ export async function getExampleFiles(name: string): Promise<TypeCodeFile[]> {
     type: 'css',
   });
 
+  const importMap = await fetchText(`${basePath}/data/${name}/import-map.json`);
+  files.push({
+    name: 'import-map.json',
+    code: importMap,
+    type: 'json',
+  });
+
   return files;
 }

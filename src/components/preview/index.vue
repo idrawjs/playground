@@ -41,7 +41,8 @@ function createSandbox() {
     container.value.removeChild(sandbox)
   }
 
-  sandbox = document.createElement('iframe')
+  const assets = getPreivewAssets();
+  sandbox = document.createElement('iframe');
   sandbox.setAttribute('sandbox', [
     'allow-forms',
     'allow-modals',
@@ -52,12 +53,18 @@ function createSandbox() {
     'allow-top-navigation-by-user-activation'
   ].join(' '))
   
-  const sandboxSrc: string = getPreivewHTML();
+  const sandboxSrc = srcdoc
+    .replace(/<!--__INJECT_STYLE__-->/, `\<style\>${assets.css}\</style\>`)
+    .replace(/<!--__INJECT_IMPORTMAP__-->/, `\<script type="importmap"\>${assets.importmap}\</script\>`)
+    .replace(/<!--__INJECT_HTML__-->/, assets.html.replace(/<script[\s\S]*?<\/script>/ig, ''))
+
   sandbox.srcdoc = sandboxSrc;
   container.value.appendChild(sandbox);
+  proxy = createPreviewProxy(sandbox);
+}
 
-
-  proxy = new PreviewProxy(sandbox, {
+function createPreviewProxy(sandbox: HTMLIFrameElement): PreviewProxy {
+  return new PreviewProxy(sandbox, {
     on_fetch_progress: (progress: any) => {
       // pending_imports = progress;
     },
@@ -111,25 +118,20 @@ function createSandbox() {
   })
 }
 
-function getPreivewHTML() {
-  const assets = { html: '', css: '', js: '' };
-  let previewHTML: string = '';
+function getPreivewAssets(): { html: string, css: string, js: string, importmap: string } {
+  const assets = { html: '', css: '', js: '', importmap: '{}' };
   for (let i = 0; i < store.files.length; i++) {
-    if (store.files[i].type === 'html') {
+    if (store.files[i].name === 'index.html') {
       assets.html = store.files[i].code;
-    } else if (store.files[i].type === 'css') {
+    } else if (store.files[i].name === 'index.css') {
       assets.css = store.files[i].code;
-    } else if (store.files[i].type === 'js') {
+    } else if (store.files[i].name === 'index.js') {
       assets.js = store.files[i].code;
+    } else if (store.files[i].name === 'import-map.json') {
+      assets.importmap = store.files[i].code;
     }
   }
-  previewHTML = assets.html;
-  previewHTML = previewHTML.replace('<!-- @inject-css -->', `<style>${assets.css}</style>`);
-  previewHTML = previewHTML.replace('<!-- @inject-js -->', `\<script type="module"\>${assets.js}\</script\>`);
-  
-  console.log('previewHTML ==', previewHTML);
-  
-  return assets.html;
+  return assets;
 }
 
 </script>
