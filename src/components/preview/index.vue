@@ -8,6 +8,7 @@ import type { WatchStopHandle } from 'vue'
 import srcdoc from './srcdoc.html?raw'
 import { store } from './../../util/store';
 import { PreviewProxy } from './proxy';
+import { parsePreivewJavaScript } from './../../util/data';
 
 const container = ref()
 const runtimeError = ref()
@@ -57,7 +58,7 @@ function createSandbox() {
     .replace(/<!--__INJECT_STYLE__-->/, `\<style\>${assets.css}\</style\>`)
     .replace(/<!--__INJECT_IMPORTMAP__-->/, `\<script type="importmap"\>${assets.importmap}\</script\>`)
     .replace(/<!--__INJECT_HTML__-->/, assets.html.replace(/<script[\s\S]*?<\/script>/ig, ''))
-    .replace(/<!--__INJECT_JS__-->/, `\<script type="module"\>${assets.js}\</script\>`)
+    .replace(/<!--__INJECT_JS__-->/, `\<script type="module"\>${assets.js}\</script\>`);
 
   sandbox.srcdoc = sandboxSrc;
   container.value.appendChild(sandbox);

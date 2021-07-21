@@ -26,7 +26,7 @@ export async function getExampleFiles(name: string): Promise<TypeCodeFile[]> {
   const jsModue = await fetchText(`${basePath}/data/${name}/index.js`);
   files.push({
     name: 'index.js',
-    code: jsModue,
+    code: parsePreivewJavaScript(jsModue),
     type: 'js',
   });
   const htmlModule = await fetchText(`${basePath}/data/${name}/index.html`);
@@ -61,4 +61,17 @@ export async function getExampleFiles(name: string): Promise<TypeCodeFile[]> {
   });
 
   return files;
+}
+
+export function parsePreivewJavaScript(js: string) {
+  const reg = /\'\/node_modules\/\.vite\/([\w]+)\.js\?v=[0-9a-zA_Z]{1,}\'/
+  const result = js.replace(reg, (str) => {
+    let mod = '\'\'';
+    const matchResult = reg?.exec(str);
+    if (matchResult && matchResult[1]) {
+      mod = `'${matchResult[1]}'`;
+    }
+    return mod;
+  })
+  return result;
 }
