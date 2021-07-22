@@ -57,7 +57,7 @@ body {
   --base: #444;
   --nav-height: 50px;
   --font-code: 'Source Code Pro', monospace;
-  --color-branding: #3c6ea8;
+  --color-branding: #1890ff;
   --color-branding-dark: #144474;
 }
 .container {
