@@ -32,6 +32,7 @@
       <svg  viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg"  width="200" height="200"><path d="M512 64a448 448 0 1 1 0 896A448 448 0 0 1 512 64z m0 64a384 384 0 1 0 0 768A384 384 0 0 0 512 128z m-0.704 448.512c98.048 0 187.648 49.472 240.384 129.408l7.68 12.16-55.104 32.64a223.872 223.872 0 0 0-192.96-110.208c-75.968 0-145.28 38.144-186.432 99.776l-7.36 11.776-55.36-32.192a287.872 287.872 0 0 1 249.152-143.36zM384 320v128H320V320h64z m320 0v128h-64V320h64z"  fill="#7dc5eb"></path></svg>
     </div>
     <div class="error-status-title">Not Finished</div>
+    <div class="error-status-title">It will take a while ...</div>
   </div>
 </template>
 
@@ -151,8 +152,10 @@ import { globalData } from './../util/global';
   width: 100px;
 }
 .error-status-title {
+  margin-top: 10px;
   text-align: center;
   font-size: 20px;
+  line-height: 32px;
   color: #888888;
 }
 
