@@ -30,7 +30,9 @@ watch(() => {
   return [
     store?.files[0]?.code,
     store?.files[1]?.code,
-    store?.files[2]?.code
+    store?.files[2]?.code,
+    store?.files[3]?.code,
+    store?.files[4]?.code
   ]
 }, () => {
   createSandbox();
@@ -123,13 +125,13 @@ function createPreviewProxy(sandbox: HTMLIFrameElement): PreviewProxy {
 function getPreivewAssets(): { html: string, css: string, js: string, importmap: string } {
   const assets = { html: '', css: '', js: '', importmap: '{}' };
   for (let i = 0; i < store.files.length; i++) {
-    if (store.files[i].name === 'index.html') {
+    if (store.files[i].fileName === 'index.html') {
       assets.html = store.files[i].code;
-    } else if (store.files[i].name === 'index.css') {
+    } else if (store.files[i].fileName === 'index.css') {
       assets.css = store.files[i].code;
-    } else if (store.files[i].name === 'index.js') {
+    } else if (store.files[i].fileName === 'index.js') {
       assets.js = store.files[i].code;
-    } else if (store.files[i].name === 'import-map.json') {
+    } else if (store.files[i].fileName === 'import-map.json') {
       assets.importmap = store.files[i].code;
     }
   }

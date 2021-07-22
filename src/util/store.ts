@@ -2,6 +2,7 @@ import { reactive } from 'vue';
 
 export interface TypeCodeFile {
   name: string;
+  fileName: string;
   code: string;
   type: 'js' | 'css' | 'html' | 'json';
 }
