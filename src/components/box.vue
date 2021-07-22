@@ -18,78 +18,86 @@
 </template>
 
 <script setup lang="ts">
-//implementation from Vue.js
-// MIT License https://github.com/vuejs/vue-next/blob/master/LICENSE
+  //implementation from Vue.js
+  // MIT License https://github.com/vuejs/vue-next/blob/master/LICENSE
 
-import { ref, reactive, defineComponent } from 'vue'
+  import { ref, reactive, defineProps } from 'vue';
 
-const container = ref()
+  const props = defineProps({
+    defaultSplit: {
+      type: Number,
+      default: 50
+    },
+  });
+  
+  const { defaultSplit } = props;
 
-const state = reactive({
-  dragging: false,
-  split: 50
-})
+  const container = ref()
+  const state = reactive({
+    dragging: false,
+    split: defaultSplit
+  })
 
-function boundSplit() {
-  const { split } = state
-  return split < 20
-    ? 20
-    : split > 80
-      ? 80
-      : split
-}
-
-let startPosition = 0
-let startSplit = 0
-
-function dragStart(e: MouseEvent) {
-  state.dragging = true
-  startPosition = e.pageX
-  startSplit = boundSplit()
-}
-
-function dragMove(e: MouseEvent) {
-  if (state.dragging) {
-    const position = e.pageX
-    const totalSize = container.value.offsetWidth
-    const dp = position - startPosition
-    state.split = startSplit + ~~(dp / totalSize * 100)
+  function boundSplit() {
+    const { split } = state
+    return split < 10
+      ? 10
+      : split > 90
+        ? 90
+        : split
   }
-}
 
-function dragEnd() {
-  state.dragging = false
-}
+  let startPosition = 0
+  let startSplit = 0
+
+  function dragStart(e: MouseEvent) {
+    state.dragging = true
+    startPosition = e.pageX
+    startSplit = boundSplit()
+  }
+
+  function dragMove(e: MouseEvent) {
+    if (state.dragging) {
+      const position = e.pageX
+      const totalSize = container.value.offsetWidth
+      const dp = position - startPosition
+      state.split = startSplit + ~~(dp / totalSize * 100)
+    }
+  }
+
+  function dragEnd() {
+    state.dragging = false
+  }
 
 </script>
 
 <style scoped>
-.split-box {
-  display: flex;
-  height: 100%;
-}
-.split-box.dragging {
-  cursor: ew-resize;
-}
-.dragging .left,
-.dragging .right {
-  pointer-events: none;
-}
-.left,
-.right {
-  position: relative;
-  height: 100%;
-}
-.left {
-  border-right: 1px solid #ccc;
-}
-.dragger {
-  position: absolute;
-  z-index: 99;
-  top: 0;
-  bottom: 0;
-  right: -5px;
-  width: 10px;
-  cursor: ew-resize;
-}
+  .split-box {
+    display: flex;
+    height: 100%;
+  }
+  .split-box.dragging {
+    cursor: ew-resize;
+  }
+  .dragging .left,
+  .dragging .right {
+    pointer-events: none;
+  }
+  .left,
+  .right {
+    position: relative;
+    height: 100%;
+  }
+  .left {
+    border-right: 1px solid #ccc;
+  }
+  .dragger {
+    position: absolute;
+    z-index: 99;
+    top: 0;
+    bottom: 0;
+    right: -5px;
+    width: 10px;
+    cursor: ew-resize;
+  }
 </style>

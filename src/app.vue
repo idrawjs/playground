@@ -1,14 +1,22 @@
 <template>
   <Nav />
   <div class="container">
-    <Box>
+    <Box :defaultSplit="15">
       <template #left>
-        <Editor />
+        <Sider />
       </template>
       <template #right>
-        <Preview />
+        <Box :defaultSplit="36">
+          <template #left>
+            <Editor />
+          </template>
+          <template #right>
+            <Preview />
+          </template>
+        </Box>
       </template>
     </Box>
+    
   </div>
 </template>
 
@@ -20,14 +28,25 @@
   import Nav from './components/nav.vue';
   import Editor from './components/editor/index.vue';
   import Preview from './components/preview/index.vue';
-  import { getUrlParams, getExampleFiles } from './util/data';
+  import Sider from './components/sider.vue';
+  import { getUrlParams, getExampleFiles, includeDemoList } from './util/data';
   import { setFiles } from './util/store';
+  import { setDemoStatus } from './util/global';
   
   async function main() {
     const demoName = getUrlParams('demo') || 'basic';
     try {
-      const files = await getExampleFiles(demoName);
-      setFiles(files);
+      if (includeDemoList(demoName)) {
+        const files = await getExampleFiles(demoName);
+        setFiles(files);
+        if (files.length > 0) {
+          setDemoStatus('LOADED');
+        } else {
+          setDemoStatus('NOT_FINISHED');
+        }
+      } else {
+        setDemoStatus('NOT_FOUND');
+      }
     } catch (err) {
       console.log(err);
     }
@@ -48,7 +67,7 @@ body {
   --base: #444;
   --nav-height: 50px;
   --font-code: 'Source Code Pro', monospace;
-  --color-branding: #3c6ea8;
+  --color-branding: #1890ff;
   --color-branding-dark: #144474;
 }
 .container {

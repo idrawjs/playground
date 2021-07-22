@@ -1,12 +1,18 @@
 <template>
-  <div class="preview-container" ref="container"></div>
+  <Status v-if="globalData.demoStatus !== 'LOADED'" />
+  <div :class="{
+      'preview-container': globalData.demoStatus === 'LOADED',
+      'preview-hide': globalData.demoStatus !== 'LOADED'
+    }"
+    ref="container"></div>
+  
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted, watchEffect, watch } from 'vue'
-import type { WatchStopHandle } from 'vue'
-import srcdoc from './srcdoc.html?raw'
+import { ref, onMounted, onUnmounted, watchEffect, watch } from 'vue';
+import Status from './../status.vue';
 import { store } from './../../util/store';
+import { globalData } from './../../util/global';
 import { PreviewProxy } from './proxy';
 import { getPreivewAssets, mergePreviewDoc } from './../../util/data';
 
@@ -16,7 +22,6 @@ const runtimeWarning = ref()
 
 let sandbox: HTMLIFrameElement
 let proxy: PreviewProxy
-let stopUpdateWatcher: WatchStopHandle
 
 // create sandbox on mount
 onMounted(createSandbox)
@@ -25,6 +30,7 @@ onUnmounted(() => {
   proxy.destroy();
   // stopUpdateWatcher && stopUpdateWatcher()
 })
+
 
 watch(() => {
   return [
@@ -126,5 +132,9 @@ iframe {
   height: 100%;
   border: none;
   background-color: #fff;
+}
+
+.preview-hide {
+  display: none;
 }
 </style>
