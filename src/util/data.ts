@@ -23,19 +23,19 @@ if (import.meta.env.PROD) {
 
 export async function getExampleFiles(name: string): Promise<TypeCodeFile[]> {
   const files: TypeCodeFile[] = [];
-  const jsModue = await fetchText(`${basePath}/data/${name}/index.js`);
+  const jsModue = await fetchText(`${basePath}/demo/${name}/index.js`);
   files.push({
     name: 'index.js',
     code: parsePreivewJavaScript(jsModue),
     type: 'js',
   });
-  const htmlModule = await fetchText(`${basePath}/data/${name}/index.html`);
+  const htmlModule = await fetchText(`${basePath}/demo/${name}/index.html`);
   files.push({
     name: 'index.html',
     code: htmlModule,
     type: 'html',
   });
-  let cssModule = await fetchText(`${basePath}/data/${name}/index.css`);
+  let cssModule = await fetchText(`${basePath}/demo/${name}/index.css`);
   if (import.meta.env.DEV) {
     const lines = cssModule.replace(/\r\n/ig, '\n').split('\n');
     cssModule = '';
@@ -53,7 +53,7 @@ export async function getExampleFiles(name: string): Promise<TypeCodeFile[]> {
     type: 'css',
   });
 
-  const importMap = await fetchText(`${basePath}/data/${name}/import-map.json`);
+  const importMap = await fetchText(`${basePath}/demo/${name}/import-map.json`);
   files.push({
     name: 'import-map.json',
     code: importMap,
@@ -64,12 +64,22 @@ export async function getExampleFiles(name: string): Promise<TypeCodeFile[]> {
 }
 
 export function parsePreivewJavaScript(js: string) {
-  const reg = /\'\/node_modules\/\.vite\/([\w]+)\.js\?v=[0-9a-zA_Z]{1,}\'/
-  const result = js.replace(reg, (str) => {
+  const regLib = /\'\/node_modules\/\.vite\/([\w]+)\.js\?v=[0-9a-zA_Z]{1,}\'/
+  let result = js.replace(regLib, (str) => {
     let mod = '\'\'';
-    const matchResult = reg?.exec(str);
+    const matchResult = regLib?.exec(str);
     if (matchResult && matchResult[1]) {
       mod = `'${matchResult[1]}'`;
+    }
+    return mod;
+  });
+
+  const regDataFile = /\'\/public\/demo\/([\w]+)\/([0-9a-zA_Z]+)\.js\'/
+  result = result.replace(regDataFile, (str) => {
+    let mod = '\'./\'';
+    const matchResult = regDataFile?.exec(str);
+    if (matchResult && matchResult[2]) {
+      mod = `'./${matchResult[2]}'`;
     }
     return mod;
   })

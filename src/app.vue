@@ -24,9 +24,9 @@
   import { setFiles } from './util/store';
   
   async function main() {
-    const exampleName = getUrlParams('example') || 'basic';
+    const demoName = getUrlParams('demo') || 'basic';
     try {
-      const files = await getExampleFiles(exampleName);
+      const files = await getExampleFiles(demoName);
       setFiles(files);
     } catch (err) {
       console.log(err);
