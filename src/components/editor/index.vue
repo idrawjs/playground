@@ -1,8 +1,11 @@
 <template>
-  <Tab />
-  <div class="editor-container">
-    <CodeMirror @change="onChange" :value="activeCode" :mode="activeMode" />
+  <div v-if="globalData.demoStatus === 'LOADED'">
+    <Tab />
+    <div class="editor-container">
+      <CodeMirror @change="onChange" :value="activeCode" :mode="activeMode" />
+    </div>
   </div>
+  <Status v-else />
 </template>
 
 <script setup lang="ts">
@@ -10,10 +13,12 @@
 // MIT License https://github.com/vuejs/vue-next/blob/master/LICENSE
 
 import CodeMirror from '../codemirror/index.vue';
+import Status from '../status.vue';
 import Tab from './tab.vue';
 import { ref, watch, computed } from 'vue';
 import { debounce } from './../../util/time';
 import { store, updateActiveFileCode } from './../../util/store';
+import { globalData } from './../../util/global';
 
 const onChange = debounce((code: string) => {
   updateActiveFileCode(code)

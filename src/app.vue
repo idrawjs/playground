@@ -29,14 +29,24 @@
   import Editor from './components/editor/index.vue';
   import Preview from './components/preview/index.vue';
   import Sider from './components/sider.vue';
-  import { getUrlParams, getExampleFiles } from './util/data';
+  import { getUrlParams, getExampleFiles, includeDemoList } from './util/data';
   import { setFiles } from './util/store';
+  import { setDemoStatus } from './util/global';
   
   async function main() {
     const demoName = getUrlParams('demo') || 'basic';
     try {
-      const files = await getExampleFiles(demoName);
-      setFiles(files);
+      if (includeDemoList(demoName)) {
+        const files = await getExampleFiles(demoName);
+        setFiles(files);
+        if (files.length > 0) {
+          setDemoStatus('LOADED');
+        } else {
+          setDemoStatus('NOT_FINISHED');
+        }
+      } else {
+        setDemoStatus('NOT_FOUND');
+      }
     } catch (err) {
       console.log(err);
     }
