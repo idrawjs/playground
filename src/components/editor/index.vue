@@ -1,7 +1,9 @@
 <template>
-  <div v-if="globalData.demoStatus === 'LOADED'">
+  <div
+    class="editor-container"
+    v-if="globalData.demoStatus === 'LOADED'">
     <Tab />
-    <div class="editor-container">
+    <div class="editor-main">
       <CodeMirror @change="onChange" :value="activeCode" :mode="activeMode" />
     </div>
   </div>
@@ -46,6 +48,9 @@ watch(() => {
 
 <style scoped>
 .editor-container {
+  height: 100%;
+}
+.editor-main {
   height: calc(100% - 35px);
   overflow: hidden;
   position: relative;
