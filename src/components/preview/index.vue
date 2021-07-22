@@ -8,7 +8,7 @@ import type { WatchStopHandle } from 'vue'
 import srcdoc from './srcdoc.html?raw'
 import { store } from './../../util/store';
 import { PreviewProxy } from './proxy';
-import { parsePreivewJavaScript } from './../../util/data';
+import { getPreivewAssets, mergePreviewDoc } from './../../util/data';
 
 const container = ref()
 const runtimeError = ref()
@@ -44,7 +44,7 @@ function createSandbox() {
     container.value.removeChild(sandbox)
   }
 
-  const assets = getPreivewAssets();
+  const assets = getPreivewAssets(store.files);
   sandbox = document.createElement('iframe');
   sandbox.setAttribute('sandbox', [
     'allow-forms',
@@ -56,12 +56,7 @@ function createSandbox() {
     'allow-top-navigation-by-user-activation'
   ].join(' '))
   
-  const sandboxSrc = srcdoc
-    .replace(/<!--__INJECT_STYLE__-->/, `\<style\>${assets.css}\</style\>`)
-    .replace(/<!--__INJECT_IMPORTMAP__-->/, `\<script type="importmap"\>${assets.importmap}\</script\>`)
-    .replace(/<!--__INJECT_HTML__-->/, assets.html.replace(/<script[\s\S]*?<\/script>/ig, ''))
-    .replace(/<!--__INJECT_JS__-->/, `\<script type="module"\>${assets.js}\</script\>`);
-
+  const sandboxSrc = mergePreviewDoc(assets);
   sandbox.srcdoc = sandboxSrc;
   container.value.appendChild(sandbox);
   proxy = createPreviewProxy(sandbox);
@@ -120,22 +115,6 @@ function createPreviewProxy(sandbox: HTMLIFrameElement): PreviewProxy {
       // group_logs(action.label, true);
     }
   })
-}
-
-function getPreivewAssets(): { html: string, css: string, js: string, importmap: string } {
-  const assets = { html: '', css: '', js: '', importmap: '{}' };
-  for (let i = 0; i < store.files.length; i++) {
-    if (store.files[i].fileName === 'index.html') {
-      assets.html = store.files[i].code;
-    } else if (store.files[i].fileName === 'index.css') {
-      assets.css = store.files[i].code;
-    } else if (store.files[i].fileName === 'index.js') {
-      assets.js = store.files[i].code;
-    } else if (store.files[i].fileName === 'import-map.json') {
-      assets.importmap = store.files[i].code;
-    }
-  }
-  return assets;
 }
 
 </script>
