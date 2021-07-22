@@ -3,9 +3,7 @@
   <div class="container">
     <Box :defaultSplit="15">
       <template #left>
-        <div>
-          // TODO
-        </div>
+        <Sider />
       </template>
       <template #right>
         <Box :defaultSplit="36">
@@ -30,6 +28,7 @@
   import Nav from './components/nav.vue';
   import Editor from './components/editor/index.vue';
   import Preview from './components/preview/index.vue';
+  import Sider from './components/sider.vue';
   import { getUrlParams, getExampleFiles } from './util/data';
   import { setFiles } from './util/store';
   
