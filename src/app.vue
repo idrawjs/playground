@@ -1,14 +1,24 @@
 <template>
   <Nav />
   <div class="container">
-    <Box>
+    <Box :defaultSplit="15">
       <template #left>
-        <Editor />
+        <div>
+          // TODO
+        </div>
       </template>
       <template #right>
-        <Preview />
+        <Box :defaultSplit="36">
+          <template #left>
+            <Editor />
+          </template>
+          <template #right>
+            <Preview />
+          </template>
+        </Box>
       </template>
     </Box>
+    
   </div>
 </template>
 
