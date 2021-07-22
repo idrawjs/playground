@@ -1,4 +1,5 @@
 import { TypeCodeFile } from './store';
+import srcdocHTML from './srcdoc.html?raw'
 
 export function getUrlParams(name: string): string | null {
   const urlParams = new URLSearchParams(window.location.search);
@@ -23,19 +24,31 @@ if (import.meta.env.PROD) {
 
 export async function getExampleFiles(name: string): Promise<TypeCodeFile[]> {
   const files: TypeCodeFile[] = [];
-  const jsModue = await fetchText(`${basePath}/data/${name}/index.js`);
+  const jsModue = await fetchText(`${basePath}/demo/${name}/index.js`);
   files.push({
     name: 'index.js',
+    fileName: 'index.js',
     code: parsePreivewJavaScript(jsModue),
     type: 'js',
   });
-  const htmlModule = await fetchText(`${basePath}/data/${name}/index.html`);
+
+  const jsDataModue = await fetchText(`${basePath}/demo/${name}/data.js`);
   files.push({
-    name: 'index.html',
+    name: 'data.js',
+    fileName: 'data.js',
+    code: parsePreivewJavaScript(jsDataModue),
+    type: 'js',
+  });
+
+  const htmlModule = await fetchText(`${basePath}/demo/${name}/index.html`);
+  files.push({
+    name: 'html',
+    fileName: 'index.html',
     code: htmlModule,
     type: 'html',
   });
-  let cssModule = await fetchText(`${basePath}/data/${name}/index.css`);
+
+  let cssModule = await fetchText(`${basePath}/demo/${name}/index.css`);
   if (import.meta.env.DEV) {
     const lines = cssModule.replace(/\r\n/ig, '\n').split('\n');
     cssModule = '';
@@ -48,14 +61,16 @@ export async function getExampleFiles(name: string): Promise<TypeCodeFile[]> {
     }
   }
   files.push({
-    name: 'index.css',
+    name: 'css',
+    fileName: 'index.css',
     code: cssModule,
     type: 'css',
   });
 
-  const importMap = await fetchText(`${basePath}/data/${name}/import-map.json`);
+  const importMap = await fetchText(`${basePath}/demo/${name}/import-map.json`);
   files.push({
-    name: 'import-map.json',
+    name: 'import-map',
+    fileName: 'import-map.json',
     code: importMap,
     type: 'json',
   });
@@ -64,14 +79,77 @@ export async function getExampleFiles(name: string): Promise<TypeCodeFile[]> {
 }
 
 export function parsePreivewJavaScript(js: string) {
-  const reg = /\'\/node_modules\/\.vite\/([\w]+)\.js\?v=[0-9a-zA_Z]{1,}\'/
-  const result = js.replace(reg, (str) => {
+  const regLib = /\'\/node_modules\/\.vite\/([\w]+)\.js\?v=[0-9a-zA_Z]{1,}\'/
+  let result = js.replace(regLib, (str) => {
     let mod = '\'\'';
-    const matchResult = reg?.exec(str);
+    const matchResult = regLib?.exec(str);
     if (matchResult && matchResult[1]) {
       mod = `'${matchResult[1]}'`;
     }
     return mod;
-  })
+  });
+
+  const regDataFile = /\'\/public\/demo\/([\w]+)\/([0-9a-zA_Z]+)\.js\?t\=[0-9]{1,}\'/
+  result = result.replace(regDataFile, (str) => {
+    let mod = '\'./\'';
+    const matchResult = regDataFile?.exec(str);
+    if (matchResult && matchResult[2]) {
+      mod = `'./${matchResult[2]}'`;
+    }
+    return mod;
+  });
   return result;
 }
+
+
+
+export type TypePrevewAssets = { html: string,  css: string, js: string, datajs: string, importmap: string }
+
+export function getPreivewAssets(files: TypeCodeFile[]): TypePrevewAssets {
+  const assets = { html: '', css: '', js: '', datajs: '', importmap: '{}' };
+  for (let i = 0; i < files.length; i++) {
+    if (files[i].fileName === 'index.html') {
+      assets.html = files[i].code;
+    } else if (files[i].fileName === 'index.css') {
+      assets.css = files[i].code;
+    } else if (files[i].fileName === 'index.js') {
+      assets.js = files[i].code;
+    } else if (files[i].fileName === 'data.js') {
+      assets.datajs = files[i].code;
+    } else if (files[i].fileName === 'import-map.json') {
+      assets.importmap = files[i].code;
+    }
+  }
+  return assets;
+}
+
+
+export function mergePreviewDoc(assets: TypePrevewAssets) {
+  const srcdoc = srcdocHTML;
+  const sandboxSrc = srcdoc
+    .replace(/<!--__INJECT_STYLE__-->/, `\<style\>${assets.css}\</style\>`)
+    .replace(/<!--__INJECT_IMPORTMAP__-->/, `\<script type="importmap"\>${assets.importmap}\</script\>`)
+    .replace(/<!--__INJECT_HTML__-->/, assets.html.replace(/<script[\s\S]*?<\/script>/ig, ''))
+    // .replace(/<!--__INJECT_JS__-->/, `\<script type="module"\>${assets.js}\</script\>`);
+    .replace(/<!--__INJECT_JS__-->/, `\<script type="module"\>${mergeJavaScript(assets)}\</script\>`);
+  return sandboxSrc;
+}
+
+
+export function mergeJavaScript(assets: TypePrevewAssets) {
+  const dataReg = /import[\s]{1,}([a-zA-Z\_]+)[\s]{1,}from[\s]{1,}\'\.\/data\'/;
+  const js = assets.js.replace(dataReg, (str) => {
+    const matchResult = dataReg?.exec(str);
+    let result = str;
+    if (matchResult && matchResult[1]) {
+      const dataName = `${matchResult[1]}`;
+      const regExport = /export[\s]{1,}default[\s]{1,}\{/;
+      if (assets.datajs && regExport.test(`${assets.datajs}`)) {
+        result = `const ${dataName} = ${assets.datajs.replace(regExport, '{')}`;
+      }
+    }
+    return result;
+  });
+  return js;
+}
+

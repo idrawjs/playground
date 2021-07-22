@@ -1,12 +1,10 @@
-import iDraw from 'idraw';
-
-const data = {
+export default {
   // bgColor: '#f0f0f0',
   elements: [
     {
       name: "rect-001",
-      x: 10,
-      y: 10,
+      x: 40,
+      y: 80,
       w: 200,
       h: 100,
       type: "rect",
@@ -19,8 +17,8 @@ const data = {
     },
     {
       name: "rect-002",
-      x: 80,
-      y: 80,
+      x: 120,
+      y: 120,
       w: 200,
       h: 120,
       // angle: 30,
@@ -34,8 +32,8 @@ const data = {
     },
     {
       name: "rect-003",
-      x: 160,
-      y: 160,
+      x: 200,
+      y: 200,
       w: 200,
       h: 20,
       type: "rect",
@@ -64,16 +62,3 @@ const data = {
     },
   ],
 };
-
-
-const app = document.querySelector('#app');
-const options = {
-  width: 600,
-  height: 400,
-  contextWidth: 600,
-  contextHeight: 400,
-  devicePixelRatio: 4,
-}
-const idraw = new iDraw(app, options);
-idraw.initData(data)
-idraw.draw();
