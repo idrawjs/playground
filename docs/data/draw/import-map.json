@@ -1,5 +1,0 @@
-{
-  "imports": {
-    "idraw": "./lib/idraw/0.x/index.es.js"
-  }
-}
