@@ -3,8 +3,8 @@ export default {
   elements: [
     {
       name: "rect-001",
-      x: 10,
-      y: 10,
+      x: 40,
+      y: 80,
       w: 200,
       h: 100,
       type: "rect",
@@ -17,8 +17,8 @@ export default {
     },
     {
       name: "rect-002",
-      x: 80,
-      y: 80,
+      x: 120,
+      y: 120,
       w: 200,
       h: 120,
       // angle: 30,
@@ -32,8 +32,8 @@ export default {
     },
     {
       name: "rect-003",
-      x: 160,
-      y: 160,
+      x: 200,
+      y: 200,
       w: 200,
       h: 20,
       type: "rect",

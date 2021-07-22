@@ -12,3 +12,4 @@ const options = {
 const idraw = new iDraw(app, options);
 idraw.initData(data)
 idraw.draw();
+idraw.selectElement(0);
