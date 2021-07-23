@@ -31,7 +31,10 @@ if (import.meta.env.PROD) {
 
 export async function getExampleFiles(name: string): Promise<TypeCodeFile[]> {
   const files: TypeCodeFile[] = [];
-
+  const demoData = getCurrentDemo(name);
+  if (demoData === null) {
+    return [];
+  }
   try {
     const jsModue = await fetchText(`${basePath}/demo/${name}/index.js`);
     files.push({
@@ -45,13 +48,15 @@ export async function getExampleFiles(name: string): Promise<TypeCodeFile[]> {
   }
 
   try {
-    const jsDataModue = await fetchText(`${basePath}/demo/${name}/data.js`);
-    files.push({
-      name: 'data.js',
-      fileName: 'data.js',
-      code: parsePreivewJavaScript(jsDataModue),
-      type: 'js',
-    });
+    if (!(Array.isArray(demoData.exclude) && demoData.exclude.includes('data.js'))) {
+      const jsDataModue = await fetchText(`${basePath}/demo/${name}/data.js`);
+      files.push({
+        name: 'data.js',
+        fileName: 'data.js',
+        code: parsePreivewJavaScript(jsDataModue),
+        type: 'js',
+      });
+    }
   } catch (err) {
     console.log(err);
   }
@@ -117,12 +122,12 @@ export function parsePreivewJavaScript(js: string) {
     return mod;
   });
 
-  const regDataFile = /\'\/public\/demo\/([\w]+)\/([0-9a-zA_Z]+)\.(js|js\?t\=[0-9]{1,})\'/
+  const regDataFile = /\'\/public\/demo\/[0-9a-zA-Z\-\_]{1,}\/([0-9a-zA-Z\-\_]+)\.(js\?t=[0-9]{1,}|js)\'/
   result = result.replace(regDataFile, (str) => {
     let mod = '\'./\'';
     const matchResult = regDataFile?.exec(str);
-    if (matchResult && matchResult[2]) {
-      mod = `'./${matchResult[2]}'`;
+    if (matchResult && matchResult[1]) {
+      mod = `'./${matchResult[1]}'`;
     }
     return mod;
   });
@@ -193,4 +198,17 @@ export function includeDemoList(demoKey: string) {
     }
   }
   return false;
+}
+
+export function getCurrentDemo(demoKey: string) {
+  for (let i = 0; i < demoList.length; i++) {
+    const list = demoList[i].list;
+    for (let j = 0; j < list.length; j++) {
+      const item = list[j] || {};
+      if (item.key === demoKey) {
+        return item;
+      }
+    }
+  }
+  return null;
 }
