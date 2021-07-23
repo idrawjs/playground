@@ -32,12 +32,12 @@ export default {
     },
     {
       name: "rect-003",
-      x: 200,
+      x: 300,
       y: 200,
       w: 200,
       h: 20,
       type: "rect",
-      angle: 80,
+      angle: 45,
       desc: {
         color: "#c0c0c0",
         borderRadius: 20,

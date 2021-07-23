@@ -24,8 +24,6 @@ import { watch, reactive } from 'vue';
 import demoList from './../constant/demo-list';
 import { globalData } from './../util/global';
 
-console.log(`globalData.urlParams['demo'] =`, globalData.urlParams['demo']);
-
 function parseItemLink(demoKey: string): string {
   return `?demo=${demoKey}`;
 }

@@ -117,7 +117,7 @@ export function parsePreivewJavaScript(js: string) {
     return mod;
   });
 
-  const regDataFile = /\'\/public\/demo\/([\w]+)\/([0-9a-zA_Z]+)\.js\?t\=[0-9]{1,}\'/
+  const regDataFile = /\'\/public\/demo\/([\w]+)\/([0-9a-zA_Z]+)\.(js|js\?t\=[0-9]{1,})\'/
   result = result.replace(regDataFile, (str) => {
     let mod = '\'./\'';
     const matchResult = regDataFile?.exec(str);
