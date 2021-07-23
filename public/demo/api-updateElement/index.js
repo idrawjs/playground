@@ -12,6 +12,10 @@ const options = {
 const idraw = new iDraw(app, options);
 idraw.initData(data);
 
-idraw.selectElementByUUID(
-  idraw.getData().elements[1].uuid
-);
+const elem1 = idraw.getData().elements[1];
+elem1.desc = { ...elem1.desc,  ...{
+  color: '#f7d3c1',
+  borderColor: '#ff6032',
+}}
+idraw.updateElement(elem1);
+
