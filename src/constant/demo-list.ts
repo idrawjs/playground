@@ -41,15 +41,15 @@ const demoList: TypeDemoList = [
         exclude: ['data.js'],
       },
       {
+        name: 'Image',
+        key: 'elem-image',
+        exclude: ['data.js'],
+      },
+      {
         name: 'SVG',
         key: 'elem-svg',
         exclude: ['data.js'],
       },
-      {
-        name: 'Image',
-        key: 'elem-image',
-        exclude: ['data.js'],
-      }
     ]
   },
   {
