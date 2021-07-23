@@ -12,8 +12,8 @@ const options = {
 const config = {
   scrollWrapper: {
     use: true,
-    lineWidth: 12,
-    color: '#009688',
+    lineWidth: 16,
+    color: '#666666',
   },
   elementWrapper: {
     color: '#e91e63',

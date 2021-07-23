@@ -47,7 +47,7 @@ export default {
     },
     {
       name: "rect-004",
-      x: 400,
+      x: 440,
       y: 300,
       w: 200,
       h: 100,
