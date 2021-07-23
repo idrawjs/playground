@@ -9,10 +9,10 @@ export default {
       h: 100,
       type: "rect",
       desc: {
-        color: "#f0f0f0",
+        color: "#d5f5f9",
         borderRadius: 20,
-        borderWidth: 6,
-        borderColor: "#bd0b64",
+        borderWidth: 4,
+        borderColor: "#3f51b5",
       },
     },
     {
@@ -24,10 +24,10 @@ export default {
       // angle: 30,
       type: "rect",
       desc: {
-        color: "#cccccc",
+        color: "#d5f5f9",
         borderRadius: 60,
-        borderWidth: 6,
-        borderColor: "#bd0b64",
+        borderWidth: 4,
+        borderColor: "#3f51b5",
       },
     },
     {
@@ -41,8 +41,8 @@ export default {
       desc: {
         color: "#c0c0c0",
         borderRadius: 20,
-        borderWidth: 6,
-        borderColor: "#bd0b64",
+        borderWidth: 4,
+        borderColor: "#3f51b5",
       },
     },
     {
@@ -56,8 +56,8 @@ export default {
       desc: {
         color: "#e0e0e0",
         borderRadius: 20,
-        borderWidth: 6,
-        borderColor: "#bd0b64",
+        borderWidth: 4,
+        borderColor: "#3f51b5",
       },
     },
   ],
