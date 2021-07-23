@@ -1,6 +1,7 @@
 type TypeDemoItem = {
   name: string;
   key: string;
+  exclude?: string[]
 }
 
 type TypeDemoList = {
@@ -32,18 +33,22 @@ const demoList: TypeDemoList = [
       {
         name: 'Rect',
         key: 'elem-rect',
+        exclude: ['data.js'],
       },
       {
         name: 'Text',
         key: 'elem-text',
+        exclude: ['data.js'],
       },
       {
         name: 'SVG',
         key: 'elem-svg',
+        exclude: ['data.js'],
       },
       {
         name: 'Image',
         key: 'elem-image',
+        exclude: ['data.js'],
       }
     ]
   },
