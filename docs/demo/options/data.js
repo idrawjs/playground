@@ -1,5 +1,5 @@
 export default {
-  // bgColor: '#f0f0f0',
+  bgColor: '#f0f0f0',
   elements: [
     {
       name: "rect-001",
@@ -40,21 +40,6 @@ export default {
       angle: 45,
       desc: {
         color: "#c0c0c0",
-        borderRadius: 20,
-        borderWidth: 4,
-        borderColor: "#3f51b5",
-      },
-    },
-    {
-      name: "rect-004",
-      x: 400 - 20,
-      y: 300 - 20,
-      w: 200,
-      h: 100,
-      type: "rect",
-      lock: true,
-      desc: {
-        color: "#e0e0e0",
         borderRadius: 20,
         borderWidth: 4,
         borderColor: "#3f51b5",
