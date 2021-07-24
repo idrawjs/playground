@@ -12,6 +12,4 @@ const options = {
 const idraw = new iDraw(app, options);
 idraw.initData(data);
 
-idraw.selectElementByUUID(
-  idraw.getData().elements[1].uuid
-);
+idraw.selectElementByIndex(1);

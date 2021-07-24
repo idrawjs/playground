@@ -2956,7 +2956,7 @@ var Core = (function () {
         this[_board].resetSize(opts);
         this.draw();
     };
-    Core.prototype.selectElement = function (index, opts) {
+    Core.prototype.selectElementByIndex = function (index, opts) {
         if (this[_onlyRender] === true)
             return;
         if (this[_data].elements[index]) {
@@ -2972,12 +2972,12 @@ var Core = (function () {
             this.draw();
         }
     };
-    Core.prototype.selectElementByUUID = function (uuid, opts) {
+    Core.prototype.selectElement = function (uuid, opts) {
         if (this[_onlyRender] === true)
             return;
         var index = this[_helper].getElementIndexByUUID(uuid);
         if (typeof index === 'number' && index >= 0) {
-            this.selectElement(index, opts);
+            this.selectElementByIndex(index, opts);
         }
     };
     Core.prototype.moveDownElement = function (uuid) {
@@ -3123,7 +3123,7 @@ var Core = (function () {
             else {
                 var _o = this[_element].isPointInElement(point, this[_data]), index = _o[0], uuid_1 = _o[1];
                 if (index >= 0) {
-                    this.selectElement(index, { useMode: true });
+                    this.selectElementByIndex(index, { useMode: true });
                     if (typeof uuid_1 === 'string' && this[_coreEvent].has('screenSelectElement')) {
                         this[_coreEvent].trigger('screenSelectElement', { index: index, uuid: uuid_1, element: deepClone((_l = this[_data].elements) === null || _l === void 0 ? void 0 : _l[index]) });
                         this[_emitChangeScreen]();

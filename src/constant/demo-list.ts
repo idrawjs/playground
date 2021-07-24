@@ -68,8 +68,8 @@ const demoList: TypeDemoList = [
         key: 'api-selectElement',
       },
       {
-        name: 'idraw.selectElementByUUID',
-        key: 'api-selectElementByUUID',
+        name: 'idraw.selectElementByIndex',
+        key: 'api-selectElementByIndex',
       },
       {
         name: 'idraw.updateElement',
