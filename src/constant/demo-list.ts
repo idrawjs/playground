@@ -56,6 +56,18 @@ const demoList: TypeDemoList = [
     name: 'API',
     list: [
       {
+        name: 'idraw.initData',
+        key: 'api-initData',
+      },
+      {
+        name: 'idraw.getData',
+        key: 'api-getData',
+      },
+      {
+        name: 'idraw.setData',
+        key: 'api-setData',
+      },
+      {
         name: 'idraw.draw',
         key: 'api-draw',
       },
@@ -102,18 +114,6 @@ const demoList: TypeDemoList = [
       {
         name: 'idraw.scrollY',
         key: 'api-scrollY',
-      },
-      {
-        name: 'idraw.initData',
-        key: 'api-initData',
-      },
-      {
-        name: 'idraw.getData',
-        key: 'api-getData',
-      },
-      {
-        name: 'idraw.setData',
-        key: 'api-setData',
       },
       {
         name: 'idraw.on',
