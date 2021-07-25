@@ -55,10 +55,10 @@ const demoList: TypeDemoList = [
   {
     name: 'API',
     list: [
-      {
-        name: 'idraw.initData',
-        key: 'api-initData',
-      },
+      // {
+      //   name: 'idraw.initData',
+      //   key: 'api-initData',
+      // },
       {
         name: 'idraw.getData',
         key: 'api-getData',
@@ -67,10 +67,10 @@ const demoList: TypeDemoList = [
         name: 'idraw.setData',
         key: 'api-setData',
       },
-      {
-        name: 'idraw.draw',
-        key: 'api-draw',
-      },
+      // {
+      //   name: 'idraw.draw',
+      //   key: 'api-draw',
+      // },
       {
         name: 'idraw.resetSize',
         key: 'api-resetSize',
@@ -123,14 +123,14 @@ const demoList: TypeDemoList = [
         name: 'idraw.off',
         key: 'api-off',
       },
-      {
-        name: 'idraw.pointScreenToContext',
-        key: 'api-pointScreenToContext',
-      },
-      {
-        name: 'idraw.pointContextToScreen',
-        key: 'api-pointContextToScreen',
-      },
+      // {
+      //   name: 'idraw.pointScreenToContext',
+      //   key: 'api-pointScreenToContext',
+      // },
+      // {
+      //   name: 'idraw.pointContextToScreen',
+      //   key: 'api-pointContextToScreen',
+      // },
     ]
   },
 ]
