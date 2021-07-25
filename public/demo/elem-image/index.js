@@ -25,4 +25,4 @@ const idraw = new iDraw(app, {
   devicePixelRatio: 4,
 });
 idraw.initData(data)
-idraw.selectElement(0);
+idraw.selectElementByIndex(0);

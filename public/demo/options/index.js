@@ -13,4 +13,4 @@ const options = {
 const idraw = new iDraw(app, options);
 idraw.initData(data);
 
-idraw.selectElement(1);
+idraw.selectElementByIndex(1);
