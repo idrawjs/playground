@@ -11,6 +11,6 @@ const options = {
   onlyRender: false,
 }
 const idraw = new iDraw(app, options);
-idraw.initData(data);
+idraw.setData(data);
 
 idraw.selectElementByIndex(1);

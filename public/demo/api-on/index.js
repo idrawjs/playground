@@ -14,8 +14,8 @@ const idraw = new iDraw(app, options);
 idraw.on('changeData', (e) => {
   console.log('changeData: event = ', e);
 });
-idraw.initData(data);
+idraw.setData(data);
 
 idraw.off('changeData');
-idraw.initData(data);
+idraw.setData(data);
 

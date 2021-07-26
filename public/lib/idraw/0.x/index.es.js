@@ -228,9 +228,30 @@ function loadImage$2(src) {
         img.src = src;
     });
 }
-function loadSVG$2(svg, opts) {
+function loadSVG$2(svg) {
     return new Promise(function (resolve, reject) {
         var _svg = svg;
+        var image = new Image$1();
+        var blob = new Blob$1([_svg], { type: 'image/svg+xml;charset=utf-8' });
+        var reader = new FileReader$1();
+        reader.readAsDataURL(blob);
+        reader.onload = function (event) {
+            var _a;
+            var base64 = (_a = event === null || event === void 0 ? void 0 : event.target) === null || _a === void 0 ? void 0 : _a.result;
+            image.onload = function () {
+                resolve(image);
+            };
+            image.src = base64;
+        };
+        reader.onerror = function (err) {
+            reject(err);
+        };
+    });
+}
+function loadHTML$2(html, opts) {
+    var width = opts.width, height = opts.height;
+    return new Promise(function (resolve, reject) {
+        var _svg = "\n    <svg xmlns=\"http://www.w3.org/2000/svg\" width=\"" + (width || '') + "\" height = \"" + (height || '') + "\">\n      <foreignObject width=\"100%\" height=\"100%\">\n        <div xmlns = \"http://www.w3.org/1999/xhtml\">\n          " + html + "\n        </div>\n      </foreignObject>\n    </svg>\n    ";
         var image = new Image$1();
         var blob = new Blob$1([_svg], { type: 'image/svg+xml;charset=utf-8' });
         var reader = new FileReader$1();
@@ -257,6 +278,7 @@ var index$1 = {
     loader: {
         loadImage: loadImage$2,
         loadSVG: loadSVG$2,
+        loadHTML: loadHTML$2,
     },
     file: {
         downloadImageFromCanvas: downloadImageFromCanvas$1,
@@ -588,7 +610,7 @@ var Context = (function () {
     };
     Context.prototype.setFont = function (opts) {
         var strList = [];
-        if (opts.fontWeight) {
+        if (opts.fontWeight === 'bold') {
             strList.push("" + opts.fontWeight);
         }
         strList.push(this._doSize(opts.fontSize || 12) + "px");
@@ -600,6 +622,15 @@ var Context = (function () {
     };
     Context.prototype.setGlobalAlpha = function (alpha) {
         this._ctx.globalAlpha = alpha;
+    };
+    Context.prototype.save = function () {
+        this._ctx.save();
+    };
+    Context.prototype.restore = function () {
+        this._ctx.restore();
+    };
+    Context.prototype.scale = function (ratioX, ratioY) {
+        this._ctx.scale(ratioX, ratioY);
     };
     Context.prototype._doSize = function (num) {
         return this._opts.devicePixelRatio * num;
@@ -1244,9 +1275,30 @@ function loadImage$1(src) {
         img.src = src;
     });
 }
-function loadSVG$1(svg, opts) {
+function loadSVG$1(svg) {
     return new Promise(function (resolve, reject) {
         var _svg = svg;
+        var image = new Image();
+        var blob = new Blob([_svg], { type: 'image/svg+xml;charset=utf-8' });
+        var reader = new FileReader();
+        reader.readAsDataURL(blob);
+        reader.onload = function (event) {
+            var _a;
+            var base64 = (_a = event === null || event === void 0 ? void 0 : event.target) === null || _a === void 0 ? void 0 : _a.result;
+            image.onload = function () {
+                resolve(image);
+            };
+            image.src = base64;
+        };
+        reader.onerror = function (err) {
+            reject(err);
+        };
+    });
+}
+function loadHTML$1(html, opts) {
+    var width = opts.width, height = opts.height;
+    return new Promise(function (resolve, reject) {
+        var _svg = "\n    <svg xmlns=\"http://www.w3.org/2000/svg\" width=\"" + (width || '') + "\" height = \"" + (height || '') + "\">\n      <foreignObject width=\"100%\" height=\"100%\">\n        <div xmlns = \"http://www.w3.org/1999/xhtml\">\n          " + html + "\n        </div>\n      </foreignObject>\n    </svg>\n    ";
         var image = new Image();
         var blob = new Blob([_svg], { type: 'image/svg+xml;charset=utf-8' });
         var reader = new FileReader();
@@ -1273,6 +1325,7 @@ var index = {
     loader: {
         loadImage: loadImage$1,
         loadSVG: loadSVG$1,
+        loadHTML: loadHTML$1,
     },
     file: {
         downloadImageFromCanvas: downloadImageFromCanvas,
@@ -1461,9 +1514,17 @@ function drawSVG(ctx, elem, loader) {
         }
     });
 }
+function drawHTML(ctx, elem, loader) {
+    var content = loader.getContent(elem.uuid);
+    rotateElement(ctx, elem, function () {
+        if (content) {
+            ctx.drawImage(content, elem.x, elem.y, elem.w, elem.h);
+        }
+    });
+}
 function drawText(ctx, elem, loader, helperConfig) {
     clearContext(ctx);
-    drawBoxBorder(ctx, elem);
+    drawBox(ctx, elem, elem.desc.bgColor || 'transparent');
     rotateElement(ctx, elem, function () {
         var desc = __assign$1({
             fontSize: 12,
@@ -1473,6 +1534,7 @@ function drawText(ctx, elem, loader, helperConfig) {
         ctx.setFillStyle(elem.desc.color);
         ctx.setTextBaseline('top');
         ctx.setFont({
+            fontWeight: desc.fontWeight,
             fontSize: desc.fontSize,
             fontFamily: desc.fontFamily
         });
@@ -1519,6 +1581,38 @@ function drawText(ctx, elem, loader, helperConfig) {
             }
             ctx.fillText(line.text, _x, _y + fontHeight * i);
         });
+    });
+}
+function drawCircle(ctx, elem) {
+    rotateElement(ctx, elem, function (ctx) {
+        var x = elem.x, y = elem.y, w = elem.w, h = elem.h, desc = elem.desc;
+        var _a = desc.color, color = _a === void 0 ? '#000000' : _a, _b = desc.borderColor, borderColor = _b === void 0 ? '#000000' : _b, borderWidth = desc.borderWidth;
+        var a = w / 2;
+        var b = h / 2;
+        var centerX = x + a;
+        var centerY = y + b;
+        var unit = (a > b) ? 1 / a : 1 / b;
+        if (borderWidth && borderWidth > 0) {
+            var ba = borderWidth / 2 + a;
+            var bb = borderWidth / 2 + b;
+            ctx.beginPath();
+            ctx.setStrokeStyle(borderColor);
+            ctx.setLineWidth(borderWidth);
+            ctx.moveTo(centerX + ba, centerY);
+            for (var i = 0; i < 2 * Math.PI; i += unit) {
+                ctx.lineTo(centerX + ba * Math.cos(i), centerY + bb * Math.sin(i));
+            }
+            ctx.lineTo(centerX + ba, centerY);
+            ctx.stroke();
+        }
+        ctx.beginPath();
+        ctx.setFillStyle(color);
+        ctx.moveTo(centerX + a, centerY);
+        for (var i = 0; i < 2 * Math.PI; i += unit) {
+            ctx.lineTo(centerX + a * Math.cos(i), centerY + b * Math.sin(i));
+        }
+        ctx.closePath();
+        ctx.fill();
     });
 }
 function drawElementWrapper(ctx, config) {
@@ -1683,6 +1777,14 @@ function drawContext(ctx, data, helperConfig, loader) {
                 drawSVG(ctx, elem, loader);
                 break;
             }
+            case 'html': {
+                drawHTML(ctx, elem, loader);
+                break;
+            }
+            case 'circle': {
+                drawCircle(ctx, elem);
+                break;
+            }
         }
     }
     drawElementWrapper(ctx, helperConfig);
@@ -1740,7 +1842,10 @@ var LoaderEvent = (function () {
     };
     return LoaderEvent;
 }());
-var _a$2 = index.loader, loadImage = _a$2.loadImage, loadSVG = _a$2.loadSVG;
+function filterScript(html) {
+    return html.replace(/<script[\s\S]*?<\/script>/ig, '');
+}
+var _a$2 = index.loader, loadImage = _a$2.loadImage, loadSVG = _a$2.loadSVG, loadHTML = _a$2.loadHTML;
 var LoaderStatus;
 (function (LoaderStatus) {
     LoaderStatus["FREE"] = "free";
@@ -1817,7 +1922,7 @@ var Loader = (function () {
         var storageLoadData = this._storageLoadData;
         for (var i = data.elements.length - 1; i >= 0; i--) {
             var elem = data.elements[i];
-            if (['image', 'svg',].includes(elem.type)) {
+            if (['image', 'svg', 'html',].includes(elem.type)) {
                 if (!storageLoadData[elem.uuid]) {
                     loadData[elem.uuid] = this._createEmptyLoadItem(elem);
                     uuidQueue.push(elem.uuid);
@@ -1837,6 +1942,13 @@ var Loader = (function () {
                             uuidQueue.push(elem.uuid);
                         }
                     }
+                    else if (elem.type === 'html') {
+                        var _ele = elem;
+                        if (filterScript(_ele.desc.html) !== storageLoadData[elem.uuid].source) {
+                            loadData[elem.uuid] = this._createEmptyLoadItem(elem);
+                            uuidQueue.push(elem.uuid);
+                        }
+                    }
                 }
             }
         }
@@ -1852,6 +1964,10 @@ var Loader = (function () {
         else if (elem.type === 'svg') {
             var _elem = elem;
             source = _elem.desc.svg || '';
+        }
+        else if (elem.type === 'html') {
+            var _elem = elem;
+            source = filterScript(_elem.desc.html || '');
         }
         return {
             type: type,
@@ -1962,7 +2078,7 @@ var Loader = (function () {
     };
     Loader.prototype._loadElementSource = function (params) {
         return __awaiter(this, void 0, void 0, function () {
-            var image, image;
+            var image, image, image;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
@@ -1973,13 +2089,19 @@ var Loader = (function () {
                         return [2, image];
                     case 2:
                         if (!(params && params.type === 'svg')) return [3, 4];
-                        return [4, loadSVG(params.source, {
-                                width: params.elemW, height: params.elemH
-                            })];
+                        return [4, loadSVG(params.source)];
                     case 3:
                         image = _a.sent();
                         return [2, image];
-                    case 4: throw Error('Element\'s source is not support!');
+                    case 4:
+                        if (!(params && params.type === 'html')) return [3, 6];
+                        return [4, loadHTML(params.source, {
+                                width: params.elemW, height: params.elemH
+                            })];
+                    case 5:
+                        image = _a.sent();
+                        return [2, image];
+                    case 6: throw Error('Element\'s source is not support!');
                 }
             });
         });
@@ -2077,7 +2199,7 @@ var Element = (function () {
     function Element(ctx) {
         this._ctx = ctx;
     }
-    Element.prototype.initData = function (data) {
+    Element.prototype.setData = function (data) {
         data.elements.forEach(function (elem) {
             if (!(elem.uuid && typeof elem.uuid === 'string')) {
                 elem.uuid = createUUID$1();
@@ -2369,8 +2491,6 @@ var Helper = (function () {
         var h = Math.abs(end.y - start.y) / scale;
         var uuids = [];
         var ctx = this._ctx;
-        console.log({ x: x, y: y, w: w, h: h }, start, end);
-        console.log(this._board.getTransform());
         ctx.beginPath();
         ctx.moveTo(x, y);
         ctx.lineTo(x + w, y);
@@ -2687,6 +2807,8 @@ var elementTypes = {
     'rect': {},
     'image': {},
     'svg': {},
+    'circle': {},
+    'html': {},
 };
 var elementNames = Object.keys(elementTypes);
 function parseData(data) {
@@ -2774,10 +2896,24 @@ function fontFamily(value) {
     return typeof value === 'string' && value.length > 0;
 }
 var is = {
-    x: x, y: y, w: w, h: h, angle: angle, number: number,
-    borderWidth: borderWidth, borderRadius: borderRadius, color: color,
-    imageSrc: imageSrc, imageURL: imageURL, imageBase64: imageBase64, svg: svg,
-    text: text, fontSize: fontSize, lineHeight: lineHeight, textAlign: textAlign, fontFamily: fontFamily,
+    x: x,
+    y: y,
+    w: w,
+    h: h,
+    angle: angle,
+    number: number,
+    borderWidth: borderWidth,
+    borderRadius: borderRadius,
+    color: color,
+    imageSrc: imageSrc,
+    imageURL: imageURL,
+    imageBase64: imageBase64,
+    svg: svg,
+    text: text,
+    fontSize: fontSize,
+    lineHeight: lineHeight,
+    textAlign: textAlign,
+    fontFamily: fontFamily,
 };
 function attrs(attrs) {
     var x = attrs.x, y = attrs.y, w = attrs.w, h = attrs.h, angle = attrs.angle;
@@ -2867,11 +3003,11 @@ var _renderer = Symbol('_renderer');
 var _element = Symbol('_element');
 var _helper = Symbol('_helper');
 var _hasInited$1 = Symbol('_hasInited');
-var _hasInitedData = Symbol('_hasInitedData');
 var _mode = Symbol('_mode');
 var _selectedUUID = Symbol('_selectedUUID');
 var _selectedUUIDList = Symbol('_selectedUUIDList');
 var _prevPoint = Symbol('_prevPoint');
+var _draw = Symbol('_draw');
 var _selectedDotDirection = Symbol('_selectedDotDirection');
 var _coreEvent = Symbol('_coreEvent');
 var _mapper = Symbol('_mapper');
@@ -2905,24 +3041,23 @@ var deepClone = index.data.deepClone;
 var createUUID = index.uuid.createUUID;
 var Core = (function () {
     function Core(mount, opts, config) {
-        var _l, _m, _o;
+        var _k, _l, _m;
         this[_a] = false;
-        this[_b] = false;
-        this[_c] = Mode.NULL;
-        this[_d] = new CoreEvent();
-        this[_e] = null;
-        this[_f] = [];
+        this[_b] = Mode.NULL;
+        this[_c] = new CoreEvent();
+        this[_d] = null;
+        this[_e] = [];
+        this[_f] = null;
         this[_g] = null;
-        this[_h] = null;
-        this[_j] = false;
-        this[_k] = CursorStatus.NULL;
+        this[_h] = false;
+        this[_j] = CursorStatus.NULL;
         this[_data] = { elements: [] };
         this[_opts$3] = opts;
         this[_onlyRender] = opts.onlyRender === true;
         this[_config] = mergeConfig(config || {});
-        this[_board] = new Board(mount, __assign$1(__assign$1({}, this[_opts$3]), { canScroll: (_l = config === null || config === void 0 ? void 0 : config.scrollWrapper) === null || _l === void 0 ? void 0 : _l.use, scrollConfig: {
-                color: ((_m = config === null || config === void 0 ? void 0 : config.scrollWrapper) === null || _m === void 0 ? void 0 : _m.color) || '#a0a0a0',
-                lineWidth: ((_o = config === null || config === void 0 ? void 0 : config.scrollWrapper) === null || _o === void 0 ? void 0 : _o.lineWidth) || 12,
+        this[_board] = new Board(mount, __assign$1(__assign$1({}, this[_opts$3]), { canScroll: (_k = config === null || config === void 0 ? void 0 : config.scrollWrapper) === null || _k === void 0 ? void 0 : _k.use, scrollConfig: {
+                color: ((_l = config === null || config === void 0 ? void 0 : config.scrollWrapper) === null || _l === void 0 ? void 0 : _l.color) || '#a0a0a0',
+                lineWidth: ((_m = config === null || config === void 0 ? void 0 : config.scrollWrapper) === null || _m === void 0 ? void 0 : _m.lineWidth) || 12,
             } }));
         this[_renderer] = new Renderer(this[_board]);
         this[_element] = new Element(this[_board].getContext());
@@ -2935,13 +3070,13 @@ var Core = (function () {
         this[_initEvent$2]();
         this[_hasInited$1] = true;
     }
-    Core.prototype.draw = function () {
-        var _l, _m;
+    Core.prototype[(_a = _hasInited$1, _b = _mode, _c = _coreEvent, _d = _selectedUUID, _e = _selectedUUIDList, _f = _prevPoint, _g = _selectedDotDirection, _h = _onlyRender, _j = _cursorStatus, _draw)] = function () {
+        var _k, _l;
         var transfrom = this[_board].getTransform();
         this[_helper].updateConfig(this[_data], {
             width: this[_opts$3].width,
             height: this[_opts$3].height,
-            canScroll: ((_m = (_l = this[_config]) === null || _l === void 0 ? void 0 : _l.scrollWrapper) === null || _m === void 0 ? void 0 : _m.use) === true,
+            canScroll: ((_l = (_k = this[_config]) === null || _k === void 0 ? void 0 : _k.scrollWrapper) === null || _l === void 0 ? void 0 : _l.use) === true,
             selectedUUID: this[_selectedUUID],
             selectedUUIDList: this[_selectedUUIDList],
             devicePixelRatio: this[_opts$3].devicePixelRatio,
@@ -2954,7 +3089,7 @@ var Core = (function () {
     Core.prototype.resetSize = function (opts) {
         this[_opts$3] = __assign$1(__assign$1({}, this[_opts$3]), opts);
         this[_board].resetSize(opts);
-        this.draw();
+        this[_draw]();
     };
     Core.prototype.selectElementByIndex = function (index, opts) {
         if (this[_onlyRender] === true)
@@ -2969,7 +3104,7 @@ var Core = (function () {
             }
             this[_selectedUUID] = uuid;
             this[_selectedUUIDList] = [];
-            this.draw();
+            this[_draw]();
         }
     };
     Core.prototype.selectElement = function (uuid, opts) {
@@ -2990,7 +3125,7 @@ var Core = (function () {
             this[_data].elements[index + 1] = temp;
         }
         this[_emitChangeData]();
-        this.draw();
+        this[_draw]();
     };
     Core.prototype.moveUpElement = function (uuid) {
         if (this[_onlyRender] === true)
@@ -3002,54 +3137,50 @@ var Core = (function () {
             this[_data].elements[index - 1] = temp;
         }
         this[_emitChangeData]();
-        this.draw();
+        this[_draw]();
     };
     Core.prototype.scale = function (ratio) {
         var screen = this[_board].scale(ratio);
+        this[_draw]();
         this[_emitChangeScreen]();
         return screen;
     };
     Core.prototype.scrollX = function (x) {
         var screen = this[_board].scrollX(x);
+        this[_draw]();
         this[_emitChangeScreen]();
         return screen;
     };
     Core.prototype.scrollY = function (y) {
         var screen = this[_board].scrollY(y);
+        this[_draw]();
         this[_emitChangeScreen]();
         return screen;
     };
     Core.prototype.getData = function () {
         return deepClone(this[_data]);
     };
-    Core.prototype.initData = function (data) {
-        if (this[_hasInitedData] === true) {
-            return;
-        }
-        this.setData(data, { triggerChangeEvent: true });
-        this[_hasInitedData] = true;
-    };
     Core.prototype.setData = function (data, opts) {
-        this[_data] = this[_element].initData(deepClone(parseData(data)));
+        this[_data] = this[_element].setData(deepClone(parseData(data)));
         if (opts && opts.triggerChangeEvent === true) {
             this[_emitChangeData]();
         }
-        this.draw();
+        this[_draw]();
     };
     Core.prototype.updateElement = function (elem) {
-        var _l;
+        var _k;
         if (this[_onlyRender] === true)
             return;
         var _elem = deepClone(elem);
         var data = this[_data];
         for (var i = 0; i < data.elements.length; i++) {
-            if (_elem.uuid === ((_l = data.elements[i]) === null || _l === void 0 ? void 0 : _l.uuid)) {
+            if (_elem.uuid === ((_k = data.elements[i]) === null || _k === void 0 ? void 0 : _k.uuid)) {
                 data.elements[i] = _elem;
                 break;
             }
         }
         this[_emitChangeData]();
-        this.draw();
+        this[_draw]();
     };
     Core.prototype.addElement = function (elem) {
         if (this[_onlyRender] === true)
@@ -3058,7 +3189,7 @@ var Core = (function () {
         _elem.uuid = createUUID();
         this[_data].elements.unshift(_elem);
         this[_emitChangeData]();
-        this.draw();
+        this[_draw]();
         return _elem.uuid;
     };
     Core.prototype.deleteElement = function (uuid) {
@@ -3068,7 +3199,7 @@ var Core = (function () {
         if (index >= 0) {
             this[_data].elements.splice(index, 1);
             this[_emitChangeData]();
-            this.draw();
+            this[_draw]();
         }
     };
     Core.prototype.on = function (key, callback) {
@@ -3092,7 +3223,7 @@ var Core = (function () {
     Core.prototype.__getOriginContext = function () {
         return this[_board].getOriginContext();
     };
-    Core.prototype[(_a = _hasInited$1, _b = _hasInitedData, _c = _mode, _d = _coreEvent, _e = _selectedUUID, _f = _selectedUUIDList, _g = _prevPoint, _h = _selectedDotDirection, _j = _onlyRender, _k = _cursorStatus, _initEvent$2)] = function () {
+    Core.prototype[_initEvent$2] = function () {
         if (this[_onlyRender] === true) {
             return;
         }
@@ -3106,7 +3237,7 @@ var Core = (function () {
         this[_board].on('hover', time.throttle(this[_handleHover].bind(this), 32));
     };
     Core.prototype[_handlePoint] = function (point) {
-        var _l;
+        var _k;
         if (!this[_mapper].isEffectivePoint(point)) {
             return;
         }
@@ -3114,18 +3245,18 @@ var Core = (function () {
             this[_mode] = Mode.SELECT_ELEMENT_LIST;
         }
         else {
-            var _m = this[_helper].isPointInElementWrapperDot(point), uuid = _m[0], direction = _m[1];
+            var _l = this[_helper].isPointInElementWrapperDot(point), uuid = _l[0], direction = _l[1];
             if (uuid && direction) {
                 this[_mode] = Mode.SELECT_ELEMENT_WRAPPER_DOT;
                 this[_selectedDotDirection] = direction;
                 this[_selectedUUID] = uuid;
             }
             else {
-                var _o = this[_element].isPointInElement(point, this[_data]), index = _o[0], uuid_1 = _o[1];
+                var _m = this[_element].isPointInElement(point, this[_data]), index = _m[0], uuid_1 = _m[1];
                 if (index >= 0) {
                     this.selectElementByIndex(index, { useMode: true });
                     if (typeof uuid_1 === 'string' && this[_coreEvent].has('screenSelectElement')) {
-                        this[_coreEvent].trigger('screenSelectElement', { index: index, uuid: uuid_1, element: deepClone((_l = this[_data].elements) === null || _l === void 0 ? void 0 : _l[index]) });
+                        this[_coreEvent].trigger('screenSelectElement', { index: index, uuid: uuid_1, element: deepClone((_k = this[_data].elements) === null || _k === void 0 ? void 0 : _k[index]) });
                         this[_emitChangeScreen]();
                     }
                     this[_mode] = Mode.SELECT_ELEMENT;
@@ -3136,7 +3267,7 @@ var Core = (function () {
                 }
             }
         }
-        this.draw();
+        this[_draw]();
     };
     Core.prototype[_handleMoveStart] = function (point) {
         this[_prevPoint] = point;
@@ -3159,13 +3290,13 @@ var Core = (function () {
     Core.prototype[_handleMove] = function (point) {
         if (this[_mode] === Mode.SELECT_ELEMENT_LIST) {
             this[_dragElements](this[_selectedUUIDList], point, this[_prevPoint]);
-            this.draw();
+            this[_draw]();
             this[_cursorStatus] = CursorStatus.DRAGGING;
         }
         else if (typeof this[_selectedUUID] === 'string') {
             if (this[_mode] === Mode.SELECT_ELEMENT) {
                 this[_dragElements]([this[_selectedUUID]], point, this[_prevPoint]);
-                this.draw();
+                this[_draw]();
                 this[_cursorStatus] = CursorStatus.DRAGGING;
             }
             else if (this[_mode] === Mode.SELECT_ELEMENT_WRAPPER_DOT && this[_selectedDotDirection]) {
@@ -3175,7 +3306,7 @@ var Core = (function () {
         }
         else if (this[_mode] === Mode.SELECT_AREA) {
             this[_helper].changeSelectArea(point);
-            this.draw();
+            this[_draw]();
         }
         this[_prevPoint] = point;
     };
@@ -3215,7 +3346,7 @@ var Core = (function () {
                 this[_mode] = Mode.NULL;
             }
             this[_helper].clearSelectedArea();
-            this.draw();
+            this[_draw]();
         }
         this[_selectedUUID] = null;
         this[_prevPoint] = null;
@@ -3245,14 +3376,14 @@ var Core = (function () {
                 _this[_element].dragElement(_this[_data], uuid, point, prevPoint, _this[_board].getContext().getTransform().scale);
             }
         });
-        this.draw();
+        this[_draw]();
     };
     Core.prototype[_transfromElement] = function (uuid, point, prevPoint, direction) {
         if (!prevPoint) {
             return null;
         }
         var result = this[_element].transformElement(this[_data], uuid, point, prevPoint, this[_board].getContext().getTransform().scale, direction);
-        this.draw();
+        this[_draw]();
         return result;
     };
     Core.prototype[_emitChangeScreen] = function () {
@@ -3267,7 +3398,7 @@ var Core = (function () {
             this[_coreEvent].trigger('changeData', deepClone(this[_data]));
         }
     };
-    var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k;
+    var _a, _b, _c, _d, _e, _f, _g, _h, _j;
     Core.is = is;
     Core.check = check;
     return Core;
@@ -3321,7 +3452,6 @@ var IDraw = (function (_super) {
         var record = this[_doRecords][this[_doRecords].length - 1];
         if (record === null || record === void 0 ? void 0 : record.data) {
             this.setData(record.data);
-            this.draw();
         }
         return {
             doRecordCount: this[_doRecords].length,
@@ -3338,7 +3468,6 @@ var IDraw = (function (_super) {
         var record = this[_unDoRecords].pop();
         if (record === null || record === void 0 ? void 0 : record.data) {
             this.setData(record.data);
-            this.draw();
         }
         return {
             undoRecordCount: this[_unDoRecords].length,

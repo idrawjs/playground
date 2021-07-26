@@ -14,7 +14,7 @@ const idraw = new iDraw(app, options, {
     use: true,
   }
 });
-idraw.initData(data);
+idraw.setData(data);
 
 idraw.scale(2);
 idraw.scrollX(-200);
