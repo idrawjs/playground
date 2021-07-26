@@ -56,12 +56,12 @@ const demoList: TypeDemoList = [
     name: 'API',
     list: [
       {
-        name: 'idraw.getData',
-        key: 'api-getData',
-      },
-      {
         name: 'idraw.setData',
         key: 'api-setData',
+      },
+      {
+        name: 'idraw.getData',
+        key: 'api-getData',
       },
       {
         name: 'idraw.resetSize',

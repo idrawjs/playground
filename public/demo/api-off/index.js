@@ -10,8 +10,17 @@ const options = {
   devicePixelRatio: 4,
 }
 const idraw = new iDraw(app, options);
-idraw.on('changeData', (e) => {
+
+const listener = (e) => {
   console.log('changeData: event = ', e);
+}
+
+idraw.on('changeData', listener);
+idraw.setData(data, {
+  triggerChangeEvent: true
 });
 
-idraw.setData(data);
+idraw.off('changeData', listener);
+idraw.setData(data, {
+  triggerChangeEvent: true
+});
