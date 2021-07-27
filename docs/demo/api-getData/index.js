@@ -10,8 +10,6 @@ const options = {
   devicePixelRatio: 4,
 }
 const idraw = new iDraw(app, options);
-idraw.initData(data);
+idraw.setData(data);
 
-idraw.selectElementByUUID(
-  idraw.getData().elements[1].uuid
-);
+console.log(idraw.getData());

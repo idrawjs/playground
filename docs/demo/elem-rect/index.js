@@ -28,5 +28,5 @@ const idraw = new iDraw(app, {
   contextHeight: 400,
   devicePixelRatio: 4,
 });
-idraw.initData(data)
-idraw.selectElement(0);
+idraw.setData(data)
+idraw.selectElementByIndex(0);

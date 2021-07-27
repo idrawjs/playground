@@ -9,6 +9,12 @@ const options = {
   contextHeight: 400,
   devicePixelRatio: 4,
 }
-const idraw = new iDraw(app, options);
-idraw.setData(data)
-idraw.selectElementByIndex(0);
+const idraw = new iDraw(app, options, {
+  scrollWrapper: {
+    use: true,
+  }
+});
+idraw.setData(data);
+
+idraw.scale(2);
+idraw.scrollX(-200);
