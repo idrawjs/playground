@@ -2,7 +2,7 @@
   "name": "-",
   "version": "0.0.0",
   "scripts": {
-    "dev": "vite",
+    "dev": "node ./scripts/before-build.js && vite",
     "build": "vue-tsc --noEmit && vite build",
     "serve": "vite preview",
     "docs": "npm run build && node ./scripts/docs.js"

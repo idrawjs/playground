@@ -1,6 +1,7 @@
 import { TypeCodeFile } from './store';
 import demoList from './../constant/demo-list';
 import srcdocHTML from './srcdoc.html?raw';
+import config from './../config.json';
 
 export function getUrlParams(name: string): string | null {
   const urlParams = new URLSearchParams(window.location.search);
@@ -49,7 +50,7 @@ export async function getExampleFiles(name: string): Promise<TypeCodeFile[]> {
 
   try {
     if (!(Array.isArray(demoData.exclude) && demoData.exclude.includes('data.js'))) {
-      const jsDataModue = await fetchText(`${basePath}/demo/${name}/data.js`);
+      const jsDataModue = await fetchText(`${basePath}/demo/${name}/data.js?v=${config?.hash || ''}`);
       files.push({
         name: 'data.js',
         fileName: 'data.js',
@@ -62,7 +63,7 @@ export async function getExampleFiles(name: string): Promise<TypeCodeFile[]> {
   }
 
   try {
-    const htmlModule = await fetchText(`${basePath}/demo/${name}/index.html`);
+    const htmlModule = await fetchText(`${basePath}/demo/${name}/index.html?v=${config?.hash || ''}`);
     files.push({
       name: 'html',
       fileName: 'index.html',
@@ -74,7 +75,7 @@ export async function getExampleFiles(name: string): Promise<TypeCodeFile[]> {
   }
 
   try {
-    let cssModule = await fetchText(`${basePath}/demo/${name}/index.css`);
+    let cssModule = await fetchText(`${basePath}/demo/${name}/index.css?v=${config?.hash || ''}`);
     if (import.meta.env.DEV) {
       const lines = cssModule.replace(/\r\n/ig, '\n').split('\n');
       cssModule = '';
@@ -97,7 +98,7 @@ export async function getExampleFiles(name: string): Promise<TypeCodeFile[]> {
   }
 
   try {
-    const importMap = await fetchText(`${basePath}/demo/${name}/import-map.json`);
+    const importMap = await fetchText(`${basePath}/demo/${name}/import-map.json?v=${config?.hash || ''}`);
     files.push({
       name: 'import-map',
       fileName: 'import-map.json',
