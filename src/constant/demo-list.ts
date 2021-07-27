@@ -50,6 +50,11 @@ const demoList: TypeDemoList = [
         key: 'elem-svg',
         exclude: ['data.js'],
       },
+      {
+        name: 'HTML',
+        key: 'elem-html',
+        exclude: ['data.js'],
+      },
     ]
   },
   {
