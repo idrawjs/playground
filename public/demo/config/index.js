@@ -23,6 +23,6 @@ const config = {
   },
 }
 const idraw = new iDraw(app, options, config);
-idraw.initData(data);
+idraw.setData(data);
 
-idraw.selectElement(1);
+idraw.selectElementByIndex(1);

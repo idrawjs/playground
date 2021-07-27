@@ -12,18 +12,4 @@ const options = {
 const idraw = new iDraw(app, options);
 idraw.setData(data);
 
-idraw.addElement({
-  name: "rect-001",
-  x: 140,
-  y: 120,
-  w: 200,
-  h: 100,
-  type: "rect",
-  desc: {
-    color: "#f7d3c1",
-    borderRadius: 20,
-    borderWidth: 4,
-    borderColor: "#ff6032",
-  },
-});
-
+idraw.selectElementByIndex(1);

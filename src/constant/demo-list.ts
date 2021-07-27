@@ -31,13 +31,18 @@ const demoList: TypeDemoList = [
     name: 'Elements\' Types',
     list: [
       {
+        name: 'Text',
+        key: 'elem-text',
+        exclude: ['data.js'],
+      },
+      {
         name: 'Rect',
         key: 'elem-rect',
         exclude: ['data.js'],
       },
       {
-        name: 'Text',
-        key: 'elem-text',
+        name: 'Circle',
+        key: 'elem-circle',
         exclude: ['data.js'],
       },
       {
@@ -50,14 +55,23 @@ const demoList: TypeDemoList = [
         key: 'elem-svg',
         exclude: ['data.js'],
       },
+      {
+        name: 'HTML',
+        key: 'elem-html',
+        exclude: ['data.js'],
+      },
     ]
   },
   {
     name: 'API',
     list: [
       {
-        name: 'idraw.draw',
-        key: 'api-draw',
+        name: 'idraw.setData',
+        key: 'api-setData',
+      },
+      {
+        name: 'idraw.getData',
+        key: 'api-getData',
       },
       {
         name: 'idraw.resetSize',
@@ -68,8 +82,8 @@ const demoList: TypeDemoList = [
         key: 'api-selectElement',
       },
       {
-        name: 'idraw.selectElementByUUID',
-        key: 'api-selectElementByUUID',
+        name: 'idraw.selectElementByIndex',
+        key: 'api-selectElementByIndex',
       },
       {
         name: 'idraw.updateElement',
@@ -104,32 +118,12 @@ const demoList: TypeDemoList = [
         key: 'api-scrollY',
       },
       {
-        name: 'idraw.initData',
-        key: 'api-initData',
-      },
-      {
-        name: 'idraw.getData',
-        key: 'api-getData',
-      },
-      {
-        name: 'idraw.setData',
-        key: 'api-setData',
-      },
-      {
         name: 'idraw.on',
         key: 'api-on',
       },
       {
         name: 'idraw.off',
         key: 'api-off',
-      },
-      {
-        name: 'idraw.pointScreenToContext',
-        key: 'api-pointScreenToContext',
-      },
-      {
-        name: 'idraw.pointContextToScreen',
-        key: 'api-pointContextToScreen',
       },
     ]
   },
