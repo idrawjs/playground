@@ -31,13 +31,18 @@ const demoList: TypeDemoList = [
     name: 'Elements\' Types',
     list: [
       {
+        name: 'Text',
+        key: 'elem-text',
+        exclude: ['data.js'],
+      },
+      {
         name: 'Rect',
         key: 'elem-rect',
         exclude: ['data.js'],
       },
       {
-        name: 'Text',
-        key: 'elem-text',
+        name: 'Circle',
+        key: 'elem-circle',
         exclude: ['data.js'],
       },
       {
