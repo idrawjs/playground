@@ -1,6 +1,11 @@
 <template>
-  <Nav />
-  <div class="container">
+  <Nav v-if=" globalData.urlParams['header'] !== 'false' " />
+  <div
+    class="container"
+    :class="{
+      'no-header': globalData.urlParams['header'] === 'false'
+    }"
+  >
     <Box :defaultSplit="15">
       <template #left>
         <Sider />
@@ -31,8 +36,8 @@
   import Sider from './components/sider.vue';
   import { getUrlParams, getExampleFiles, includeDemoList } from './util/data';
   import { setFiles } from './util/store';
-  import { setDemoStatus } from './util/global';
-  
+  import { setDemoStatus, globalData } from './util/global';
+
   async function main() {
     const demoName = getUrlParams('demo') || 'basic';
     try {
@@ -73,5 +78,9 @@ body {
 .container {
   height: calc(100vh - var(--nav-height));
   width: 100%;
+}
+
+.container.no-header {
+  height: 100vh;
 }
 </style>
