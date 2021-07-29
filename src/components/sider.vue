@@ -20,12 +20,21 @@
 </template>
 
 <script setup lang="ts">
-import { watch, reactive } from 'vue';
+// import { watch, reactive } from 'vue';
 import demoList from './../constant/demo-list';
 import { globalData } from './../util/global';
 
 function parseItemLink(demoKey: string): string {
-  return `?demo=${demoKey}`;
+  const names = Object.keys(globalData.urlParams);
+  const paramList: string[] = [];
+  names.forEach((name: string) => {
+    if (name === 'demo') {
+      paramList.push(`demo=${demoKey}`);
+    } else {
+      paramList.push(`${name}=${globalData.urlParams[name] || ''}`)
+    }
+  })
+  return `?${paramList.join('&')}`;
 }
 
 </script>

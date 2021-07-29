@@ -1658,7 +1658,7 @@ function drawElementWrapper(ctx, config) {
         }
         else {
             clearContext(ctx);
-            ctx.setFillStyle(wrapper.color);
+            ctx.setStrokeStyle(wrapper.color);
             [
                 wrapper.dots.topLeft, wrapper.dots.top, wrapper.dots.topRight, wrapper.dots.right,
                 wrapper.dots.bottomRight, wrapper.dots.bottom, wrapper.dots.bottomLeft, wrapper.dots.left,
@@ -1727,7 +1727,7 @@ function drawElementListWrappers(ctx, config) {
             ctx.closePath();
             if (wrapper.lock === true) {
                 clearContext(ctx);
-                ctx.setFillStyle(wrapper.color);
+                ctx.setStrokeStyle(wrapper.color);
                 [
                     wrapper.dots.topLeft, wrapper.dots.top, wrapper.dots.topRight, wrapper.dots.right,
                     wrapper.dots.bottomRight, wrapper.dots.bottom, wrapper.dots.bottomLeft, wrapper.dots.left,
@@ -2199,7 +2199,7 @@ var Element = (function () {
     function Element(ctx) {
         this._ctx = ctx;
     }
-    Element.prototype.setData = function (data) {
+    Element.prototype.initData = function (data) {
         data.elements.forEach(function (elem) {
             if (!(elem.uuid && typeof elem.uuid === 'string')) {
                 elem.uuid = createUUID$1();
@@ -2355,9 +2355,6 @@ var Element = (function () {
     return Element;
 }());
 var deepClone$1 = index.data.deepClone;
-var areaLineWidth = 1.5;
-var areaColor = '#2ab6f1';
-var areaLineDash = [4, 3];
 var Helper = (function () {
     function Helper(board, config) {
         this._areaStart = { x: 0, y: 0 };
@@ -2373,7 +2370,6 @@ var Helper = (function () {
         this._updateElementIndex(data);
         this._updateSelectedElementWrapper(data, opts);
         this._updateSelectedElementListWrapper(data, opts);
-        this._updateDisplayContextScrollWrapper(data, opts);
     };
     Helper.prototype.getConfig = function () {
         return deepClone$1(this._helperConfig);
@@ -2512,6 +2508,9 @@ var Helper = (function () {
         var end = this._areaEnd;
         var transform = this._ctx.getTransform();
         var _a = transform.scale, scale = _a === void 0 ? 1 : _a, _b = transform.scrollX, scrollX = _b === void 0 ? 0 : _b, _c = transform.scrollY, scrollY = _c === void 0 ? 0 : _c;
+        var elemWrapper = this._coreConfig.elementWrapper;
+        var lineWidth = elemWrapper.lineWidth / scale;
+        var lineDash = elemWrapper.lineDash.map(function (n) { return (n / scale); });
         this._helperConfig.selectedAreaWrapper = {
             x: (Math.min(start.x, end.x) - scrollX) / scale,
             y: (Math.min(start.y, end.y) - scrollY) / scale,
@@ -2519,11 +2518,9 @@ var Helper = (function () {
             h: Math.abs(end.y - start.y) / scale,
             startPoint: { x: start.x, y: start.y },
             endPoint: { x: end.x, y: end.y },
-            lineWidth: areaLineWidth / scale,
-            lineDash: areaLineDash.map(function (num) {
-                return num / scale;
-            }),
-            color: areaColor,
+            lineWidth: lineWidth,
+            lineDash: lineDash,
+            color: elemWrapper.color,
         };
     };
     Helper.prototype._updateElementIndex = function (data) {
@@ -2616,45 +2613,6 @@ var Helper = (function () {
             wrapper.translate = calcElementCenter(elem);
         }
         return wrapper;
-    };
-    Helper.prototype._updateDisplayContextScrollWrapper = function (data, opts) {
-        if (opts.canScroll !== true) {
-            return;
-        }
-        var width = opts.width, height = opts.height;
-        var sliderMinSize = 50;
-        var lineSize = 16;
-        var position = this._board.getScreenInfo().position;
-        var xSize = 0;
-        var ySize = 0;
-        if (position.left <= 0 || position.right <= 0) {
-            xSize = Math.max(sliderMinSize, width - (Math.abs(position.left < 0 ? position.left : 0) + Math.abs(position.right < 0 ? position.right : 0)));
-            if (xSize >= width)
-                xSize = 0;
-        }
-        if (position.top <= 0 || position.bottom <= 0) {
-            ySize = Math.max(sliderMinSize, height - (Math.abs(position.top < 0 ? position.top : 0) + Math.abs(position.bottom < 0 ? position.bottom : 0)));
-            if (ySize >= height)
-                ySize = 0;
-        }
-        var translateX = 0;
-        if (xSize > 0) {
-            translateX = width * Math.abs(position.left) / (Math.abs(position.left) + Math.abs(position.right));
-            translateX = Math.min(Math.max(0, translateX - xSize / 2), width - xSize);
-        }
-        var translateY = 0;
-        if (ySize > 0) {
-            translateY = height * Math.abs(position.top) / (Math.abs(position.top) + Math.abs(position.bottom));
-            translateY = Math.min(Math.max(0, translateY - ySize / 2), height - ySize);
-        }
-        this._helperConfig.displayContextScrollWrapper = {
-            lineSize: lineSize,
-            xSize: xSize,
-            ySize: ySize,
-            translateY: translateY,
-            translateX: translateX,
-            color: '#e0e0e0'
-        };
     };
     return Helper;
 }());
@@ -2880,6 +2838,18 @@ function imageSrc(value) {
 function svg(value) {
     return (typeof value === 'string' && /^(<svg[\s]{1,}|<svg>)/i.test(("" + value).trim()) && /<\/[\s]{0,}svg>$/i.test(("" + value).trim()));
 }
+function html(value) {
+    var result = false;
+    if (typeof value === 'string') {
+        var div = document.createElement('div');
+        div.innerHTML = value;
+        if (div.children.length > 0) {
+            result = true;
+        }
+        div = null;
+    }
+    return result;
+}
 function text(value) {
     return typeof value === 'string';
 }
@@ -2895,6 +2865,9 @@ function textAlign(value) {
 function fontFamily(value) {
     return typeof value === 'string' && value.length > 0;
 }
+function fontWeight(value) {
+    return ['bold'].includes(value);
+}
 var is = {
     x: x,
     y: y,
@@ -2909,11 +2882,13 @@ var is = {
     imageURL: imageURL,
     imageBase64: imageBase64,
     svg: svg,
+    html: html,
     text: text,
     fontSize: fontSize,
     lineHeight: lineHeight,
     textAlign: textAlign,
     fontFamily: fontFamily,
+    fontWeight: fontWeight,
 };
 function attrs(attrs) {
     var x = attrs.x, y = attrs.y, w = attrs.w, h = attrs.h, angle = attrs.angle;
@@ -2949,6 +2924,19 @@ function rectDesc(desc) {
     }
     return true;
 }
+function circleDesc(desc) {
+    var color = desc.color, borderColor = desc.borderColor, borderWidth = desc.borderWidth;
+    if (desc.hasOwnProperty('color') && !is.color(color)) {
+        return false;
+    }
+    if (desc.hasOwnProperty('borderColor') && !is.color(borderColor)) {
+        return false;
+    }
+    if (desc.hasOwnProperty('borderWidth') && !is.number(borderWidth)) {
+        return false;
+    }
+    return true;
+}
 function imageDesc(desc) {
     var src = desc.src;
     if (!is.imageSrc(src)) {
@@ -2963,8 +2951,15 @@ function svgDesc(desc) {
     }
     return true;
 }
+function htmlDesc(desc) {
+    var html = desc.html;
+    if (!is.html(html)) {
+        return false;
+    }
+    return true;
+}
 function textDesc(desc) {
-    var text = desc.text, color = desc.color, fontSize = desc.fontSize, lineHeight = desc.lineHeight, fontFamily = desc.fontFamily, textAlign = desc.textAlign;
+    var text = desc.text, color = desc.color, fontSize = desc.fontSize, lineHeight = desc.lineHeight, fontFamily = desc.fontFamily, textAlign = desc.textAlign, fontWeight = desc.fontWeight, bgColor = desc.bgColor;
     if (!is.text(text)) {
         return false;
     }
@@ -2972,6 +2967,12 @@ function textDesc(desc) {
         return false;
     }
     if (!is.fontSize(fontSize)) {
+        return false;
+    }
+    if (desc.hasOwnProperty('bgColor') && !is.color(bgColor)) {
+        return false;
+    }
+    if (desc.hasOwnProperty('fontWeight') && !is.fontWeight(fontWeight)) {
         return false;
     }
     if (desc.hasOwnProperty('lineHeight') && !is.lineHeight(lineHeight)) {
@@ -2990,10 +2991,12 @@ function textDesc(desc) {
 }
 var check = {
     attrs: attrs,
+    textDesc: textDesc,
     rectDesc: rectDesc,
+    circleDesc: circleDesc,
     imageDesc: imageDesc,
     svgDesc: svgDesc,
-    textDesc: textDesc,
+    htmlDesc: htmlDesc,
 };
 var _board = Symbol('_board');
 var _data = Symbol('_data');
@@ -3161,7 +3164,7 @@ var Core = (function () {
         return deepClone(this[_data]);
     };
     Core.prototype.setData = function (data, opts) {
-        this[_data] = this[_element].setData(deepClone(parseData(data)));
+        this[_data] = this[_element].initData(deepClone(parseData(data)));
         if (opts && opts.triggerChangeEvent === true) {
             this[_emitChangeData]();
         }
@@ -3497,4 +3500,4 @@ var IDraw = (function (_super) {
     return IDraw;
 }(Core));
 
-export default IDraw;
+export { IDraw as default };
