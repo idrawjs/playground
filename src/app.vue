@@ -12,7 +12,7 @@
         <Sider />
       </template>
       <template #right>
-        <Box :defaultSplit="16">
+        <Box :defaultSplit="40">
           <template #left>
             <Editor />
           </template>
@@ -39,7 +39,7 @@
   // MIT License https://github.com/vuejs/vue-next/blob/master/LICENSE
 
   // import { reactive, watch } from 'vue';
-  
+
   import Box from './components/box.vue';
   import Nav from './components/nav.vue';
   import Editor from './components/editor/index.vue';
