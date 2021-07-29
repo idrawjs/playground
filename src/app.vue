@@ -1,17 +1,18 @@
 <template>
-  <Nav v-if=" globalData.urlParams['header'] !== 'false' " />
+  <Nav v-if="globalData.layout.showHeader" />
   <div
     class="container"
     :class="{
-      'no-header': globalData.urlParams['header'] === 'false'
+      'no-header': !globalData.layout.showHeader
     }"
   >
-    <Box :defaultSplit="15">
+    
+    <Box v-if="globalData.layout.showSider" :defaultSplit="15">
       <template #left>
         <Sider />
       </template>
       <template #right>
-        <Box :defaultSplit="36">
+        <Box :defaultSplit="16">
           <template #left>
             <Editor />
           </template>
@@ -19,6 +20,14 @@
             <Preview />
           </template>
         </Box>
+      </template>
+    </Box>
+    <Box v-else :defaultSplit="50">
+      <template #left>
+        <Editor />
+      </template>
+      <template #right>
+        <Preview />
       </template>
     </Box>
     
@@ -29,6 +38,8 @@
   //implementation from Vue.js
   // MIT License https://github.com/vuejs/vue-next/blob/master/LICENSE
 
+  // import { reactive, watch } from 'vue';
+  
   import Box from './components/box.vue';
   import Nav from './components/nav.vue';
   import Editor from './components/editor/index.vue';

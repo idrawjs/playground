@@ -9,13 +9,21 @@ export type TypeGlobalData = {
     [name: string]: string | undefined;
   },
   demoStatus: 'LOADED' | 'LOADING' | 'NOT_FOUND' | 'NOT_FINISHED';
+  layout: {
+    showHeader: boolean;
+    showSider: boolean;
+  },
 }
 
 export const globalData: TypeGlobalData = reactive({
   urlParams: {
     demo: 'basic'
   },
-  demoStatus: 'LOADING'
+  demoStatus: 'LOADING',
+  layout: {
+    showHeader: true,
+    showSider: true,
+  },
 });
 
 
@@ -28,6 +36,12 @@ function initPageParams() {
   // if (!globalData.urlParams['demo']) {
   //   globalData.urlParams['demo'] = 'basic'
   // }
+  if (globalData.urlParams['header'] === 'false') {
+    globalData.layout.showHeader = false;
+  }
+  if (globalData.urlParams['sider'] === 'false') {
+    globalData.layout.showSider = false;
+  }
 }
 
 
