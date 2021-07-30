@@ -12,7 +12,7 @@
         <Sider />
       </template>
       <template #right>
-        <Box :defaultSplit="40">
+        <Box :defaultSplit="globalData.layout.defaultEditorSplit">
           <template #left>
             <Editor />
           </template>
@@ -22,7 +22,7 @@
         </Box>
       </template>
     </Box>
-    <Box v-else :defaultSplit="50">
+    <Box v-else :defaultSplit="globalData.layout.defaultEditorSplit">
       <template #left>
         <Editor />
       </template>
