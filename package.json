@@ -9,6 +9,7 @@
   },
   "dependencies": {
     "codemirror": "^5.62.0",
+    "es-module-shims": "^0.12.2",
     "idraw": "*",
     "vue": "^3.0.5"
   },
