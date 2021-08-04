@@ -171,8 +171,10 @@ export function mergePreviewDoc(assets: TypePrevewAssets) {
 
 
 export function mergeJavaScript(assets: TypePrevewAssets) {
+  // parse data.js
   const dataReg = /import[\s]{1,}([a-zA-Z\_]+)[\s]{1,}from[\s]{1,}\'\.\/data\'/;
-  const js = assets.js.replace(dataReg, (str) => {
+  let jsContext: string = assets.js;
+  jsContext = jsContext.replace(dataReg, (str) => {
     const matchResult = dataReg?.exec(str);
     let result = str;
     if (matchResult && matchResult[1]) {
@@ -184,7 +186,20 @@ export function mergeJavaScript(assets: TypePrevewAssets) {
     }
     return result;
   });
-  return js;
+
+  // parse import idraw
+  const idrawReg = /import[\s]{1,}([a-zA-Z\_]+)[\s]{1,}from[\s]{1,}\'idraw\'/;
+  jsContext = jsContext.replace(idrawReg, (str) => {
+    const matchResult = idrawReg?.exec(str);
+    let result = str;
+    if (matchResult && matchResult[1]) {
+      const dataName = `${matchResult[1]}`;
+      result = `import ${dataName} from '/lib/idraw/0.x/index.es.js'`;
+    }
+    return result;
+  });
+
+  return jsContext;
 }
 
 
