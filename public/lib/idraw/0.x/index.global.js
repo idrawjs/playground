@@ -1,5 +1,4 @@
-this.iDraw = this.iDraw || {};
-this.iDraw.IDraw = (function () {
+var iDraw = (function () {
     'use strict';
 
     var extendStatics = function(d, b) {

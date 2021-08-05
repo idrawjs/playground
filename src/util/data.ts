@@ -195,7 +195,7 @@ export function mergeJavaScript(assets: TypePrevewAssets) {
     if (matchResult && matchResult[1]) {
       const dataName = `${matchResult[1]}`;
       // result = `import ${dataName} from './lib/idraw/0.x/index.es.js'`;
-      result = `const ${dataName} = window.iDraw.IDraw`;
+      result = `const ${dataName} = window.iDraw`;
     }
     return result;
   });
