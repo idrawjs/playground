@@ -110,12 +110,12 @@ const demoList: TypeDemoList = [
         key: 'api-scale',
       },
       {
-        name: 'idraw.scrollX',
-        key: 'api-scrollX',
+        name: 'idraw.scrollLeft',
+        key: 'api-scrollLeft',
       },
       {
-        name: 'idraw.scrollY',
-        key: 'api-scrollY',
+        name: 'idraw.scrollTop',
+        key: 'api-scrollTop',
       },
       {
         name: 'idraw.on',
