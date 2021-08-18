@@ -17,4 +17,4 @@ const idraw = new iDraw(app, options, {
 idraw.setData(data);
 
 idraw.scale(2);
-idraw.scrollX(-200);
+idraw.scrollLeft(200);
