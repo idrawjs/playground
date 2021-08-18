@@ -9,8 +9,7 @@
   },
   "dependencies": {
     "codemirror": "^5.62.0",
-    "es-module-shims": "^0.12.2",
-    "idraw": "0.1.4",
+    "idraw": "0.1.5",
     "vue": "^3.0.5"
   },
   "devDependencies": {
