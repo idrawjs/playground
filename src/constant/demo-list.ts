@@ -86,6 +86,10 @@ const demoList: TypeDemoList = [
         key: 'api-selectElementByIndex',
       },
       {
+        name: 'getSelectedElements',
+        key: 'api-getSelectedElements',
+      },
+      {
         name: 'updateElement',
         key: 'api-updateElement',
       },
