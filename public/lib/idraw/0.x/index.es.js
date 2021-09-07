@@ -21,6 +21,42 @@ var __assign$2 = function() {
     };
     return __assign$2.apply(this, arguments);
 };
+function __awaiter$1(thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+}
+function __generator$1(thisArg, body) {
+    var _ = { label: 0, sent: function() { if (t[0] & 1) throw t[1]; return t[1]; }, trys: [], ops: [] }, f, y, t, g;
+    return g = { next: verb(0), "throw": verb(1), "return": verb(2) }, typeof Symbol === "function" && (g[Symbol.iterator] = function() { return this; }), g;
+    function verb(n) { return function (v) { return step([n, v]); }; }
+    function step(op) {
+        if (f) throw new TypeError("Generator is already executing.");
+        while (_) try {
+            if (f = 1, y && (t = op[0] & 2 ? y["return"] : op[0] ? y["throw"] || ((t = y["return"]) && t.call(y), 0) : y.next) && !(t = t.call(y, op[1])).done) return t;
+            if (y = 0, t) op = [op[0] & 2, t.value];
+            switch (op[0]) {
+                case 0: case 1: t = op; break;
+                case 4: _.label++; return { value: op[1], done: false };
+                case 5: _.label++; y = op[1]; op = [0]; continue;
+                case 7: op = _.ops.pop(); _.trys.pop(); continue;
+                default:
+                    if (!(t = _.trys, t = t.length > 0 && t[t.length - 1]) && (op[0] === 6 || op[0] === 2)) { _ = 0; continue; }
+                    if (op[0] === 3 && (!t || (op[1] > t[0] && op[1] < t[3]))) { _.label = op[1]; break; }
+                    if (op[0] === 6 && _.label < t[1]) { _.label = t[1]; t = op; break; }
+                    if (t && _.label < t[2]) { _.label = t[2]; _.ops.push(op); break; }
+                    if (t[2]) _.ops.pop();
+                    _.trys.pop(); continue;
+            }
+            op = body.call(thisArg, _);
+        } catch (e) { op = [6, e]; y = 0; } finally { f = t = 0; }
+        if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
+    }
+}
 
 var __assign$1 = function() {
     __assign$1 = Object.assign || function __assign(t) {
@@ -145,7 +181,7 @@ function createUUID$3() {
     }
     return "" + str4() + str4() + "-" + str4() + "-" + str4() + "-" + str4() + "-" + str4() + str4() + str4();
 }
-function deepClone$4(target) {
+function deepClone$5(target) {
     function _clone(t) {
         var type = is$2(t);
         if (['Null', 'Number', 'String', 'Boolean', 'Undefined'].indexOf(type) >= 0) {
@@ -293,7 +329,7 @@ var index$1 = {
     },
     istype: istype$2,
     data: {
-        deepClone: deepClone$4,
+        deepClone: deepClone$5,
     }
 };
 var BoardEvent = (function () {
@@ -347,9 +383,29 @@ var BoardEvent = (function () {
     };
     return BoardEvent;
 }());
+var TempData$1 = (function () {
+    function TempData() {
+        this._temp = {
+            prevClickPoint: null
+        };
+    }
+    TempData.prototype.set = function (name, value) {
+        this._temp[name] = value;
+    };
+    TempData.prototype.get = function (name) {
+        return this._temp[name];
+    };
+    TempData.prototype.clear = function () {
+        this._temp = {
+            prevClickPoint: null,
+        };
+    };
+    return TempData;
+}());
 var Watcher = (function () {
     function Watcher(canvas) {
         this._isMoving = false;
+        this._temp = new TempData$1;
         this._canvas = canvas;
         this._isMoving = false;
         this._initEvent();
@@ -368,6 +424,8 @@ var Watcher = (function () {
         canvas.addEventListener('mousemove', this._listenMove.bind(this), true);
         canvas.addEventListener('mouseup', this._listenMoveEnd.bind(this), true);
         canvas.addEventListener('mouseleave', this._listenMoveEnd.bind(this), true);
+        canvas.addEventListener('mouseleave', this._listenLeave.bind(this), true);
+        canvas.addEventListener('click', this._listenClick.bind(this), true);
         canvas.addEventListener('wheel', this._listenWheel.bind(this), true);
         canvas.addEventListener('touchstart', this._listenMoveStart.bind(this), true);
         canvas.addEventListener('touchmove', this._listenMove.bind(this), true);
@@ -382,6 +440,12 @@ var Watcher = (function () {
             }
         }
         this._isMoving = true;
+    };
+    Watcher.prototype._listenLeave = function (e) {
+        e.preventDefault();
+        if (this._event.has('leave')) {
+            this._event.trigger('leave', undefined);
+        }
     };
     Watcher.prototype._listenMoveStart = function (e) {
         e.preventDefault();
@@ -423,6 +487,25 @@ var Watcher = (function () {
         }
         if (this._event.has('wheelY') && (e.deltaY > 0 || e.deltaY < 0)) {
             this._event.trigger('wheelY', e.deltaY);
+        }
+    };
+    Watcher.prototype._listenClick = function (e) {
+        e.preventDefault();
+        var maxLimitTime = 500;
+        var p = this._getPosition(e);
+        var t = Date.now();
+        if (this._isVaildPoint(p)) {
+            var preClickPoint = this._temp.get('prevClickPoint');
+            if (preClickPoint && (t - preClickPoint.t <= maxLimitTime)
+                && Math.abs(preClickPoint.x - p.x) <= 5
+                && Math.abs(preClickPoint.y - p.y) <= 5) {
+                if (this._event.has('doubleClick')) {
+                    this._event.trigger('doubleClick', { x: p.x, y: p.y });
+                }
+            }
+            else {
+                this._temp.set('prevClickPoint', { x: p.x, y: p.y, t: t, });
+            }
         }
     };
     Watcher.prototype._getPosition = function (e) {
@@ -923,23 +1006,10 @@ var Board = (function () {
         return this[_displayCtx];
     };
     Board.prototype.getOriginContext = function () {
-        return this[_displayCtx];
+        return this[_originCtx];
     };
     Board.prototype.getContext = function () {
         return this[_ctx];
-    };
-    Board.prototype.createContext = function (canvas) {
-        var opts = this[_opts$2];
-        canvas.width = opts.contextWidth * opts.devicePixelRatio;
-        canvas.height = opts.contextHeight * opts.devicePixelRatio;
-        return new Context(canvas.getContext('2d'), this[_opts$2]);
-    };
-    Board.prototype.createCanvas = function () {
-        var opts = this[_opts$2];
-        var canvas = document.createElement('canvas');
-        canvas.width = opts.contextWidth * opts.devicePixelRatio;
-        canvas.height = opts.contextHeight * opts.devicePixelRatio;
-        return canvas;
     };
     Board.prototype.scale = function (scaleRatio) {
         if (scaleRatio > 0) {
@@ -1125,7 +1195,7 @@ var Board = (function () {
     };
     return Board;
 }());
-function compose(middleware) {
+function compose$2(middleware) {
     return function (context, next) {
         return dispatch(0);
         function dispatch(i) {
@@ -1144,14 +1214,14 @@ function compose(middleware) {
         }
     };
 }
-function delay(time) {
+function delay$2(time) {
     return new Promise(function (resolve) {
         setTimeout(function () {
             resolve();
         }, time);
     });
 }
-function throttle(fn, timeout) {
+function throttle$3(fn, timeout) {
     var timer = -1;
     return function () {
         var args = [];
@@ -1167,7 +1237,7 @@ function throttle(fn, timeout) {
         }, timeout);
     };
 }
-function downloadImageFromCanvas(canvas, opts) {
+function downloadImageFromCanvas$2(canvas, opts) {
     var filename = opts.filename, _a = opts.type, type = _a === void 0 ? 'image/jpeg' : _a;
     var stream = canvas.toDataURL(type);
     var downloadLink = document.createElement('a');
@@ -1177,10 +1247,10 @@ function downloadImageFromCanvas(canvas, opts) {
     downloadClickEvent.initEvent('click', true, false);
     downloadLink.dispatchEvent(downloadClickEvent);
 }
-function toColorHexNum(color) {
+function toColorHexNum$2(color) {
     return parseInt(color.replace(/^\#/, '0x'));
 }
-function toColorHexStr(color) {
+function toColorHexStr$2(color) {
     return '#' + color.toString(16);
 }
 function isColorStr$2(color) {
@@ -1192,7 +1262,7 @@ function createUUID$2() {
     }
     return "" + str4() + str4() + "-" + str4() + "-" + str4() + "-" + str4() + "-" + str4() + str4() + str4();
 }
-function deepClone$3(target) {
+function deepClone$4(target) {
     function _clone(t) {
         var type = is$1(t);
         if (['Null', 'Number', 'String', 'Boolean', 'Undefined'].indexOf(type) >= 0) {
@@ -1219,54 +1289,54 @@ function deepClone$3(target) {
 function is$1(data) {
     return Object.prototype.toString.call(data).replace(/[\]|\[]{1,1}/ig, '').split(' ')[1];
 }
-function parsePrototype(data) {
+function parsePrototype$2(data) {
     var typeStr = Object.prototype.toString.call(data) || '';
     var result = typeStr.replace(/(\[object|\])/ig, '').trim();
     return result;
 }
 var istype$1 = {
     type: function (data, lowerCase) {
-        var result = parsePrototype(data);
+        var result = parsePrototype$2(data);
         return lowerCase === true ? result.toLocaleLowerCase() : result;
     },
     array: function (data) {
-        return parsePrototype(data) === 'Array';
+        return parsePrototype$2(data) === 'Array';
     },
     json: function (data) {
-        return parsePrototype(data) === 'Object';
+        return parsePrototype$2(data) === 'Object';
     },
     function: function (data) {
-        return parsePrototype(data) === 'Function';
+        return parsePrototype$2(data) === 'Function';
     },
     asyncFunction: function (data) {
-        return parsePrototype(data) === 'AsyncFunction';
+        return parsePrototype$2(data) === 'AsyncFunction';
     },
     string: function (data) {
-        return parsePrototype(data) === 'String';
+        return parsePrototype$2(data) === 'String';
     },
     number: function (data) {
-        return parsePrototype(data) === 'Number';
+        return parsePrototype$2(data) === 'Number';
     },
     undefined: function (data) {
-        return parsePrototype(data) === 'Undefined';
+        return parsePrototype$2(data) === 'Undefined';
     },
     null: function (data) {
-        return parsePrototype(data) === 'Null';
+        return parsePrototype$2(data) === 'Null';
     },
     promise: function (data) {
-        return parsePrototype(data) === 'Promise';
+        return parsePrototype$2(data) === 'Promise';
     },
     nodeList: function (data) {
-        return parsePrototype(data) === 'NodeList';
+        return parsePrototype$2(data) === 'NodeList';
     },
     imageData: function (data) {
-        return parsePrototype(data) === 'ImageData';
+        return parsePrototype$2(data) === 'ImageData';
     }
 };
-var Image = window.Image, Blob = window.Blob, FileReader = window.FileReader;
+var Image$2 = window.Image, Blob$2 = window.Blob, FileReader$2 = window.FileReader;
 function loadImage$1(src) {
     return new Promise(function (resolve, reject) {
-        var img = new Image;
+        var img = new Image$2;
         img.onload = function () {
             resolve(img);
         };
@@ -1278,9 +1348,9 @@ function loadImage$1(src) {
 function loadSVG$1(svg) {
     return new Promise(function (resolve, reject) {
         var _svg = svg;
-        var image = new Image();
-        var blob = new Blob([_svg], { type: 'image/svg+xml;charset=utf-8' });
-        var reader = new FileReader();
+        var image = new Image$2();
+        var blob = new Blob$2([_svg], { type: 'image/svg+xml;charset=utf-8' });
+        var reader = new FileReader$2();
         reader.readAsDataURL(blob);
         reader.onload = function (event) {
             var _a;
@@ -1299,9 +1369,9 @@ function loadHTML$1(html, opts) {
     var width = opts.width, height = opts.height;
     return new Promise(function (resolve, reject) {
         var _svg = "\n    <svg xmlns=\"http://www.w3.org/2000/svg\" width=\"" + (width || '') + "\" height = \"" + (height || '') + "\">\n      <foreignObject width=\"100%\" height=\"100%\">\n        <div xmlns = \"http://www.w3.org/1999/xhtml\">\n          " + html + "\n        </div>\n      </foreignObject>\n    </svg>\n    ";
-        var image = new Image();
-        var blob = new Blob([_svg], { type: 'image/svg+xml;charset=utf-8' });
-        var reader = new FileReader();
+        var image = new Image$2();
+        var blob = new Blob$2([_svg], { type: 'image/svg+xml;charset=utf-8' });
+        var reader = new FileReader$2();
         reader.readAsDataURL(blob);
         reader.onload = function (event) {
             var _a;
@@ -1316,11 +1386,11 @@ function loadHTML$1(html, opts) {
         };
     });
 }
-var index = {
+var index$2 = {
     time: {
-        delay: delay,
-        compose: compose,
-        throttle: throttle,
+        delay: delay$2,
+        compose: compose$2,
+        throttle: throttle$3,
     },
     loader: {
         loadImage: loadImage$1,
@@ -1328,11 +1398,11 @@ var index = {
         loadHTML: loadHTML$1,
     },
     file: {
-        downloadImageFromCanvas: downloadImageFromCanvas,
+        downloadImageFromCanvas: downloadImageFromCanvas$2,
     },
     color: {
-        toColorHexStr: toColorHexStr,
-        toColorHexNum: toColorHexNum,
+        toColorHexStr: toColorHexStr$2,
+        toColorHexNum: toColorHexNum$2,
         isColorStr: isColorStr$2,
     },
     uuid: {
@@ -1340,7 +1410,7 @@ var index = {
     },
     istype: istype$1,
     data: {
-        deepClone: deepClone$3,
+        deepClone: deepClone$4,
     }
 };
 function parseRadianToAngle(radian) {
@@ -1425,7 +1495,7 @@ function rotateContext(ctx, center, radian, callback) {
         ctx.translate(-center.x, -center.y);
     }
 }
-var istype = index.istype, color$1 = index.color;
+var istype$3 = index$2.istype, color$1 = index$2.color;
 function clearContext(ctx) {
     ctx.setFillStyle('#000000');
     ctx.setStrokeStyle('#000000');
@@ -1457,7 +1527,7 @@ function drawBox(ctx, elem, pattern) {
         if (typeof pattern === 'string') {
             ctx.setFillStyle(pattern);
         }
-        else if (['CanvasPattern'].includes(istype.type(pattern))) {
+        else if (['CanvasPattern'].includes(istype$3.type(pattern))) {
             ctx.setFillStyle(pattern);
         }
         ctx.fill();
@@ -1538,35 +1608,39 @@ function drawText(ctx, elem, loader, helperConfig) {
             fontSize: desc.fontSize,
             fontFamily: desc.fontFamily
         });
+        var descText = desc.text.replace(/\r\n/ig, '\n');
         var fontHeight = desc.lineHeight || desc.fontSize;
+        var descTextList = descText.split('\n');
         var lines = [];
-        var lineText = '';
-        var lineNum = 0;
-        for (var i = 0; i < desc.text.length; i++) {
-            if (ctx.measureText(lineText + (desc.text[i] || '')).width < ctx.calcDeviceNum(elem.w)) {
-                lineText += (desc.text[i] || '');
-            }
-            else {
-                lines.push({
-                    text: lineText,
-                    width: ctx.calcScreenNum(ctx.measureText(lineText).width),
-                });
-                lineText = (desc.text[i] || '');
-                lineNum++;
-            }
-            if ((lineNum + 1) * fontHeight > elem.h) {
-                break;
-            }
-            if (lineText && desc.text.length - 1 === i) {
-                if ((lineNum + 1) * fontHeight < elem.h) {
+        descTextList.forEach(function (tempText) {
+            var lineText = '';
+            var lineNum = 0;
+            for (var i = 0; i < tempText.length; i++) {
+                if (ctx.measureText(lineText + (tempText[i] || '')).width < ctx.calcDeviceNum(elem.w)) {
+                    lineText += (tempText[i] || '');
+                }
+                else {
                     lines.push({
                         text: lineText,
                         width: ctx.calcScreenNum(ctx.measureText(lineText).width),
                     });
+                    lineText = (tempText[i] || '');
+                    lineNum++;
+                }
+                if ((lineNum + 1) * fontHeight > elem.h) {
                     break;
                 }
+                if (lineText && tempText.length - 1 === i) {
+                    if ((lineNum + 1) * fontHeight < elem.h) {
+                        lines.push({
+                            text: lineText,
+                            width: ctx.calcScreenNum(ctx.measureText(lineText).width),
+                        });
+                        break;
+                    }
+                }
             }
-        }
+        });
         var _y = elem.y;
         if (lines.length * fontHeight < elem.h) {
             _y += ((elem.h - lines.length * fontHeight) / 2);
@@ -1747,8 +1821,9 @@ function drawElementListWrappers(ctx, config) {
         });
     });
 }
-var isColorStr$1 = index.color.isColorStr;
+var isColorStr$1 = index$2.color.isColorStr;
 function drawContext(ctx, data, helperConfig, loader) {
+    var _a;
     clearContext(ctx);
     var size = ctx.getSize();
     ctx.clearRect(0, 0, size.contextWidth, size.contextHeight);
@@ -1760,6 +1835,9 @@ function drawContext(ctx, data, helperConfig, loader) {
     }
     for (var i = 0; i < data.elements.length; i++) {
         var elem = data.elements[i];
+        if (((_a = elem === null || elem === void 0 ? void 0 : elem.operation) === null || _a === void 0 ? void 0 : _a.invisible) === true) {
+            continue;
+        }
         switch (elem.type) {
             case 'rect': {
                 drawRect(ctx, elem);
@@ -1845,7 +1923,7 @@ var LoaderEvent = (function () {
 function filterScript(html) {
     return html.replace(/<script[\s\S]*?<\/script>/ig, '');
 }
-var _a$2 = index.loader, loadImage = _a$2.loadImage, loadSVG = _a$2.loadSVG, loadHTML = _a$2.loadHTML;
+var _a$2 = index$2.loader, loadImage$3 = _a$2.loadImage, loadSVG$3 = _a$2.loadSVG, loadHTML$3 = _a$2.loadHTML;
 var LoaderStatus;
 (function (LoaderStatus) {
     LoaderStatus["FREE"] = "free";
@@ -1854,7 +1932,6 @@ var LoaderStatus;
 })(LoaderStatus || (LoaderStatus = {}));
 var Loader = (function () {
     function Loader(opts) {
-        this._patternMap = {};
         this._currentLoadData = {};
         this._currentUUIDQueue = [];
         this._storageLoadData = {};
@@ -1864,8 +1941,8 @@ var Loader = (function () {
         this._event = new LoaderEvent();
         this._waitingLoadQueue = [];
     }
-    Loader.prototype.load = function (data) {
-        var _a = this._resetLoadData(data), uuidQueue = _a[0], loadData = _a[1];
+    Loader.prototype.load = function (data, changeResourceUUIDs) {
+        var _a = this._resetLoadData(data, changeResourceUUIDs), uuidQueue = _a[0], loadData = _a[1];
         if (this._status === LoaderStatus.FREE || this._status === LoaderStatus.COMPLETE) {
             this._currentUUIDQueue = uuidQueue;
             this._currentLoadData = loadData;
@@ -1894,29 +1971,7 @@ var Loader = (function () {
         }
         return null;
     };
-    Loader.prototype.getPattern = function (elem, opts) {
-        if (this._patternMap[elem.uuid]) {
-            if (!(opts && opts.forceUpdate === true)) {
-                return this._patternMap[elem.uuid];
-            }
-        }
-        var item = this._currentLoadData[elem.uuid];
-        if ((item === null || item === void 0 ? void 0 : item.status) === 'loaded') {
-            var board = this._opts.board;
-            var tempCanvas = board.createCanvas();
-            var tempCtx = board.createContext(tempCanvas);
-            var image = this.getContent(elem.uuid);
-            tempCtx.drawImage(image, elem.x, elem.y, elem.w, elem.h);
-            var canvas = board.createCanvas();
-            var ctx = board.createContext(canvas);
-            var pattern = ctx.createPattern(tempCanvas, 'no-repeat');
-            if (pattern)
-                this._patternMap[elem.uuid] = pattern;
-            return pattern;
-        }
-        return null;
-    };
-    Loader.prototype._resetLoadData = function (data) {
+    Loader.prototype._resetLoadData = function (data, changeResourceUUIDs) {
         var loadData = {};
         var uuidQueue = [];
         var storageLoadData = this._storageLoadData;
@@ -1928,26 +1983,9 @@ var Loader = (function () {
                     uuidQueue.push(elem.uuid);
                 }
                 else {
-                    if (elem.type === 'image') {
-                        var _ele = elem;
-                        if (_ele.desc.src !== storageLoadData[elem.uuid].source) {
-                            loadData[elem.uuid] = this._createEmptyLoadItem(elem);
-                            uuidQueue.push(elem.uuid);
-                        }
-                    }
-                    else if (elem.type === 'svg') {
-                        var _ele = elem;
-                        if (_ele.desc.svg !== storageLoadData[elem.uuid].source) {
-                            loadData[elem.uuid] = this._createEmptyLoadItem(elem);
-                            uuidQueue.push(elem.uuid);
-                        }
-                    }
-                    else if (elem.type === 'html') {
-                        var _ele = elem;
-                        if (filterScript(_ele.desc.html) !== storageLoadData[elem.uuid].source) {
-                            loadData[elem.uuid] = this._createEmptyLoadItem(elem);
-                            uuidQueue.push(elem.uuid);
-                        }
+                    if (changeResourceUUIDs.includes(elem.uuid)) {
+                        loadData[elem.uuid] = this._createEmptyLoadItem(elem);
+                        uuidQueue.push(elem.uuid);
                     }
                 }
             }
@@ -1987,6 +2025,7 @@ var Loader = (function () {
         if (this._status === LoaderStatus.LOADING) {
             return;
         }
+        this._status = LoaderStatus.LOADING;
         if (this._currentUUIDQueue.length === 0) {
             if (this._waitingLoadQueue.length === 0) {
                 this._status = LoaderStatus.COMPLETE;
@@ -2047,6 +2086,7 @@ var Loader = (function () {
                     });
                 }).catch(function (err) {
                     var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k;
+                    console.warn(err);
                     loadUUIDList.splice(loadUUIDList.indexOf(uuid), 1);
                     var status = _loadAction();
                     if (_this._currentLoadData[uuid]) {
@@ -2092,19 +2132,19 @@ var Loader = (function () {
                 switch (_a.label) {
                     case 0:
                         if (!(params && params.type === 'image')) return [3, 2];
-                        return [4, loadImage(params.source)];
+                        return [4, loadImage$3(params.source)];
                     case 1:
                         image = _a.sent();
                         return [2, image];
                     case 2:
                         if (!(params && params.type === 'svg')) return [3, 4];
-                        return [4, loadSVG(params.source)];
+                        return [4, loadSVG$3(params.source)];
                     case 3:
                         image = _a.sent();
                         return [2, image];
                     case 4:
                         if (!(params && params.type === 'html')) return [3, 6];
-                        return [4, loadHTML(params.source, {
+                        return [4, loadHTML$3(params.source, {
                                 width: params.elemW, height: params.elemH
                             })];
                     case 5:
@@ -2118,7 +2158,7 @@ var Loader = (function () {
     return Loader;
 }());
 var requestAnimationFrame = window.requestAnimationFrame;
-var deepClone$2 = index.data.deepClone;
+var deepClone$3 = index$2.data.deepClone;
 var DrawStatus;
 (function (DrawStatus) {
     DrawStatus["FREE"] = "free";
@@ -2143,14 +2183,14 @@ var Renderer = (function () {
         this._loader.on('complete', function (res) {
         });
     }
-    Renderer.prototype.render = function (data, helper) {
-        var _data = deepClone$2({ data: data, helper: helper });
+    Renderer.prototype.render = function (data, helper, changeResourceUUIDs) {
+        var _data = deepClone$3({ data: data, helper: helper });
         this._queue.push(_data);
         if (this._status !== DrawStatus.DRAWING) {
             this._status = DrawStatus.DRAWING;
             this._drawFrame();
         }
-        this._loader.load(data);
+        this._loader.load(data, changeResourceUUIDs);
     };
     Renderer.prototype._drawFrame = function () {
         var _this = this;
@@ -2191,7 +2231,7 @@ var Renderer = (function () {
         if (this._queue.length <= 1) {
             return;
         }
-        var lastOne = deepClone$2(this._queue[this._queue.length - 1]);
+        var lastOne = deepClone$3(this._queue[this._queue.length - 1]);
         this._queue = [lastOne];
     };
     return Renderer;
@@ -2203,7 +2243,7 @@ function limitNum(num) {
 function limitAngle(angle) {
     return limitNum(angle % 360);
 }
-var createUUID$1 = index.uuid.createUUID;
+var createUUID$1 = index$2.uuid.createUUID;
 var Element = (function () {
     function Element(ctx) {
         this._ctx = ctx;
@@ -2264,8 +2304,12 @@ var Element = (function () {
         this.limitElementAttrs(data.elements[index]);
     };
     Element.prototype.transformElement = function (data, uuid, point, prevPoint, scale, direction) {
+        var _a, _b;
         var index = this.getElementIndex(data, uuid);
         if (!data.elements[index]) {
+            return null;
+        }
+        if (((_b = (_a = data.elements[index]) === null || _a === void 0 ? void 0 : _a.operation) === null || _b === void 0 ? void 0 : _b.lock) === true) {
             return null;
         }
         var moveX = (point.x - prevPoint.x) / scale;
@@ -2363,7 +2407,7 @@ var Element = (function () {
     };
     return Element;
 }());
-var deepClone$1 = index.data.deepClone;
+var deepClone$2 = index$2.data.deepClone;
 var Helper = (function () {
     function Helper(board, config) {
         this._areaStart = { x: 0, y: 0 };
@@ -2381,7 +2425,7 @@ var Helper = (function () {
         this._updateSelectedElementListWrapper(data, opts);
     };
     Helper.prototype.getConfig = function () {
-        return deepClone$1(this._helperConfig);
+        return deepClone$2(this._helperConfig);
     };
     Helper.prototype.getElementIndexByUUID = function (uuid) {
         var index = this._helperConfig.elementIndexMap[uuid];
@@ -2504,10 +2548,13 @@ var Helper = (function () {
         ctx.lineTo(x, y);
         ctx.closePath();
         data.elements.forEach(function (elem) {
-            var centerX = elem.x + elem.w / 2;
-            var centerY = elem.y + elem.h / 2;
-            if (ctx.isPointInPathWithoutScroll(centerX, centerY)) {
-                uuids.push(elem.uuid);
+            var _a;
+            if (((_a = elem === null || elem === void 0 ? void 0 : elem.operation) === null || _a === void 0 ? void 0 : _a.invisible) !== true) {
+                var centerX = elem.x + elem.w / 2;
+                var centerY = elem.y + elem.h / 2;
+                if (ctx.isPointInPathWithoutScroll(centerX, centerY)) {
+                    uuids.push(elem.uuid);
+                }
             }
         });
         return uuids;
@@ -2540,6 +2587,7 @@ var Helper = (function () {
         });
     };
     Helper.prototype._updateSelectedElementWrapper = function (data, opts) {
+        var _a;
         var uuid = opts.selectedUUID;
         if (!(typeof uuid === 'string' && this._helperConfig.elementIndexMap[uuid] >= 0)) {
             delete this._helperConfig.selectedElementWrapper;
@@ -2547,6 +2595,9 @@ var Helper = (function () {
         }
         var index = this._helperConfig.elementIndexMap[uuid];
         var elem = data.elements[index];
+        if (((_a = elem === null || elem === void 0 ? void 0 : elem.operation) === null || _a === void 0 ? void 0 : _a.invisible) === true) {
+            return;
+        }
         var wrapper = this._createSelectedElementWrapper(elem, opts);
         this._helperConfig.selectedElementWrapper = wrapper;
     };
@@ -2563,7 +2614,7 @@ var Helper = (function () {
         this._helperConfig.selectedElementListWrappers = wrapperList;
     };
     Helper.prototype._createSelectedElementWrapper = function (elem, opts) {
-        var _a;
+        var _a, _b, _c;
         var scale = opts.scale;
         var elemWrapper = this._coreConfig.elementWrapper;
         var dotSize = elemWrapper.dotSize / scale;
@@ -2574,7 +2625,7 @@ var Helper = (function () {
         var wrapper = {
             uuid: elem.uuid,
             dotSize: dotSize,
-            lock: elem.lock === true,
+            lock: ((_b = elem === null || elem === void 0 ? void 0 : elem.operation) === null || _b === void 0 ? void 0 : _b.lock) === true,
             dots: {
                 topLeft: {
                     x: elem.x - dotSize - bw,
@@ -2615,7 +2666,7 @@ var Helper = (function () {
             },
             lineWidth: lineWidth,
             lineDash: lineDash,
-            color: elem.lock === true ? elemWrapper.lockColor : elemWrapper.color,
+            color: ((_c = elem === null || elem === void 0 ? void 0 : elem.operation) === null || _c === void 0 ? void 0 : _c.lock) === true ? elemWrapper.lockColor : elemWrapper.color,
         };
         if (typeof elem.angle === 'number' && (elem.angle > 0 || elem.angle < 0)) {
             wrapper.radian = parseAngleToRadian(elem.angle);
@@ -2714,13 +2765,13 @@ var defaultConfig = {
     elementWrapper: {
         color: '#2ab6f1',
         lockColor: '#aaaaaa',
-        dotSize: 8,
+        dotSize: 6,
         lineWidth: 1,
         lineDash: [4, 3],
     }
 };
 function mergeConfig(config) {
-    var result = defaultConfig;
+    var result = index$2.data.deepClone(defaultConfig);
     if (config) {
         if (config.elementWrapper) {
             result.elementWrapper = __assign$1(__assign$1({}, result.elementWrapper), config.elementWrapper);
@@ -2817,7 +2868,7 @@ function isElement(elem) {
 function isNumber(num) {
     return (num >= 0 || num < 0);
 }
-var isColorStr = index.color.isColorStr;
+var isColorStr$4 = index$2.color.isColorStr;
 function number(value) {
     return (typeof value === 'number' && (value > 0 || value <= 0));
 }
@@ -2843,7 +2894,7 @@ function borderRadius(value) {
     return number(value) && value >= 0;
 }
 function color(value) {
-    return isColorStr(value);
+    return isColorStr$4(value);
 }
 function imageURL(value) {
     return (typeof value === 'string' && /^(http:\/\/|https:\/\/|\.\/|\/)/.test("" + value));
@@ -2887,7 +2938,7 @@ function fontFamily(value) {
 function fontWeight(value) {
     return ['bold'].includes(value);
 }
-var is = {
+var is$3 = {
     x: x,
     y: y,
     w: w,
@@ -2911,7 +2962,7 @@ var is = {
 };
 function attrs(attrs) {
     var x = attrs.x, y = attrs.y, w = attrs.w, h = attrs.h, angle = attrs.angle;
-    if (!(is.x(x) && is.y(y) && is.w(w) && is.h(h) && is.angle(angle))) {
+    if (!(is$3.x(x) && is$3.y(y) && is$3.w(w) && is$3.h(h) && is$3.angle(angle))) {
         return false;
     }
     if (!(angle >= -360 && angle <= 360)) {
@@ -2922,20 +2973,20 @@ function attrs(attrs) {
 function box(desc) {
     if (desc === void 0) { desc = {}; }
     var borderColor = desc.borderColor, borderRadius = desc.borderRadius, borderWidth = desc.borderWidth;
-    if (desc.hasOwnProperty('borderColor') && !is.color(borderColor)) {
+    if (desc.hasOwnProperty('borderColor') && !is$3.color(borderColor)) {
         return false;
     }
-    if (desc.hasOwnProperty('borderRadius') && !is.number(borderRadius)) {
+    if (desc.hasOwnProperty('borderRadius') && !is$3.number(borderRadius)) {
         return false;
     }
-    if (desc.hasOwnProperty('borderWidth') && !is.number(borderWidth)) {
+    if (desc.hasOwnProperty('borderWidth') && !is$3.number(borderWidth)) {
         return false;
     }
     return true;
 }
 function rectDesc(desc) {
     var color = desc.color;
-    if (desc.hasOwnProperty('color') && !is.color(color)) {
+    if (desc.hasOwnProperty('color') && !is$3.color(color)) {
         return false;
     }
     if (!box(desc)) {
@@ -2945,62 +2996,62 @@ function rectDesc(desc) {
 }
 function circleDesc(desc) {
     var color = desc.color, borderColor = desc.borderColor, borderWidth = desc.borderWidth;
-    if (desc.hasOwnProperty('color') && !is.color(color)) {
+    if (desc.hasOwnProperty('color') && !is$3.color(color)) {
         return false;
     }
-    if (desc.hasOwnProperty('borderColor') && !is.color(borderColor)) {
+    if (desc.hasOwnProperty('borderColor') && !is$3.color(borderColor)) {
         return false;
     }
-    if (desc.hasOwnProperty('borderWidth') && !is.number(borderWidth)) {
+    if (desc.hasOwnProperty('borderWidth') && !is$3.number(borderWidth)) {
         return false;
     }
     return true;
 }
 function imageDesc(desc) {
     var src = desc.src;
-    if (!is.imageSrc(src)) {
+    if (!is$3.imageSrc(src)) {
         return false;
     }
     return true;
 }
 function svgDesc(desc) {
     var svg = desc.svg;
-    if (!is.svg(svg)) {
+    if (!is$3.svg(svg)) {
         return false;
     }
     return true;
 }
 function htmlDesc(desc) {
     var html = desc.html;
-    if (!is.html(html)) {
+    if (!is$3.html(html)) {
         return false;
     }
     return true;
 }
 function textDesc(desc) {
     var text = desc.text, color = desc.color, fontSize = desc.fontSize, lineHeight = desc.lineHeight, fontFamily = desc.fontFamily, textAlign = desc.textAlign, fontWeight = desc.fontWeight, bgColor = desc.bgColor;
-    if (!is.text(text)) {
+    if (!is$3.text(text)) {
         return false;
     }
-    if (!is.color(color)) {
+    if (!is$3.color(color)) {
         return false;
     }
-    if (!is.fontSize(fontSize)) {
+    if (!is$3.fontSize(fontSize)) {
         return false;
     }
-    if (desc.hasOwnProperty('bgColor') && !is.color(bgColor)) {
+    if (desc.hasOwnProperty('bgColor') && !is$3.color(bgColor)) {
         return false;
     }
-    if (desc.hasOwnProperty('fontWeight') && !is.fontWeight(fontWeight)) {
+    if (desc.hasOwnProperty('fontWeight') && !is$3.fontWeight(fontWeight)) {
         return false;
     }
-    if (desc.hasOwnProperty('lineHeight') && !is.lineHeight(lineHeight)) {
+    if (desc.hasOwnProperty('lineHeight') && !is$3.lineHeight(lineHeight)) {
         return false;
     }
-    if (desc.hasOwnProperty('fontFamily') && !is.fontFamily(fontFamily)) {
+    if (desc.hasOwnProperty('fontFamily') && !is$3.fontFamily(fontFamily)) {
         return false;
     }
-    if (desc.hasOwnProperty('textAlign') && !is.textAlign(textAlign)) {
+    if (desc.hasOwnProperty('textAlign') && !is$3.textAlign(textAlign)) {
         return false;
     }
     if (!box(desc)) {
@@ -3017,7 +3068,7 @@ var check = {
     svgDesc: svgDesc,
     htmlDesc: htmlDesc,
 };
-var TempData = (function () {
+var TempData$2 = (function () {
     function TempData() {
         this._temp = {
             selectedUUID: null,
@@ -3049,7 +3100,7 @@ var _element = Symbol('_element');
 var _helper = Symbol('_helper');
 var _hasInited$1 = Symbol('_hasInited');
 var _mode = Symbol('_mode');
-var _tempData = Symbol('_tempData');
+var _tempData$1 = Symbol('_tempData');
 var _prevPoint = Symbol('_prevPoint');
 var _draw = Symbol('_draw');
 var _selectedDotDirection = Symbol('_selectedDotDirection');
@@ -3057,11 +3108,13 @@ var _coreEvent = Symbol('_coreEvent');
 var _mapper = Symbol('_mapper');
 var _initEvent$2 = Symbol('_initEvent');
 var _handleClick = Symbol('_handleClick');
+var _handleDoubleClick = Symbol('_handleDoubleClick');
 var _handlePoint = Symbol('_handlePoint');
 var _handleMoveStart = Symbol('_handleMoveStart');
 var _handleMove = Symbol('_handleMove');
 var _handleMoveEnd = Symbol('_handleMoveEnd');
 var _handleHover = Symbol('_handleHover');
+var _handleLeave = Symbol('_handleLeave');
 var _dragElements = Symbol('_dragElements');
 var _transfromElement = Symbol('_transfromElement');
 var _emitChangeScreen = Symbol('_emitChangeScreen');
@@ -3081,9 +3134,127 @@ var CursorStatus;
     CursorStatus["DRAGGING"] = "dragging";
     CursorStatus["NULL"] = "null";
 })(CursorStatus || (CursorStatus = {}));
-var time = index.time;
-var deepClone = index.data.deepClone;
-var createUUID = index.uuid.createUUID;
+function isChangeImageElementResource(before, after) {
+    var _a, _b;
+    return (((_a = before === null || before === void 0 ? void 0 : before.desc) === null || _a === void 0 ? void 0 : _a.src) !== ((_b = after === null || after === void 0 ? void 0 : after.desc) === null || _b === void 0 ? void 0 : _b.src));
+}
+function isChangeSVGElementResource(before, after) {
+    var _a, _b;
+    return (((_a = before === null || before === void 0 ? void 0 : before.desc) === null || _a === void 0 ? void 0 : _a.svg) !== ((_b = after === null || after === void 0 ? void 0 : after.desc) === null || _b === void 0 ? void 0 : _b.svg));
+}
+function isChangeHTMLElementResource(before, after) {
+    var _a, _b, _c, _d, _e, _f;
+    return (((_a = before === null || before === void 0 ? void 0 : before.desc) === null || _a === void 0 ? void 0 : _a.html) !== ((_b = after === null || after === void 0 ? void 0 : after.desc) === null || _b === void 0 ? void 0 : _b.html)
+        || ((_c = before === null || before === void 0 ? void 0 : before.desc) === null || _c === void 0 ? void 0 : _c.width) !== ((_d = after === null || after === void 0 ? void 0 : after.desc) === null || _d === void 0 ? void 0 : _d.width)
+        || ((_e = before === null || before === void 0 ? void 0 : before.desc) === null || _e === void 0 ? void 0 : _e.height) !== ((_f = after === null || after === void 0 ? void 0 : after.desc) === null || _f === void 0 ? void 0 : _f.height));
+}
+function diffElementResourceChange(before, after) {
+    var result = null;
+    var isChange = false;
+    switch (after.type) {
+        case 'image': {
+            isChange = isChangeImageElementResource(before, after);
+            break;
+        }
+        case 'svg': {
+            isChange = isChangeSVGElementResource(before, after);
+            break;
+        }
+        case 'html': {
+            isChange = isChangeHTMLElementResource(before, after);
+            break;
+        }
+    }
+    if (isChange === true) {
+        result = after.uuid;
+    }
+    return result;
+}
+function diffElementResourceChangeList(before, after) {
+    var _a;
+    var uuids = [];
+    var beforeMap = parseDataElementMap(before);
+    var afterMap = parseDataElementMap(after);
+    for (var uuid in afterMap) {
+        if (['image', 'svg', 'html'].includes((_a = afterMap[uuid]) === null || _a === void 0 ? void 0 : _a.type) !== true) {
+            continue;
+        }
+        if (beforeMap[uuid]) {
+            var isChange = false;
+            switch (beforeMap[uuid].type) {
+                case 'image': {
+                    isChange = isChangeImageElementResource(beforeMap[uuid], afterMap[uuid]);
+                    break;
+                }
+                case 'svg': {
+                    isChange = isChangeSVGElementResource(beforeMap[uuid], afterMap[uuid]);
+                    break;
+                }
+                case 'html': {
+                    isChange = isChangeHTMLElementResource(beforeMap[uuid], afterMap[uuid]);
+                    break;
+                }
+            }
+            if (isChange === true) {
+                uuids.push(uuid);
+            }
+        }
+        else {
+            uuids.push(uuid);
+        }
+    }
+    return uuids;
+}
+function parseDataElementMap(data) {
+    var elemMap = {};
+    data.elements.forEach(function (elem) {
+        elemMap[elem.uuid] = elem;
+    });
+    return elemMap;
+}
+var deepClone$1 = index$2.data.deepClone;
+function getSelectedElements(core) {
+    var elems = [];
+    var list = [];
+    var uuid = core[_tempData$1].get('selectedUUID');
+    if (typeof uuid === 'string' && uuid) {
+        list.push(uuid);
+    }
+    else {
+        list = core[_tempData$1].get('selectedUUIDList');
+    }
+    list.forEach(function (uuid) {
+        var _a;
+        var index = core[_helper].getElementIndexByUUID(uuid);
+        if (index !== null && index >= 0) {
+            var elem = (_a = core[_data]) === null || _a === void 0 ? void 0 : _a.elements[index];
+            if (elem)
+                elems.push(elem);
+        }
+    });
+    return elems;
+}
+function updateElement(core, elem) {
+    var _a;
+    var _elem = deepClone$1(elem);
+    var data = core[_data];
+    var resourceChangeUUIDs = [];
+    for (var i = 0; i < data.elements.length; i++) {
+        if (_elem.uuid === ((_a = data.elements[i]) === null || _a === void 0 ? void 0 : _a.uuid)) {
+            var result = diffElementResourceChange(data.elements[i], _elem);
+            if (typeof result === 'string') {
+                resourceChangeUUIDs.push(result);
+            }
+            data.elements[i] = _elem;
+            break;
+        }
+    }
+    core[_emitChangeData]();
+    core[_draw]({ resourceChangeUUIDs: resourceChangeUUIDs });
+}
+var time = index$2.time;
+var deepClone$6 = index$2.data.deepClone;
+var createUUID$4 = index$2.uuid.createUUID;
 var Core = (function () {
     function Core(mount, opts, config) {
         var _h, _j, _k;
@@ -3098,7 +3269,7 @@ var Core = (function () {
         this[_opts$3] = opts;
         this[_onlyRender] = opts.onlyRender === true;
         this[_config] = mergeConfig(config || {});
-        this[_tempData] = new TempData();
+        this[_tempData$1] = new TempData$2();
         this[_board] = new Board(mount, __assign$1(__assign$1({}, this[_opts$3]), { canScroll: (_h = config === null || config === void 0 ? void 0 : config.scrollWrapper) === null || _h === void 0 ? void 0 : _h.use, scrollConfig: {
                 color: ((_j = config === null || config === void 0 ? void 0 : config.scrollWrapper) === null || _j === void 0 ? void 0 : _j.color) || '#a0a0a0',
                 lineWidth: ((_k = config === null || config === void 0 ? void 0 : config.scrollWrapper) === null || _k === void 0 ? void 0 : _k.lineWidth) || 12,
@@ -3114,21 +3285,21 @@ var Core = (function () {
         this[_initEvent$2]();
         this[_hasInited$1] = true;
     }
-    Core.prototype[(_a = _hasInited$1, _b = _mode, _c = _coreEvent, _d = _prevPoint, _e = _selectedDotDirection, _f = _onlyRender, _g = _cursorStatus, _draw)] = function () {
+    Core.prototype[(_a = _hasInited$1, _b = _mode, _c = _coreEvent, _d = _prevPoint, _e = _selectedDotDirection, _f = _onlyRender, _g = _cursorStatus, _draw)] = function (opts) {
         var _h, _j;
         var transfrom = this[_board].getTransform();
         this[_helper].updateConfig(this[_data], {
             width: this[_opts$3].width,
             height: this[_opts$3].height,
             canScroll: ((_j = (_h = this[_config]) === null || _h === void 0 ? void 0 : _h.scrollWrapper) === null || _j === void 0 ? void 0 : _j.use) === true,
-            selectedUUID: this[_tempData].get('selectedUUID'),
-            selectedUUIDList: this[_tempData].get('selectedUUIDList'),
+            selectedUUID: this[_tempData$1].get('selectedUUID'),
+            selectedUUIDList: this[_tempData$1].get('selectedUUIDList'),
             devicePixelRatio: this[_opts$3].devicePixelRatio,
             scale: transfrom.scale,
             scrollX: transfrom.scrollX,
             scrollY: transfrom.scrollY,
         });
-        this[_renderer].render(this[_data], this[_helper].getConfig());
+        this[_renderer].render(this[_data], this[_helper].getConfig(), (opts === null || opts === void 0 ? void 0 : opts.resourceChangeUUIDs) || []);
     };
     Core.prototype.resetSize = function (opts) {
         this[_opts$3] = __assign$1(__assign$1({}, this[_opts$3]), opts);
@@ -3147,8 +3318,8 @@ var Core = (function () {
                 this[_mode] = Mode.NULL;
             }
             if (typeof uuid === 'string') {
-                this[_tempData].set('selectedUUID', uuid);
-                this[_tempData].set('selectedUUIDList', []);
+                this[_tempData$1].set('selectedUUID', uuid);
+                this[_tempData$1].set('selectedUUIDList', []);
             }
             this[_draw]();
         }
@@ -3162,8 +3333,6 @@ var Core = (function () {
         }
     };
     Core.prototype.moveUpElement = function (uuid) {
-        if (this[_onlyRender] === true)
-            return;
         var index = this[_helper].getElementIndexByUUID(uuid);
         if (typeof index === 'number' && index >= 0 && index < this[_data].elements.length - 1) {
             var temp = this[_data].elements[index];
@@ -3174,8 +3343,6 @@ var Core = (function () {
         this[_draw]();
     };
     Core.prototype.moveDownElement = function (uuid) {
-        if (this[_onlyRender] === true)
-            return;
         var index = this[_helper].getElementIndexByUUID(uuid);
         if (typeof index === 'number' && index > 0 && index < this[_data].elements.length) {
             var temp = this[_data].elements[index];
@@ -3212,49 +3379,71 @@ var Core = (function () {
         };
     };
     Core.prototype.getData = function () {
-        return deepClone(this[_data]);
+        return deepClone$6(this[_data]);
     };
     Core.prototype.setData = function (data, opts) {
-        this[_data] = this[_element].initData(deepClone(parseData(data)));
+        var resourceChangeUUIDs = diffElementResourceChangeList(this[_data], data);
+        this[_data] = this[_element].initData(deepClone$6(parseData(data)));
         if (opts && opts.triggerChangeEvent === true) {
             this[_emitChangeData]();
         }
-        this[_draw]();
+        this[_draw]({ resourceChangeUUIDs: resourceChangeUUIDs });
     };
     Core.prototype.updateElement = function (elem) {
-        var _h;
-        if (this[_onlyRender] === true)
-            return;
-        var _elem = deepClone(elem);
-        var data = this[_data];
-        for (var i = 0; i < data.elements.length; i++) {
-            if (_elem.uuid === ((_h = data.elements[i]) === null || _h === void 0 ? void 0 : _h.uuid)) {
-                data.elements[i] = _elem;
-                break;
-            }
-        }
-        this[_emitChangeData]();
-        this[_draw]();
+        return updateElement(this, elem);
     };
     Core.prototype.addElement = function (elem) {
-        if (this[_onlyRender] === true)
-            return null;
-        var _elem = deepClone(elem);
-        _elem.uuid = createUUID();
-        this[_data].elements.unshift(_elem);
+        var _elem = deepClone$6(elem);
+        _elem.uuid = createUUID$4();
+        this[_data].elements.push(_elem);
         this[_emitChangeData]();
         this[_draw]();
         return _elem.uuid;
     };
     Core.prototype.deleteElement = function (uuid) {
-        if (this[_onlyRender] === true)
-            return;
         var index = this[_element].getElementIndex(this[_data], uuid);
         if (index >= 0) {
             this[_data].elements.splice(index, 1);
             this[_emitChangeData]();
             this[_draw]();
         }
+    };
+    Core.prototype.insertElementBefore = function (elem, beforeUUID) {
+        var index = this[_helper].getElementIndexByUUID(beforeUUID);
+        if (index !== null) {
+            this.insertElementBeforeIndex(elem, index);
+        }
+    };
+    Core.prototype.insertElementBeforeIndex = function (elem, index) {
+        var _elem = deepClone$6(elem);
+        _elem.uuid = createUUID$4();
+        if (index >= 0) {
+            this[_data].elements.splice(index, 0, _elem);
+            this[_emitChangeData]();
+            this[_draw]();
+        }
+    };
+    Core.prototype.getSelectedElements = function () {
+        return getSelectedElements(this);
+    };
+    Core.prototype.insertElementAfter = function (elem, beforeUUID) {
+        var index = this[_helper].getElementIndexByUUID(beforeUUID);
+        if (index !== null) {
+            this.insertElementAfterIndex(elem, index);
+        }
+    };
+    Core.prototype.insertElementAfterIndex = function (elem, index) {
+        var _elem = deepClone$6(elem);
+        _elem.uuid = createUUID$4();
+        if (index >= 0) {
+            this[_data].elements.splice(index + 1, 0, _elem);
+            this[_emitChangeData]();
+            this[_draw]();
+        }
+    };
+    Core.prototype.clearOperation = function () {
+        this[_tempData$1].clear();
+        this[_draw]();
     };
     Core.prototype.on = function (key, callback) {
         this[_coreEvent].on(key, callback);
@@ -3282,7 +3471,9 @@ var Core = (function () {
             return;
         }
         this[_board].on('hover', time.throttle(this[_handleHover].bind(this), 32));
+        this[_board].on('leave', time.throttle(this[_handleLeave].bind(this), 32));
         this[_board].on('point', time.throttle(this[_handleClick].bind(this), 16));
+        this[_board].on('doubleClick', this[_handleDoubleClick].bind(this));
         if (this[_onlyRender] === true) {
             return;
         }
@@ -3291,16 +3482,24 @@ var Core = (function () {
         this[_board].on('move', time.throttle(this[_handleMove].bind(this), 16));
         this[_board].on('moveEnd', this[_handleMoveEnd].bind(this));
     };
+    Core.prototype[_handleDoubleClick] = function (point) {
+        var _h;
+        var _j = this[_element].isPointInElement(point, this[_data]), index = _j[0], uuid = _j[1];
+        if (index >= 0 && uuid) {
+            this[_coreEvent].trigger('screenDoubleClickElement', { index: index, uuid: uuid, element: deepClone$6((_h = this[_data].elements) === null || _h === void 0 ? void 0 : _h[index]) });
+        }
+        this[_draw]();
+    };
     Core.prototype[_handleClick] = function (point) {
         var _h;
         var _j = this[_element].isPointInElement(point, this[_data]), index = _j[0], uuid = _j[1];
         if (index >= 0 && uuid) {
-            this[_coreEvent].trigger('screenClickElement', { index: index, uuid: uuid, element: deepClone((_h = this[_data].elements) === null || _h === void 0 ? void 0 : _h[index]) });
+            this[_coreEvent].trigger('screenClickElement', { index: index, uuid: uuid, element: deepClone$6((_h = this[_data].elements) === null || _h === void 0 ? void 0 : _h[index]) });
         }
         this[_draw]();
     };
     Core.prototype[_handlePoint] = function (point) {
-        var _h;
+        var _h, _j, _k;
         if (!this[_mapper].isEffectivePoint(point)) {
             return;
         }
@@ -3308,24 +3507,24 @@ var Core = (function () {
             this[_mode] = Mode.SELECT_ELEMENT_LIST;
         }
         else {
-            var _j = this[_helper].isPointInElementWrapperDot(point), uuid = _j[0], direction = _j[1];
+            var _l = this[_helper].isPointInElementWrapperDot(point), uuid = _l[0], direction = _l[1];
             if (uuid && direction) {
                 this[_mode] = Mode.SELECT_ELEMENT_WRAPPER_DOT;
                 this[_selectedDotDirection] = direction;
-                this[_tempData].set('selectedUUID', uuid);
+                this[_tempData$1].set('selectedUUID', uuid);
             }
             else {
-                var _k = this[_element].isPointInElement(point, this[_data]), index = _k[0], uuid_1 = _k[1];
-                if (index >= 0) {
+                var _m = this[_element].isPointInElement(point, this[_data]), index = _m[0], uuid_1 = _m[1];
+                if (index >= 0 && ((_j = (_h = this[_data].elements[index]) === null || _h === void 0 ? void 0 : _h.operation) === null || _j === void 0 ? void 0 : _j.invisible) !== true) {
                     this.selectElementByIndex(index, { useMode: true });
                     if (typeof uuid_1 === 'string' && this[_coreEvent].has('screenSelectElement')) {
-                        this[_coreEvent].trigger('screenSelectElement', { index: index, uuid: uuid_1, element: deepClone((_h = this[_data].elements) === null || _h === void 0 ? void 0 : _h[index]) });
+                        this[_coreEvent].trigger('screenSelectElement', { index: index, uuid: uuid_1, element: deepClone$6((_k = this[_data].elements) === null || _k === void 0 ? void 0 : _k[index]) });
                         this[_emitChangeScreen]();
                     }
                     this[_mode] = Mode.SELECT_ELEMENT;
                 }
                 else {
-                    this[_tempData].set('selectedUUIDList', []);
+                    this[_tempData$1].set('selectedUUIDList', []);
                     this[_mode] = Mode.SELECT_AREA;
                 }
             }
@@ -3334,7 +3533,7 @@ var Core = (function () {
     };
     Core.prototype[_handleMoveStart] = function (point) {
         this[_prevPoint] = point;
-        var uuid = this[_tempData].get('selectedUUID');
+        var uuid = this[_tempData$1].get('selectedUUID');
         if (this[_mode] === Mode.SELECT_ELEMENT_LIST) ;
         else if (this[_mode] === Mode.SELECT_ELEMENT) {
             if (typeof uuid === 'string' && this[_coreEvent].has('screenMoveElementStart')) {
@@ -3352,18 +3551,18 @@ var Core = (function () {
     };
     Core.prototype[_handleMove] = function (point) {
         if (this[_mode] === Mode.SELECT_ELEMENT_LIST) {
-            this[_dragElements](this[_tempData].get('selectedUUIDList'), point, this[_prevPoint]);
+            this[_dragElements](this[_tempData$1].get('selectedUUIDList'), point, this[_prevPoint]);
             this[_draw]();
             this[_cursorStatus] = CursorStatus.DRAGGING;
         }
-        else if (typeof this[_tempData].get('selectedUUID') === 'string') {
+        else if (typeof this[_tempData$1].get('selectedUUID') === 'string') {
             if (this[_mode] === Mode.SELECT_ELEMENT) {
-                this[_dragElements]([this[_tempData].get('selectedUUID')], point, this[_prevPoint]);
+                this[_dragElements]([this[_tempData$1].get('selectedUUID')], point, this[_prevPoint]);
                 this[_draw]();
                 this[_cursorStatus] = CursorStatus.DRAGGING;
             }
             else if (this[_mode] === Mode.SELECT_ELEMENT_WRAPPER_DOT && this[_selectedDotDirection]) {
-                this[_transfromElement](this[_tempData].get('selectedUUID'), point, this[_prevPoint], this[_selectedDotDirection]);
+                this[_transfromElement](this[_tempData$1].get('selectedUUID'), point, this[_prevPoint], this[_selectedDotDirection]);
                 this[_cursorStatus] = CursorStatus.DRAGGING;
             }
         }
@@ -3374,7 +3573,7 @@ var Core = (function () {
         this[_prevPoint] = point;
     };
     Core.prototype[_handleMoveEnd] = function (point) {
-        var uuid = this[_tempData].get('selectedUUID');
+        var uuid = this[_tempData$1].get('selectedUUID');
         if (typeof uuid === 'string') {
             var index = this[_element].getElementIndex(this[_data], uuid);
             var elem = this[_data].elements[index];
@@ -3402,8 +3601,8 @@ var Core = (function () {
         else if (this[_mode] === Mode.SELECT_AREA) {
             var uuids = this[_helper].calcSelectedElements(this[_data]);
             if (uuids.length > 0) {
-                this[_tempData].set('selectedUUIDList', uuids);
-                this[_tempData].set('selectedUUID', null);
+                this[_tempData$1].set('selectedUUIDList', uuids);
+                this[_tempData$1].set('selectedUUID', null);
             }
             else {
                 this[_mode] = Mode.NULL;
@@ -3412,31 +3611,36 @@ var Core = (function () {
             this[_draw]();
         }
         if (this[_mode] !== Mode.SELECT_ELEMENT) {
-            this[_tempData].set('selectedUUID', null);
+            this[_tempData$1].set('selectedUUID', null);
         }
         this[_prevPoint] = null;
         this[_cursorStatus] = CursorStatus.NULL;
         this[_mode] = Mode.NULL;
     };
     Core.prototype[_handleHover] = function (point) {
+        var _h, _j;
         var isMouseOverElement = false;
         if (this[_mode] === Mode.SELECT_AREA) {
             if (this[_onlyRender] !== true)
                 this[_board].resetCursor();
         }
         else if (this[_cursorStatus] === CursorStatus.NULL) {
-            var _h = this[_mapper].judgePointCursor(point, this[_data]), cursor = _h.cursor, elementUUID = _h.elementUUID;
+            var _k = this[_mapper].judgePointCursor(point, this[_data]), cursor = _k.cursor, elementUUID = _k.elementUUID;
             if (this[_onlyRender] !== true)
                 this[_board].setCursor(cursor);
             if (elementUUID) {
                 var index = this[_helper].getElementIndexByUUID(elementUUID);
                 if (index !== null && index >= 0) {
                     var elem = this[_data].elements[index];
-                    if (this[_tempData].get('hoverUUID') !== elem.uuid) {
-                        var preIndex = this[_helper].getElementIndexByUUID(this[_tempData].get('hoverUUID') || '');
+                    if (((_h = elem === null || elem === void 0 ? void 0 : elem.operation) === null || _h === void 0 ? void 0 : _h.lock) === true || ((_j = elem === null || elem === void 0 ? void 0 : elem.operation) === null || _j === void 0 ? void 0 : _j.invisible) === true) {
+                        this[_board].resetCursor();
+                        return;
+                    }
+                    if (this[_tempData$1].get('hoverUUID') !== elem.uuid) {
+                        var preIndex = this[_helper].getElementIndexByUUID(this[_tempData$1].get('hoverUUID') || '');
                         if (preIndex !== null && this[_data].elements[preIndex]) {
                             this[_coreEvent].trigger('mouseLeaveElement', {
-                                uuid: this[_tempData].get('hoverUUID'),
+                                uuid: this[_tempData$1].get('hoverUUID'),
                                 index: preIndex,
                                 element: this[_data].elements[preIndex]
                             });
@@ -3444,19 +3648,25 @@ var Core = (function () {
                     }
                     if (elem) {
                         this[_coreEvent].trigger('mouseOverElement', { uuid: elem.uuid, index: index, element: elem, });
-                        this[_tempData].set('hoverUUID', elem.uuid);
+                        this[_tempData$1].set('hoverUUID', elem.uuid);
                         isMouseOverElement = true;
                     }
                 }
             }
         }
-        if (isMouseOverElement !== true && this[_tempData].get('hoverUUID') !== null) {
-            var uuid = this[_tempData].get('hoverUUID');
+        if (isMouseOverElement !== true && this[_tempData$1].get('hoverUUID') !== null) {
+            var uuid = this[_tempData$1].get('hoverUUID');
             var index = this[_helper].getElementIndexByUUID(uuid || '');
             if (index !== null)
                 this[_coreEvent].trigger('mouseLeaveElement', { uuid: uuid, index: index, element: this[_data].elements[index] });
-            this[_tempData].set('hoverUUID', null);
+            this[_tempData$1].set('hoverUUID', null);
         }
+        if (this[_coreEvent].has('mouseOverScreen'))
+            this[_coreEvent].trigger('mouseOverScreen', point);
+    };
+    Core.prototype[_handleLeave] = function () {
+        if (this[_coreEvent].has('mouseLeaveScreen'))
+            this[_coreEvent].trigger('mouseLeaveScreen', undefined);
     };
     Core.prototype[_dragElements] = function (uuids, point, prevPoint) {
         var _this = this;
@@ -3464,11 +3674,12 @@ var Core = (function () {
             return;
         }
         uuids.forEach(function (uuid) {
+            var _h, _j;
             var idx = _this[_helper].getElementIndexByUUID(uuid);
             if (idx === null)
                 return;
             var elem = _this[_data].elements[idx];
-            if (elem.lock !== true) {
+            if (((_h = elem === null || elem === void 0 ? void 0 : elem.operation) === null || _h === void 0 ? void 0 : _h.lock) !== true && ((_j = elem === null || elem === void 0 ? void 0 : elem.operation) === null || _j === void 0 ? void 0 : _j.invisible) !== true) {
                 _this[_element].dragElement(_this[_data], uuid, point, prevPoint, _this[_board].getContext().getTransform().scale);
             }
         });
@@ -3489,11 +3700,11 @@ var Core = (function () {
     };
     Core.prototype[_emitChangeData] = function () {
         if (this[_coreEvent].has('changeData')) {
-            this[_coreEvent].trigger('changeData', deepClone(this[_data]));
+            this[_coreEvent].trigger('changeData', deepClone$6(this[_data]));
         }
     };
     var _a, _b, _c, _d, _e, _f, _g;
-    Core.is = is;
+    Core.is = is$3;
     Core.check = check;
     return Core;
 }());
@@ -3506,17 +3717,505 @@ var defaultOptions = {
     devicePixelRatio: 1,
     onlyRender: false,
     maxRecords: 10,
+    disableKeyboard: true,
 };
 
-var _a, _b, _c;
+var TempData = (function () {
+    function TempData() {
+        this._temp = {
+            isFocus: false,
+            doRecords: [],
+            unDoRecords: [],
+            clipboardElements: [],
+        };
+    }
+    TempData.prototype.set = function (name, value) {
+        this._temp[name] = value;
+    };
+    TempData.prototype.get = function (name) {
+        return this._temp[name];
+    };
+    TempData.prototype.clear = function () {
+        this._temp = {
+            isFocus: false,
+            doRecords: [],
+            unDoRecords: [],
+            clipboardElements: [],
+        };
+    };
+    return TempData;
+}());
+
+var KeyboardWatcher = (function () {
+    function KeyboardWatcher() {
+        this._listeners = new Map();
+        this._initEvent();
+    }
+    KeyboardWatcher.prototype._initEvent = function () {
+        var _this = this;
+        document.addEventListener('keydown', function (e) {
+            if ((e.metaKey === true || e.ctrlKey === true) && e.key === 'c') {
+                _this.trigger('keyboardCopy', undefined);
+            }
+            else if ((e.metaKey === true || e.ctrlKey === true) && e.key === 'v') {
+                _this.trigger('keyboardPaste', undefined);
+            }
+            else if ((e.metaKey === true || e.ctrlKey === true) && e.key === 'x') {
+                _this.trigger('keyboardCut', undefined);
+            }
+            else if (e.key === 'Backspace') {
+                _this.trigger('keyboardDelete', undefined);
+            }
+            else if (e.key === 'ArrowUp') {
+                _this.trigger('keyboardArrowUp', undefined);
+            }
+            else if (e.key === 'ArrowDown') {
+                _this.trigger('keyboardArrowDown', undefined);
+            }
+            else if (e.key === 'ArrowLeft') {
+                _this.trigger('keyboardArrowLeft', undefined);
+            }
+            else if (e.key === 'ArrowRight') {
+                _this.trigger('keyboardArrowRight', undefined);
+            }
+        });
+    };
+    KeyboardWatcher.prototype.on = function (eventKey, callback) {
+        if (this._listeners.has(eventKey)) {
+            var callbacks = this._listeners.get(eventKey);
+            callbacks === null || callbacks === void 0 ? void 0 : callbacks.push(callback);
+            this._listeners.set(eventKey, callbacks || []);
+        }
+        else {
+            this._listeners.set(eventKey, [callback]);
+        }
+        return this;
+    };
+    KeyboardWatcher.prototype.off = function (eventKey, callback) {
+        if (this._listeners.has(eventKey)) {
+            var callbacks = this._listeners.get(eventKey);
+            if (Array.isArray(callbacks)) {
+                for (var i = 0; i < (callbacks === null || callbacks === void 0 ? void 0 : callbacks.length); i++) {
+                    if (callbacks[i] === callback) {
+                        callbacks.splice(i, 1);
+                        break;
+                    }
+                }
+            }
+            this._listeners.set(eventKey, callbacks || []);
+        }
+        return this;
+    };
+    KeyboardWatcher.prototype.trigger = function (eventKey, arg) {
+        var callbacks = this._listeners.get(eventKey);
+        if (Array.isArray(callbacks)) {
+            callbacks.forEach(function (cb) {
+                cb(arg);
+            });
+            return true;
+        }
+        else {
+            return false;
+        }
+    };
+    KeyboardWatcher.prototype.has = function (name) {
+        if (this._listeners.has(name)) {
+            var list = this._listeners.get(name);
+            if (Array.isArray(list) && list.length > 0) {
+                return true;
+            }
+        }
+        return false;
+    };
+    return KeyboardWatcher;
+}());
+
 var _opts = Symbol('_opts');
-var _doRecords = Symbol('_doRecords');
-var _unDoRecords = Symbol('_unDoRecords');
 var _hasInited = Symbol('_hasInited');
 var _initEvent = Symbol('_initEvent');
-var IDraw = (function (_super) {
-    __extends(IDraw, _super);
-    function IDraw(mount, opts, config) {
+var _tempData = Symbol('_tempData');
+var _createOpts = Symbol('_createOpts');
+var _pushRecord = Symbol('_pushRecord');
+var _keyboardWatcher = Symbol('_keyboardWatcher');
+
+function undo(idraw) {
+    var doRecords = idraw[_tempData].get('doRecords');
+    var unDoRecords = idraw[_tempData].get('unDoRecords');
+    if (!(doRecords.length > 1)) {
+        return {
+            doRecordCount: doRecords.length,
+            data: null,
+        };
+    }
+    var popRecord = doRecords.pop();
+    if (popRecord) {
+        unDoRecords.push(popRecord);
+    }
+    var record = doRecords[doRecords.length - 1];
+    if (record === null || record === void 0 ? void 0 : record.data) {
+        idraw.setData(record.data);
+    }
+    idraw[_tempData].set('doRecords', doRecords);
+    idraw[_tempData].set('unDoRecords', unDoRecords);
+    return {
+        doRecordCount: doRecords.length,
+        data: (record === null || record === void 0 ? void 0 : record.data) || null,
+    };
+}
+function redo(idraw) {
+    var unDoRecords = idraw[_tempData].get('unDoRecords');
+    if (!(unDoRecords.length > 0)) {
+        return {
+            undoRecordCount: unDoRecords.length,
+            data: null,
+        };
+    }
+    var record = unDoRecords.pop();
+    if (record === null || record === void 0 ? void 0 : record.data) {
+        idraw.setData(record.data);
+    }
+    idraw[_tempData].set('unDoRecords', unDoRecords);
+    return {
+        undoRecordCount: unDoRecords.length,
+        data: (record === null || record === void 0 ? void 0 : record.data) || null,
+    };
+}
+
+function compose(middleware) {
+    return function (context, next) {
+        return dispatch(0);
+        function dispatch(i) {
+            var fn = middleware[i];
+            if (i === middleware.length && next) {
+                fn = next;
+            }
+            if (!fn)
+                return Promise.resolve();
+            try {
+                return Promise.resolve(fn(context, dispatch.bind(null, i + 1)));
+            }
+            catch (err) {
+                return Promise.reject(err);
+            }
+        }
+    };
+}
+function delay(time) {
+    return new Promise(function (resolve) {
+        setTimeout(function () {
+            resolve();
+        }, time);
+    });
+}
+function throttle(fn, timeout) {
+    var timer = -1;
+    return function () {
+        var args = [];
+        for (var _i = 0; _i < arguments.length; _i++) {
+            args[_i] = arguments[_i];
+        }
+        if (timer > 0) {
+            return;
+        }
+        timer = setTimeout(function () {
+            fn.apply(void 0, args);
+            timer = -1;
+        }, timeout);
+    };
+}
+function downloadImageFromCanvas(canvas, opts) {
+    var filename = opts.filename, _a = opts.type, type = _a === void 0 ? 'image/jpeg' : _a;
+    var stream = canvas.toDataURL(type);
+    var downloadLink = document.createElement('a');
+    downloadLink.href = stream;
+    downloadLink.download = filename;
+    var downloadClickEvent = document.createEvent('MouseEvents');
+    downloadClickEvent.initEvent('click', true, false);
+    downloadLink.dispatchEvent(downloadClickEvent);
+}
+function toColorHexNum(color) {
+    return parseInt(color.replace(/^\#/, '0x'));
+}
+function toColorHexStr(color) {
+    return '#' + color.toString(16);
+}
+function isColorStr(color) {
+    return typeof color === 'string' && /^\#([0-9a-f]{3}|[0-9a-f]{6}|[0-9a-f]{8})$/i.test(color);
+}
+function createUUID() {
+    function str4() {
+        return (((1 + Math.random()) * 0x10000) | 0).toString(16).substring(1);
+    }
+    return "" + str4() + str4() + "-" + str4() + "-" + str4() + "-" + str4() + "-" + str4() + str4() + str4();
+}
+function deepClone(target) {
+    function _clone(t) {
+        var type = is(t);
+        if (['Null', 'Number', 'String', 'Boolean', 'Undefined'].indexOf(type) >= 0) {
+            return t;
+        }
+        else if (type === 'Array') {
+            var arr_1 = [];
+            t.forEach(function (item) {
+                arr_1.push(_clone(item));
+            });
+            return arr_1;
+        }
+        else if (type === 'Object') {
+            var obj_1 = {};
+            var keys = Object.keys(t);
+            keys.forEach(function (key) {
+                obj_1[key] = _clone(t[key]);
+            });
+            return obj_1;
+        }
+    }
+    return _clone(target);
+}
+function is(data) {
+    return Object.prototype.toString.call(data).replace(/[\]|\[]{1,1}/ig, '').split(' ')[1];
+}
+function parsePrototype(data) {
+    var typeStr = Object.prototype.toString.call(data) || '';
+    var result = typeStr.replace(/(\[object|\])/ig, '').trim();
+    return result;
+}
+var istype = {
+    type: function (data, lowerCase) {
+        var result = parsePrototype(data);
+        return lowerCase === true ? result.toLocaleLowerCase() : result;
+    },
+    array: function (data) {
+        return parsePrototype(data) === 'Array';
+    },
+    json: function (data) {
+        return parsePrototype(data) === 'Object';
+    },
+    function: function (data) {
+        return parsePrototype(data) === 'Function';
+    },
+    asyncFunction: function (data) {
+        return parsePrototype(data) === 'AsyncFunction';
+    },
+    string: function (data) {
+        return parsePrototype(data) === 'String';
+    },
+    number: function (data) {
+        return parsePrototype(data) === 'Number';
+    },
+    undefined: function (data) {
+        return parsePrototype(data) === 'Undefined';
+    },
+    null: function (data) {
+        return parsePrototype(data) === 'Null';
+    },
+    promise: function (data) {
+        return parsePrototype(data) === 'Promise';
+    },
+    nodeList: function (data) {
+        return parsePrototype(data) === 'NodeList';
+    },
+    imageData: function (data) {
+        return parsePrototype(data) === 'ImageData';
+    }
+};
+var Image = window.Image, Blob = window.Blob, FileReader = window.FileReader;
+function loadImage(src) {
+    return new Promise(function (resolve, reject) {
+        var img = new Image;
+        img.onload = function () {
+            resolve(img);
+        };
+        img.onabort = reject;
+        img.onerror = reject;
+        img.src = src;
+    });
+}
+function loadSVG(svg) {
+    return new Promise(function (resolve, reject) {
+        var _svg = svg;
+        var image = new Image();
+        var blob = new Blob([_svg], { type: 'image/svg+xml;charset=utf-8' });
+        var reader = new FileReader();
+        reader.readAsDataURL(blob);
+        reader.onload = function (event) {
+            var _a;
+            var base64 = (_a = event === null || event === void 0 ? void 0 : event.target) === null || _a === void 0 ? void 0 : _a.result;
+            image.onload = function () {
+                resolve(image);
+            };
+            image.src = base64;
+        };
+        reader.onerror = function (err) {
+            reject(err);
+        };
+    });
+}
+function loadHTML(html, opts) {
+    var width = opts.width, height = opts.height;
+    return new Promise(function (resolve, reject) {
+        var _svg = "\n    <svg xmlns=\"http://www.w3.org/2000/svg\" width=\"" + (width || '') + "\" height = \"" + (height || '') + "\">\n      <foreignObject width=\"100%\" height=\"100%\">\n        <div xmlns = \"http://www.w3.org/1999/xhtml\">\n          " + html + "\n        </div>\n      </foreignObject>\n    </svg>\n    ";
+        var image = new Image();
+        var blob = new Blob([_svg], { type: 'image/svg+xml;charset=utf-8' });
+        var reader = new FileReader();
+        reader.readAsDataURL(blob);
+        reader.onload = function (event) {
+            var _a;
+            var base64 = (_a = event === null || event === void 0 ? void 0 : event.target) === null || _a === void 0 ? void 0 : _a.result;
+            image.onload = function () {
+                resolve(image);
+            };
+            image.src = base64;
+        };
+        reader.onerror = function (err) {
+            reject(err);
+        };
+    });
+}
+var index = {
+    time: {
+        delay: delay,
+        compose: compose,
+        throttle: throttle,
+    },
+    loader: {
+        loadImage: loadImage,
+        loadSVG: loadSVG,
+        loadHTML: loadHTML,
+    },
+    file: {
+        downloadImageFromCanvas: downloadImageFromCanvas,
+    },
+    color: {
+        toColorHexStr: toColorHexStr,
+        toColorHexNum: toColorHexNum,
+        isColorStr: isColorStr,
+    },
+    uuid: {
+        createUUID: createUUID
+    },
+    istype: istype,
+    data: {
+        deepClone: deepClone,
+    }
+};
+
+function exportDataURL(idraw, type, quality) {
+    return __awaiter$1(this, void 0, void 0, function () {
+        var ctx, canvas, dataURL;
+        return __generator$1(this, function (_a) {
+            switch (_a.label) {
+                case 0:
+                    idraw.clearOperation();
+                    return [4, index.time.delay(300)];
+                case 1:
+                    _a.sent();
+                    ctx = idraw.__getOriginContext();
+                    canvas = ctx.canvas;
+                    dataURL = canvas.toDataURL(type, quality);
+                    return [2, dataURL];
+            }
+        });
+    });
+}
+
+function copyElements(idraw) {
+    if (idraw[_tempData].get('isFocus') !== true) {
+        return;
+    }
+    var elems = index.data.deepClone(idraw.getSelectedElements());
+    idraw[_tempData].set('clipboardElements', elems);
+}
+function pasteElements(idraw) {
+    if (idraw[_tempData].get('isFocus') !== true) {
+        return;
+    }
+    var elems = idraw[_tempData].get('clipboardElements');
+    var moveRate = 0.1;
+    elems.forEach(function (elem) {
+        elem.x += elem.w * moveRate;
+        elem.y += elem.w * moveRate;
+        idraw.addElement(elem);
+    });
+    idraw[_tempData].set('clipboardElements', []);
+}
+function cutElements(idraw) {
+    if (idraw[_tempData].get('isFocus') !== true) {
+        return;
+    }
+    var elems = index.data.deepClone(idraw.getSelectedElements());
+    elems.forEach(function (elem) {
+        idraw.deleteElement(elem.uuid);
+    });
+    idraw[_tempData].set('clipboardElements', elems);
+}
+function deleteElements(idraw) {
+    if (idraw[_tempData].get('isFocus') !== true) {
+        return;
+    }
+    var elems = index.data.deepClone(idraw.getSelectedElements());
+    elems.forEach(function (elem) {
+        idraw.deleteElement(elem.uuid);
+    });
+}
+var keyArrowMoveDistance = 4;
+function keyArrowUp(idraw) {
+    var elems = index.data.deepClone(idraw.getSelectedElements());
+    if (elems.length > 0) {
+        elems.forEach(function (elem) {
+            elem.y -= keyArrowMoveDistance;
+            idraw.updateElement(elem);
+        });
+    }
+    else {
+        var scrollTop = idraw.getScreenTransform().scrollTop;
+        idraw.scrollTop(scrollTop - keyArrowMoveDistance);
+    }
+}
+function keyArrowDown(idraw) {
+    var elems = index.data.deepClone(idraw.getSelectedElements());
+    if (elems.length > 0) {
+        elems.forEach(function (elem) {
+            elem.y += keyArrowMoveDistance;
+            idraw.updateElement(elem);
+        });
+    }
+    else {
+        var scrollTop = idraw.getScreenTransform().scrollTop;
+        idraw.scrollTop(scrollTop + keyArrowMoveDistance);
+    }
+}
+function keyArrowLeft(idraw) {
+    var elems = index.data.deepClone(idraw.getSelectedElements());
+    if (elems.length > 0) {
+        elems.forEach(function (elem) {
+            elem.x -= keyArrowMoveDistance;
+            idraw.updateElement(elem);
+        });
+    }
+    else {
+        var scrollLeft = idraw.getScreenTransform().scrollLeft;
+        idraw.scrollLeft(scrollLeft - keyArrowMoveDistance);
+    }
+}
+function keyArrowRight(idraw) {
+    var elems = index.data.deepClone(idraw.getSelectedElements());
+    if (elems.length > 0) {
+        elems.forEach(function (elem) {
+            elem.x += keyArrowMoveDistance;
+            idraw.updateElement(elem);
+        });
+    }
+    else {
+        var scrollLeft = idraw.getScreenTransform().scrollLeft;
+        idraw.scrollLeft(scrollLeft + keyArrowMoveDistance);
+    }
+}
+
+var _a, _b, _c;
+var iDraw = (function (_super) {
+    __extends(iDraw, _super);
+    function iDraw(mount, opts, config) {
         var _this = _super.call(this, mount, {
             width: opts.width || defaultOptions.width,
             height: opts.height || defaultOptions.height,
@@ -3525,70 +4224,66 @@ var IDraw = (function (_super) {
             devicePixelRatio: opts.devicePixelRatio || defaultOptions.devicePixelRatio,
             onlyRender: opts.onlyRender || defaultOptions.onlyRender,
         }, config || {}) || this;
-        _this[_a] = [];
-        _this[_b] = [];
-        _this[_c] = false;
-        _this[_opts] = _this._createOpts(opts);
+        _this[_a] = false;
+        _this[_b] = new TempData();
+        _this[_c] = new KeyboardWatcher();
+        _this[_opts] = _this[_createOpts](opts);
         _this[_initEvent]();
         return _this;
     }
-    IDraw.prototype.undo = function () {
-        if (!(this[_doRecords].length > 1)) {
-            return {
-                doRecordCount: this[_doRecords].length,
-                data: null,
-            };
-        }
-        var popRecord = this[_doRecords].pop();
-        if (popRecord) {
-            this[_unDoRecords].push(popRecord);
-        }
-        var record = this[_doRecords][this[_doRecords].length - 1];
-        if (record === null || record === void 0 ? void 0 : record.data) {
-            this.setData(record.data);
-        }
-        return {
-            doRecordCount: this[_doRecords].length,
-            data: (record === null || record === void 0 ? void 0 : record.data) || null,
-        };
+    iDraw.prototype.undo = function () {
+        return undo(this);
     };
-    IDraw.prototype.redo = function () {
-        if (!(this[_unDoRecords].length > 0)) {
-            return {
-                undoRecordCount: this[_unDoRecords].length,
-                data: null,
-            };
-        }
-        var record = this[_unDoRecords].pop();
-        if (record === null || record === void 0 ? void 0 : record.data) {
-            this.setData(record.data);
-        }
-        return {
-            undoRecordCount: this[_unDoRecords].length,
-            data: (record === null || record === void 0 ? void 0 : record.data) || null,
-        };
+    iDraw.prototype.redo = function () {
+        return redo(this);
     };
-    IDraw.prototype[(_a = _doRecords, _b = _unDoRecords, _c = _hasInited, _initEvent)] = function () {
+    iDraw.prototype.exportDataURL = function (type, quality) {
+        return __awaiter$1(this, void 0, void 0, function () {
+            return __generator$1(this, function (_d) {
+                return [2, exportDataURL(this, type, quality)];
+            });
+        });
+    };
+    iDraw.prototype[(_a = _hasInited, _b = _tempData, _c = _keyboardWatcher, _initEvent)] = function () {
         var _this = this;
         if (this[_hasInited] === true) {
             return;
         }
         this.on('changeData', function (data) {
-            _this._pushRecord(data);
+            _this[_pushRecord](data);
         });
+        this.on('mouseLeaveScreen', function () {
+            _this[_tempData].set('isFocus', false);
+        });
+        this.on('mouseOverScreen', function () {
+            _this[_tempData].set('isFocus', true);
+        });
+        if (this[_opts].disableKeyboard === false) {
+            this[_keyboardWatcher]
+                .on('keyboardCopy', function () { return copyElements(_this); })
+                .on('keyboardPaste', function () { return pasteElements(_this); })
+                .on('keyboardCut', function () { return cutElements(_this); })
+                .on('keyboardDelete', function () { return deleteElements(_this); })
+                .on('keyboardArrowUp', function () { return keyArrowUp(_this); })
+                .on('keyboardArrowDown', function () { return keyArrowDown(_this); })
+                .on('keyboardArrowLeft', function () { return keyArrowLeft(_this); })
+                .on('keyboardArrowRight', function () { return keyArrowRight(_this); });
+        }
         this[_hasInited] = true;
     };
-    IDraw.prototype._pushRecord = function (data) {
-        if (this[_doRecords].length >= this[_opts].maxRecords) {
-            this[_doRecords].shift();
+    iDraw.prototype[_pushRecord] = function (data) {
+        var doRecords = this[_tempData].get('doRecords');
+        if (doRecords.length >= this[_opts].maxRecords) {
+            doRecords.shift();
         }
-        this[_doRecords].push({ data: data, time: Date.now() });
-        this[_unDoRecords] = [];
+        doRecords.push({ data: data, time: Date.now() });
+        this[_tempData].set('doRecords', doRecords);
+        this[_tempData].set('unDoRecords', []);
     };
-    IDraw.prototype._createOpts = function (opts) {
+    iDraw.prototype[_createOpts] = function (opts) {
         return __assign$2(__assign$2({}, defaultOptions), opts);
     };
-    return IDraw;
+    return iDraw;
 }(Core));
 
-export default IDraw;
+export { iDraw as default };

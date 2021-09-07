@@ -63,66 +63,86 @@ const demoList: TypeDemoList = [
     ]
   },
   {
-    name: 'API',
+    name: 'iDraw API',
     list: [
       {
-        name: 'idraw.setData',
+        name: 'setData',
         key: 'api-setData',
       },
       {
-        name: 'idraw.getData',
+        name: 'getData',
         key: 'api-getData',
       },
       {
-        name: 'idraw.resetSize',
+        name: 'resetSize',
         key: 'api-resetSize',
       },
       {
-        name: 'idraw.selectElement',
+        name: 'selectElement',
         key: 'api-selectElement',
       },
       {
-        name: 'idraw.selectElementByIndex',
+        name: 'selectElementByIndex',
         key: 'api-selectElementByIndex',
       },
       {
-        name: 'idraw.updateElement',
+        name: 'getSelectedElements',
+        key: 'api-getSelectedElements',
+      },
+      {
+        name: 'updateElement',
         key: 'api-updateElement',
       },
       {
-        name: 'idraw.addElement',
+        name: 'addElement',
         key: 'api-addElement',
       },
       {
-        name: 'idraw.deleteElement',
+        name: 'deleteElement',
         key: 'api-deleteElement',
       },
       {
-        name: 'idraw.moveDownElement',
+        name: 'moveDownElement',
         key: 'api-moveDownElement',
       },
       {
-        name: 'idraw.moveUpElement',
+        name: 'moveUpElement',
         key: 'api-moveUpElement',
       },
       {
-        name: 'idraw.scale',
+        name: 'insertElementBefore',
+        key: 'api-insertElementBefore',
+      },
+      {
+        name: 'insertElementAfter',
+        key: 'api-insertElementAfter',
+      },
+      {
+        name: 'insertElementBeforeIndex',
+        key: 'api-insertElementBeforeIndex',
+      },
+      {
+        name: 'insertElementAfterIndex',
+        key: 'api-insertElementAfterIndex',
+      },
+      {
+        name: 'scale',
         key: 'api-scale',
       },
       {
-        name: 'idraw.scrollLeft',
+        name: 'scrollLeft',
         key: 'api-scrollLeft',
       },
       {
-        name: 'idraw.scrollTop',
+        name: 'scrollTop',
         key: 'api-scrollTop',
       },
       {
-        name: 'idraw.on',
+        name: 'on',
         key: 'api-on',
       },
       {
-        name: 'idraw.off',
+        name: 'off',
         key: 'api-off',
       },
     ]
