@@ -1569,7 +1569,7 @@ var iDraw = (function () {
         });
     }
     function drawRect(ctx, elem) {
-        drawBox(ctx, elem, elem.desc.color);
+        drawBox(ctx, elem, elem.desc.bgColor);
     }
     function drawImage(ctx, elem, loader) {
         var content = loader.getContent(elem.uuid);
@@ -1663,7 +1663,7 @@ var iDraw = (function () {
     function drawCircle(ctx, elem) {
         rotateElement(ctx, elem, function (ctx) {
             var x = elem.x, y = elem.y, w = elem.w, h = elem.h, desc = elem.desc;
-            var _a = desc.color, color = _a === void 0 ? '#000000' : _a, _b = desc.borderColor, borderColor = _b === void 0 ? '#000000' : _b, borderWidth = desc.borderWidth;
+            var _a = desc.bgColor, bgColor = _a === void 0 ? '#000000' : _a, _b = desc.borderColor, borderColor = _b === void 0 ? '#000000' : _b, borderWidth = desc.borderWidth;
             var a = w / 2;
             var b = h / 2;
             var centerX = x + a;
@@ -1683,7 +1683,7 @@ var iDraw = (function () {
                 ctx.stroke();
             }
             ctx.beginPath();
-            ctx.setFillStyle(color);
+            ctx.setFillStyle(bgColor);
             ctx.moveTo(centerX + a, centerY);
             for (var i = 0; i < 2 * Math.PI; i += unit) {
                 ctx.lineTo(centerX + a * Math.cos(i), centerY + b * Math.sin(i));
@@ -2988,8 +2988,8 @@ var iDraw = (function () {
         return true;
     }
     function rectDesc(desc) {
-        var color = desc.color;
-        if (desc.hasOwnProperty('color') && !is$3.color(color)) {
+        var bgColor = desc.bgColor;
+        if (desc.hasOwnProperty('bgColor') && !is$3.color(bgColor)) {
             return false;
         }
         if (!box(desc)) {
@@ -2998,8 +2998,8 @@ var iDraw = (function () {
         return true;
     }
     function circleDesc(desc) {
-        var color = desc.color, borderColor = desc.borderColor, borderWidth = desc.borderWidth;
-        if (desc.hasOwnProperty('color') && !is$3.color(color)) {
+        var bgColor = desc.bgColor, borderColor = desc.borderColor, borderWidth = desc.borderWidth;
+        if (desc.hasOwnProperty('bgColor') && !is$3.color(bgColor)) {
             return false;
         }
         if (desc.hasOwnProperty('borderColor') && !is$3.color(borderColor)) {
@@ -3235,7 +3235,7 @@ var iDraw = (function () {
                     elems.push(elem);
             }
         });
-        return elems;
+        return deepClone$1(elems);
     }
     function updateElement(core, elem) {
         var _a;
@@ -3414,8 +3414,9 @@ var iDraw = (function () {
         Core.prototype.insertElementBefore = function (elem, beforeUUID) {
             var index = this[_helper].getElementIndexByUUID(beforeUUID);
             if (index !== null) {
-                this.insertElementBeforeIndex(elem, index);
+                return this.insertElementBeforeIndex(elem, index);
             }
+            return null;
         };
         Core.prototype.insertElementBeforeIndex = function (elem, index) {
             var _elem = deepClone$6(elem);
@@ -3424,7 +3425,9 @@ var iDraw = (function () {
                 this[_data].elements.splice(index, 0, _elem);
                 this[_emitChangeData]();
                 this[_draw]();
+                return _elem.uuid;
             }
+            return null;
         };
         Core.prototype.getSelectedElements = function () {
             return getSelectedElements(this);
@@ -3432,8 +3435,9 @@ var iDraw = (function () {
         Core.prototype.insertElementAfter = function (elem, beforeUUID) {
             var index = this[_helper].getElementIndexByUUID(beforeUUID);
             if (index !== null) {
-                this.insertElementAfterIndex(elem, index);
+                return this.insertElementAfterIndex(elem, index);
             }
+            return null;
         };
         Core.prototype.insertElementAfterIndex = function (elem, index) {
             var _elem = deepClone$6(elem);
@@ -3442,7 +3446,9 @@ var iDraw = (function () {
                 this[_data].elements.splice(index + 1, 0, _elem);
                 this[_emitChangeData]();
                 this[_draw]();
+                return _elem.uuid;
             }
+            return null;
         };
         Core.prototype.clearOperation = function () {
             this[_tempData$1].clear();

@@ -21,7 +21,7 @@ idraw.insertElementBeforeIndex({
   h: 100,
   type: "rect",
   desc: {
-    color: "#f7d3c1",
+    bgColor: "#f7d3c1",
     borderRadius: 20,
     borderWidth: 4,
     borderColor: "#ff6032",
