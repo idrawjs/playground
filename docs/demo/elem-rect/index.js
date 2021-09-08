@@ -11,7 +11,7 @@ const data = {
       angle: 30,
       type: "rect",
       desc: {
-        color: "#d5f5f9",
+        bgColor: "#d5f5f9",
         borderRadius: 10,
         borderWidth: 2,
         borderColor: "#3f51b5",

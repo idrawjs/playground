@@ -11,7 +11,7 @@ const data = {
       angle: 0,
       type: "circle",
       desc: {
-        color: "#d5f5f9",
+        bgColor: "#d5f5f9",
         borderRadius: 10,
         borderWidth: 4,
         borderColor: "#3f51b5",
