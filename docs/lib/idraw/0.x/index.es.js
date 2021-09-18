@@ -181,7 +181,7 @@ function createUUID$3() {
     }
     return "" + str4() + str4() + "-" + str4() + "-" + str4() + "-" + str4() + "-" + str4() + str4() + str4();
 }
-function deepClone$5(target) {
+function deepClone$6(target) {
     function _clone(t) {
         var type = is$2(t);
         if (['Null', 'Number', 'String', 'Boolean', 'Undefined'].indexOf(type) >= 0) {
@@ -329,7 +329,7 @@ var index$1 = {
     },
     istype: istype$2,
     data: {
-        deepClone: deepClone$5,
+        deepClone: deepClone$6,
     }
 };
 var BoardEvent = (function () {
@@ -1262,7 +1262,7 @@ function createUUID$2() {
     }
     return "" + str4() + str4() + "-" + str4() + "-" + str4() + "-" + str4() + "-" + str4() + str4() + str4();
 }
-function deepClone$4(target) {
+function deepClone$5(target) {
     function _clone(t) {
         var type = is$1(t);
         if (['Null', 'Number', 'String', 'Boolean', 'Undefined'].indexOf(type) >= 0) {
@@ -1410,8 +1410,208 @@ var index$2 = {
     },
     istype: istype$1,
     data: {
-        deepClone: deepClone$4,
+        deepClone: deepClone$5,
     }
+};
+var isColorStr$1 = index$2.color.isColorStr;
+function number(value) {
+    return (typeof value === 'number' && (value > 0 || value <= 0));
+}
+function x(value) {
+    return number(value);
+}
+function y(value) {
+    return number(value);
+}
+function w(value) {
+    return (typeof value === 'number' && value >= 0);
+}
+function h(value) {
+    return (typeof value === 'number' && value >= 0);
+}
+function angle(value) {
+    return (typeof value === 'number' && value >= -360 && value <= 360);
+}
+function borderWidth(value) {
+    return w(value);
+}
+function borderRadius(value) {
+    return number(value) && value >= 0;
+}
+function color$1(value) {
+    return isColorStr$1(value);
+}
+function imageURL(value) {
+    return (typeof value === 'string' && /^(http:\/\/|https:\/\/|\.\/|\/)/.test("" + value));
+}
+function imageBase64(value) {
+    return (typeof value === 'string' && /^(data:image\/)/.test("" + value));
+}
+function imageSrc(value) {
+    return (imageBase64(value) || imageURL(value));
+}
+function svg(value) {
+    return (typeof value === 'string' && /^(<svg[\s]{1,}|<svg>)/i.test(("" + value).trim()) && /<\/[\s]{0,}svg>$/i.test(("" + value).trim()));
+}
+function html(value) {
+    var result = false;
+    if (typeof value === 'string') {
+        var div = document.createElement('div');
+        div.innerHTML = value;
+        if (div.children.length > 0) {
+            result = true;
+        }
+        div = null;
+    }
+    return result;
+}
+function text(value) {
+    return typeof value === 'string';
+}
+function fontSize(value) {
+    return number(value) && value > 0;
+}
+function lineHeight(value) {
+    return number(value) && value > 0;
+}
+function textAlign(value) {
+    return ['center', 'left', 'right'].includes(value);
+}
+function fontFamily(value) {
+    return typeof value === 'string' && value.length > 0;
+}
+function fontWeight(value) {
+    return ['bold'].includes(value);
+}
+var is$3 = {
+    x: x,
+    y: y,
+    w: w,
+    h: h,
+    angle: angle,
+    number: number,
+    borderWidth: borderWidth,
+    borderRadius: borderRadius,
+    color: color$1,
+    imageSrc: imageSrc,
+    imageURL: imageURL,
+    imageBase64: imageBase64,
+    svg: svg,
+    html: html,
+    text: text,
+    fontSize: fontSize,
+    lineHeight: lineHeight,
+    textAlign: textAlign,
+    fontFamily: fontFamily,
+    fontWeight: fontWeight,
+};
+function attrs(attrs) {
+    var x = attrs.x, y = attrs.y, w = attrs.w, h = attrs.h, angle = attrs.angle;
+    if (!(is$3.x(x) && is$3.y(y) && is$3.w(w) && is$3.h(h) && is$3.angle(angle))) {
+        return false;
+    }
+    if (!(angle >= -360 && angle <= 360)) {
+        return false;
+    }
+    return true;
+}
+function box(desc) {
+    if (desc === void 0) { desc = {}; }
+    var borderColor = desc.borderColor, borderRadius = desc.borderRadius, borderWidth = desc.borderWidth;
+    if (desc.hasOwnProperty('borderColor') && !is$3.color(borderColor)) {
+        return false;
+    }
+    if (desc.hasOwnProperty('borderRadius') && !is$3.number(borderRadius)) {
+        return false;
+    }
+    if (desc.hasOwnProperty('borderWidth') && !is$3.number(borderWidth)) {
+        return false;
+    }
+    return true;
+}
+function rectDesc(desc) {
+    var bgColor = desc.bgColor;
+    if (desc.hasOwnProperty('bgColor') && !is$3.color(bgColor)) {
+        return false;
+    }
+    if (!box(desc)) {
+        return false;
+    }
+    return true;
+}
+function circleDesc(desc) {
+    var bgColor = desc.bgColor, borderColor = desc.borderColor, borderWidth = desc.borderWidth;
+    if (desc.hasOwnProperty('bgColor') && !is$3.color(bgColor)) {
+        return false;
+    }
+    if (desc.hasOwnProperty('borderColor') && !is$3.color(borderColor)) {
+        return false;
+    }
+    if (desc.hasOwnProperty('borderWidth') && !is$3.number(borderWidth)) {
+        return false;
+    }
+    return true;
+}
+function imageDesc(desc) {
+    var src = desc.src;
+    if (!is$3.imageSrc(src)) {
+        return false;
+    }
+    return true;
+}
+function svgDesc(desc) {
+    var svg = desc.svg;
+    if (!is$3.svg(svg)) {
+        return false;
+    }
+    return true;
+}
+function htmlDesc(desc) {
+    var html = desc.html;
+    if (!is$3.html(html)) {
+        return false;
+    }
+    return true;
+}
+function textDesc(desc) {
+    var text = desc.text, color = desc.color, fontSize = desc.fontSize, lineHeight = desc.lineHeight, fontFamily = desc.fontFamily, textAlign = desc.textAlign, fontWeight = desc.fontWeight, bgColor = desc.bgColor;
+    if (!is$3.text(text)) {
+        return false;
+    }
+    if (!is$3.color(color)) {
+        return false;
+    }
+    if (!is$3.fontSize(fontSize)) {
+        return false;
+    }
+    if (desc.hasOwnProperty('bgColor') && !is$3.color(bgColor)) {
+        return false;
+    }
+    if (desc.hasOwnProperty('fontWeight') && !is$3.fontWeight(fontWeight)) {
+        return false;
+    }
+    if (desc.hasOwnProperty('lineHeight') && !is$3.lineHeight(lineHeight)) {
+        return false;
+    }
+    if (desc.hasOwnProperty('fontFamily') && !is$3.fontFamily(fontFamily)) {
+        return false;
+    }
+    if (desc.hasOwnProperty('textAlign') && !is$3.textAlign(textAlign)) {
+        return false;
+    }
+    if (!box(desc)) {
+        return false;
+    }
+    return true;
+}
+var check = {
+    attrs: attrs,
+    textDesc: textDesc,
+    rectDesc: rectDesc,
+    circleDesc: circleDesc,
+    imageDesc: imageDesc,
+    svgDesc: svgDesc,
+    htmlDesc: htmlDesc,
 };
 function parseRadianToAngle(radian) {
     return radian / Math.PI * 180;
@@ -1495,7 +1695,7 @@ function rotateContext(ctx, center, radian, callback) {
         ctx.translate(-center.x, -center.y);
     }
 }
-var istype$3 = index$2.istype, color$1 = index$2.color;
+var istype$3 = index$2.istype, color = index$2.color;
 function clearContext(ctx) {
     ctx.setFillStyle('#000000');
     ctx.setStrokeStyle('#000000');
@@ -1541,7 +1741,7 @@ function drawBoxBorder(ctx, elem) {
         }
         var bw = elem.desc.borderWidth;
         var borderColor = '#000000';
-        if (color$1.isColorStr(elem.desc.borderColor) === true) {
+        if (color.isColorStr(elem.desc.borderColor) === true) {
             borderColor = elem.desc.borderColor;
         }
         var x = elem.x - bw / 2;
@@ -1821,13 +2021,13 @@ function drawElementListWrappers(ctx, config) {
         });
     });
 }
-var isColorStr$1 = index$2.color.isColorStr;
+var isColorStr$4 = index$2.color.isColorStr;
 function drawContext(ctx, data, helperConfig, loader) {
     var _a;
     clearContext(ctx);
     var size = ctx.getSize();
     ctx.clearRect(0, 0, size.contextWidth, size.contextHeight);
-    if (typeof data.bgColor === 'string' && isColorStr$1(data.bgColor)) {
+    if (typeof data.bgColor === 'string' && isColorStr$4(data.bgColor)) {
         drawBgColor(ctx, data.bgColor);
     }
     if (!(data.elements.length > 0)) {
@@ -1869,6 +2069,651 @@ function drawContext(ctx, data, helperConfig, loader) {
     drawAreaWrapper(ctx, helperConfig);
     drawElementListWrappers(ctx, helperConfig);
 }
+var defaultConfig = {
+    elementWrapper: {
+        color: '#2ab6f1',
+        lockColor: '#aaaaaa',
+        dotSize: 6,
+        lineWidth: 1,
+        lineDash: [4, 3],
+    }
+};
+function mergeConfig(config) {
+    var result = index$2.data.deepClone(defaultConfig);
+    if (config) {
+        if (config.elementWrapper) {
+            result.elementWrapper = __assign$1(__assign$1({}, result.elementWrapper), config.elementWrapper);
+        }
+    }
+    return result;
+}
+var CoreEvent = (function () {
+    function CoreEvent() {
+        this._listeners = new Map();
+    }
+    CoreEvent.prototype.on = function (eventKey, callback) {
+        if (this._listeners.has(eventKey)) {
+            var callbacks = this._listeners.get(eventKey);
+            callbacks === null || callbacks === void 0 ? void 0 : callbacks.push(callback);
+            this._listeners.set(eventKey, callbacks || []);
+        }
+        else {
+            this._listeners.set(eventKey, [callback]);
+        }
+    };
+    CoreEvent.prototype.off = function (eventKey, callback) {
+        if (this._listeners.has(eventKey)) {
+            var callbacks = this._listeners.get(eventKey);
+            if (Array.isArray(callbacks)) {
+                for (var i = 0; i < (callbacks === null || callbacks === void 0 ? void 0 : callbacks.length); i++) {
+                    if (callbacks[i] === callback) {
+                        callbacks.splice(i, 1);
+                        break;
+                    }
+                }
+            }
+            this._listeners.set(eventKey, callbacks || []);
+        }
+    };
+    CoreEvent.prototype.trigger = function (eventKey, arg) {
+        var callbacks = this._listeners.get(eventKey);
+        if (Array.isArray(callbacks)) {
+            callbacks.forEach(function (cb) {
+                cb(arg);
+            });
+            return true;
+        }
+        else {
+            return false;
+        }
+    };
+    CoreEvent.prototype.has = function (name) {
+        if (this._listeners.has(name)) {
+            var list = this._listeners.get(name);
+            if (Array.isArray(list) && list.length > 0) {
+                return true;
+            }
+        }
+        return false;
+    };
+    return CoreEvent;
+}());
+function isChangeImageElementResource(before, after) {
+    var _a, _b;
+    return (((_a = before === null || before === void 0 ? void 0 : before.desc) === null || _a === void 0 ? void 0 : _a.src) !== ((_b = after === null || after === void 0 ? void 0 : after.desc) === null || _b === void 0 ? void 0 : _b.src));
+}
+function isChangeSVGElementResource(before, after) {
+    var _a, _b;
+    return (((_a = before === null || before === void 0 ? void 0 : before.desc) === null || _a === void 0 ? void 0 : _a.svg) !== ((_b = after === null || after === void 0 ? void 0 : after.desc) === null || _b === void 0 ? void 0 : _b.svg));
+}
+function isChangeHTMLElementResource(before, after) {
+    var _a, _b, _c, _d, _e, _f;
+    return (((_a = before === null || before === void 0 ? void 0 : before.desc) === null || _a === void 0 ? void 0 : _a.html) !== ((_b = after === null || after === void 0 ? void 0 : after.desc) === null || _b === void 0 ? void 0 : _b.html)
+        || ((_c = before === null || before === void 0 ? void 0 : before.desc) === null || _c === void 0 ? void 0 : _c.width) !== ((_d = after === null || after === void 0 ? void 0 : after.desc) === null || _d === void 0 ? void 0 : _d.width)
+        || ((_e = before === null || before === void 0 ? void 0 : before.desc) === null || _e === void 0 ? void 0 : _e.height) !== ((_f = after === null || after === void 0 ? void 0 : after.desc) === null || _f === void 0 ? void 0 : _f.height));
+}
+function diffElementResourceChange(before, after) {
+    var result = null;
+    var isChange = false;
+    switch (after.type) {
+        case 'image': {
+            isChange = isChangeImageElementResource(before, after);
+            break;
+        }
+        case 'svg': {
+            isChange = isChangeSVGElementResource(before, after);
+            break;
+        }
+        case 'html': {
+            isChange = isChangeHTMLElementResource(before, after);
+            break;
+        }
+    }
+    if (isChange === true) {
+        result = after.uuid;
+    }
+    return result;
+}
+function diffElementResourceChangeList(before, after) {
+    var _a;
+    var uuids = [];
+    var beforeMap = parseDataElementMap(before);
+    var afterMap = parseDataElementMap(after);
+    for (var uuid in afterMap) {
+        if (['image', 'svg', 'html'].includes((_a = afterMap[uuid]) === null || _a === void 0 ? void 0 : _a.type) !== true) {
+            continue;
+        }
+        if (beforeMap[uuid]) {
+            var isChange = false;
+            switch (beforeMap[uuid].type) {
+                case 'image': {
+                    isChange = isChangeImageElementResource(beforeMap[uuid], afterMap[uuid]);
+                    break;
+                }
+                case 'svg': {
+                    isChange = isChangeSVGElementResource(beforeMap[uuid], afterMap[uuid]);
+                    break;
+                }
+                case 'html': {
+                    isChange = isChangeHTMLElementResource(beforeMap[uuid], afterMap[uuid]);
+                    break;
+                }
+            }
+            if (isChange === true) {
+                uuids.push(uuid);
+            }
+        }
+        else {
+            uuids.push(uuid);
+        }
+    }
+    return uuids;
+}
+function parseDataElementMap(data) {
+    var elemMap = {};
+    data.elements.forEach(function (elem) {
+        elemMap[elem.uuid] = elem;
+    });
+    return elemMap;
+}
+function limitNum(num) {
+    var numStr = num.toFixed(2);
+    return parseFloat(numStr);
+}
+function limitAngle(angle) {
+    return limitNum(angle % 360);
+}
+var createUUID$1 = index$2.uuid.createUUID;
+var Element = (function () {
+    function Element(ctx) {
+        this._ctx = ctx;
+    }
+    Element.prototype.initData = function (data) {
+        data.elements.forEach(function (elem) {
+            if (!(elem.uuid && typeof elem.uuid === 'string')) {
+                elem.uuid = createUUID$1();
+            }
+        });
+        return data;
+    };
+    Element.prototype.isPointInElement = function (p, data) {
+        var _a;
+        var ctx = this._ctx;
+        var idx = -1;
+        var uuid = null;
+        var _loop_1 = function (i) {
+            var ele = data.elements[i];
+            var bw = 0;
+            if (((_a = ele.desc) === null || _a === void 0 ? void 0 : _a.borderWidth) > 0) {
+                bw = ele.desc.borderWidth;
+            }
+            rotateElement(ctx, ele, function () {
+                ctx.beginPath();
+                ctx.moveTo(ele.x - bw, ele.y - bw);
+                ctx.lineTo(ele.x + ele.w + bw, ele.y - bw);
+                ctx.lineTo(ele.x + ele.w + bw, ele.y + ele.h + bw);
+                ctx.lineTo(ele.x - bw, ele.y + ele.h + bw);
+                ctx.lineTo(ele.x, ele.y);
+                ctx.rect(ele.x, ele.y, ele.w, ele.h);
+                ctx.closePath();
+                if (ctx.isPointInPath(p.x, p.y)) {
+                    idx = i;
+                    uuid = ele.uuid;
+                }
+            });
+            if (idx >= 0) {
+                return "break";
+            }
+        };
+        for (var i = data.elements.length - 1; i >= 0; i--) {
+            var state_1 = _loop_1(i);
+            if (state_1 === "break")
+                break;
+        }
+        return [idx, uuid];
+    };
+    Element.prototype.dragElement = function (data, uuid, point, prevPoint, scale) {
+        var index = this.getElementIndex(data, uuid);
+        if (!data.elements[index]) {
+            return;
+        }
+        var moveX = point.x - prevPoint.x;
+        var moveY = point.y - prevPoint.y;
+        data.elements[index].x += (moveX / scale);
+        data.elements[index].y += (moveY / scale);
+        this.limitElementAttrs(data.elements[index]);
+    };
+    Element.prototype.transformElement = function (data, uuid, point, prevPoint, scale, direction) {
+        var _a, _b;
+        var index = this.getElementIndex(data, uuid);
+        if (!data.elements[index]) {
+            return null;
+        }
+        if (((_b = (_a = data.elements[index]) === null || _a === void 0 ? void 0 : _a.operation) === null || _b === void 0 ? void 0 : _b.lock) === true) {
+            return null;
+        }
+        var moveX = (point.x - prevPoint.x) / scale;
+        var moveY = (point.y - prevPoint.y) / scale;
+        var elem = data.elements[index];
+        switch (direction) {
+            case 'top-left': {
+                if (elem.w - moveX > 0 && elem.h - moveY > 0) {
+                    elem.x += moveX;
+                    elem.y += moveY;
+                    elem.w -= moveX;
+                    elem.h -= moveY;
+                }
+                break;
+            }
+            case 'top': {
+                if (elem.h - moveY > 0) {
+                    elem.y += moveY;
+                    elem.h -= moveY;
+                }
+                break;
+            }
+            case 'top-right': {
+                if (elem.h - moveY > 0 && elem.w + moveX > 0) {
+                    elem.y += moveY;
+                    elem.w += moveX;
+                    elem.h -= moveY;
+                }
+                break;
+            }
+            case 'right': {
+                if (elem.w + moveX > 0) {
+                    elem.w += moveX;
+                }
+                break;
+            }
+            case 'bottom-right': {
+                if (elem.w + moveX > 0 && elem.h + moveY > 0) {
+                    elem.w += moveX;
+                    elem.h += moveY;
+                }
+                break;
+            }
+            case 'bottom': {
+                if (elem.h + moveY > 0) {
+                    elem.h += moveY;
+                }
+                break;
+            }
+            case 'bottom-left': {
+                if (elem.w - moveX > 0 && elem.h + moveY > 0) {
+                    elem.x += moveX;
+                    elem.w -= moveX;
+                    elem.h += moveY;
+                }
+                break;
+            }
+            case 'left': {
+                if (elem.w - moveX > 0) {
+                    elem.x += moveX;
+                    elem.w -= moveX;
+                }
+                break;
+            }
+            case 'rotate': {
+                var center = calcElementCenter(elem);
+                var radian = calcRadian(center, prevPoint, point);
+                elem.angle = (elem.angle || 0) + parseRadianToAngle(radian);
+                break;
+            }
+        }
+        this.limitElementAttrs(elem);
+        return {
+            width: limitNum(elem.w),
+            height: limitNum(elem.h),
+            angle: limitAngle(elem.angle || 0),
+        };
+    };
+    Element.prototype.getElementIndex = function (data, uuid) {
+        var idx = -1;
+        for (var i = 0; i < data.elements.length; i++) {
+            if (data.elements[i].uuid === uuid) {
+                idx = i;
+                break;
+            }
+        }
+        return idx;
+    };
+    Element.prototype.limitElementAttrs = function (elem) {
+        elem.x = limitNum(elem.x);
+        elem.y = limitNum(elem.y);
+        elem.w = limitNum(elem.w);
+        elem.h = limitNum(elem.h);
+        elem.angle = limitAngle(elem.angle || 0);
+    };
+    return Element;
+}());
+var deepClone$4 = index$2.data.deepClone;
+var Helper = (function () {
+    function Helper(board, config) {
+        this._areaStart = { x: 0, y: 0 };
+        this._areaEnd = { x: 0, y: 0 };
+        this._board = board;
+        this._ctx = this._board.getContext();
+        this._coreConfig = config;
+        this._helperConfig = {
+            elementIndexMap: {}
+        };
+    }
+    Helper.prototype.updateConfig = function (data, opts) {
+        this._updateElementIndex(data);
+        this._updateSelectedElementWrapper(data, opts);
+        this._updateSelectedElementListWrapper(data, opts);
+    };
+    Helper.prototype.getConfig = function () {
+        return deepClone$4(this._helperConfig);
+    };
+    Helper.prototype.getElementIndexByUUID = function (uuid) {
+        var index = this._helperConfig.elementIndexMap[uuid];
+        if (index >= 0) {
+            return index;
+        }
+        return null;
+    };
+    Helper.prototype.isPointInElementWrapperDot = function (p, data) {
+        var _a, _b;
+        var ctx = this._ctx;
+        var uuid = ((_b = (_a = this._helperConfig) === null || _a === void 0 ? void 0 : _a.selectedElementWrapper) === null || _b === void 0 ? void 0 : _b.uuid) || null;
+        var directIdx = null;
+        var direction = null;
+        if (!this._helperConfig.selectedElementWrapper) {
+            return [uuid, direction, directIdx];
+        }
+        var wrapper = this._helperConfig.selectedElementWrapper;
+        var dots = [
+            wrapper.dots.right,
+            wrapper.dots.topRight,
+            wrapper.dots.top,
+            wrapper.dots.topLeft,
+            wrapper.dots.left,
+            wrapper.dots.bottomLeft,
+            wrapper.dots.bottom,
+            wrapper.dots.bottomRight,
+        ];
+        var directionNames = [
+            'right',
+            'top-right',
+            'top',
+            'top-left',
+            'left',
+            'bottom-left',
+            'bottom',
+            'bottom-right',
+        ];
+        var angleMoveNum = 0;
+        if (data && uuid) {
+            var elemIdx = this.getElementIndexByUUID(uuid);
+            if (elemIdx !== null && elemIdx >= 0) {
+                var elem = data.elements[elemIdx];
+                var angle = elem.angle;
+                if (angle < 0) {
+                    angle += 360;
+                }
+                if (angle < 45) {
+                    angleMoveNum = 0;
+                }
+                else if (angle < 90) {
+                    angleMoveNum = 1;
+                }
+                else if (angle < 135) {
+                    angleMoveNum = 2;
+                }
+                else if (angle < 180) {
+                    angleMoveNum = 3;
+                }
+                else if (angle < 225) {
+                    angleMoveNum = 4;
+                }
+                else if (angle < 270) {
+                    angleMoveNum = 5;
+                }
+                else if (angle < 315) {
+                    angleMoveNum = 6;
+                }
+            }
+        }
+        if (angleMoveNum > 0) {
+            directionNames = directionNames.slice(-angleMoveNum).concat(directionNames.slice(0, -angleMoveNum));
+        }
+        rotateContext(ctx, wrapper.translate, wrapper.radian || 0, function () {
+            for (var i = 0; i < dots.length; i++) {
+                var dot = dots[i];
+                ctx.beginPath();
+                ctx.arc(dot.x, dot.y, wrapper.dotSize, 0, Math.PI * 2);
+                ctx.closePath();
+                if (ctx.isPointInPath(p.x, p.y)) {
+                    direction = directionNames[i];
+                }
+                if (direction) {
+                    directIdx = i;
+                    break;
+                }
+            }
+        });
+        if (direction === null) {
+            rotateContext(ctx, wrapper.translate, wrapper.radian || 0, function () {
+                var dot = wrapper.dots.rotate;
+                ctx.beginPath();
+                ctx.arc(dot.x, dot.y, wrapper.dotSize, 0, Math.PI * 2);
+                ctx.closePath();
+                if (ctx.isPointInPath(p.x, p.y)) {
+                    direction = 'rotate';
+                }
+            });
+        }
+        return [uuid, direction, directIdx];
+    };
+    Helper.prototype.isPointInElementList = function (p, data) {
+        var _a, _b;
+        var ctx = this._ctx;
+        var idx = -1;
+        var uuid = null;
+        var wrapperList = ((_a = this._helperConfig) === null || _a === void 0 ? void 0 : _a.selectedElementListWrappers) || [];
+        var _loop_1 = function (i) {
+            var wrapper = wrapperList[i];
+            var elemIdx = this_1._helperConfig.elementIndexMap[wrapper.uuid];
+            var ele = data.elements[elemIdx];
+            if (!ele)
+                return "continue";
+            var bw = 0;
+            if (((_b = ele.desc) === null || _b === void 0 ? void 0 : _b.borderWidth) > 0) {
+                bw = ele.desc.borderWidth;
+            }
+            rotateElement(ctx, ele, function () {
+                ctx.beginPath();
+                ctx.moveTo(ele.x - bw, ele.y - bw);
+                ctx.lineTo(ele.x + ele.w + bw, ele.y - bw);
+                ctx.lineTo(ele.x + ele.w + bw, ele.y + ele.h + bw);
+                ctx.lineTo(ele.x - bw, ele.y + ele.h + bw);
+                ctx.lineTo(ele.x, ele.y);
+                ctx.rect(ele.x, ele.y, ele.w, ele.h);
+                ctx.closePath();
+                if (ctx.isPointInPath(p.x, p.y)) {
+                    idx = i;
+                    uuid = ele.uuid;
+                }
+            });
+            if (idx >= 0) {
+                return "break";
+            }
+        };
+        var this_1 = this;
+        for (var i = 0; i < wrapperList.length; i++) {
+            var state_1 = _loop_1(i);
+            if (state_1 === "break")
+                break;
+        }
+        if (uuid && idx >= 0) {
+            return true;
+        }
+        else {
+            return false;
+        }
+    };
+    Helper.prototype.startSelectArea = function (p) {
+        this._areaStart = p;
+        this._areaEnd = p;
+    };
+    Helper.prototype.changeSelectArea = function (p) {
+        this._areaEnd = p;
+        this._calcSelectedArea();
+    };
+    Helper.prototype.clearSelectedArea = function () {
+        this._areaStart = { x: 0, y: 0 };
+        this._areaEnd = { x: 0, y: 0 };
+        this._calcSelectedArea();
+    };
+    Helper.prototype.calcSelectedElements = function (data) {
+        var transform = this._ctx.getTransform();
+        var _a = transform.scale, scale = _a === void 0 ? 1 : _a, _b = transform.scrollX, scrollX = _b === void 0 ? 0 : _b, _c = transform.scrollY, scrollY = _c === void 0 ? 0 : _c;
+        var start = this._areaStart;
+        var end = this._areaEnd;
+        var x = (Math.min(start.x, end.x) - scrollX) / scale;
+        var y = (Math.min(start.y, end.y) - scrollY) / scale;
+        var w = Math.abs(end.x - start.x) / scale;
+        var h = Math.abs(end.y - start.y) / scale;
+        var uuids = [];
+        var ctx = this._ctx;
+        ctx.beginPath();
+        ctx.moveTo(x, y);
+        ctx.lineTo(x + w, y);
+        ctx.lineTo(x + w, y + h);
+        ctx.lineTo(x, y + h);
+        ctx.lineTo(x, y);
+        ctx.closePath();
+        data.elements.forEach(function (elem) {
+            var _a;
+            if (((_a = elem === null || elem === void 0 ? void 0 : elem.operation) === null || _a === void 0 ? void 0 : _a.invisible) !== true) {
+                var centerX = elem.x + elem.w / 2;
+                var centerY = elem.y + elem.h / 2;
+                if (ctx.isPointInPathWithoutScroll(centerX, centerY)) {
+                    uuids.push(elem.uuid);
+                }
+            }
+        });
+        return uuids;
+    };
+    Helper.prototype._calcSelectedArea = function () {
+        var start = this._areaStart;
+        var end = this._areaEnd;
+        var transform = this._ctx.getTransform();
+        var _a = transform.scale, scale = _a === void 0 ? 1 : _a, _b = transform.scrollX, scrollX = _b === void 0 ? 0 : _b, _c = transform.scrollY, scrollY = _c === void 0 ? 0 : _c;
+        var elemWrapper = this._coreConfig.elementWrapper;
+        var lineWidth = elemWrapper.lineWidth / scale;
+        var lineDash = elemWrapper.lineDash.map(function (n) { return (n / scale); });
+        this._helperConfig.selectedAreaWrapper = {
+            x: (Math.min(start.x, end.x) - scrollX) / scale,
+            y: (Math.min(start.y, end.y) - scrollY) / scale,
+            w: Math.abs(end.x - start.x) / scale,
+            h: Math.abs(end.y - start.y) / scale,
+            startPoint: { x: start.x, y: start.y },
+            endPoint: { x: end.x, y: end.y },
+            lineWidth: lineWidth,
+            lineDash: lineDash,
+            color: elemWrapper.color,
+        };
+    };
+    Helper.prototype._updateElementIndex = function (data) {
+        var _this = this;
+        this._helperConfig.elementIndexMap = {};
+        data.elements.forEach(function (elem, i) {
+            _this._helperConfig.elementIndexMap[elem.uuid] = i;
+        });
+    };
+    Helper.prototype._updateSelectedElementWrapper = function (data, opts) {
+        var _a;
+        var uuid = opts.selectedUUID;
+        if (!(typeof uuid === 'string' && this._helperConfig.elementIndexMap[uuid] >= 0)) {
+            delete this._helperConfig.selectedElementWrapper;
+            return;
+        }
+        var index = this._helperConfig.elementIndexMap[uuid];
+        var elem = data.elements[index];
+        if (((_a = elem === null || elem === void 0 ? void 0 : elem.operation) === null || _a === void 0 ? void 0 : _a.invisible) === true) {
+            return;
+        }
+        var wrapper = this._createSelectedElementWrapper(elem, opts);
+        this._helperConfig.selectedElementWrapper = wrapper;
+    };
+    Helper.prototype._updateSelectedElementListWrapper = function (data, opts) {
+        var _this = this;
+        var selectedUUIDList = opts.selectedUUIDList;
+        var wrapperList = [];
+        data.elements.forEach(function (elem, i) {
+            if (selectedUUIDList === null || selectedUUIDList === void 0 ? void 0 : selectedUUIDList.includes(elem.uuid)) {
+                var wrapper = _this._createSelectedElementWrapper(elem, opts);
+                wrapperList.push(wrapper);
+            }
+        });
+        this._helperConfig.selectedElementListWrappers = wrapperList;
+    };
+    Helper.prototype._createSelectedElementWrapper = function (elem, opts) {
+        var _a, _b, _c;
+        var scale = opts.scale;
+        var elemWrapper = this._coreConfig.elementWrapper;
+        var dotSize = elemWrapper.dotSize / scale;
+        var lineWidth = elemWrapper.lineWidth / scale;
+        var lineDash = elemWrapper.lineDash.map(function (n) { return (n / scale); });
+        var rotateLimit = 12;
+        var bw = ((_a = elem.desc) === null || _a === void 0 ? void 0 : _a.borderWidth) || 0;
+        var wrapper = {
+            uuid: elem.uuid,
+            dotSize: dotSize,
+            lock: ((_b = elem === null || elem === void 0 ? void 0 : elem.operation) === null || _b === void 0 ? void 0 : _b.lock) === true,
+            dots: {
+                topLeft: {
+                    x: elem.x - dotSize - bw,
+                    y: elem.y - dotSize - bw,
+                },
+                top: {
+                    x: elem.x + elem.w / 2,
+                    y: elem.y - dotSize - bw,
+                },
+                topRight: {
+                    x: elem.x + elem.w + dotSize + bw,
+                    y: elem.y - dotSize - bw,
+                },
+                right: {
+                    x: elem.x + elem.w + dotSize + bw,
+                    y: elem.y + elem.h / 2,
+                },
+                bottomRight: {
+                    x: elem.x + elem.w + dotSize + bw,
+                    y: elem.y + elem.h + dotSize + bw,
+                },
+                bottom: {
+                    x: elem.x + elem.w / 2,
+                    y: elem.y + elem.h + dotSize + bw,
+                },
+                bottomLeft: {
+                    x: elem.x - dotSize - bw,
+                    y: elem.y + elem.h + dotSize + bw,
+                },
+                left: {
+                    x: elem.x - dotSize - bw,
+                    y: elem.y + elem.h / 2,
+                },
+                rotate: {
+                    x: elem.x + elem.w / 2,
+                    y: elem.y - dotSize - (dotSize * 2 + rotateLimit) - bw,
+                }
+            },
+            lineWidth: lineWidth,
+            lineDash: lineDash,
+            color: ((_c = elem === null || elem === void 0 ? void 0 : elem.operation) === null || _c === void 0 ? void 0 : _c.lock) === true ? elemWrapper.lockColor : elemWrapper.color,
+        };
+        if (typeof elem.angle === 'number' && (elem.angle > 0 || elem.angle < 0)) {
+            wrapper.radian = parseAngleToRadian(elem.angle);
+            wrapper.translate = calcElementCenter(elem);
+        }
+        return wrapper;
+    };
+    return Helper;
+}());
 var LoaderEvent = (function () {
     function LoaderEvent() {
         this._listeners = new Map();
@@ -2157,6 +3002,129 @@ var Loader = (function () {
     };
     return Loader;
 }());
+var _board$1 = Symbol('_displayCtx');
+var _helper$1 = Symbol('_helper');
+var _element$1 = Symbol('_element');
+var _opts$1 = Symbol('_opts');
+var Mapper = (function () {
+    function Mapper(opts) {
+        this[_opts$1] = opts;
+        this[_board$1] = this[_opts$1].board;
+        this[_element$1] = this[_opts$1].element;
+        this[_helper$1] = this[_opts$1].helper;
+    }
+    Mapper.prototype.isEffectivePoint = function (p) {
+        var scrollLineWidth = this[_board$1].getScrollLineWidth();
+        var screenInfo = this[_board$1].getScreenInfo();
+        if (p.x <= (screenInfo.width - scrollLineWidth) && p.y <= (screenInfo.height - scrollLineWidth)) {
+            return true;
+        }
+        return false;
+    };
+    Mapper.prototype.judgePointCursor = function (p, data) {
+        var cursor = 'auto';
+        var elementUUID = null;
+        if (!this.isEffectivePoint(p)) {
+            return { cursor: cursor, elementUUID: elementUUID };
+        }
+        var _a = this[_helper$1].isPointInElementWrapperDot(p, data), uuid = _a[0], direction = _a[1];
+        if (uuid && direction) {
+            switch (direction) {
+                case 'top-right': {
+                    cursor = 'ne-resize';
+                    break;
+                }
+                case 'top-left': {
+                    cursor = 'nw-resize';
+                    break;
+                }
+                case 'top': {
+                    cursor = 'n-resize';
+                    break;
+                }
+                case 'right': {
+                    cursor = 'e-resize';
+                    break;
+                }
+                case 'bottom-right': {
+                    cursor = 'se-resize';
+                    break;
+                }
+                case 'bottom': {
+                    cursor = 's-resize';
+                    break;
+                }
+                case 'bottom-left': {
+                    cursor = 'sw-resize';
+                    break;
+                }
+                case 'left': {
+                    cursor = 'w-resize';
+                    break;
+                }
+                case 'rotate': {
+                    cursor = 'grab';
+                    break;
+                }
+            }
+            if (uuid) {
+                elementUUID = uuid;
+            }
+        }
+        else {
+            var _b = this[_element$1].isPointInElement(p, data), index = _b[0], uuid_1 = _b[1];
+            if (index >= 0) {
+                cursor = 'move';
+            }
+            if (uuid_1) {
+                elementUUID = uuid_1;
+            }
+        }
+        return {
+            cursor: cursor,
+            elementUUID: elementUUID,
+        };
+    };
+    return Mapper;
+}());
+var elementTypes = {
+    'text': {},
+    'rect': {},
+    'image': {},
+    'svg': {},
+    'circle': {},
+    'html': {},
+};
+var elementNames = Object.keys(elementTypes);
+function parseData(data) {
+    var result = {
+        elements: [],
+    };
+    if (Array.isArray(data === null || data === void 0 ? void 0 : data.elements)) {
+        data === null || data === void 0 ? void 0 : data.elements.forEach(function (elem) {
+            if (elem === void 0) { elem = {}; }
+            if (isElement(elem)) {
+                result.elements.push(elem);
+            }
+        });
+    }
+    if (typeof data.bgColor === 'string') {
+        result.bgColor = data.bgColor;
+    }
+    return result;
+}
+function isElement(elem) {
+    if (!(isNumber(elem.x) && isNumber(elem.y) && isNumber(elem.w) && isNumber(elem.h))) {
+        return false;
+    }
+    if (!(typeof elem.type === 'string' && elementNames.includes(elem.type))) {
+        return false;
+    }
+    return true;
+}
+function isNumber(num) {
+    return (num >= 0 || num < 0);
+}
 var requestAnimationFrame = window.requestAnimationFrame;
 var deepClone$3 = index$2.data.deepClone;
 var DrawStatus;
@@ -2236,891 +3204,6 @@ var Renderer = (function () {
     };
     return Renderer;
 }());
-function limitNum(num) {
-    var numStr = num.toFixed(2);
-    return parseFloat(numStr);
-}
-function limitAngle(angle) {
-    return limitNum(angle % 360);
-}
-var createUUID$1 = index$2.uuid.createUUID;
-var Element = (function () {
-    function Element(ctx) {
-        this._ctx = ctx;
-    }
-    Element.prototype.initData = function (data) {
-        data.elements.forEach(function (elem) {
-            if (!(elem.uuid && typeof elem.uuid === 'string')) {
-                elem.uuid = createUUID$1();
-            }
-        });
-        return data;
-    };
-    Element.prototype.isPointInElement = function (p, data) {
-        var _a;
-        var ctx = this._ctx;
-        var idx = -1;
-        var uuid = null;
-        var _loop_1 = function (i) {
-            var ele = data.elements[i];
-            var bw = 0;
-            if (((_a = ele.desc) === null || _a === void 0 ? void 0 : _a.borderWidth) > 0) {
-                bw = ele.desc.borderWidth;
-            }
-            rotateElement(ctx, ele, function () {
-                ctx.beginPath();
-                ctx.moveTo(ele.x - bw, ele.y - bw);
-                ctx.lineTo(ele.x + ele.w + bw, ele.y - bw);
-                ctx.lineTo(ele.x + ele.w + bw, ele.y + ele.h + bw);
-                ctx.lineTo(ele.x - bw, ele.y + ele.h + bw);
-                ctx.lineTo(ele.x, ele.y);
-                ctx.rect(ele.x, ele.y, ele.w, ele.h);
-                ctx.closePath();
-                if (ctx.isPointInPath(p.x, p.y)) {
-                    idx = i;
-                    uuid = ele.uuid;
-                }
-            });
-            if (idx >= 0) {
-                return "break";
-            }
-        };
-        for (var i = data.elements.length - 1; i >= 0; i--) {
-            var state_1 = _loop_1(i);
-            if (state_1 === "break")
-                break;
-        }
-        return [idx, uuid];
-    };
-    Element.prototype.dragElement = function (data, uuid, point, prevPoint, scale) {
-        var index = this.getElementIndex(data, uuid);
-        if (!data.elements[index]) {
-            return;
-        }
-        var moveX = point.x - prevPoint.x;
-        var moveY = point.y - prevPoint.y;
-        data.elements[index].x += (moveX / scale);
-        data.elements[index].y += (moveY / scale);
-        this.limitElementAttrs(data.elements[index]);
-    };
-    Element.prototype.transformElement = function (data, uuid, point, prevPoint, scale, direction) {
-        var _a, _b;
-        var index = this.getElementIndex(data, uuid);
-        if (!data.elements[index]) {
-            return null;
-        }
-        if (((_b = (_a = data.elements[index]) === null || _a === void 0 ? void 0 : _a.operation) === null || _b === void 0 ? void 0 : _b.lock) === true) {
-            return null;
-        }
-        var moveX = (point.x - prevPoint.x) / scale;
-        var moveY = (point.y - prevPoint.y) / scale;
-        var elem = data.elements[index];
-        switch (direction) {
-            case 'top-left': {
-                if (elem.w - moveX > 0 && elem.h - moveY > 0) {
-                    elem.x += moveX;
-                    elem.y += moveY;
-                    elem.w -= moveX;
-                    elem.h -= moveY;
-                }
-                break;
-            }
-            case 'top': {
-                if (elem.h - moveY > 0) {
-                    elem.y += moveY;
-                    elem.h -= moveY;
-                }
-                break;
-            }
-            case 'top-right': {
-                if (elem.h - moveY > 0 && elem.w + moveX > 0) {
-                    elem.y += moveY;
-                    elem.w += moveX;
-                    elem.h -= moveY;
-                }
-                break;
-            }
-            case 'right': {
-                if (elem.w + moveX > 0) {
-                    elem.w += moveX;
-                }
-                break;
-            }
-            case 'bottom-right': {
-                if (elem.w + moveX > 0 && elem.h + moveY > 0) {
-                    elem.w += moveX;
-                    elem.h += moveY;
-                }
-                break;
-            }
-            case 'bottom': {
-                if (elem.h + moveY > 0) {
-                    elem.h += moveY;
-                }
-                break;
-            }
-            case 'bottom-left': {
-                if (elem.w - moveX > 0 && elem.h + moveY > 0) {
-                    elem.x += moveX;
-                    elem.w -= moveX;
-                    elem.h += moveY;
-                }
-                break;
-            }
-            case 'left': {
-                if (elem.w - moveX > 0) {
-                    elem.x += moveX;
-                    elem.w -= moveX;
-                }
-                break;
-            }
-            case 'rotate': {
-                var center = calcElementCenter(elem);
-                var radian = calcRadian(center, prevPoint, point);
-                elem.angle = (elem.angle || 0) + parseRadianToAngle(radian);
-                break;
-            }
-        }
-        this.limitElementAttrs(elem);
-        return {
-            width: limitNum(elem.w),
-            height: limitNum(elem.h),
-            angle: limitAngle(elem.angle || 0),
-        };
-    };
-    Element.prototype.getElementIndex = function (data, uuid) {
-        var idx = -1;
-        for (var i = 0; i < data.elements.length; i++) {
-            if (data.elements[i].uuid === uuid) {
-                idx = i;
-                break;
-            }
-        }
-        return idx;
-    };
-    Element.prototype.limitElementAttrs = function (elem) {
-        elem.x = limitNum(elem.x);
-        elem.y = limitNum(elem.y);
-        elem.w = limitNum(elem.w);
-        elem.h = limitNum(elem.h);
-        elem.angle = limitAngle(elem.angle || 0);
-    };
-    return Element;
-}());
-var deepClone$2 = index$2.data.deepClone;
-var Helper = (function () {
-    function Helper(board, config) {
-        this._areaStart = { x: 0, y: 0 };
-        this._areaEnd = { x: 0, y: 0 };
-        this._board = board;
-        this._ctx = this._board.getContext();
-        this._coreConfig = config;
-        this._helperConfig = {
-            elementIndexMap: {}
-        };
-    }
-    Helper.prototype.updateConfig = function (data, opts) {
-        this._updateElementIndex(data);
-        this._updateSelectedElementWrapper(data, opts);
-        this._updateSelectedElementListWrapper(data, opts);
-    };
-    Helper.prototype.getConfig = function () {
-        return deepClone$2(this._helperConfig);
-    };
-    Helper.prototype.getElementIndexByUUID = function (uuid) {
-        var index = this._helperConfig.elementIndexMap[uuid];
-        if (index >= 0) {
-            return index;
-        }
-        return null;
-    };
-    Helper.prototype.isPointInElementWrapperDot = function (p) {
-        var _a, _b;
-        var ctx = this._ctx;
-        var uuid = (_b = (_a = this._helperConfig) === null || _a === void 0 ? void 0 : _a.selectedElementWrapper) === null || _b === void 0 ? void 0 : _b.uuid;
-        var direction = null;
-        if (!this._helperConfig.selectedElementWrapper) {
-            return [null, null];
-        }
-        var wrapper = this._helperConfig.selectedElementWrapper;
-        var dots = [
-            wrapper.dots.topLeft, wrapper.dots.top, wrapper.dots.topRight, wrapper.dots.right,
-            wrapper.dots.bottomRight, wrapper.dots.bottom, wrapper.dots.bottomLeft, wrapper.dots.left,
-            wrapper.dots.rotate,
-        ];
-        var directionNames = [
-            'top-left', 'top', 'top-right', 'right',
-            'bottom-right', 'bottom', 'bottom-left', 'left',
-            'rotate',
-        ];
-        rotateContext(ctx, wrapper.translate, wrapper.radian || 0, function () {
-            for (var i = 0; i < dots.length; i++) {
-                var dot = dots[i];
-                ctx.beginPath();
-                ctx.arc(dot.x, dot.y, wrapper.dotSize, 0, Math.PI * 2);
-                ctx.closePath();
-                if (ctx.isPointInPath(p.x, p.y)) {
-                    direction = directionNames[i];
-                }
-                if (direction) {
-                    break;
-                }
-            }
-        });
-        return [uuid, direction];
-    };
-    Helper.prototype.isPointInElementList = function (p, data) {
-        var _a, _b;
-        var ctx = this._ctx;
-        var idx = -1;
-        var uuid = null;
-        var wrapperList = ((_a = this._helperConfig) === null || _a === void 0 ? void 0 : _a.selectedElementListWrappers) || [];
-        var _loop_1 = function (i) {
-            var wrapper = wrapperList[i];
-            var elemIdx = this_1._helperConfig.elementIndexMap[wrapper.uuid];
-            var ele = data.elements[elemIdx];
-            if (!ele)
-                return "continue";
-            var bw = 0;
-            if (((_b = ele.desc) === null || _b === void 0 ? void 0 : _b.borderWidth) > 0) {
-                bw = ele.desc.borderWidth;
-            }
-            rotateElement(ctx, ele, function () {
-                ctx.beginPath();
-                ctx.moveTo(ele.x - bw, ele.y - bw);
-                ctx.lineTo(ele.x + ele.w + bw, ele.y - bw);
-                ctx.lineTo(ele.x + ele.w + bw, ele.y + ele.h + bw);
-                ctx.lineTo(ele.x - bw, ele.y + ele.h + bw);
-                ctx.lineTo(ele.x, ele.y);
-                ctx.rect(ele.x, ele.y, ele.w, ele.h);
-                ctx.closePath();
-                if (ctx.isPointInPath(p.x, p.y)) {
-                    idx = i;
-                    uuid = ele.uuid;
-                }
-            });
-            if (idx >= 0) {
-                return "break";
-            }
-        };
-        var this_1 = this;
-        for (var i = 0; i < wrapperList.length; i++) {
-            var state_1 = _loop_1(i);
-            if (state_1 === "break")
-                break;
-        }
-        if (uuid && idx >= 0) {
-            return true;
-        }
-        else {
-            return false;
-        }
-    };
-    Helper.prototype.startSelectArea = function (p) {
-        this._areaStart = p;
-        this._areaEnd = p;
-    };
-    Helper.prototype.changeSelectArea = function (p) {
-        this._areaEnd = p;
-        this._calcSelectedArea();
-    };
-    Helper.prototype.clearSelectedArea = function () {
-        this._areaStart = { x: 0, y: 0 };
-        this._areaEnd = { x: 0, y: 0 };
-        this._calcSelectedArea();
-    };
-    Helper.prototype.calcSelectedElements = function (data) {
-        var transform = this._ctx.getTransform();
-        var _a = transform.scale, scale = _a === void 0 ? 1 : _a, _b = transform.scrollX, scrollX = _b === void 0 ? 0 : _b, _c = transform.scrollY, scrollY = _c === void 0 ? 0 : _c;
-        var start = this._areaStart;
-        var end = this._areaEnd;
-        var x = (Math.min(start.x, end.x) - scrollX) / scale;
-        var y = (Math.min(start.y, end.y) - scrollY) / scale;
-        var w = Math.abs(end.x - start.x) / scale;
-        var h = Math.abs(end.y - start.y) / scale;
-        var uuids = [];
-        var ctx = this._ctx;
-        ctx.beginPath();
-        ctx.moveTo(x, y);
-        ctx.lineTo(x + w, y);
-        ctx.lineTo(x + w, y + h);
-        ctx.lineTo(x, y + h);
-        ctx.lineTo(x, y);
-        ctx.closePath();
-        data.elements.forEach(function (elem) {
-            var _a;
-            if (((_a = elem === null || elem === void 0 ? void 0 : elem.operation) === null || _a === void 0 ? void 0 : _a.invisible) !== true) {
-                var centerX = elem.x + elem.w / 2;
-                var centerY = elem.y + elem.h / 2;
-                if (ctx.isPointInPathWithoutScroll(centerX, centerY)) {
-                    uuids.push(elem.uuid);
-                }
-            }
-        });
-        return uuids;
-    };
-    Helper.prototype._calcSelectedArea = function () {
-        var start = this._areaStart;
-        var end = this._areaEnd;
-        var transform = this._ctx.getTransform();
-        var _a = transform.scale, scale = _a === void 0 ? 1 : _a, _b = transform.scrollX, scrollX = _b === void 0 ? 0 : _b, _c = transform.scrollY, scrollY = _c === void 0 ? 0 : _c;
-        var elemWrapper = this._coreConfig.elementWrapper;
-        var lineWidth = elemWrapper.lineWidth / scale;
-        var lineDash = elemWrapper.lineDash.map(function (n) { return (n / scale); });
-        this._helperConfig.selectedAreaWrapper = {
-            x: (Math.min(start.x, end.x) - scrollX) / scale,
-            y: (Math.min(start.y, end.y) - scrollY) / scale,
-            w: Math.abs(end.x - start.x) / scale,
-            h: Math.abs(end.y - start.y) / scale,
-            startPoint: { x: start.x, y: start.y },
-            endPoint: { x: end.x, y: end.y },
-            lineWidth: lineWidth,
-            lineDash: lineDash,
-            color: elemWrapper.color,
-        };
-    };
-    Helper.prototype._updateElementIndex = function (data) {
-        var _this = this;
-        this._helperConfig.elementIndexMap = {};
-        data.elements.forEach(function (elem, i) {
-            _this._helperConfig.elementIndexMap[elem.uuid] = i;
-        });
-    };
-    Helper.prototype._updateSelectedElementWrapper = function (data, opts) {
-        var _a;
-        var uuid = opts.selectedUUID;
-        if (!(typeof uuid === 'string' && this._helperConfig.elementIndexMap[uuid] >= 0)) {
-            delete this._helperConfig.selectedElementWrapper;
-            return;
-        }
-        var index = this._helperConfig.elementIndexMap[uuid];
-        var elem = data.elements[index];
-        if (((_a = elem === null || elem === void 0 ? void 0 : elem.operation) === null || _a === void 0 ? void 0 : _a.invisible) === true) {
-            return;
-        }
-        var wrapper = this._createSelectedElementWrapper(elem, opts);
-        this._helperConfig.selectedElementWrapper = wrapper;
-    };
-    Helper.prototype._updateSelectedElementListWrapper = function (data, opts) {
-        var _this = this;
-        var selectedUUIDList = opts.selectedUUIDList;
-        var wrapperList = [];
-        data.elements.forEach(function (elem, i) {
-            if (selectedUUIDList === null || selectedUUIDList === void 0 ? void 0 : selectedUUIDList.includes(elem.uuid)) {
-                var wrapper = _this._createSelectedElementWrapper(elem, opts);
-                wrapperList.push(wrapper);
-            }
-        });
-        this._helperConfig.selectedElementListWrappers = wrapperList;
-    };
-    Helper.prototype._createSelectedElementWrapper = function (elem, opts) {
-        var _a, _b, _c;
-        var scale = opts.scale;
-        var elemWrapper = this._coreConfig.elementWrapper;
-        var dotSize = elemWrapper.dotSize / scale;
-        var lineWidth = elemWrapper.lineWidth / scale;
-        var lineDash = elemWrapper.lineDash.map(function (n) { return (n / scale); });
-        var rotateLimit = 12;
-        var bw = ((_a = elem.desc) === null || _a === void 0 ? void 0 : _a.borderWidth) || 0;
-        var wrapper = {
-            uuid: elem.uuid,
-            dotSize: dotSize,
-            lock: ((_b = elem === null || elem === void 0 ? void 0 : elem.operation) === null || _b === void 0 ? void 0 : _b.lock) === true,
-            dots: {
-                topLeft: {
-                    x: elem.x - dotSize - bw,
-                    y: elem.y - dotSize - bw,
-                },
-                top: {
-                    x: elem.x + elem.w / 2,
-                    y: elem.y - dotSize - bw,
-                },
-                topRight: {
-                    x: elem.x + elem.w + dotSize + bw,
-                    y: elem.y - dotSize - bw,
-                },
-                right: {
-                    x: elem.x + elem.w + dotSize + bw,
-                    y: elem.y + elem.h / 2,
-                },
-                bottomRight: {
-                    x: elem.x + elem.w + dotSize + bw,
-                    y: elem.y + elem.h + dotSize + bw,
-                },
-                bottom: {
-                    x: elem.x + elem.w / 2,
-                    y: elem.y + elem.h + dotSize + bw,
-                },
-                bottomLeft: {
-                    x: elem.x - dotSize - bw,
-                    y: elem.y + elem.h + dotSize + bw,
-                },
-                left: {
-                    x: elem.x - dotSize - bw,
-                    y: elem.y + elem.h / 2,
-                },
-                rotate: {
-                    x: elem.x + elem.w / 2,
-                    y: elem.y - dotSize - (dotSize * 2 + rotateLimit) - bw,
-                }
-            },
-            lineWidth: lineWidth,
-            lineDash: lineDash,
-            color: ((_c = elem === null || elem === void 0 ? void 0 : elem.operation) === null || _c === void 0 ? void 0 : _c.lock) === true ? elemWrapper.lockColor : elemWrapper.color,
-        };
-        if (typeof elem.angle === 'number' && (elem.angle > 0 || elem.angle < 0)) {
-            wrapper.radian = parseAngleToRadian(elem.angle);
-            wrapper.translate = calcElementCenter(elem);
-        }
-        return wrapper;
-    };
-    return Helper;
-}());
-var _board$1 = Symbol('_displayCtx');
-var _helper$1 = Symbol('_helper');
-var _element$1 = Symbol('_element');
-var _opts$1 = Symbol('_opts');
-var Mapper = (function () {
-    function Mapper(opts) {
-        this[_opts$1] = opts;
-        this[_board$1] = this[_opts$1].board;
-        this[_element$1] = this[_opts$1].element;
-        this[_helper$1] = this[_opts$1].helper;
-    }
-    Mapper.prototype.isEffectivePoint = function (p) {
-        var scrollLineWidth = this[_board$1].getScrollLineWidth();
-        var screenInfo = this[_board$1].getScreenInfo();
-        if (p.x <= (screenInfo.width - scrollLineWidth) && p.y <= (screenInfo.height - scrollLineWidth)) {
-            return true;
-        }
-        return false;
-    };
-    Mapper.prototype.judgePointCursor = function (p, data) {
-        var cursor = 'auto';
-        var elementUUID = null;
-        if (!this.isEffectivePoint(p)) {
-            return { cursor: cursor, elementUUID: elementUUID };
-        }
-        var _a = this[_helper$1].isPointInElementWrapperDot(p), uuid = _a[0], direction = _a[1];
-        if (uuid && direction) {
-            switch (direction) {
-                case 'top-left': {
-                    cursor = 'nw-resize';
-                    break;
-                }
-                case 'top': {
-                    cursor = 'n-resize';
-                    break;
-                }
-                case 'top-right': {
-                    cursor = 'ne-resize';
-                    break;
-                }
-                case 'right': {
-                    cursor = 'e-resize';
-                    break;
-                }
-                case 'bottom-right': {
-                    cursor = 'se-resize';
-                    break;
-                }
-                case 'bottom': {
-                    cursor = 's-resize';
-                    break;
-                }
-                case 'bottom-left': {
-                    cursor = 'sw-resize';
-                    break;
-                }
-                case 'left': {
-                    cursor = 'w-resize';
-                    break;
-                }
-                case 'rotate': {
-                    cursor = 'grab';
-                    break;
-                }
-            }
-            if (uuid) {
-                elementUUID = uuid;
-            }
-        }
-        else {
-            var _b = this[_element$1].isPointInElement(p, data), index = _b[0], uuid_1 = _b[1];
-            if (index >= 0) {
-                cursor = 'move';
-            }
-            if (uuid_1) {
-                elementUUID = uuid_1;
-            }
-        }
-        return {
-            cursor: cursor,
-            elementUUID: elementUUID,
-        };
-    };
-    return Mapper;
-}());
-var defaultConfig = {
-    elementWrapper: {
-        color: '#2ab6f1',
-        lockColor: '#aaaaaa',
-        dotSize: 6,
-        lineWidth: 1,
-        lineDash: [4, 3],
-    }
-};
-function mergeConfig(config) {
-    var result = index$2.data.deepClone(defaultConfig);
-    if (config) {
-        if (config.elementWrapper) {
-            result.elementWrapper = __assign$1(__assign$1({}, result.elementWrapper), config.elementWrapper);
-        }
-    }
-    return result;
-}
-var CoreEvent = (function () {
-    function CoreEvent() {
-        this._listeners = new Map();
-    }
-    CoreEvent.prototype.on = function (eventKey, callback) {
-        if (this._listeners.has(eventKey)) {
-            var callbacks = this._listeners.get(eventKey);
-            callbacks === null || callbacks === void 0 ? void 0 : callbacks.push(callback);
-            this._listeners.set(eventKey, callbacks || []);
-        }
-        else {
-            this._listeners.set(eventKey, [callback]);
-        }
-    };
-    CoreEvent.prototype.off = function (eventKey, callback) {
-        if (this._listeners.has(eventKey)) {
-            var callbacks = this._listeners.get(eventKey);
-            if (Array.isArray(callbacks)) {
-                for (var i = 0; i < (callbacks === null || callbacks === void 0 ? void 0 : callbacks.length); i++) {
-                    if (callbacks[i] === callback) {
-                        callbacks.splice(i, 1);
-                        break;
-                    }
-                }
-            }
-            this._listeners.set(eventKey, callbacks || []);
-        }
-    };
-    CoreEvent.prototype.trigger = function (eventKey, arg) {
-        var callbacks = this._listeners.get(eventKey);
-        if (Array.isArray(callbacks)) {
-            callbacks.forEach(function (cb) {
-                cb(arg);
-            });
-            return true;
-        }
-        else {
-            return false;
-        }
-    };
-    CoreEvent.prototype.has = function (name) {
-        if (this._listeners.has(name)) {
-            var list = this._listeners.get(name);
-            if (Array.isArray(list) && list.length > 0) {
-                return true;
-            }
-        }
-        return false;
-    };
-    return CoreEvent;
-}());
-var elementTypes = {
-    'text': {},
-    'rect': {},
-    'image': {},
-    'svg': {},
-    'circle': {},
-    'html': {},
-};
-var elementNames = Object.keys(elementTypes);
-function parseData(data) {
-    var result = {
-        elements: [],
-    };
-    if (Array.isArray(data === null || data === void 0 ? void 0 : data.elements)) {
-        data === null || data === void 0 ? void 0 : data.elements.forEach(function (elem) {
-            if (elem === void 0) { elem = {}; }
-            if (isElement(elem)) {
-                result.elements.push(elem);
-            }
-        });
-    }
-    if (typeof data.bgColor === 'string') {
-        result.bgColor = data.bgColor;
-    }
-    return result;
-}
-function isElement(elem) {
-    if (!(isNumber(elem.x) && isNumber(elem.y) && isNumber(elem.w) && isNumber(elem.h))) {
-        return false;
-    }
-    if (!(typeof elem.type === 'string' && elementNames.includes(elem.type))) {
-        return false;
-    }
-    return true;
-}
-function isNumber(num) {
-    return (num >= 0 || num < 0);
-}
-var isColorStr$4 = index$2.color.isColorStr;
-function number(value) {
-    return (typeof value === 'number' && (value > 0 || value <= 0));
-}
-function x(value) {
-    return number(value);
-}
-function y(value) {
-    return number(value);
-}
-function w(value) {
-    return (typeof value === 'number' && value >= 0);
-}
-function h(value) {
-    return (typeof value === 'number' && value >= 0);
-}
-function angle(value) {
-    return (typeof value === 'number' && value >= -360 && value <= 360);
-}
-function borderWidth(value) {
-    return w(value);
-}
-function borderRadius(value) {
-    return number(value) && value >= 0;
-}
-function color(value) {
-    return isColorStr$4(value);
-}
-function imageURL(value) {
-    return (typeof value === 'string' && /^(http:\/\/|https:\/\/|\.\/|\/)/.test("" + value));
-}
-function imageBase64(value) {
-    return (typeof value === 'string' && /^(data:image\/)/.test("" + value));
-}
-function imageSrc(value) {
-    return (imageBase64(value) || imageURL(value));
-}
-function svg(value) {
-    return (typeof value === 'string' && /^(<svg[\s]{1,}|<svg>)/i.test(("" + value).trim()) && /<\/[\s]{0,}svg>$/i.test(("" + value).trim()));
-}
-function html(value) {
-    var result = false;
-    if (typeof value === 'string') {
-        var div = document.createElement('div');
-        div.innerHTML = value;
-        if (div.children.length > 0) {
-            result = true;
-        }
-        div = null;
-    }
-    return result;
-}
-function text(value) {
-    return typeof value === 'string';
-}
-function fontSize(value) {
-    return number(value) && value > 0;
-}
-function lineHeight(value) {
-    return number(value) && value > 0;
-}
-function textAlign(value) {
-    return ['center', 'left', 'right'].includes(value);
-}
-function fontFamily(value) {
-    return typeof value === 'string' && value.length > 0;
-}
-function fontWeight(value) {
-    return ['bold'].includes(value);
-}
-var is$3 = {
-    x: x,
-    y: y,
-    w: w,
-    h: h,
-    angle: angle,
-    number: number,
-    borderWidth: borderWidth,
-    borderRadius: borderRadius,
-    color: color,
-    imageSrc: imageSrc,
-    imageURL: imageURL,
-    imageBase64: imageBase64,
-    svg: svg,
-    html: html,
-    text: text,
-    fontSize: fontSize,
-    lineHeight: lineHeight,
-    textAlign: textAlign,
-    fontFamily: fontFamily,
-    fontWeight: fontWeight,
-};
-function attrs(attrs) {
-    var x = attrs.x, y = attrs.y, w = attrs.w, h = attrs.h, angle = attrs.angle;
-    if (!(is$3.x(x) && is$3.y(y) && is$3.w(w) && is$3.h(h) && is$3.angle(angle))) {
-        return false;
-    }
-    if (!(angle >= -360 && angle <= 360)) {
-        return false;
-    }
-    return true;
-}
-function box(desc) {
-    if (desc === void 0) { desc = {}; }
-    var borderColor = desc.borderColor, borderRadius = desc.borderRadius, borderWidth = desc.borderWidth;
-    if (desc.hasOwnProperty('borderColor') && !is$3.color(borderColor)) {
-        return false;
-    }
-    if (desc.hasOwnProperty('borderRadius') && !is$3.number(borderRadius)) {
-        return false;
-    }
-    if (desc.hasOwnProperty('borderWidth') && !is$3.number(borderWidth)) {
-        return false;
-    }
-    return true;
-}
-function rectDesc(desc) {
-    var bgColor = desc.bgColor;
-    if (desc.hasOwnProperty('bgColor') && !is$3.color(bgColor)) {
-        return false;
-    }
-    if (!box(desc)) {
-        return false;
-    }
-    return true;
-}
-function circleDesc(desc) {
-    var bgColor = desc.bgColor, borderColor = desc.borderColor, borderWidth = desc.borderWidth;
-    if (desc.hasOwnProperty('bgColor') && !is$3.color(bgColor)) {
-        return false;
-    }
-    if (desc.hasOwnProperty('borderColor') && !is$3.color(borderColor)) {
-        return false;
-    }
-    if (desc.hasOwnProperty('borderWidth') && !is$3.number(borderWidth)) {
-        return false;
-    }
-    return true;
-}
-function imageDesc(desc) {
-    var src = desc.src;
-    if (!is$3.imageSrc(src)) {
-        return false;
-    }
-    return true;
-}
-function svgDesc(desc) {
-    var svg = desc.svg;
-    if (!is$3.svg(svg)) {
-        return false;
-    }
-    return true;
-}
-function htmlDesc(desc) {
-    var html = desc.html;
-    if (!is$3.html(html)) {
-        return false;
-    }
-    return true;
-}
-function textDesc(desc) {
-    var text = desc.text, color = desc.color, fontSize = desc.fontSize, lineHeight = desc.lineHeight, fontFamily = desc.fontFamily, textAlign = desc.textAlign, fontWeight = desc.fontWeight, bgColor = desc.bgColor;
-    if (!is$3.text(text)) {
-        return false;
-    }
-    if (!is$3.color(color)) {
-        return false;
-    }
-    if (!is$3.fontSize(fontSize)) {
-        return false;
-    }
-    if (desc.hasOwnProperty('bgColor') && !is$3.color(bgColor)) {
-        return false;
-    }
-    if (desc.hasOwnProperty('fontWeight') && !is$3.fontWeight(fontWeight)) {
-        return false;
-    }
-    if (desc.hasOwnProperty('lineHeight') && !is$3.lineHeight(lineHeight)) {
-        return false;
-    }
-    if (desc.hasOwnProperty('fontFamily') && !is$3.fontFamily(fontFamily)) {
-        return false;
-    }
-    if (desc.hasOwnProperty('textAlign') && !is$3.textAlign(textAlign)) {
-        return false;
-    }
-    if (!box(desc)) {
-        return false;
-    }
-    return true;
-}
-var check = {
-    attrs: attrs,
-    textDesc: textDesc,
-    rectDesc: rectDesc,
-    circleDesc: circleDesc,
-    imageDesc: imageDesc,
-    svgDesc: svgDesc,
-    htmlDesc: htmlDesc,
-};
-var TempData$2 = (function () {
-    function TempData() {
-        this._temp = {
-            selectedUUID: null,
-            selectedUUIDList: [],
-            hoverUUID: null,
-        };
-    }
-    TempData.prototype.set = function (name, value) {
-        this._temp[name] = value;
-    };
-    TempData.prototype.get = function (name) {
-        return this._temp[name];
-    };
-    TempData.prototype.clear = function () {
-        this._temp = {
-            selectedUUID: null,
-            hoverUUID: null,
-            selectedUUIDList: [],
-        };
-    };
-    return TempData;
-}());
-var _board = Symbol('_board');
-var _data = Symbol('_data');
-var _opts$3 = Symbol('_opts');
-var _config = Symbol('_config');
-var _renderer = Symbol('_renderer');
-var _element = Symbol('_element');
-var _helper = Symbol('_helper');
-var _hasInited$1 = Symbol('_hasInited');
-var _mode = Symbol('_mode');
-var _tempData$1 = Symbol('_tempData');
-var _prevPoint = Symbol('_prevPoint');
-var _draw = Symbol('_draw');
-var _selectedDotDirection = Symbol('_selectedDotDirection');
-var _coreEvent = Symbol('_coreEvent');
-var _mapper = Symbol('_mapper');
-var _initEvent$2 = Symbol('_initEvent');
-var _handleClick = Symbol('_handleClick');
-var _handleDoubleClick = Symbol('_handleDoubleClick');
-var _handlePoint = Symbol('_handlePoint');
-var _handleMoveStart = Symbol('_handleMoveStart');
-var _handleMove = Symbol('_handleMove');
-var _handleMoveEnd = Symbol('_handleMoveEnd');
-var _handleHover = Symbol('_handleHover');
-var _handleLeave = Symbol('_handleLeave');
-var _dragElements = Symbol('_dragElements');
-var _transfromElement = Symbol('_transfromElement');
-var _emitChangeScreen = Symbol('_emitChangeScreen');
-var _emitChangeData = Symbol('_emitChangeData');
-var _onlyRender = Symbol('_onlyRender');
-var _cursorStatus = Symbol('_cursorStatus');
 var Mode;
 (function (Mode) {
     Mode["NULL"] = "null";
@@ -3134,85 +3217,50 @@ var CursorStatus;
     CursorStatus["DRAGGING"] = "dragging";
     CursorStatus["NULL"] = "null";
 })(CursorStatus || (CursorStatus = {}));
-function isChangeImageElementResource(before, after) {
-    var _a, _b;
-    return (((_a = before === null || before === void 0 ? void 0 : before.desc) === null || _a === void 0 ? void 0 : _a.src) !== ((_b = after === null || after === void 0 ? void 0 : after.desc) === null || _b === void 0 ? void 0 : _b.src));
+function createData() {
+    return {
+        onlyRender: false,
+        hasInited: false,
+        mode: Mode.NULL,
+        cursorStatus: CursorStatus.NULL,
+        selectedUUID: null,
+        selectedUUIDList: [],
+        hoverUUID: null,
+        selectedDotDirection: null,
+        prevPoint: null,
+    };
 }
-function isChangeSVGElementResource(before, after) {
-    var _a, _b;
-    return (((_a = before === null || before === void 0 ? void 0 : before.desc) === null || _a === void 0 ? void 0 : _a.svg) !== ((_b = after === null || after === void 0 ? void 0 : after.desc) === null || _b === void 0 ? void 0 : _b.svg));
-}
-function isChangeHTMLElementResource(before, after) {
-    var _a, _b, _c, _d, _e, _f;
-    return (((_a = before === null || before === void 0 ? void 0 : before.desc) === null || _a === void 0 ? void 0 : _a.html) !== ((_b = after === null || after === void 0 ? void 0 : after.desc) === null || _b === void 0 ? void 0 : _b.html)
-        || ((_c = before === null || before === void 0 ? void 0 : before.desc) === null || _c === void 0 ? void 0 : _c.width) !== ((_d = after === null || after === void 0 ? void 0 : after.desc) === null || _d === void 0 ? void 0 : _d.width)
-        || ((_e = before === null || before === void 0 ? void 0 : before.desc) === null || _e === void 0 ? void 0 : _e.height) !== ((_f = after === null || after === void 0 ? void 0 : after.desc) === null || _f === void 0 ? void 0 : _f.height));
-}
-function diffElementResourceChange(before, after) {
-    var result = null;
-    var isChange = false;
-    switch (after.type) {
-        case 'image': {
-            isChange = isChangeImageElementResource(before, after);
-            break;
-        }
-        case 'svg': {
-            isChange = isChangeSVGElementResource(before, after);
-            break;
-        }
-        case 'html': {
-            isChange = isChangeHTMLElementResource(before, after);
-            break;
-        }
+var TempData$2 = (function () {
+    function TempData() {
+        this._temp = createData();
     }
-    if (isChange === true) {
-        result = after.uuid;
-    }
-    return result;
-}
-function diffElementResourceChangeList(before, after) {
-    var _a;
-    var uuids = [];
-    var beforeMap = parseDataElementMap(before);
-    var afterMap = parseDataElementMap(after);
-    for (var uuid in afterMap) {
-        if (['image', 'svg', 'html'].includes((_a = afterMap[uuid]) === null || _a === void 0 ? void 0 : _a.type) !== true) {
-            continue;
-        }
-        if (beforeMap[uuid]) {
-            var isChange = false;
-            switch (beforeMap[uuid].type) {
-                case 'image': {
-                    isChange = isChangeImageElementResource(beforeMap[uuid], afterMap[uuid]);
-                    break;
-                }
-                case 'svg': {
-                    isChange = isChangeSVGElementResource(beforeMap[uuid], afterMap[uuid]);
-                    break;
-                }
-                case 'html': {
-                    isChange = isChangeHTMLElementResource(beforeMap[uuid], afterMap[uuid]);
-                    break;
-                }
-            }
-            if (isChange === true) {
-                uuids.push(uuid);
-            }
-        }
-        else {
-            uuids.push(uuid);
-        }
-    }
-    return uuids;
-}
-function parseDataElementMap(data) {
-    var elemMap = {};
-    data.elements.forEach(function (elem) {
-        elemMap[elem.uuid] = elem;
-    });
-    return elemMap;
-}
-var deepClone$1 = index$2.data.deepClone;
+    TempData.prototype.set = function (name, value) {
+        this._temp[name] = value;
+    };
+    TempData.prototype.get = function (name) {
+        return this._temp[name];
+    };
+    TempData.prototype.clear = function () {
+        this._temp = createData();
+    };
+    return TempData;
+}());
+var _board = Symbol('_board');
+var _data = Symbol('_data');
+var _opts$3 = Symbol('_opts');
+var _config = Symbol('_config');
+var _renderer = Symbol('_renderer');
+var _element = Symbol('_element');
+var _helper = Symbol('_helper');
+var _tempData$1 = Symbol('_tempData');
+var _draw = Symbol('_draw');
+var _coreEvent = Symbol('_coreEvent');
+var _mapper = Symbol('_mapper');
+var _emitChangeScreen = Symbol('_emitChangeScreen');
+var _emitChangeData = Symbol('_emitChangeData');
+var _todo = Symbol('_todo');
+var deepClone$2 = index$2.data.deepClone;
+var createUUID$4 = index$2.uuid.createUUID;
 function getSelectedElements(core) {
     var elems = [];
     var list = [];
@@ -3232,11 +3280,26 @@ function getSelectedElements(core) {
                 elems.push(elem);
         }
     });
-    return deepClone$1(elems);
+    return deepClone$2(elems);
+}
+function getElement(core, uuid) {
+    var elem = null;
+    var index = core[_helper].getElementIndexByUUID(uuid);
+    if (index !== null && core[_data].elements[index]) {
+        elem = deepClone$2(core[_data].elements[index]);
+    }
+    return elem;
+}
+function getElementByIndex(core, index) {
+    var elem = null;
+    if (index >= 0 && core[_data].elements[index]) {
+        elem = deepClone$2(core[_data].elements[index]);
+    }
+    return elem;
 }
 function updateElement(core, elem) {
     var _a;
-    var _elem = deepClone$1(elem);
+    var _elem = deepClone$2(elem);
     var data = core[_data];
     var resourceChangeUUIDs = [];
     for (var i = 0; i < data.elements.length; i++) {
@@ -3252,27 +3315,365 @@ function updateElement(core, elem) {
     core[_emitChangeData]();
     core[_draw]({ resourceChangeUUIDs: resourceChangeUUIDs });
 }
+function selectElementByIndex(core, index, opts) {
+    if (core[_tempData$1].get('onlyRender') === true)
+        return;
+    if (core[_data].elements[index]) {
+        var uuid = core[_data].elements[index].uuid;
+        if ((opts === null || opts === void 0 ? void 0 : opts.useMode) === true) {
+            core[_tempData$1].set('mode', Mode.SELECT_ELEMENT);
+        }
+        else {
+            core[_tempData$1].set('mode', Mode.NULL);
+        }
+        if (typeof uuid === 'string') {
+            core[_tempData$1].set('selectedUUID', uuid);
+            core[_tempData$1].set('selectedUUIDList', []);
+        }
+        core[_draw]();
+    }
+}
+function selectElement(core, uuid, opts) {
+    if (core[_tempData$1].get('onlyRender') === true)
+        return;
+    var index = core[_helper].getElementIndexByUUID(uuid);
+    if (typeof index === 'number' && index >= 0) {
+        core.selectElementByIndex(index, opts);
+    }
+}
+function moveUpElement(core, uuid) {
+    var index = core[_helper].getElementIndexByUUID(uuid);
+    if (typeof index === 'number' && index >= 0 && index < core[_data].elements.length - 1) {
+        var temp = core[_data].elements[index];
+        core[_data].elements[index] = core[_data].elements[index + 1];
+        core[_data].elements[index + 1] = temp;
+    }
+    core[_emitChangeData]();
+    core[_draw]();
+}
+function moveDownElement(core, uuid) {
+    var index = core[_helper].getElementIndexByUUID(uuid);
+    if (typeof index === 'number' && index > 0 && index < core[_data].elements.length) {
+        var temp = core[_data].elements[index];
+        core[_data].elements[index] = core[_data].elements[index - 1];
+        core[_data].elements[index - 1] = temp;
+    }
+    core[_emitChangeData]();
+    core[_draw]();
+}
+function addElement(core, elem) {
+    var _elem = deepClone$2(elem);
+    _elem.uuid = createUUID$4();
+    core[_data].elements.push(_elem);
+    core[_emitChangeData]();
+    core[_draw]();
+    return _elem.uuid;
+}
+function deleteElement(core, uuid) {
+    var index = core[_element].getElementIndex(core[_data], uuid);
+    if (index >= 0) {
+        core[_data].elements.splice(index, 1);
+        core[_emitChangeData]();
+        core[_draw]();
+    }
+}
+function insertElementBefore(core, elem, beforeUUID) {
+    var index = core[_helper].getElementIndexByUUID(beforeUUID);
+    if (index !== null) {
+        return core.insertElementBeforeIndex(elem, index);
+    }
+    return null;
+}
+function insertElementBeforeIndex(core, elem, index) {
+    var _elem = deepClone$2(elem);
+    _elem.uuid = createUUID$4();
+    if (index >= 0) {
+        core[_data].elements.splice(index, 0, _elem);
+        core[_emitChangeData]();
+        core[_draw]();
+        return _elem.uuid;
+    }
+    return null;
+}
+function insertElementAfter(core, elem, beforeUUID) {
+    var index = core[_helper].getElementIndexByUUID(beforeUUID);
+    if (index !== null) {
+        return core.insertElementAfterIndex(elem, index);
+    }
+    return null;
+}
+function insertElementAfterIndex(core, elem, index) {
+    var _elem = deepClone$2(elem);
+    _elem.uuid = createUUID$4();
+    if (index >= 0) {
+        core[_data].elements.splice(index + 1, 0, _elem);
+        core[_emitChangeData]();
+        core[_draw]();
+        return _elem.uuid;
+    }
+    return null;
+}
 var time = index$2.time;
-var deepClone$6 = index$2.data.deepClone;
-var createUUID$4 = index$2.uuid.createUUID;
+var deepClone$1 = index$2.data.deepClone;
+function initEvent(core) {
+    if (core[_tempData$1].get('hasInited') === true) {
+        return;
+    }
+    core[_board].on('hover', time.throttle(handleHover(core), 32));
+    core[_board].on('leave', time.throttle(handleLeave(core), 32));
+    core[_board].on('point', time.throttle(handleClick(core), 16));
+    core[_board].on('doubleClick', handleDoubleClick(core));
+    if (core[_tempData$1].get('onlyRender') === true) {
+        return;
+    }
+    core[_board].on('point', handlePoint(core));
+    core[_board].on('moveStart', handleMoveStart(core));
+    core[_board].on('move', time.throttle(handleMove(core), 16));
+    core[_board].on('moveEnd', handleMoveEnd(core));
+    core[_tempData$1].set('hasInited', true);
+}
+function handleDoubleClick(core) {
+    return function (point) {
+        var _a, _b, _c;
+        var _d = core[_element].isPointInElement(point, core[_data]), index = _d[0], uuid = _d[1];
+        if (index >= 0 && uuid) {
+            var elem = deepClone$1((_a = core[_data].elements) === null || _a === void 0 ? void 0 : _a[index]);
+            if (((_b = elem === null || elem === void 0 ? void 0 : elem.operation) === null || _b === void 0 ? void 0 : _b.invisible) !== true) {
+                core[_coreEvent].trigger('screenDoubleClickElement', { index: index, uuid: uuid, element: deepClone$1((_c = core[_data].elements) === null || _c === void 0 ? void 0 : _c[index]) });
+            }
+        }
+        core[_draw]();
+    };
+}
+function handlePoint(core) {
+    return function (point) {
+        var _a, _b, _c;
+        if (!core[_mapper].isEffectivePoint(point)) {
+            return;
+        }
+        if (core[_helper].isPointInElementList(point, core[_data])) {
+            core[_tempData$1].set('mode', Mode.SELECT_ELEMENT_LIST);
+        }
+        else {
+            var _d = core[_helper].isPointInElementWrapperDot(point, core[_data]), uuid = _d[0], direction = _d[1];
+            if (uuid && direction) {
+                core[_tempData$1].set('mode', Mode.SELECT_ELEMENT_WRAPPER_DOT);
+                core[_tempData$1].set('selectedDotDirection', direction);
+                core[_tempData$1].set('selectedUUID', uuid);
+            }
+            else {
+                var _e = core[_element].isPointInElement(point, core[_data]), index = _e[0], uuid_1 = _e[1];
+                if (index >= 0 && ((_b = (_a = core[_data].elements[index]) === null || _a === void 0 ? void 0 : _a.operation) === null || _b === void 0 ? void 0 : _b.invisible) !== true) {
+                    core.selectElementByIndex(index, { useMode: true });
+                    if (typeof uuid_1 === 'string' && core[_coreEvent].has('screenSelectElement')) {
+                        core[_coreEvent].trigger('screenSelectElement', { index: index, uuid: uuid_1, element: deepClone$1((_c = core[_data].elements) === null || _c === void 0 ? void 0 : _c[index]) });
+                        core[_emitChangeScreen]();
+                    }
+                    core[_tempData$1].set('mode', Mode.SELECT_ELEMENT);
+                }
+                else {
+                    core[_tempData$1].set('selectedUUIDList', []);
+                    core[_tempData$1].set('mode', Mode.SELECT_AREA);
+                }
+            }
+        }
+        core[_draw]();
+    };
+}
+function handleClick(core) {
+    return function (point) {
+        var _a;
+        var _b = core[_element].isPointInElement(point, core[_data]), index = _b[0], uuid = _b[1];
+        if (index >= 0 && uuid) {
+            core[_coreEvent].trigger('screenClickElement', { index: index, uuid: uuid, element: deepClone$1((_a = core[_data].elements) === null || _a === void 0 ? void 0 : _a[index]) });
+        }
+        core[_draw]();
+    };
+}
+function handleMoveStart(core) {
+    return function (point) {
+        core[_tempData$1].set('prevPoint', point);
+        var uuid = core[_tempData$1].get('selectedUUID');
+        if (core[_tempData$1].get('mode') === Mode.SELECT_ELEMENT_LIST) ;
+        else if (core[_tempData$1].get('mode') === Mode.SELECT_ELEMENT) {
+            if (typeof uuid === 'string' && core[_coreEvent].has('screenMoveElementStart')) {
+                core[_coreEvent].trigger('screenMoveElementStart', {
+                    index: core[_element].getElementIndex(core[_data], uuid),
+                    uuid: uuid,
+                    x: point.x,
+                    y: point.y
+                });
+            }
+        }
+        else if (core[_tempData$1].get('mode') === Mode.SELECT_AREA) {
+            core[_helper].startSelectArea(point);
+        }
+    };
+}
+function handleMove(core) {
+    return function (point) {
+        if (core[_tempData$1].get('mode') === Mode.SELECT_ELEMENT_LIST) {
+            dragElements(core, core[_tempData$1].get('selectedUUIDList'), point, core[_tempData$1].get('prevPoint'));
+            core[_draw]();
+            core[_tempData$1].set('cursorStatus', CursorStatus.DRAGGING);
+        }
+        else if (typeof core[_tempData$1].get('selectedUUID') === 'string') {
+            if (core[_tempData$1].get('mode') === Mode.SELECT_ELEMENT) {
+                dragElements(core, [core[_tempData$1].get('selectedUUID')], point, core[_tempData$1].get('prevPoint'));
+                core[_draw]();
+                core[_tempData$1].set('cursorStatus', CursorStatus.DRAGGING);
+            }
+            else if (core[_tempData$1].get('mode') === Mode.SELECT_ELEMENT_WRAPPER_DOT && core[_tempData$1].get('selectedDotDirection')) {
+                transfromElement(core, core[_tempData$1].get('selectedUUID'), point, core[_tempData$1].get('prevPoint'), core[_tempData$1].get('selectedDotDirection'));
+                core[_tempData$1].set('cursorStatus', CursorStatus.DRAGGING);
+            }
+        }
+        else if (core[_tempData$1].get('mode') === Mode.SELECT_AREA) {
+            core[_helper].changeSelectArea(point);
+            core[_draw]();
+        }
+        core[_tempData$1].set('prevPoint', point);
+    };
+}
+function dragElements(core, uuids, point, prevPoint) {
+    if (!prevPoint) {
+        return;
+    }
+    uuids.forEach(function (uuid) {
+        var _a, _b;
+        var idx = core[_helper].getElementIndexByUUID(uuid);
+        if (idx === null)
+            return;
+        var elem = core[_data].elements[idx];
+        if (((_a = elem === null || elem === void 0 ? void 0 : elem.operation) === null || _a === void 0 ? void 0 : _a.lock) !== true && ((_b = elem === null || elem === void 0 ? void 0 : elem.operation) === null || _b === void 0 ? void 0 : _b.invisible) !== true) {
+            core[_element].dragElement(core[_data], uuid, point, prevPoint, core[_board].getContext().getTransform().scale);
+        }
+    });
+    core[_draw]();
+}
+function handleMoveEnd(core) {
+    return function (point) {
+        var uuid = core[_tempData$1].get('selectedUUID');
+        if (typeof uuid === 'string') {
+            var index = core[_element].getElementIndex(core[_data], uuid);
+            var elem = core[_data].elements[index];
+            if (elem) {
+                if (core[_coreEvent].has('screenMoveElementEnd')) {
+                    core[_coreEvent].trigger('screenMoveElementEnd', {
+                        index: index,
+                        uuid: uuid,
+                        x: point.x,
+                        y: point.y
+                    });
+                }
+                if (core[_coreEvent].has('screenChangeElement')) {
+                    core[_coreEvent].trigger('screenChangeElement', {
+                        index: index,
+                        uuid: uuid,
+                        width: elem.w,
+                        height: elem.h,
+                        angle: elem.angle || 0
+                    });
+                }
+                core[_emitChangeData]();
+            }
+        }
+        else if (core[_tempData$1].get('mode') === Mode.SELECT_AREA) {
+            var uuids = core[_helper].calcSelectedElements(core[_data]);
+            if (uuids.length > 0) {
+                core[_tempData$1].set('selectedUUIDList', uuids);
+                core[_tempData$1].set('selectedUUID', null);
+            }
+            else {
+                core[_tempData$1].set('mode', Mode.NULL);
+            }
+            core[_helper].clearSelectedArea();
+            core[_draw]();
+        }
+        if (core[_tempData$1].get('mode') !== Mode.SELECT_ELEMENT) {
+            core[_tempData$1].set('selectedUUID', null);
+        }
+        core[_tempData$1].set('cursorStatus', CursorStatus.NULL);
+        core[_tempData$1].set('mode', Mode.NULL);
+    };
+}
+function handleHover(core) {
+    return function (point) {
+        var _a, _b;
+        var isMouseOverElement = false;
+        if (core[_tempData$1].get('mode') === Mode.SELECT_AREA) {
+            if (core[_tempData$1].get('onlyRender') !== true)
+                core[_board].resetCursor();
+        }
+        else if (core[_tempData$1].get('cursorStatus') === CursorStatus.NULL) {
+            var _c = core[_mapper].judgePointCursor(point, core[_data]), cursor = _c.cursor, elementUUID = _c.elementUUID;
+            if (core[_tempData$1].get('onlyRender') !== true)
+                core[_board].setCursor(cursor);
+            if (elementUUID) {
+                var index = core[_helper].getElementIndexByUUID(elementUUID);
+                if (index !== null && index >= 0) {
+                    var elem = core[_data].elements[index];
+                    if (((_a = elem === null || elem === void 0 ? void 0 : elem.operation) === null || _a === void 0 ? void 0 : _a.lock) === true || ((_b = elem === null || elem === void 0 ? void 0 : elem.operation) === null || _b === void 0 ? void 0 : _b.invisible) === true) {
+                        core[_board].resetCursor();
+                        return;
+                    }
+                    if (core[_tempData$1].get('hoverUUID') !== elem.uuid) {
+                        var preIndex = core[_helper].getElementIndexByUUID(core[_tempData$1].get('hoverUUID') || '');
+                        if (preIndex !== null && core[_data].elements[preIndex]) {
+                            core[_coreEvent].trigger('mouseLeaveElement', {
+                                uuid: core[_tempData$1].get('hoverUUID'),
+                                index: preIndex,
+                                element: core[_data].elements[preIndex]
+                            });
+                        }
+                    }
+                    if (elem) {
+                        core[_coreEvent].trigger('mouseOverElement', { uuid: elem.uuid, index: index, element: elem, });
+                        core[_tempData$1].set('hoverUUID', elem.uuid);
+                        isMouseOverElement = true;
+                    }
+                }
+            }
+        }
+        if (isMouseOverElement !== true && core[_tempData$1].get('hoverUUID') !== null) {
+            var uuid = core[_tempData$1].get('hoverUUID');
+            var index = core[_helper].getElementIndexByUUID(uuid || '');
+            if (index !== null)
+                core[_coreEvent].trigger('mouseLeaveElement', { uuid: uuid, index: index, element: core[_data].elements[index] });
+            core[_tempData$1].set('hoverUUID', null);
+        }
+        if (core[_coreEvent].has('mouseOverScreen'))
+            core[_coreEvent].trigger('mouseOverScreen', point);
+    };
+}
+function handleLeave(core) {
+    return function () {
+        if (core[_coreEvent].has('mouseLeaveScreen')) {
+            core[_coreEvent].trigger('mouseLeaveScreen', undefined);
+        }
+    };
+}
+function transfromElement(core, uuid, point, prevPoint, direction) {
+    if (!prevPoint) {
+        return null;
+    }
+    var result = core[_element].transformElement(core[_data], uuid, point, prevPoint, core[_board].getContext().getTransform().scale, direction);
+    core[_draw]();
+    return result;
+}
+var deepClone$7 = index$2.data.deepClone;
 var Core = (function () {
     function Core(mount, opts, config) {
-        var _h, _j, _k;
-        this[_a] = false;
-        this[_b] = Mode.NULL;
-        this[_c] = new CoreEvent();
-        this[_d] = null;
-        this[_e] = null;
-        this[_f] = false;
-        this[_g] = CursorStatus.NULL;
+        var _c, _d, _e;
+        this[_a] = new CoreEvent();
+        this[_b] = new TempData$2();
         this[_data] = { elements: [] };
         this[_opts$3] = opts;
-        this[_onlyRender] = opts.onlyRender === true;
+        this[_tempData$1].set('onlyRender', opts.onlyRender === true);
         this[_config] = mergeConfig(config || {});
-        this[_tempData$1] = new TempData$2();
-        this[_board] = new Board(mount, __assign$1(__assign$1({}, this[_opts$3]), { canScroll: (_h = config === null || config === void 0 ? void 0 : config.scrollWrapper) === null || _h === void 0 ? void 0 : _h.use, scrollConfig: {
-                color: ((_j = config === null || config === void 0 ? void 0 : config.scrollWrapper) === null || _j === void 0 ? void 0 : _j.color) || '#a0a0a0',
-                lineWidth: ((_k = config === null || config === void 0 ? void 0 : config.scrollWrapper) === null || _k === void 0 ? void 0 : _k.lineWidth) || 12,
+        this[_board] = new Board(mount, __assign$1(__assign$1({}, this[_opts$3]), { canScroll: (_c = config === null || config === void 0 ? void 0 : config.scrollWrapper) === null || _c === void 0 ? void 0 : _c.use, scrollConfig: {
+                color: ((_d = config === null || config === void 0 ? void 0 : config.scrollWrapper) === null || _d === void 0 ? void 0 : _d.color) || '#a0a0a0',
+                lineWidth: ((_e = config === null || config === void 0 ? void 0 : config.scrollWrapper) === null || _e === void 0 ? void 0 : _e.lineWidth) || 12,
             } }));
         this[_renderer] = new Renderer(this[_board]);
         this[_element] = new Element(this[_board].getContext());
@@ -3282,16 +3683,15 @@ var Core = (function () {
             helper: this[_helper],
             element: this[_element]
         });
-        this[_initEvent$2]();
-        this[_hasInited$1] = true;
+        initEvent(this);
     }
-    Core.prototype[(_a = _hasInited$1, _b = _mode, _c = _coreEvent, _d = _prevPoint, _e = _selectedDotDirection, _f = _onlyRender, _g = _cursorStatus, _draw)] = function (opts) {
-        var _h, _j;
+    Core.prototype[(_a = _coreEvent, _b = _tempData$1, _draw)] = function (opts) {
+        var _c, _d;
         var transfrom = this[_board].getTransform();
         this[_helper].updateConfig(this[_data], {
             width: this[_opts$3].width,
             height: this[_opts$3].height,
-            canScroll: ((_j = (_h = this[_config]) === null || _h === void 0 ? void 0 : _h.scrollWrapper) === null || _j === void 0 ? void 0 : _j.use) === true,
+            canScroll: ((_d = (_c = this[_config]) === null || _c === void 0 ? void 0 : _c.scrollWrapper) === null || _d === void 0 ? void 0 : _d.use) === true,
             selectedUUID: this[_tempData$1].get('selectedUUID'),
             selectedUUIDList: this[_tempData$1].get('selectedUUIDList'),
             devicePixelRatio: this[_opts$3].devicePixelRatio,
@@ -3301,55 +3701,51 @@ var Core = (function () {
         });
         this[_renderer].render(this[_data], this[_helper].getConfig(), (opts === null || opts === void 0 ? void 0 : opts.resourceChangeUUIDs) || []);
     };
+    Core.prototype.getElement = function (uuid) {
+        return getElement(this, uuid);
+    };
+    Core.prototype.getElementByIndex = function (index) {
+        return getElementByIndex(this, index);
+    };
+    Core.prototype.selectElementByIndex = function (index, opts) {
+        return selectElementByIndex(this, index, opts);
+    };
+    Core.prototype.selectElement = function (uuid, opts) {
+        return selectElement(this, uuid, opts);
+    };
+    Core.prototype.moveUpElement = function (uuid) {
+        return moveUpElement(this, uuid);
+    };
+    Core.prototype.moveDownElement = function (uuid) {
+        return moveDownElement(this, uuid);
+    };
+    Core.prototype.updateElement = function (elem) {
+        return updateElement(this, elem);
+    };
+    Core.prototype.addElement = function (elem) {
+        return addElement(this, elem);
+    };
+    Core.prototype.deleteElement = function (uuid) {
+        return deleteElement(this, uuid);
+    };
+    Core.prototype.insertElementBefore = function (elem, beforeUUID) {
+        return insertElementBefore(this, elem, beforeUUID);
+    };
+    Core.prototype.insertElementBeforeIndex = function (elem, index) {
+        return insertElementBeforeIndex(this, elem, index);
+    };
+    Core.prototype.getSelectedElements = function () {
+        return getSelectedElements(this);
+    };
+    Core.prototype.insertElementAfter = function (elem, beforeUUID) {
+        return insertElementAfter(this, elem, beforeUUID);
+    };
+    Core.prototype.insertElementAfterIndex = function (elem, index) {
+        return insertElementAfterIndex(this, elem, index);
+    };
     Core.prototype.resetSize = function (opts) {
         this[_opts$3] = __assign$1(__assign$1({}, this[_opts$3]), opts);
         this[_board].resetSize(opts);
-        this[_draw]();
-    };
-    Core.prototype.selectElementByIndex = function (index, opts) {
-        if (this[_onlyRender] === true)
-            return;
-        if (this[_data].elements[index]) {
-            var uuid = this[_data].elements[index].uuid;
-            if ((opts === null || opts === void 0 ? void 0 : opts.useMode) === true) {
-                this[_mode] = Mode.SELECT_ELEMENT;
-            }
-            else {
-                this[_mode] = Mode.NULL;
-            }
-            if (typeof uuid === 'string') {
-                this[_tempData$1].set('selectedUUID', uuid);
-                this[_tempData$1].set('selectedUUIDList', []);
-            }
-            this[_draw]();
-        }
-    };
-    Core.prototype.selectElement = function (uuid, opts) {
-        if (this[_onlyRender] === true)
-            return;
-        var index = this[_helper].getElementIndexByUUID(uuid);
-        if (typeof index === 'number' && index >= 0) {
-            this.selectElementByIndex(index, opts);
-        }
-    };
-    Core.prototype.moveUpElement = function (uuid) {
-        var index = this[_helper].getElementIndexByUUID(uuid);
-        if (typeof index === 'number' && index >= 0 && index < this[_data].elements.length - 1) {
-            var temp = this[_data].elements[index];
-            this[_data].elements[index] = this[_data].elements[index + 1];
-            this[_data].elements[index + 1] = temp;
-        }
-        this[_emitChangeData]();
-        this[_draw]();
-    };
-    Core.prototype.moveDownElement = function (uuid) {
-        var index = this[_helper].getElementIndexByUUID(uuid);
-        if (typeof index === 'number' && index > 0 && index < this[_data].elements.length) {
-            var temp = this[_data].elements[index];
-            this[_data].elements[index] = this[_data].elements[index - 1];
-            this[_data].elements[index - 1] = temp;
-        }
-        this[_emitChangeData]();
         this[_draw]();
     };
     Core.prototype.scale = function (ratio) {
@@ -3379,73 +3775,15 @@ var Core = (function () {
         };
     };
     Core.prototype.getData = function () {
-        return deepClone$6(this[_data]);
+        return deepClone$7(this[_data]);
     };
     Core.prototype.setData = function (data, opts) {
         var resourceChangeUUIDs = diffElementResourceChangeList(this[_data], data);
-        this[_data] = this[_element].initData(deepClone$6(parseData(data)));
+        this[_data] = this[_element].initData(deepClone$7(parseData(data)));
         if (opts && opts.triggerChangeEvent === true) {
             this[_emitChangeData]();
         }
         this[_draw]({ resourceChangeUUIDs: resourceChangeUUIDs });
-    };
-    Core.prototype.updateElement = function (elem) {
-        return updateElement(this, elem);
-    };
-    Core.prototype.addElement = function (elem) {
-        var _elem = deepClone$6(elem);
-        _elem.uuid = createUUID$4();
-        this[_data].elements.push(_elem);
-        this[_emitChangeData]();
-        this[_draw]();
-        return _elem.uuid;
-    };
-    Core.prototype.deleteElement = function (uuid) {
-        var index = this[_element].getElementIndex(this[_data], uuid);
-        if (index >= 0) {
-            this[_data].elements.splice(index, 1);
-            this[_emitChangeData]();
-            this[_draw]();
-        }
-    };
-    Core.prototype.insertElementBefore = function (elem, beforeUUID) {
-        var index = this[_helper].getElementIndexByUUID(beforeUUID);
-        if (index !== null) {
-            return this.insertElementBeforeIndex(elem, index);
-        }
-        return null;
-    };
-    Core.prototype.insertElementBeforeIndex = function (elem, index) {
-        var _elem = deepClone$6(elem);
-        _elem.uuid = createUUID$4();
-        if (index >= 0) {
-            this[_data].elements.splice(index, 0, _elem);
-            this[_emitChangeData]();
-            this[_draw]();
-            return _elem.uuid;
-        }
-        return null;
-    };
-    Core.prototype.getSelectedElements = function () {
-        return getSelectedElements(this);
-    };
-    Core.prototype.insertElementAfter = function (elem, beforeUUID) {
-        var index = this[_helper].getElementIndexByUUID(beforeUUID);
-        if (index !== null) {
-            return this.insertElementAfterIndex(elem, index);
-        }
-        return null;
-    };
-    Core.prototype.insertElementAfterIndex = function (elem, index) {
-        var _elem = deepClone$6(elem);
-        _elem.uuid = createUUID$4();
-        if (index >= 0) {
-            this[_data].elements.splice(index + 1, 0, _elem);
-            this[_emitChangeData]();
-            this[_draw]();
-            return _elem.uuid;
-        }
-        return null;
     };
     Core.prototype.clearOperation = function () {
         this[_tempData$1].clear();
@@ -3472,233 +3810,6 @@ var Core = (function () {
     Core.prototype.__getOriginContext = function () {
         return this[_board].getOriginContext();
     };
-    Core.prototype[_initEvent$2] = function () {
-        if (this[_hasInited$1] === true) {
-            return;
-        }
-        this[_board].on('hover', time.throttle(this[_handleHover].bind(this), 32));
-        this[_board].on('leave', time.throttle(this[_handleLeave].bind(this), 32));
-        this[_board].on('point', time.throttle(this[_handleClick].bind(this), 16));
-        this[_board].on('doubleClick', this[_handleDoubleClick].bind(this));
-        if (this[_onlyRender] === true) {
-            return;
-        }
-        this[_board].on('point', this[_handlePoint].bind(this));
-        this[_board].on('moveStart', this[_handleMoveStart].bind(this));
-        this[_board].on('move', time.throttle(this[_handleMove].bind(this), 16));
-        this[_board].on('moveEnd', this[_handleMoveEnd].bind(this));
-    };
-    Core.prototype[_handleDoubleClick] = function (point) {
-        var _h;
-        var _j = this[_element].isPointInElement(point, this[_data]), index = _j[0], uuid = _j[1];
-        if (index >= 0 && uuid) {
-            this[_coreEvent].trigger('screenDoubleClickElement', { index: index, uuid: uuid, element: deepClone$6((_h = this[_data].elements) === null || _h === void 0 ? void 0 : _h[index]) });
-        }
-        this[_draw]();
-    };
-    Core.prototype[_handleClick] = function (point) {
-        var _h;
-        var _j = this[_element].isPointInElement(point, this[_data]), index = _j[0], uuid = _j[1];
-        if (index >= 0 && uuid) {
-            this[_coreEvent].trigger('screenClickElement', { index: index, uuid: uuid, element: deepClone$6((_h = this[_data].elements) === null || _h === void 0 ? void 0 : _h[index]) });
-        }
-        this[_draw]();
-    };
-    Core.prototype[_handlePoint] = function (point) {
-        var _h, _j, _k;
-        if (!this[_mapper].isEffectivePoint(point)) {
-            return;
-        }
-        if (this[_helper].isPointInElementList(point, this[_data])) {
-            this[_mode] = Mode.SELECT_ELEMENT_LIST;
-        }
-        else {
-            var _l = this[_helper].isPointInElementWrapperDot(point), uuid = _l[0], direction = _l[1];
-            if (uuid && direction) {
-                this[_mode] = Mode.SELECT_ELEMENT_WRAPPER_DOT;
-                this[_selectedDotDirection] = direction;
-                this[_tempData$1].set('selectedUUID', uuid);
-            }
-            else {
-                var _m = this[_element].isPointInElement(point, this[_data]), index = _m[0], uuid_1 = _m[1];
-                if (index >= 0 && ((_j = (_h = this[_data].elements[index]) === null || _h === void 0 ? void 0 : _h.operation) === null || _j === void 0 ? void 0 : _j.invisible) !== true) {
-                    this.selectElementByIndex(index, { useMode: true });
-                    if (typeof uuid_1 === 'string' && this[_coreEvent].has('screenSelectElement')) {
-                        this[_coreEvent].trigger('screenSelectElement', { index: index, uuid: uuid_1, element: deepClone$6((_k = this[_data].elements) === null || _k === void 0 ? void 0 : _k[index]) });
-                        this[_emitChangeScreen]();
-                    }
-                    this[_mode] = Mode.SELECT_ELEMENT;
-                }
-                else {
-                    this[_tempData$1].set('selectedUUIDList', []);
-                    this[_mode] = Mode.SELECT_AREA;
-                }
-            }
-        }
-        this[_draw]();
-    };
-    Core.prototype[_handleMoveStart] = function (point) {
-        this[_prevPoint] = point;
-        var uuid = this[_tempData$1].get('selectedUUID');
-        if (this[_mode] === Mode.SELECT_ELEMENT_LIST) ;
-        else if (this[_mode] === Mode.SELECT_ELEMENT) {
-            if (typeof uuid === 'string' && this[_coreEvent].has('screenMoveElementStart')) {
-                this[_coreEvent].trigger('screenMoveElementStart', {
-                    index: this[_element].getElementIndex(this[_data], uuid),
-                    uuid: uuid,
-                    x: point.x,
-                    y: point.y
-                });
-            }
-        }
-        else if (this[_mode] === Mode.SELECT_AREA) {
-            this[_helper].startSelectArea(point);
-        }
-    };
-    Core.prototype[_handleMove] = function (point) {
-        if (this[_mode] === Mode.SELECT_ELEMENT_LIST) {
-            this[_dragElements](this[_tempData$1].get('selectedUUIDList'), point, this[_prevPoint]);
-            this[_draw]();
-            this[_cursorStatus] = CursorStatus.DRAGGING;
-        }
-        else if (typeof this[_tempData$1].get('selectedUUID') === 'string') {
-            if (this[_mode] === Mode.SELECT_ELEMENT) {
-                this[_dragElements]([this[_tempData$1].get('selectedUUID')], point, this[_prevPoint]);
-                this[_draw]();
-                this[_cursorStatus] = CursorStatus.DRAGGING;
-            }
-            else if (this[_mode] === Mode.SELECT_ELEMENT_WRAPPER_DOT && this[_selectedDotDirection]) {
-                this[_transfromElement](this[_tempData$1].get('selectedUUID'), point, this[_prevPoint], this[_selectedDotDirection]);
-                this[_cursorStatus] = CursorStatus.DRAGGING;
-            }
-        }
-        else if (this[_mode] === Mode.SELECT_AREA) {
-            this[_helper].changeSelectArea(point);
-            this[_draw]();
-        }
-        this[_prevPoint] = point;
-    };
-    Core.prototype[_handleMoveEnd] = function (point) {
-        var uuid = this[_tempData$1].get('selectedUUID');
-        if (typeof uuid === 'string') {
-            var index = this[_element].getElementIndex(this[_data], uuid);
-            var elem = this[_data].elements[index];
-            if (elem) {
-                if (this[_coreEvent].has('screenMoveElementEnd')) {
-                    this[_coreEvent].trigger('screenMoveElementEnd', {
-                        index: index,
-                        uuid: uuid,
-                        x: point.x,
-                        y: point.y
-                    });
-                }
-                if (this[_coreEvent].has('screenChangeElement')) {
-                    this[_coreEvent].trigger('screenChangeElement', {
-                        index: index,
-                        uuid: uuid,
-                        width: elem.w,
-                        height: elem.h,
-                        angle: elem.angle || 0
-                    });
-                }
-                this[_emitChangeData]();
-            }
-        }
-        else if (this[_mode] === Mode.SELECT_AREA) {
-            var uuids = this[_helper].calcSelectedElements(this[_data]);
-            if (uuids.length > 0) {
-                this[_tempData$1].set('selectedUUIDList', uuids);
-                this[_tempData$1].set('selectedUUID', null);
-            }
-            else {
-                this[_mode] = Mode.NULL;
-            }
-            this[_helper].clearSelectedArea();
-            this[_draw]();
-        }
-        if (this[_mode] !== Mode.SELECT_ELEMENT) {
-            this[_tempData$1].set('selectedUUID', null);
-        }
-        this[_prevPoint] = null;
-        this[_cursorStatus] = CursorStatus.NULL;
-        this[_mode] = Mode.NULL;
-    };
-    Core.prototype[_handleHover] = function (point) {
-        var _h, _j;
-        var isMouseOverElement = false;
-        if (this[_mode] === Mode.SELECT_AREA) {
-            if (this[_onlyRender] !== true)
-                this[_board].resetCursor();
-        }
-        else if (this[_cursorStatus] === CursorStatus.NULL) {
-            var _k = this[_mapper].judgePointCursor(point, this[_data]), cursor = _k.cursor, elementUUID = _k.elementUUID;
-            if (this[_onlyRender] !== true)
-                this[_board].setCursor(cursor);
-            if (elementUUID) {
-                var index = this[_helper].getElementIndexByUUID(elementUUID);
-                if (index !== null && index >= 0) {
-                    var elem = this[_data].elements[index];
-                    if (((_h = elem === null || elem === void 0 ? void 0 : elem.operation) === null || _h === void 0 ? void 0 : _h.lock) === true || ((_j = elem === null || elem === void 0 ? void 0 : elem.operation) === null || _j === void 0 ? void 0 : _j.invisible) === true) {
-                        this[_board].resetCursor();
-                        return;
-                    }
-                    if (this[_tempData$1].get('hoverUUID') !== elem.uuid) {
-                        var preIndex = this[_helper].getElementIndexByUUID(this[_tempData$1].get('hoverUUID') || '');
-                        if (preIndex !== null && this[_data].elements[preIndex]) {
-                            this[_coreEvent].trigger('mouseLeaveElement', {
-                                uuid: this[_tempData$1].get('hoverUUID'),
-                                index: preIndex,
-                                element: this[_data].elements[preIndex]
-                            });
-                        }
-                    }
-                    if (elem) {
-                        this[_coreEvent].trigger('mouseOverElement', { uuid: elem.uuid, index: index, element: elem, });
-                        this[_tempData$1].set('hoverUUID', elem.uuid);
-                        isMouseOverElement = true;
-                    }
-                }
-            }
-        }
-        if (isMouseOverElement !== true && this[_tempData$1].get('hoverUUID') !== null) {
-            var uuid = this[_tempData$1].get('hoverUUID');
-            var index = this[_helper].getElementIndexByUUID(uuid || '');
-            if (index !== null)
-                this[_coreEvent].trigger('mouseLeaveElement', { uuid: uuid, index: index, element: this[_data].elements[index] });
-            this[_tempData$1].set('hoverUUID', null);
-        }
-        if (this[_coreEvent].has('mouseOverScreen'))
-            this[_coreEvent].trigger('mouseOverScreen', point);
-    };
-    Core.prototype[_handleLeave] = function () {
-        if (this[_coreEvent].has('mouseLeaveScreen'))
-            this[_coreEvent].trigger('mouseLeaveScreen', undefined);
-    };
-    Core.prototype[_dragElements] = function (uuids, point, prevPoint) {
-        var _this = this;
-        if (!prevPoint) {
-            return;
-        }
-        uuids.forEach(function (uuid) {
-            var _h, _j;
-            var idx = _this[_helper].getElementIndexByUUID(uuid);
-            if (idx === null)
-                return;
-            var elem = _this[_data].elements[idx];
-            if (((_h = elem === null || elem === void 0 ? void 0 : elem.operation) === null || _h === void 0 ? void 0 : _h.lock) !== true && ((_j = elem === null || elem === void 0 ? void 0 : elem.operation) === null || _j === void 0 ? void 0 : _j.invisible) !== true) {
-                _this[_element].dragElement(_this[_data], uuid, point, prevPoint, _this[_board].getContext().getTransform().scale);
-            }
-        });
-        this[_draw]();
-    };
-    Core.prototype[_transfromElement] = function (uuid, point, prevPoint, direction) {
-        if (!prevPoint) {
-            return null;
-        }
-        var result = this[_element].transformElement(this[_data], uuid, point, prevPoint, this[_board].getContext().getTransform().scale, direction);
-        this[_draw]();
-        return result;
-    };
     Core.prototype[_emitChangeScreen] = function () {
         if (this[_coreEvent].has('changeScreen')) {
             this[_coreEvent].trigger('changeScreen', __assign$1({}, this.getScreenTransform()));
@@ -3706,10 +3817,13 @@ var Core = (function () {
     };
     Core.prototype[_emitChangeData] = function () {
         if (this[_coreEvent].has('changeData')) {
-            this[_coreEvent].trigger('changeData', deepClone$6(this[_data]));
+            this[_coreEvent].trigger('changeData', deepClone$7(this[_data]));
         }
     };
-    var _a, _b, _c, _d, _e, _f, _g;
+    Core.prototype[_todo] = function () {
+        console.log(this[_mapper]);
+    };
+    var _a, _b;
     Core.is = is$3;
     Core.check = check;
     return Core;
@@ -3768,6 +3882,9 @@ var KeyboardWatcher = (function () {
             }
             else if ((e.metaKey === true || e.ctrlKey === true) && e.key === 'x') {
                 _this.trigger('keyboardCut', undefined);
+            }
+            else if ((e.metaKey === true || e.ctrlKey === true) && e.key === 'z') {
+                _this.trigger('keyboardUndo', undefined);
             }
             else if (e.key === 'Backspace') {
                 _this.trigger('keyboardDelete', undefined);
@@ -4217,6 +4334,9 @@ function keyArrowRight(idraw) {
         idraw.scrollLeft(scrollLeft + keyArrowMoveDistance);
     }
 }
+function keyUndo(idraw) {
+    idraw.undo();
+}
 
 var _a, _b, _c;
 var iDraw = (function (_super) {
@@ -4273,7 +4393,8 @@ var iDraw = (function (_super) {
                 .on('keyboardArrowUp', function () { return keyArrowUp(_this); })
                 .on('keyboardArrowDown', function () { return keyArrowDown(_this); })
                 .on('keyboardArrowLeft', function () { return keyArrowLeft(_this); })
-                .on('keyboardArrowRight', function () { return keyArrowRight(_this); });
+                .on('keyboardArrowRight', function () { return keyArrowRight(_this); })
+                .on('keyboardUndo', function () { return keyUndo(_this); });
         }
         this[_hasInited] = true;
     };
