@@ -9,7 +9,7 @@
   },
   "dependencies": {
     "codemirror": "^5.62.0",
-    "idraw": "0.2.0-alpha.3",
+    "idraw": "0.2.0-alpha.5",
     "vue": "^3.0.5"
   },
   "devDependencies": {
