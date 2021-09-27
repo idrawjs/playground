@@ -1,13 +1,13 @@
-var extendStatics = function(d, b) {
-    extendStatics = Object.setPrototypeOf ||
+var extendStatics$1 = function(d, b) {
+    extendStatics$1 = Object.setPrototypeOf ||
         ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
         function (d, b) { for (var p in b) if (Object.prototype.hasOwnProperty.call(b, p)) d[p] = b[p]; };
-    return extendStatics(d, b);
+    return extendStatics$1(d, b);
 };
-function __extends(d, b) {
+function __extends$1(d, b) {
     if (typeof b !== "function" && b !== null)
         throw new TypeError("Class extends value " + String(b) + " is not a constructor or null");
-    extendStatics(d, b);
+    extendStatics$1(d, b);
     function __() { this.constructor = d; }
     d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 }
@@ -58,6 +58,19 @@ function __generator$1(thisArg, body) {
     }
 }
 
+var extendStatics = function(d, b) {
+    extendStatics = Object.setPrototypeOf ||
+        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+        function (d, b) { for (var p in b) if (Object.prototype.hasOwnProperty.call(b, p)) d[p] = b[p]; };
+    return extendStatics(d, b);
+};
+function __extends(d, b) {
+    if (typeof b !== "function" && b !== null)
+        throw new TypeError("Class extends value " + String(b) + " is not a constructor or null");
+    extendStatics(d, b);
+    function __() { this.constructor = d; }
+    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+}
 var __assign$1 = function() {
     __assign$1 = Object.assign || function __assign(t) {
         for (var s, i = 1, n = arguments.length; i < n; i++) {
@@ -1921,13 +1934,21 @@ function drawElementWrapper(ctx, config) {
             ctx.closePath();
             ctx.setFillStyle(wrapper.color);
             [
-                wrapper.dots.topLeft, wrapper.dots.top, wrapper.dots.topRight, wrapper.dots.right,
-                wrapper.dots.bottomRight, wrapper.dots.bottom, wrapper.dots.bottomLeft, wrapper.dots.left,
+                wrapper.dots.topLeft,
+                wrapper.dots.top,
+                wrapper.dots.topRight,
+                wrapper.dots.right,
+                wrapper.dots.bottomRight,
+                wrapper.dots.bottom,
+                wrapper.dots.bottomLeft,
+                wrapper.dots.left,
             ].forEach(function (dot) {
-                ctx.beginPath();
-                ctx.arc(dot.x, dot.y, wrapper.dotSize, 0, Math.PI * 2);
-                ctx.fill();
-                ctx.closePath();
+                if (dot.invisible !== true) {
+                    ctx.beginPath();
+                    ctx.arc(dot.x, dot.y, wrapper.dotSize, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.closePath();
+                }
             });
         }
         else {
@@ -2223,7 +2244,18 @@ function limitNum(num) {
 function limitAngle(angle) {
     return limitNum(angle % 360);
 }
+var elementTypes = {
+    'text': {},
+    'rect': {},
+    'image': {},
+    'svg': {},
+    'circle': {},
+    'html': {},
+};
+var elementNames = Object.keys(elementTypes);
+var LIMIT_QBLIQUE_ANGLE = 15;
 var createUUID$1 = index$2.uuid.createUUID;
+var limitQbliqueAngle$1 = LIMIT_QBLIQUE_ANGLE;
 var Element = (function () {
     function Element(ctx) {
         this._ctx = ctx;
@@ -2295,71 +2327,20 @@ var Element = (function () {
         var moveX = (point.x - prevPoint.x) / scale;
         var moveY = (point.y - prevPoint.y) / scale;
         var elem = data.elements[index];
-        switch (direction) {
-            case 'top-left': {
-                if (elem.w - moveX > 0 && elem.h - moveY > 0) {
-                    elem.x += moveX;
-                    elem.y += moveY;
-                    elem.w -= moveX;
-                    elem.h -= moveY;
-                }
-                break;
-            }
-            case 'top': {
-                if (elem.h - moveY > 0) {
-                    elem.y += moveY;
-                    elem.h -= moveY;
-                }
-                break;
-            }
-            case 'top-right': {
-                if (elem.h - moveY > 0 && elem.w + moveX > 0) {
-                    elem.y += moveY;
-                    elem.w += moveX;
-                    elem.h -= moveY;
-                }
-                break;
-            }
-            case 'right': {
-                if (elem.w + moveX > 0) {
-                    elem.w += moveX;
-                }
-                break;
-            }
-            case 'bottom-right': {
-                if (elem.w + moveX > 0 && elem.h + moveY > 0) {
-                    elem.w += moveX;
-                    elem.h += moveY;
-                }
-                break;
-            }
-            case 'bottom': {
-                if (elem.h + moveY > 0) {
-                    elem.h += moveY;
-                }
-                break;
-            }
-            case 'bottom-left': {
-                if (elem.w - moveX > 0 && elem.h + moveY > 0) {
-                    elem.x += moveX;
-                    elem.w -= moveX;
-                    elem.h += moveY;
-                }
-                break;
-            }
-            case 'left': {
-                if (elem.w - moveX > 0) {
-                    elem.x += moveX;
-                    elem.w -= moveX;
-                }
-                break;
-            }
-            case 'rotate': {
-                var center = calcElementCenter(elem);
-                var radian = calcRadian(center, prevPoint, point);
-                elem.angle = (elem.angle || 0) + parseRadianToAngle(radian);
-                break;
-            }
+        if ([
+            'top-left', 'top', 'top-right', 'right',
+            'bottom-right', 'bottom', 'bottom-left', 'left'
+        ].includes(direction)) {
+            var p = calcuScaleElemPosition(elem, moveX, moveY, direction);
+            elem.x = p.x;
+            elem.y = p.y;
+            elem.w = p.w;
+            elem.h = p.h;
+        }
+        else if (direction === 'rotate') {
+            var center = calcElementCenter(elem);
+            var radian = calcRadian(center, prevPoint, point);
+            elem.angle = (elem.angle || 0) + parseRadianToAngle(radian);
         }
         this.limitElementAttrs(elem);
         return {
@@ -2387,6 +2368,268 @@ var Element = (function () {
     };
     return Element;
 }());
+function calcuScaleElemPosition(elem, moveX, moveY, direction, scale) {
+    var p = { x: elem.x, y: elem.y, w: elem.w, h: elem.h };
+    elem.angle;
+    switch (direction) {
+        case 'top-left': {
+            if (elem.w - moveX > 0 && elem.h - moveY > 0) {
+                p.x += moveX;
+                p.y += moveY;
+                p.w -= moveX;
+                p.h -= moveY;
+            }
+            break;
+        }
+        case 'top': {
+            if (elem.angle === 0 || Math.abs(elem.angle) < limitQbliqueAngle$1) {
+                if (p.h - moveY > 0) {
+                    p.y += moveY;
+                    p.h -= moveY;
+                }
+            }
+            else if (elem.angle > 0 || elem.angle < 0) {
+                var angle_1 = elem.angle > 0 ? elem.angle : Math.max(0, elem.angle + 360);
+                var moveDist = calcMoveDist(moveX, moveY);
+                var centerX = p.x + elem.w / 2;
+                var centerY = p.y + elem.h / 2;
+                if (angle_1 < 90) {
+                    moveDist = 0 - changeMoveDistDirect(moveDist, moveY);
+                    var radian = parseRadian(angle_1);
+                    var centerMoveDist = moveDist / 2;
+                    centerX = centerX + centerMoveDist * Math.sin(radian);
+                    centerY = centerY - centerMoveDist * Math.cos(radian);
+                }
+                else if (angle_1 < 180) {
+                    moveDist = changeMoveDistDirect(moveDist, moveX);
+                    var radian = parseRadian(angle_1 - 90);
+                    var centerMoveDist = moveDist / 2;
+                    centerX = centerX + centerMoveDist * Math.cos(radian);
+                    centerY = centerY + centerMoveDist * Math.sin(radian);
+                }
+                else if (angle_1 < 270) {
+                    moveDist = changeMoveDistDirect(moveDist, moveY);
+                    var radian = parseRadian(angle_1 - 180);
+                    var centerMoveDist = moveDist / 2;
+                    centerX = centerX - centerMoveDist * Math.sin(radian);
+                    centerY = centerY + centerMoveDist * Math.cos(radian);
+                }
+                else if (angle_1 < 360) {
+                    moveDist = 0 - changeMoveDistDirect(moveDist, moveX);
+                    var radian = parseRadian(angle_1 - 270);
+                    var centerMoveDist = moveDist / 2;
+                    centerX = centerX - centerMoveDist * Math.cos(radian);
+                    centerY = centerY - centerMoveDist * Math.sin(radian);
+                }
+                if (p.h + moveDist > 0) {
+                    p.h = p.h + moveDist;
+                    p.x = centerX - p.w / 2;
+                    p.y = centerY - p.h / 2;
+                }
+            }
+            else {
+                if (p.h - moveY > 0) {
+                    p.y += moveY;
+                    p.h -= moveY;
+                }
+            }
+            break;
+        }
+        case 'top-right': {
+            if (p.h - moveY > 0 && p.w + moveX > 0) {
+                p.y += moveY;
+                p.w += moveX;
+                p.h -= moveY;
+            }
+            break;
+        }
+        case 'right': {
+            if (elem.angle === 0 || Math.abs(elem.angle) < limitQbliqueAngle$1) {
+                if (elem.w + moveX > 0) {
+                    p.w += moveX;
+                }
+            }
+            else if (elem.angle > 0 || elem.angle < 0) {
+                var angle_2 = elem.angle > 0 ? elem.angle : Math.max(0, elem.angle + 360);
+                var moveDist = calcMoveDist(moveX, moveY);
+                var centerX = p.x + elem.w / 2;
+                var centerY = p.y + elem.h / 2;
+                if (angle_2 < 90) {
+                    moveDist = changeMoveDistDirect(moveDist, moveY);
+                    var radian = parseRadian(angle_2);
+                    var centerMoveDist = moveDist / 2;
+                    centerX = centerX + centerMoveDist * Math.cos(radian);
+                    centerY = centerY + centerMoveDist * Math.sin(radian);
+                }
+                else if (angle_2 < 180) {
+                    moveDist = changeMoveDistDirect(moveDist, moveY);
+                    var radian = parseRadian(angle_2 - 90);
+                    var centerMoveDist = moveDist / 2;
+                    centerX = centerX - centerMoveDist * Math.sin(radian);
+                    centerY = centerY + centerMoveDist * Math.cos(radian);
+                }
+                else if (angle_2 < 270) {
+                    moveDist = changeMoveDistDirect(moveDist, moveY);
+                    var radian = parseRadian(angle_2 - 180);
+                    var centerMoveDist = moveDist / 2;
+                    centerX = centerX + centerMoveDist * Math.cos(radian);
+                    centerY = centerY + centerMoveDist * Math.sin(radian);
+                    moveDist = 0 - moveDist;
+                }
+                else if (angle_2 < 360) {
+                    moveDist = changeMoveDistDirect(moveDist, moveX);
+                    var radian = parseRadian(angle_2 - 270);
+                    var centerMoveDist = moveDist / 2;
+                    centerX = centerX + centerMoveDist * Math.sin(radian);
+                    centerY = centerY - centerMoveDist * Math.cos(radian);
+                }
+                if (p.w + moveDist > 0) {
+                    p.w = p.w + moveDist;
+                    p.x = centerX - p.w / 2;
+                    p.y = centerY - p.h / 2;
+                }
+            }
+            else {
+                if (elem.w + moveX > 0) {
+                    p.w += moveX;
+                }
+            }
+            break;
+        }
+        case 'bottom-right': {
+            if (elem.w + moveX > 0 && elem.h + moveY > 0) {
+                p.w += moveX;
+                p.h += moveY;
+            }
+            break;
+        }
+        case 'bottom': {
+            if (elem.angle === 0 || Math.abs(elem.angle) < limitQbliqueAngle$1) {
+                if (elem.h + moveY > 0) {
+                    p.h += moveY;
+                }
+            }
+            else if (elem.angle > 0 || elem.angle < 0) {
+                var angle_3 = elem.angle > 0 ? elem.angle : Math.max(0, elem.angle + 360);
+                var moveDist = calcMoveDist(moveX, moveY);
+                var centerX = p.x + elem.w / 2;
+                var centerY = p.y + elem.h / 2;
+                if (angle_3 < 90) {
+                    moveDist = changeMoveDistDirect(moveDist, moveY);
+                    var radian = parseRadian(angle_3);
+                    var centerMoveDist = moveDist / 2;
+                    centerX = centerX - centerMoveDist * Math.sin(radian);
+                    centerY = centerY + centerMoveDist * Math.cos(radian);
+                }
+                else if (angle_3 < 180) {
+                    moveDist = 0 - changeMoveDistDirect(moveDist, moveX);
+                    var radian = parseRadian(angle_3 - 90);
+                    var centerMoveDist = moveDist / 2;
+                    centerX = centerX - centerMoveDist * Math.cos(radian);
+                    centerY = centerY - centerMoveDist * Math.sin(radian);
+                }
+                else if (angle_3 < 270) {
+                    moveDist = changeMoveDistDirect(moveDist, moveX);
+                    var radian = parseRadian(angle_3 - 180);
+                    var centerMoveDist = moveDist / 2;
+                    centerX = centerX + centerMoveDist * Math.sin(radian);
+                    centerY = centerY - centerMoveDist * Math.cos(radian);
+                }
+                else if (angle_3 < 360) {
+                    moveDist = changeMoveDistDirect(moveDist, moveX);
+                    var radian = parseRadian(angle_3 - 270);
+                    var centerMoveDist = moveDist / 2;
+                    centerX = centerX + centerMoveDist * Math.cos(radian);
+                    centerY = centerY + centerMoveDist * Math.sin(radian);
+                }
+                if (p.h + moveDist > 0) {
+                    p.h = p.h + moveDist;
+                    p.x = centerX - p.w / 2;
+                    p.y = centerY - p.h / 2;
+                }
+            }
+            else {
+                if (elem.h + moveY > 0) {
+                    p.h += moveY;
+                }
+            }
+            break;
+        }
+        case 'bottom-left': {
+            if (elem.w - moveX > 0 && elem.h + moveY > 0) {
+                p.x += moveX;
+                p.w -= moveX;
+                p.h += moveY;
+            }
+            break;
+        }
+        case 'left': {
+            if (elem.angle === 0 || Math.abs(elem.angle) < limitQbliqueAngle$1) {
+                if (elem.w - moveX > 0) {
+                    p.x += moveX;
+                    p.w -= moveX;
+                }
+            }
+            else if (elem.angle > 0 || elem.angle < 0) {
+                var angle_4 = elem.angle > 0 ? elem.angle : Math.max(0, elem.angle + 360);
+                var moveDist = calcMoveDist(moveX, moveY);
+                var centerX = p.x + elem.w / 2;
+                var centerY = p.y + elem.h / 2;
+                if (angle_4 < 90) {
+                    moveDist = 0 - changeMoveDistDirect(moveDist, moveX);
+                    var radian = parseRadian(angle_4);
+                    var centerMoveDist = moveDist / 2;
+                    centerX = centerX - centerMoveDist * Math.cos(radian);
+                    centerY = centerY - centerMoveDist * Math.sin(radian);
+                }
+                else if (angle_4 < 180) {
+                    moveDist = changeMoveDistDirect(moveDist, moveX);
+                    var radian = parseRadian(angle_4 - 90);
+                    var centerMoveDist = moveDist / 2;
+                    centerX = centerX + centerMoveDist * Math.sin(radian);
+                    centerY = centerY - centerMoveDist * Math.cos(radian);
+                }
+                else if (angle_4 < 270) {
+                    moveDist = changeMoveDistDirect(moveDist, moveY);
+                    var radian = parseRadian(angle_4 - 180);
+                    var centerMoveDist = moveDist / 2;
+                    centerX = centerX + centerMoveDist * Math.cos(radian);
+                    centerY = centerY + centerMoveDist * Math.sin(radian);
+                }
+                else if (angle_4 < 360) {
+                    moveDist = changeMoveDistDirect(moveDist, moveY);
+                    var radian = parseRadian(angle_4 - 270);
+                    var centerMoveDist = moveDist / 2;
+                    centerX = centerX - centerMoveDist * Math.sin(radian);
+                    centerY = centerY + centerMoveDist * Math.cos(radian);
+                }
+                if (p.w + moveDist > 0) {
+                    p.w = p.w + moveDist;
+                    p.x = centerX - p.w / 2;
+                    p.y = centerY - p.h / 2;
+                }
+            }
+            else {
+                if (elem.w - moveX > 0) {
+                    p.x += moveX;
+                    p.w -= moveX;
+                }
+            }
+            break;
+        }
+    }
+    return p;
+}
+function parseRadian(angle) {
+    return angle * Math.PI / 180;
+}
+function calcMoveDist(moveX, moveY) {
+    return Math.sqrt(moveX * moveX + moveY * moveY);
+}
+function changeMoveDistDirect(moveDist, moveDirect) {
+    return moveDirect > 0 ? Math.abs(moveDist) : 0 - Math.abs(moveDist);
+}
+var limitQbliqueAngle = LIMIT_QBLIQUE_ANGLE;
 var deepClone$4 = index$2.data.deepClone;
 var Helper = (function () {
     function Helper(board, config) {
@@ -2418,10 +2661,11 @@ var Helper = (function () {
         var _a, _b;
         var ctx = this._ctx;
         var uuid = ((_b = (_a = this._helperConfig) === null || _a === void 0 ? void 0 : _a.selectedElementWrapper) === null || _b === void 0 ? void 0 : _b.uuid) || null;
-        var directIdx = null;
-        var direction = null;
+        var directIndex = null;
+        var selectedDotDirection = null;
+        var hoverDotDirection = null;
         if (!this._helperConfig.selectedElementWrapper) {
-            return [uuid, direction, directIdx];
+            return { uuid: uuid, selectedDotDirection: selectedDotDirection, directIndex: directIndex, hoverDotDirection: hoverDotDirection };
         }
         var wrapper = this._helperConfig.selectedElementWrapper;
         var dots = [
@@ -2444,6 +2688,7 @@ var Helper = (function () {
             'bottom',
             'bottom-right',
         ];
+        var hoverDirectionNames = index$2.data.deepClone(directionNames);
         var angleMoveNum = 0;
         if (data && uuid) {
             var elemIdx = this.getElementIndexByUUID(uuid);
@@ -2477,35 +2722,40 @@ var Helper = (function () {
             }
         }
         if (angleMoveNum > 0) {
-            directionNames = directionNames.slice(-angleMoveNum).concat(directionNames.slice(0, -angleMoveNum));
+            hoverDirectionNames = hoverDirectionNames.slice(-angleMoveNum).concat(hoverDirectionNames.slice(0, -angleMoveNum));
         }
         rotateContext(ctx, wrapper.translate, wrapper.radian || 0, function () {
             for (var i = 0; i < dots.length; i++) {
                 var dot = dots[i];
+                if (dot.invisible === true) {
+                    continue;
+                }
                 ctx.beginPath();
                 ctx.arc(dot.x, dot.y, wrapper.dotSize, 0, Math.PI * 2);
                 ctx.closePath();
                 if (ctx.isPointInPath(p.x, p.y)) {
-                    direction = directionNames[i];
+                    selectedDotDirection = directionNames[i];
+                    hoverDotDirection = hoverDirectionNames[i];
                 }
-                if (direction) {
-                    directIdx = i;
+                if (selectedDotDirection) {
+                    directIndex = i;
                     break;
                 }
             }
         });
-        if (direction === null) {
+        if (selectedDotDirection === null) {
             rotateContext(ctx, wrapper.translate, wrapper.radian || 0, function () {
                 var dot = wrapper.dots.rotate;
                 ctx.beginPath();
                 ctx.arc(dot.x, dot.y, wrapper.dotSize, 0, Math.PI * 2);
                 ctx.closePath();
                 if (ctx.isPointInPath(p.x, p.y)) {
-                    direction = 'rotate';
+                    selectedDotDirection = 'rotate';
+                    hoverDotDirection = 'rotate';
                 }
             });
         }
-        return [uuid, direction, directIdx];
+        return { uuid: uuid, selectedDotDirection: selectedDotDirection, hoverDotDirection: hoverDotDirection, directIndex: directIndex };
     };
     Helper.prototype.isPointInElementList = function (p, data) {
         var _a, _b;
@@ -2660,6 +2910,10 @@ var Helper = (function () {
         var lineDash = elemWrapper.lineDash.map(function (n) { return (n / scale); });
         var rotateLimit = 12;
         var bw = ((_a = elem.desc) === null || _a === void 0 ? void 0 : _a.borderWidth) || 0;
+        var hideObliqueDirection = false;
+        if (typeof elem.angle === 'number' && Math.abs(elem.angle) > limitQbliqueAngle) {
+            hideObliqueDirection = true;
+        }
         var wrapper = {
             uuid: elem.uuid,
             dotSize: dotSize,
@@ -2668,6 +2922,7 @@ var Helper = (function () {
                 topLeft: {
                     x: elem.x - dotSize - bw,
                     y: elem.y - dotSize - bw,
+                    invisible: hideObliqueDirection,
                 },
                 top: {
                     x: elem.x + elem.w / 2,
@@ -2676,6 +2931,7 @@ var Helper = (function () {
                 topRight: {
                     x: elem.x + elem.w + dotSize + bw,
                     y: elem.y - dotSize - bw,
+                    invisible: hideObliqueDirection,
                 },
                 right: {
                     x: elem.x + elem.w + dotSize + bw,
@@ -2684,6 +2940,7 @@ var Helper = (function () {
                 bottomRight: {
                     x: elem.x + elem.w + dotSize + bw,
                     y: elem.y + elem.h + dotSize + bw,
+                    invisible: hideObliqueDirection,
                 },
                 bottom: {
                     x: elem.x + elem.w / 2,
@@ -2692,6 +2949,7 @@ var Helper = (function () {
                 bottomLeft: {
                     x: elem.x - dotSize - bw,
                     y: elem.y + elem.h + dotSize + bw,
+                    invisible: hideObliqueDirection,
                 },
                 left: {
                     x: elem.x - dotSize - bw,
@@ -3027,7 +3285,8 @@ var Mapper = (function () {
         if (!this.isEffectivePoint(p)) {
             return { cursor: cursor, elementUUID: elementUUID };
         }
-        var _a = this[_helper$1].isPointInElementWrapperDot(p, data), uuid = _a[0], direction = _a[1];
+        var _a = this[_helper$1].isPointInElementWrapperDot(p, data), uuid = _a.uuid, hoverDotDirection = _a.hoverDotDirection;
+        var direction = hoverDotDirection;
         if (uuid && direction) {
             switch (direction) {
                 case 'top-right': {
@@ -3087,15 +3346,6 @@ var Mapper = (function () {
     };
     return Mapper;
 }());
-var elementTypes = {
-    'text': {},
-    'rect': {},
-    'image': {},
-    'svg': {},
-    'circle': {},
-    'html': {},
-};
-var elementNames = Object.keys(elementTypes);
 function parseData(data) {
     var result = {
         elements: [],
@@ -3125,33 +3375,97 @@ function isElement(elem) {
 function isNumber(num) {
     return (num >= 0 || num < 0);
 }
+var RendererEvent = (function () {
+    function RendererEvent() {
+        this._listeners = new Map();
+    }
+    RendererEvent.prototype.on = function (eventKey, callback) {
+        if (this._listeners.has(eventKey)) {
+            var callbacks = this._listeners.get(eventKey);
+            callbacks === null || callbacks === void 0 ? void 0 : callbacks.push(callback);
+            this._listeners.set(eventKey, callbacks || []);
+        }
+        else {
+            this._listeners.set(eventKey, [callback]);
+        }
+    };
+    RendererEvent.prototype.off = function (eventKey, callback) {
+        if (this._listeners.has(eventKey)) {
+            var callbacks = this._listeners.get(eventKey);
+            if (Array.isArray(callbacks)) {
+                for (var i = 0; i < (callbacks === null || callbacks === void 0 ? void 0 : callbacks.length); i++) {
+                    if (callbacks[i] === callback) {
+                        callbacks.splice(i, 1);
+                        break;
+                    }
+                }
+            }
+            this._listeners.set(eventKey, callbacks || []);
+        }
+    };
+    RendererEvent.prototype.trigger = function (eventKey, arg) {
+        var callbacks = this._listeners.get(eventKey);
+        if (Array.isArray(callbacks)) {
+            callbacks.forEach(function (cb) {
+                cb(arg);
+            });
+            return true;
+        }
+        else {
+            return false;
+        }
+    };
+    RendererEvent.prototype.has = function (name) {
+        if (this._listeners.has(name)) {
+            var list = this._listeners.get(name);
+            if (Array.isArray(list) && list.length > 0) {
+                return true;
+            }
+        }
+        return false;
+    };
+    return RendererEvent;
+}());
 var requestAnimationFrame = window.requestAnimationFrame;
 var deepClone$3 = index$2.data.deepClone;
 var DrawStatus;
 (function (DrawStatus) {
+    DrawStatus["NULL"] = "null";
     DrawStatus["FREE"] = "free";
     DrawStatus["DRAWING"] = "drawing";
+    DrawStatus["FREEZE"] = "freeze";
 })(DrawStatus || (DrawStatus = {}));
-var Renderer = (function () {
+var Renderer = (function (_super) {
+    __extends(Renderer, _super);
     function Renderer(board) {
-        var _this = this;
-        this._queue = [];
-        this._status = DrawStatus.FREE;
-        this._board = board;
-        this._loader = new Loader({
+        var _this = _super.call(this) || this;
+        _this._queue = [];
+        _this._status = DrawStatus.NULL;
+        _this._board = board;
+        _this._loader = new Loader({
             board: board,
             maxParallelNum: 6
         });
-        this._loader.on('load', function (res) {
+        _this._loader.on('load', function (res) {
             _this._drawFrame();
         });
-        this._loader.on('error', function (res) {
+        _this._loader.on('error', function (res) {
             console.log('Loader Error: ', res);
         });
-        this._loader.on('complete', function (res) {
+        _this._loader.on('complete', function (res) {
         });
+        return _this;
     }
+    Renderer.prototype.freeze = function () {
+        this._status = DrawStatus.FREEZE;
+    };
+    Renderer.prototype.thaw = function () {
+        this._status = DrawStatus.FREE;
+    };
     Renderer.prototype.render = function (data, helper, changeResourceUUIDs) {
+        if ([DrawStatus.FREEZE].includes(this._status)) {
+            return;
+        }
         var _data = deepClone$3({ data: data, helper: helper });
         this._queue.push(_data);
         if (this._status !== DrawStatus.DRAWING) {
@@ -3162,7 +3476,13 @@ var Renderer = (function () {
     };
     Renderer.prototype._drawFrame = function () {
         var _this = this;
+        if (this._status === DrawStatus.FREEZE) {
+            return;
+        }
         requestAnimationFrame(function () {
+            if (_this._status === DrawStatus.FREEZE) {
+                return;
+            }
             var ctx = _this._board.getContext();
             var item = _this._queue[0];
             var isLastFrame = false;
@@ -3193,6 +3513,11 @@ var Renderer = (function () {
             else {
                 _this._status = DrawStatus.FREE;
             }
+            _this.trigger('drawFrame', undefined);
+            if (_this._loader.isComplete() === true && _this._queue.length === 1 && _this._status === DrawStatus.FREE) {
+                _this.trigger('drawFrameComplete', undefined);
+                _this.freeze();
+            }
         });
     };
     Renderer.prototype._retainQueueOneItem = function () {
@@ -3203,7 +3528,7 @@ var Renderer = (function () {
         this._queue = [lastOne];
     };
     return Renderer;
-}());
+}(RendererEvent));
 var Mode;
 (function (Mode) {
     Mode["NULL"] = "null";
@@ -3227,6 +3552,7 @@ function createData() {
         selectedUUIDList: [],
         hoverUUID: null,
         selectedDotDirection: null,
+        hoverDotDirection: null,
         prevPoint: null,
     };
 }
@@ -3430,6 +3756,12 @@ function initEvent(core) {
     core[_board].on('moveStart', handleMoveStart(core));
     core[_board].on('move', time.throttle(handleMove(core), 16));
     core[_board].on('moveEnd', handleMoveEnd(core));
+    core[_renderer].on('drawFrame', function () {
+        core[_coreEvent].trigger('drawFrame', undefined);
+    });
+    core[_renderer].on('drawFrameComplete', function () {
+        core[_coreEvent].trigger('drawFrameComplete', undefined);
+    });
     core[_tempData$1].set('hasInited', true);
 }
 function handleDoubleClick(core) {
@@ -3455,10 +3787,10 @@ function handlePoint(core) {
             core[_tempData$1].set('mode', Mode.SELECT_ELEMENT_LIST);
         }
         else {
-            var _d = core[_helper].isPointInElementWrapperDot(point, core[_data]), uuid = _d[0], direction = _d[1];
-            if (uuid && direction) {
+            var _d = core[_helper].isPointInElementWrapperDot(point, core[_data]), uuid = _d.uuid, selectedDotDirection = _d.selectedDotDirection;
+            if (uuid && selectedDotDirection) {
                 core[_tempData$1].set('mode', Mode.SELECT_ELEMENT_WRAPPER_DOT);
-                core[_tempData$1].set('selectedDotDirection', direction);
+                core[_tempData$1].set('selectedDotDirection', selectedDotDirection);
                 core[_tempData$1].set('selectedUUID', uuid);
             }
             else {
@@ -3699,6 +4031,7 @@ var Core = (function () {
             scrollX: transfrom.scrollX,
             scrollY: transfrom.scrollY,
         });
+        this[_renderer].thaw();
         this[_renderer].render(this[_data], this[_helper].getConfig(), (opts === null || opts === void 0 ? void 0 : opts.resourceChangeUUIDs) || []);
     };
     Core.prototype.getElement = function (uuid) {
@@ -3787,6 +4120,7 @@ var Core = (function () {
     };
     Core.prototype.clearOperation = function () {
         this[_tempData$1].clear();
+        this[_tempData$1].set('onlyRender', this[_opts$3].onlyRender === true);
         this[_draw]();
     };
     Core.prototype.on = function (key, callback) {
@@ -3800,6 +4134,12 @@ var Core = (function () {
     };
     Core.prototype.pointContextToScreen = function (p) {
         return this[_board].pointContextToScreen(p);
+    };
+    Core.prototype.setOnlyRender = function () {
+        this[_tempData$1].set('onlyRender', true);
+    };
+    Core.prototype.cancelOnlyRender = function () {
+        this[_tempData$1].set('onlyRender', false);
     };
     Core.prototype.__getBoardContext = function () {
         return this[_board].getContext();
@@ -3840,14 +4180,18 @@ var defaultOptions = {
     disableKeyboard: true,
 };
 
+function createDefaultData() {
+    return {
+        isFocus: false,
+        doRecords: [],
+        unDoRecords: [],
+        clipboardElements: [],
+        isDownloading: false,
+    };
+}
 var TempData = (function () {
     function TempData() {
-        this._temp = {
-            isFocus: false,
-            doRecords: [],
-            unDoRecords: [],
-            clipboardElements: [],
-        };
+        this._temp = createDefaultData();
     }
     TempData.prototype.set = function (name, value) {
         this._temp[name] = value;
@@ -3856,12 +4200,7 @@ var TempData = (function () {
         return this._temp[name];
     };
     TempData.prototype.clear = function () {
-        this._temp = {
-            isFocus: false,
-            doRecords: [],
-            unDoRecords: [],
-            clipboardElements: [],
-        };
+        this._temp = createDefaultData();
     };
     return TempData;
 }());
@@ -4002,6 +4341,35 @@ function redo(idraw) {
         undoRecordCount: unDoRecords.length,
         data: (record === null || record === void 0 ? void 0 : record.data) || null,
     };
+}
+
+function exportDataURL(idraw, type, quality) {
+    return __awaiter$1(this, void 0, void 0, function () {
+        return __generator$1(this, function (_a) {
+            if (idraw[_tempData].get('isDownloading') === true) {
+                return [2, Promise.reject('Busy!')];
+            }
+            idraw[_tempData].set('isDownloading', true);
+            return [2, new Promise(function (resolve, reject) {
+                    var dataURL = '';
+                    function listenRenderFrameComplete() {
+                        idraw.off('drawFrameComplete', listenRenderFrameComplete);
+                        idraw[_tempData].set('isDownloading', false);
+                        var ctx = idraw.__getOriginContext();
+                        var canvas = ctx.canvas;
+                        dataURL = canvas.toDataURL(type, quality);
+                        resolve(dataURL);
+                    }
+                    try {
+                        idraw.on('drawFrameComplete', listenRenderFrameComplete);
+                        idraw.clearOperation();
+                    }
+                    catch (err) {
+                        reject(err);
+                    }
+                })];
+        });
+    });
 }
 
 function compose(middleware) {
@@ -4223,25 +4591,6 @@ var index = {
     }
 };
 
-function exportDataURL(idraw, type, quality) {
-    return __awaiter$1(this, void 0, void 0, function () {
-        var ctx, canvas, dataURL;
-        return __generator$1(this, function (_a) {
-            switch (_a.label) {
-                case 0:
-                    idraw.clearOperation();
-                    return [4, index.time.delay(300)];
-                case 1:
-                    _a.sent();
-                    ctx = idraw.__getOriginContext();
-                    canvas = ctx.canvas;
-                    dataURL = canvas.toDataURL(type, quality);
-                    return [2, dataURL];
-            }
-        });
-    });
-}
-
 function copyElements(idraw) {
     if (idraw[_tempData].get('isFocus') !== true) {
         return;
@@ -4340,7 +4689,7 @@ function keyUndo(idraw) {
 
 var _a, _b, _c;
 var iDraw = (function (_super) {
-    __extends(iDraw, _super);
+    __extends$1(iDraw, _super);
     function iDraw(mount, opts, config) {
         var _this = _super.call(this, mount, {
             width: opts.width || defaultOptions.width,
