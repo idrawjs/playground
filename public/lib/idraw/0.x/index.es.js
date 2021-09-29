@@ -258,12 +258,6 @@ var istype$2 = {
     promise: function (data) {
         return parsePrototype$1(data) === 'Promise';
     },
-    nodeList: function (data) {
-        return parsePrototype$1(data) === 'NodeList';
-    },
-    imageData: function (data) {
-        return parsePrototype$1(data) === 'ImageData';
-    }
 };
 var Image$1 = window.Image, Blob$1 = window.Blob, FileReader$1 = window.FileReader;
 function loadImage$2(src) {
@@ -1339,12 +1333,6 @@ var istype$1 = {
     promise: function (data) {
         return parsePrototype$2(data) === 'Promise';
     },
-    nodeList: function (data) {
-        return parsePrototype$2(data) === 'NodeList';
-    },
-    imageData: function (data) {
-        return parsePrototype$2(data) === 'ImageData';
-    }
 };
 var Image$2 = window.Image, Blob$2 = window.Blob, FileReader$2 = window.FileReader;
 function loadImage$1(src) {
@@ -3805,6 +3793,7 @@ function handlePoint(core) {
                 }
                 else {
                     core[_tempData$1].set('selectedUUIDList', []);
+                    core[_tempData$1].set('selectedUUID', null);
                     core[_tempData$1].set('mode', Mode.SELECT_AREA);
                 }
             }
@@ -4503,12 +4492,6 @@ var istype = {
     promise: function (data) {
         return parsePrototype(data) === 'Promise';
     },
-    nodeList: function (data) {
-        return parsePrototype(data) === 'NodeList';
-    },
-    imageData: function (data) {
-        return parsePrototype(data) === 'ImageData';
-    }
 };
 var Image = window.Image, Blob = window.Blob, FileReader = window.FileReader;
 function loadImage(src) {
