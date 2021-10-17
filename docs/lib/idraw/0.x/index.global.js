@@ -156,7 +156,7 @@ var iDraw = (function () {
             }, time);
         });
     }
-    function throttle$2(fn, timeout) {
+    function throttle$1(fn, timeout) {
         var timer = -1;
         return function () {
             var args = [];
@@ -379,7 +379,7 @@ var iDraw = (function () {
         time: {
             delay: delay$1,
             compose: compose$1,
-            throttle: throttle$2,
+            throttle: throttle$1,
         },
         loader: {
             loadImage: loadImage$2,
@@ -475,7 +475,6 @@ var iDraw = (function () {
         };
         return TempData;
     }());
-    var throttle$1 = index$1.time.throttle;
     var ScreenWatcher = (function () {
         function ScreenWatcher(canvas) {
             this._isMoving = false;
@@ -507,9 +506,20 @@ var iDraw = (function () {
             canvas.addEventListener('mouseup', this._listenCanvasMoveEnd.bind(this), true);
             canvas.addEventListener('mouseover', this._listenCanvasMoveOver.bind(this), true);
             canvas.addEventListener('mouseleave', this._listenCanvasMoveLeave.bind(this), true);
-            if (window.self !== window.parent) {
-                if (window.self.origin === window.parent.self.origin) {
-                    window.parent.window.addEventListener('mousemove', throttle$1(this._listSameOriginParentWindow.bind(this), 16), false);
+            this._initParentEvent();
+        };
+        ScreenWatcher.prototype._initParentEvent = function () {
+            var target = window;
+            var targetOrigin = target.origin;
+            while (target.self !== target.top) {
+                if (target.self !== target.parent) {
+                    if (target.origin === targetOrigin) {
+                        window.parent.window.addEventListener('mousemove', this._listSameOriginParentWindow.bind(this), false);
+                    }
+                }
+                target = target.parent;
+                if (!target) {
+                    break;
                 }
             }
         };
@@ -1138,7 +1148,7 @@ var iDraw = (function () {
     var _resetContext = Symbol('_resetContext');
     var _screen = Symbol('_screen');
     var _a$1;
-    var throttle$3 = index$1.time.throttle;
+    var throttle$2 = index$1.time.throttle;
     var Board = (function () {
         function Board(mount, opts) {
             this[_a$1] = false;
@@ -1286,14 +1296,14 @@ var iDraw = (function () {
                 return;
             }
             if (this[_opts$2].canScroll === true) {
-                this.on('wheelX', throttle$3(function (deltaX) {
+                this.on('wheelX', throttle$2(function (deltaX) {
                     _this[_doScrollX](deltaX);
                 }, 16));
-                this.on('wheelY', throttle$3(function (deltaY) {
+                this.on('wheelY', throttle$2(function (deltaY) {
                     _this[_doScrollY](deltaY);
                 }, 16));
                 var scrollType_1 = null;
-                this.on('moveStart', throttle$3(function (p) {
+                this.on('moveStart', throttle$2(function (p) {
                     if (_this[_scroller].isPointAtScrollX(p)) {
                         scrollType_1 = 'x';
                     }
@@ -1301,12 +1311,12 @@ var iDraw = (function () {
                         scrollType_1 = 'y';
                     }
                 }, 16));
-                this.on('move', throttle$3(function (p) {
+                this.on('move', throttle$2(function (p) {
                     if (scrollType_1) {
                         _this[_doMoveScroll](scrollType_1, p);
                     }
                 }, 16));
-                this.on('moveEnd', throttle$3(function (p) {
+                this.on('moveEnd', throttle$2(function (p) {
                     if (scrollType_1) {
                         _this[_doMoveScroll](scrollType_1, p);
                     }
@@ -1379,7 +1389,7 @@ var iDraw = (function () {
             }, time);
         });
     }
-    function throttle$4(fn, timeout) {
+    function throttle$3(fn, timeout) {
         var timer = -1;
         return function () {
             var args = [];
@@ -1602,7 +1612,7 @@ var iDraw = (function () {
         time: {
             delay: delay$2,
             compose: compose$2,
-            throttle: throttle$4,
+            throttle: throttle$3,
         },
         loader: {
             loadImage: loadImage$1,
