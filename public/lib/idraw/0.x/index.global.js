@@ -514,7 +514,7 @@ var iDraw = (function () {
             while (target.self !== target.top) {
                 if (target.self !== target.parent) {
                     if (target.origin === targetOrigin) {
-                        window.parent.window.addEventListener('mousemove', this._listSameOriginParentWindow.bind(this), false);
+                        target.parent.window.addEventListener('mousemove', this._listSameOriginParentWindow.bind(this), false);
                     }
                 }
                 target = target.parent;
