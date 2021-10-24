@@ -1,16 +1,16 @@
 var iDraw = (function () {
     'use strict';
 
-    var extendStatics$1 = function(d, b) {
-        extendStatics$1 = Object.setPrototypeOf ||
+    var extendStatics = function(d, b) {
+        extendStatics = Object.setPrototypeOf ||
             ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
             function (d, b) { for (var p in b) if (Object.prototype.hasOwnProperty.call(b, p)) d[p] = b[p]; };
-        return extendStatics$1(d, b);
+        return extendStatics(d, b);
     };
-    function __extends$1(d, b) {
+    function __extends(d, b) {
         if (typeof b !== "function" && b !== null)
             throw new TypeError("Class extends value " + String(b) + " is not a constructor or null");
-        extendStatics$1(d, b);
+        extendStatics(d, b);
         function __() { this.constructor = d; }
         d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
     }
@@ -24,7 +24,7 @@ var iDraw = (function () {
         };
         return __assign$2.apply(this, arguments);
     };
-    function __awaiter$4(thisArg, _arguments, P, generator) {
+    function __awaiter$1(thisArg, _arguments, P, generator) {
         function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
         return new (P || (P = Promise))(function (resolve, reject) {
             function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
@@ -33,7 +33,7 @@ var iDraw = (function () {
             step((generator = generator.apply(thisArg, _arguments || [])).next());
         });
     }
-    function __generator$4(thisArg, body) {
+    function __generator$1(thisArg, body) {
         var _ = { label: 0, sent: function() { if (t[0] & 1) throw t[1]; return t[1]; }, trys: [], ops: [] }, f, y, t, g;
         return g = { next: verb(0), "throw": verb(1), "return": verb(2) }, typeof Symbol === "function" && (g[Symbol.iterator] = function() { return this; }), g;
         function verb(n) { return function (v) { return step([n, v]); }; }
@@ -61,19 +61,6 @@ var iDraw = (function () {
         }
     }
 
-    var extendStatics = function(d, b) {
-        extendStatics = Object.setPrototypeOf ||
-            ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-            function (d, b) { for (var p in b) if (Object.prototype.hasOwnProperty.call(b, p)) d[p] = b[p]; };
-        return extendStatics(d, b);
-    };
-    function __extends(d, b) {
-        if (typeof b !== "function" && b !== null)
-            throw new TypeError("Class extends value " + String(b) + " is not a constructor or null");
-        extendStatics(d, b);
-        function __() { this.constructor = d; }
-        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-    }
     var __assign$1 = function() {
         __assign$1 = Object.assign || function __assign(t) {
             for (var s, i = 1, n = arguments.length; i < n; i++) {
@@ -84,7 +71,7 @@ var iDraw = (function () {
         };
         return __assign$1.apply(this, arguments);
     };
-    function __awaiter$2(thisArg, _arguments, P, generator) {
+    function __awaiter(thisArg, _arguments, P, generator) {
         function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
         return new (P || (P = Promise))(function (resolve, reject) {
             function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
@@ -93,7 +80,7 @@ var iDraw = (function () {
             step((generator = generator.apply(thisArg, _arguments || [])).next());
         });
     }
-    function __generator$2(thisArg, body) {
+    function __generator(thisArg, body) {
         var _ = { label: 0, sent: function() { if (t[0] & 1) throw t[1]; return t[1]; }, trys: [], ops: [] }, f, y, t, g;
         return g = { next: verb(0), "throw": verb(1), "return": verb(2) }, typeof Symbol === "function" && (g[Symbol.iterator] = function() { return this; }), g;
         function verb(n) { return function (v) { return step([n, v]); }; }
@@ -261,77 +248,14 @@ var iDraw = (function () {
         promise: function (data) {
             return parsePrototype$1(data) === 'Promise';
         },
-    };
-    function __awaiter$1(thisArg, _arguments, P, generator) {
-        function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-        return new (P || (P = Promise))(function (resolve, reject) {
-            function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-            function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-            function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-            step((generator = generator.apply(thisArg, _arguments || [])).next());
-        });
-    }
-    function __generator$1(thisArg, body) {
-        var _ = { label: 0, sent: function() { if (t[0] & 1) throw t[1]; return t[1]; }, trys: [], ops: [] }, f, y, t, g;
-        return g = { next: verb(0), "throw": verb(1), "return": verb(2) }, typeof Symbol === "function" && (g[Symbol.iterator] = function() { return this; }), g;
-        function verb(n) { return function (v) { return step([n, v]); }; }
-        function step(op) {
-            if (f) throw new TypeError("Generator is already executing.");
-            while (_) try {
-                if (f = 1, y && (t = op[0] & 2 ? y["return"] : op[0] ? y["throw"] || ((t = y["return"]) && t.call(y), 0) : y.next) && !(t = t.call(y, op[1])).done) return t;
-                if (y = 0, t) op = [op[0] & 2, t.value];
-                switch (op[0]) {
-                    case 0: case 1: t = op; break;
-                    case 4: _.label++; return { value: op[1], done: false };
-                    case 5: _.label++; y = op[1]; op = [0]; continue;
-                    case 7: op = _.ops.pop(); _.trys.pop(); continue;
-                    default:
-                        if (!(t = _.trys, t = t.length > 0 && t[t.length - 1]) && (op[0] === 6 || op[0] === 2)) { _ = 0; continue; }
-                        if (op[0] === 3 && (!t || (op[1] > t[0] && op[1] < t[3]))) { _.label = op[1]; break; }
-                        if (op[0] === 6 && _.label < t[1]) { _.label = t[1]; t = op; break; }
-                        if (t && _.label < t[2]) { _.label = t[2]; _.ops.push(op); break; }
-                        if (t[2]) _.ops.pop();
-                        _.trys.pop(); continue;
-                }
-                op = body.call(thisArg, _);
-            } catch (e) { op = [6, e]; y = 0; } finally { f = t = 0; }
-            if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
+        nodeList: function (data) {
+            return parsePrototype$1(data) === 'NodeList';
+        },
+        imageData: function (data) {
+            return parsePrototype$1(data) === 'ImageData';
         }
-    }
-    function parseHTMLToDataURL$1(html, opts) {
-        var width = opts.width, height = opts.height;
-        return new Promise(function (resolve, reject) {
-            var _svg = "\n    <svg xmlns=\"http://www.w3.org/2000/svg\" width=\"" + (width || '') + "\" height = \"" + (height || '') + "\">\n      <foreignObject width=\"100%\" height=\"100%\">\n        <div xmlns = \"http://www.w3.org/1999/xhtml\">\n          " + html + "\n        </div>\n      </foreignObject>\n    </svg>\n    ";
-            var blob = new Blob([_svg], { type: 'image/svg+xml;charset=utf-8' });
-            var reader = new FileReader();
-            reader.readAsDataURL(blob);
-            reader.onload = function (event) {
-                var _a;
-                var base64 = (_a = event === null || event === void 0 ? void 0 : event.target) === null || _a === void 0 ? void 0 : _a.result;
-                resolve(base64);
-            };
-            reader.onerror = function (err) {
-                reject(err);
-            };
-        });
-    }
-    function parseSVGToDataURL$1(svg) {
-        return new Promise(function (resolve, reject) {
-            var _svg = svg;
-            var blob = new Blob([_svg], { type: 'image/svg+xml;charset=utf-8' });
-            var reader = new FileReader();
-            reader.readAsDataURL(blob);
-            reader.onload = function (event) {
-                var _a;
-                var base64 = (_a = event === null || event === void 0 ? void 0 : event.target) === null || _a === void 0 ? void 0 : _a.result;
-                resolve(base64);
-            };
-            reader.onerror = function (err) {
-                reject(err);
-            };
-        });
-    }
-    var Image$1 = window.Image;
+    };
+    var Image$1 = window.Image, Blob$1 = window.Blob, FileReader$1 = window.FileReader;
     function loadImage$2(src) {
         return new Promise(function (resolve, reject) {
             var img = new Image$1;
@@ -344,35 +268,44 @@ var iDraw = (function () {
         });
     }
     function loadSVG$2(svg) {
-        return __awaiter$1(this, void 0, void 0, function () {
-            var dataURL, image;
-            return __generator$1(this, function (_a) {
-                switch (_a.label) {
-                    case 0: return [4, parseSVGToDataURL$1(svg)];
-                    case 1:
-                        dataURL = _a.sent();
-                        return [4, loadImage$2(dataURL)];
-                    case 2:
-                        image = _a.sent();
-                        return [2, image];
-                }
-            });
+        return new Promise(function (resolve, reject) {
+            var _svg = svg;
+            var image = new Image$1();
+            var blob = new Blob$1([_svg], { type: 'image/svg+xml;charset=utf-8' });
+            var reader = new FileReader$1();
+            reader.readAsDataURL(blob);
+            reader.onload = function (event) {
+                var _a;
+                var base64 = (_a = event === null || event === void 0 ? void 0 : event.target) === null || _a === void 0 ? void 0 : _a.result;
+                image.onload = function () {
+                    resolve(image);
+                };
+                image.src = base64;
+            };
+            reader.onerror = function (err) {
+                reject(err);
+            };
         });
     }
     function loadHTML$2(html, opts) {
-        return __awaiter$1(this, void 0, void 0, function () {
-            var dataURL, image;
-            return __generator$1(this, function (_a) {
-                switch (_a.label) {
-                    case 0: return [4, parseHTMLToDataURL$1(html, opts)];
-                    case 1:
-                        dataURL = _a.sent();
-                        return [4, loadImage$2(dataURL)];
-                    case 2:
-                        image = _a.sent();
-                        return [2, image];
-                }
-            });
+        var width = opts.width, height = opts.height;
+        return new Promise(function (resolve, reject) {
+            var _svg = "\n    <svg xmlns=\"http://www.w3.org/2000/svg\" width=\"" + (width || '') + "\" height = \"" + (height || '') + "\">\n      <foreignObject width=\"100%\" height=\"100%\">\n        <div xmlns = \"http://www.w3.org/1999/xhtml\">\n          " + html + "\n        </div>\n      </foreignObject>\n    </svg>\n    ";
+            var image = new Image$1();
+            var blob = new Blob$1([_svg], { type: 'image/svg+xml;charset=utf-8' });
+            var reader = new FileReader$1();
+            reader.readAsDataURL(blob);
+            reader.onload = function (event) {
+                var _a;
+                var base64 = (_a = event === null || event === void 0 ? void 0 : event.target) === null || _a === void 0 ? void 0 : _a.result;
+                image.onload = function () {
+                    resolve(image);
+                };
+                image.src = base64;
+            };
+            reader.onerror = function (err) {
+                reject(err);
+            };
         });
     }
     var index$1 = {
@@ -453,16 +386,11 @@ var iDraw = (function () {
         };
         return BoardEvent;
     }());
-    function createTempData() {
-        return {
-            prevClickPoint: null,
-            isHoverCanvas: false,
-            isDragCanvas: false,
-        };
-    }
     var TempData$1 = (function () {
         function TempData() {
-            this._temp = createTempData();
+            this._temp = {
+                prevClickPoint: null
+            };
         }
         TempData.prototype.set = function (name, value) {
             this._temp[name] = value;
@@ -471,59 +399,42 @@ var iDraw = (function () {
             return this._temp[name];
         };
         TempData.prototype.clear = function () {
-            this._temp = createTempData();
+            this._temp = {
+                prevClickPoint: null,
+            };
         };
         return TempData;
     }());
-    var ScreenWatcher = (function () {
-        function ScreenWatcher(canvas) {
+    var Watcher = (function () {
+        function Watcher(canvas) {
             this._isMoving = false;
             this._temp = new TempData$1;
-            this._container = window;
             this._canvas = canvas;
             this._isMoving = false;
             this._initEvent();
             this._event = new BoardEvent;
         }
-        ScreenWatcher.prototype.on = function (name, callback) {
+        Watcher.prototype.on = function (name, callback) {
             this._event.on(name, callback);
         };
-        ScreenWatcher.prototype.off = function (name, callback) {
+        Watcher.prototype.off = function (name, callback) {
             this._event.off(name, callback);
         };
-        ScreenWatcher.prototype._initEvent = function () {
+        Watcher.prototype._initEvent = function () {
             var canvas = this._canvas;
-            var container = this._container;
-            container.addEventListener('mousemove', this._listenWindowMove.bind(this), false);
-            container.addEventListener('mouseup', this._listenWindowMoveEnd.bind(this), false);
-            canvas.addEventListener('mousemove', this._listenHover.bind(this), false);
-            canvas.addEventListener('mousedown', this._listenMoveStart.bind(this), false);
-            canvas.addEventListener('mousemove', this._listenMove.bind(this), false);
-            canvas.addEventListener('mouseup', this._listenMoveEnd.bind(this), false);
-            canvas.addEventListener('click', this._listenCanvasClick.bind(this), false);
-            canvas.addEventListener('wheel', this._listenCanvasWheel.bind(this), false);
-            canvas.addEventListener('mousedown', this._listenCanvasMoveStart.bind(this), true);
-            canvas.addEventListener('mouseup', this._listenCanvasMoveEnd.bind(this), true);
-            canvas.addEventListener('mouseover', this._listenCanvasMoveOver.bind(this), true);
-            canvas.addEventListener('mouseleave', this._listenCanvasMoveLeave.bind(this), true);
-            this._initParentEvent();
+            canvas.addEventListener('mousemove', this._listenHover.bind(this), true);
+            canvas.addEventListener('mousedown', this._listenMoveStart.bind(this), true);
+            canvas.addEventListener('mousemove', this._listenMove.bind(this), true);
+            canvas.addEventListener('mouseup', this._listenMoveEnd.bind(this), true);
+            canvas.addEventListener('mouseleave', this._listenMoveEnd.bind(this), true);
+            canvas.addEventListener('mouseleave', this._listenLeave.bind(this), true);
+            canvas.addEventListener('click', this._listenClick.bind(this), true);
+            canvas.addEventListener('wheel', this._listenWheel.bind(this), true);
+            canvas.addEventListener('touchstart', this._listenMoveStart.bind(this), true);
+            canvas.addEventListener('touchmove', this._listenMove.bind(this), true);
+            canvas.addEventListener('touchend', this._listenMoveEnd.bind(this), true);
         };
-        ScreenWatcher.prototype._initParentEvent = function () {
-            var target = window;
-            var targetOrigin = target.origin;
-            while (target.self !== target.top) {
-                if (target.self !== target.parent) {
-                    if (target.origin === targetOrigin) {
-                        target.parent.window.addEventListener('mousemove', this._listSameOriginParentWindow.bind(this), false);
-                    }
-                }
-                target = target.parent;
-                if (!target) {
-                    break;
-                }
-            }
-        };
-        ScreenWatcher.prototype._listenHover = function (e) {
+        Watcher.prototype._listenHover = function (e) {
             e.preventDefault();
             var p = this._getPosition(e);
             if (this._isVaildPoint(p)) {
@@ -533,7 +444,13 @@ var iDraw = (function () {
             }
             this._isMoving = true;
         };
-        ScreenWatcher.prototype._listenMoveStart = function (e) {
+        Watcher.prototype._listenLeave = function (e) {
+            e.preventDefault();
+            if (this._event.has('leave')) {
+                this._event.trigger('leave', undefined);
+            }
+        };
+        Watcher.prototype._listenMoveStart = function (e) {
             e.preventDefault();
             var p = this._getPosition(e);
             if (this._isVaildPoint(p)) {
@@ -546,7 +463,7 @@ var iDraw = (function () {
             }
             this._isMoving = true;
         };
-        ScreenWatcher.prototype._listenMove = function (e) {
+        Watcher.prototype._listenMove = function (e) {
             e.preventDefault();
             e.stopPropagation();
             if (this._event.has('move') && this._isMoving === true) {
@@ -556,7 +473,7 @@ var iDraw = (function () {
                 }
             }
         };
-        ScreenWatcher.prototype._listenMoveEnd = function (e) {
+        Watcher.prototype._listenMoveEnd = function (e) {
             e.preventDefault();
             if (this._event.has('moveEnd')) {
                 var p = this._getPosition(e);
@@ -566,66 +483,7 @@ var iDraw = (function () {
             }
             this._isMoving = false;
         };
-        ScreenWatcher.prototype._listSameOriginParentWindow = function () {
-            if (this._temp.get('isHoverCanvas')) {
-                if (this._event.has('leave')) {
-                    this._event.trigger('leave', undefined);
-                }
-            }
-            if (this._temp.get('isDragCanvas')) {
-                if (this._event.has('moveEnd')) {
-                    this._event.trigger('moveEnd', { x: NaN, y: NaN });
-                }
-            }
-            this._isMoving = false;
-            this._temp.set('isDragCanvas', false);
-            this._temp.set('isHoverCanvas', false);
-        };
-        ScreenWatcher.prototype._listenCanvasMoveStart = function () {
-            if (this._temp.get('isHoverCanvas')) {
-                this._temp.set('isDragCanvas', true);
-            }
-        };
-        ScreenWatcher.prototype._listenCanvasMoveEnd = function () {
-            this._temp.set('isDragCanvas', false);
-        };
-        ScreenWatcher.prototype._listenCanvasMoveOver = function () {
-            this._temp.set('isHoverCanvas', true);
-        };
-        ScreenWatcher.prototype._listenCanvasMoveLeave = function () {
-            this._temp.set('isHoverCanvas', false);
-            if (this._event.has('leave')) {
-                this._event.trigger('leave', undefined);
-            }
-        };
-        ScreenWatcher.prototype._listenWindowMove = function (e) {
-            if (this._temp.get('isDragCanvas') !== true) {
-                return;
-            }
-            e.preventDefault();
-            e.stopPropagation();
-            if (this._event.has('move') && this._isMoving === true) {
-                var p = this._getPosition(e);
-                if (this._isVaildPoint(p)) {
-                    this._event.trigger('move', p);
-                }
-            }
-        };
-        ScreenWatcher.prototype._listenWindowMoveEnd = function (e) {
-            if (!this._temp.get('isDragCanvas') === true) {
-                return;
-            }
-            e.preventDefault();
-            if (this._event.has('moveEnd')) {
-                var p = this._getPosition(e);
-                if (this._isVaildPoint(p)) {
-                    this._event.trigger('moveEnd', p);
-                }
-            }
-            this._temp.set('isDragCanvas', false);
-            this._isMoving = false;
-        };
-        ScreenWatcher.prototype._listenCanvasWheel = function (e) {
+        Watcher.prototype._listenWheel = function (e) {
             e.preventDefault();
             if (this._event.has('wheelX') && (e.deltaX > 0 || e.deltaX < 0)) {
                 this._event.trigger('wheelX', e.deltaX);
@@ -634,7 +492,7 @@ var iDraw = (function () {
                 this._event.trigger('wheelY', e.deltaY);
             }
         };
-        ScreenWatcher.prototype._listenCanvasClick = function (e) {
+        Watcher.prototype._listenClick = function (e) {
             e.preventDefault();
             var maxLimitTime = 500;
             var p = this._getPosition(e);
@@ -653,7 +511,7 @@ var iDraw = (function () {
                 }
             }
         };
-        ScreenWatcher.prototype._getPosition = function (e) {
+        Watcher.prototype._getPosition = function (e) {
             var canvas = this._canvas;
             var x = 0;
             var y = 0;
@@ -675,14 +533,11 @@ var iDraw = (function () {
             };
             return p;
         };
-        ScreenWatcher.prototype._isVaildPoint = function (p) {
-            return isAvailableNum(p.x) && isAvailableNum(p.y);
+        Watcher.prototype._isVaildPoint = function (p) {
+            return (p.x > 0 && p.y > 0);
         };
-        return ScreenWatcher;
+        return Watcher;
     }());
-    function isAvailableNum(num) {
-        return (num > 0 || num < 0 || num === 0);
-    }
     function setStyle(dom, style) {
         var originStyle = getStyle(dom);
         var _style = __assign(__assign({}, originStyle), style);
@@ -839,14 +694,6 @@ var iDraw = (function () {
                 return this._ctx.fillText(text, this._doSize(x), this._doSize(y));
             }
         };
-        Context.prototype.strokeText = function (text, x, y, maxWidth) {
-            if (maxWidth !== undefined) {
-                return this._ctx.strokeText(text, this._doSize(x), this._doSize(y), this._doSize(maxWidth));
-            }
-            else {
-                return this._ctx.strokeText(text, this._doSize(x), this._doSize(y));
-            }
-        };
         Context.prototype.setFont = function (opts) {
             var strList = [];
             if (opts.fontWeight === 'bold') {
@@ -870,18 +717,6 @@ var iDraw = (function () {
         };
         Context.prototype.scale = function (ratioX, ratioY) {
             this._ctx.scale(ratioX, ratioY);
-        };
-        Context.prototype.setShadowColor = function (color) {
-            this._ctx.shadowColor = color;
-        };
-        Context.prototype.setShadowOffsetX = function (offsetX) {
-            this._ctx.shadowOffsetX = this._doSize(offsetX);
-        };
-        Context.prototype.setShadowOffsetY = function (offsetY) {
-            this._ctx.shadowOffsetY = this._doSize(offsetY);
-        };
-        Context.prototype.setShadowBlur = function (blur) {
-            this._ctx.shadowBlur = this._doSize(blur);
         };
         Context.prototype._doSize = function (num) {
             return this._opts.devicePixelRatio * num;
@@ -1161,7 +996,7 @@ var iDraw = (function () {
             this[_displayCtx] = this[_displayCanvas].getContext('2d');
             this[_ctx] = new Context(this[_originCtx], this[_opts$2]);
             this[_screen] = new Screen(this[_ctx], this[_opts$2]);
-            this[_watcher] = new ScreenWatcher(this[_displayCanvas]);
+            this[_watcher] = new Watcher(this[_displayCanvas]);
             this[_scroller] = new Scroller(this[_displayCtx], {
                 width: opts.width,
                 height: opts.height,
@@ -1494,77 +1329,14 @@ var iDraw = (function () {
         promise: function (data) {
             return parsePrototype$2(data) === 'Promise';
         },
-    };
-    function __awaiter$3(thisArg, _arguments, P, generator) {
-        function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-        return new (P || (P = Promise))(function (resolve, reject) {
-            function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-            function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-            function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-            step((generator = generator.apply(thisArg, _arguments || [])).next());
-        });
-    }
-    function __generator$3(thisArg, body) {
-        var _ = { label: 0, sent: function() { if (t[0] & 1) throw t[1]; return t[1]; }, trys: [], ops: [] }, f, y, t, g;
-        return g = { next: verb(0), "throw": verb(1), "return": verb(2) }, typeof Symbol === "function" && (g[Symbol.iterator] = function() { return this; }), g;
-        function verb(n) { return function (v) { return step([n, v]); }; }
-        function step(op) {
-            if (f) throw new TypeError("Generator is already executing.");
-            while (_) try {
-                if (f = 1, y && (t = op[0] & 2 ? y["return"] : op[0] ? y["throw"] || ((t = y["return"]) && t.call(y), 0) : y.next) && !(t = t.call(y, op[1])).done) return t;
-                if (y = 0, t) op = [op[0] & 2, t.value];
-                switch (op[0]) {
-                    case 0: case 1: t = op; break;
-                    case 4: _.label++; return { value: op[1], done: false };
-                    case 5: _.label++; y = op[1]; op = [0]; continue;
-                    case 7: op = _.ops.pop(); _.trys.pop(); continue;
-                    default:
-                        if (!(t = _.trys, t = t.length > 0 && t[t.length - 1]) && (op[0] === 6 || op[0] === 2)) { _ = 0; continue; }
-                        if (op[0] === 3 && (!t || (op[1] > t[0] && op[1] < t[3]))) { _.label = op[1]; break; }
-                        if (op[0] === 6 && _.label < t[1]) { _.label = t[1]; t = op; break; }
-                        if (t && _.label < t[2]) { _.label = t[2]; _.ops.push(op); break; }
-                        if (t[2]) _.ops.pop();
-                        _.trys.pop(); continue;
-                }
-                op = body.call(thisArg, _);
-            } catch (e) { op = [6, e]; y = 0; } finally { f = t = 0; }
-            if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
+        nodeList: function (data) {
+            return parsePrototype$2(data) === 'NodeList';
+        },
+        imageData: function (data) {
+            return parsePrototype$2(data) === 'ImageData';
         }
-    }
-    function parseHTMLToDataURL$2(html, opts) {
-        var width = opts.width, height = opts.height;
-        return new Promise(function (resolve, reject) {
-            var _svg = "\n    <svg xmlns=\"http://www.w3.org/2000/svg\" width=\"" + (width || '') + "\" height = \"" + (height || '') + "\">\n      <foreignObject width=\"100%\" height=\"100%\">\n        <div xmlns = \"http://www.w3.org/1999/xhtml\">\n          " + html + "\n        </div>\n      </foreignObject>\n    </svg>\n    ";
-            var blob = new Blob([_svg], { type: 'image/svg+xml;charset=utf-8' });
-            var reader = new FileReader();
-            reader.readAsDataURL(blob);
-            reader.onload = function (event) {
-                var _a;
-                var base64 = (_a = event === null || event === void 0 ? void 0 : event.target) === null || _a === void 0 ? void 0 : _a.result;
-                resolve(base64);
-            };
-            reader.onerror = function (err) {
-                reject(err);
-            };
-        });
-    }
-    function parseSVGToDataURL$2(svg) {
-        return new Promise(function (resolve, reject) {
-            var _svg = svg;
-            var blob = new Blob([_svg], { type: 'image/svg+xml;charset=utf-8' });
-            var reader = new FileReader();
-            reader.readAsDataURL(blob);
-            reader.onload = function (event) {
-                var _a;
-                var base64 = (_a = event === null || event === void 0 ? void 0 : event.target) === null || _a === void 0 ? void 0 : _a.result;
-                resolve(base64);
-            };
-            reader.onerror = function (err) {
-                reject(err);
-            };
-        });
-    }
-    var Image$2 = window.Image;
+    };
+    var Image$2 = window.Image, Blob$2 = window.Blob, FileReader$2 = window.FileReader;
     function loadImage$1(src) {
         return new Promise(function (resolve, reject) {
             var img = new Image$2;
@@ -1577,35 +1349,44 @@ var iDraw = (function () {
         });
     }
     function loadSVG$1(svg) {
-        return __awaiter$3(this, void 0, void 0, function () {
-            var dataURL, image;
-            return __generator$3(this, function (_a) {
-                switch (_a.label) {
-                    case 0: return [4, parseSVGToDataURL$2(svg)];
-                    case 1:
-                        dataURL = _a.sent();
-                        return [4, loadImage$1(dataURL)];
-                    case 2:
-                        image = _a.sent();
-                        return [2, image];
-                }
-            });
+        return new Promise(function (resolve, reject) {
+            var _svg = svg;
+            var image = new Image$2();
+            var blob = new Blob$2([_svg], { type: 'image/svg+xml;charset=utf-8' });
+            var reader = new FileReader$2();
+            reader.readAsDataURL(blob);
+            reader.onload = function (event) {
+                var _a;
+                var base64 = (_a = event === null || event === void 0 ? void 0 : event.target) === null || _a === void 0 ? void 0 : _a.result;
+                image.onload = function () {
+                    resolve(image);
+                };
+                image.src = base64;
+            };
+            reader.onerror = function (err) {
+                reject(err);
+            };
         });
     }
     function loadHTML$1(html, opts) {
-        return __awaiter$3(this, void 0, void 0, function () {
-            var dataURL, image;
-            return __generator$3(this, function (_a) {
-                switch (_a.label) {
-                    case 0: return [4, parseHTMLToDataURL$2(html, opts)];
-                    case 1:
-                        dataURL = _a.sent();
-                        return [4, loadImage$1(dataURL)];
-                    case 2:
-                        image = _a.sent();
-                        return [2, image];
-                }
-            });
+        var width = opts.width, height = opts.height;
+        return new Promise(function (resolve, reject) {
+            var _svg = "\n    <svg xmlns=\"http://www.w3.org/2000/svg\" width=\"" + (width || '') + "\" height = \"" + (height || '') + "\">\n      <foreignObject width=\"100%\" height=\"100%\">\n        <div xmlns = \"http://www.w3.org/1999/xhtml\">\n          " + html + "\n        </div>\n      </foreignObject>\n    </svg>\n    ";
+            var image = new Image$2();
+            var blob = new Blob$2([_svg], { type: 'image/svg+xml;charset=utf-8' });
+            var reader = new FileReader$2();
+            reader.readAsDataURL(blob);
+            reader.onload = function (event) {
+                var _a;
+                var base64 = (_a = event === null || event === void 0 ? void 0 : event.target) === null || _a === void 0 ? void 0 : _a.result;
+                image.onload = function () {
+                    resolve(image);
+                };
+                image.src = base64;
+            };
+            reader.onerror = function (err) {
+                reject(err);
+            };
         });
     }
     var index$2 = {
@@ -1696,9 +1477,6 @@ var iDraw = (function () {
     function lineHeight(value) {
         return number(value) && value > 0;
     }
-    function strokeWidth(value) {
-        return number(value) && value > 0;
-    }
     function textAlign(value) {
         return ['center', 'left', 'right'].includes(value);
     }
@@ -1729,7 +1507,6 @@ var iDraw = (function () {
         textAlign: textAlign,
         fontFamily: fontFamily,
         fontWeight: fontWeight,
-        strokeWidth: strokeWidth,
     };
     function attrs(attrs) {
         var x = attrs.x, y = attrs.y, w = attrs.w, h = attrs.h, angle = attrs.angle;
@@ -1800,7 +1577,7 @@ var iDraw = (function () {
         return true;
     }
     function textDesc(desc) {
-        var text = desc.text, color = desc.color, fontSize = desc.fontSize, lineHeight = desc.lineHeight, fontFamily = desc.fontFamily, textAlign = desc.textAlign, fontWeight = desc.fontWeight, bgColor = desc.bgColor, strokeWidth = desc.strokeWidth, strokeColor = desc.strokeColor;
+        var text = desc.text, color = desc.color, fontSize = desc.fontSize, lineHeight = desc.lineHeight, fontFamily = desc.fontFamily, textAlign = desc.textAlign, fontWeight = desc.fontWeight, bgColor = desc.bgColor;
         if (!is$3.text(text)) {
             return false;
         }
@@ -1823,12 +1600,6 @@ var iDraw = (function () {
             return false;
         }
         if (desc.hasOwnProperty('textAlign') && !is$3.textAlign(textAlign)) {
-            return false;
-        }
-        if (desc.hasOwnProperty('strokeWidth') && !is$3.strokeWidth(strokeWidth)) {
-            return false;
-        }
-        if (desc.hasOwnProperty('strokeColor') && !is$3.color(strokeColor)) {
             return false;
         }
         if (!box(desc)) {
@@ -1933,10 +1704,6 @@ var iDraw = (function () {
         ctx.setStrokeStyle('#000000');
         ctx.setLineDash([]);
         ctx.setGlobalAlpha(1);
-        ctx.setShadowColor('#00000000');
-        ctx.setShadowOffsetX(0);
-        ctx.setShadowOffsetY(0);
-        ctx.setShadowBlur(0);
     }
     function drawBgColor(ctx, color) {
         var size = ctx.getSize();
@@ -1946,7 +1713,6 @@ var iDraw = (function () {
     function drawBox(ctx, elem, pattern) {
         clearContext(ctx);
         drawBoxBorder(ctx, elem);
-        clearContext(ctx);
         rotateElement(ctx, elem, function () {
             var x = elem.x, y = elem.y, w = elem.w, h = elem.h;
             var r = elem.desc.borderRadius || 0;
@@ -1989,19 +1755,6 @@ var iDraw = (function () {
             r = Math.min(r, w / 2, h / 2);
             if (r < w / 2 && r < h / 2) {
                 r = r + bw / 2;
-            }
-            var desc = elem.desc;
-            if (desc.shadowColor !== undefined && index$2.color.isColorStr(desc.shadowColor)) {
-                ctx.setShadowColor(desc.shadowColor);
-            }
-            if (desc.shadowOffsetX !== undefined && is$3.number(desc.shadowOffsetX)) {
-                ctx.setShadowOffsetX(desc.shadowOffsetX);
-            }
-            if (desc.shadowOffsetY !== undefined && is$3.number(desc.shadowOffsetY)) {
-                ctx.setShadowOffsetY(desc.shadowOffsetY);
-            }
-            if (desc.shadowBlur !== undefined && is$3.number(desc.shadowBlur)) {
-                ctx.setShadowBlur(desc.shadowBlur);
             }
             ctx.beginPath();
             ctx.setLineWidth(bw);
@@ -2091,64 +1844,26 @@ var iDraw = (function () {
                     }
                 }
             });
-            {
-                var _y_1 = elem.y;
-                if (lines.length * fontHeight < elem.h) {
-                    _y_1 += ((elem.h - lines.length * fontHeight) / 2);
-                }
-                if (desc.textShadowColor !== undefined && index$2.color.isColorStr(desc.textShadowColor)) {
-                    ctx.setShadowColor(desc.textShadowColor);
-                }
-                if (desc.textShadowOffsetX !== undefined && is$3.number(desc.textShadowOffsetX)) {
-                    ctx.setShadowOffsetX(desc.textShadowOffsetX);
-                }
-                if (desc.textShadowOffsetY !== undefined && is$3.number(desc.textShadowOffsetY)) {
-                    ctx.setShadowOffsetY(desc.textShadowOffsetY);
-                }
-                if (desc.textShadowBlur !== undefined && is$3.number(desc.textShadowBlur)) {
-                    ctx.setShadowBlur(desc.textShadowBlur);
-                }
-                lines.forEach(function (line, i) {
-                    var _x = elem.x;
-                    if (desc.textAlign === 'center') {
-                        _x = elem.x + (elem.w - line.width) / 2;
-                    }
-                    else if (desc.textAlign === 'right') {
-                        _x = elem.x + (elem.w - line.width);
-                    }
-                    ctx.fillText(line.text, _x, _y_1 + fontHeight * i);
-                });
-                clearContext(ctx);
+            var _y = elem.y;
+            if (lines.length * fontHeight < elem.h) {
+                _y += ((elem.h - lines.length * fontHeight) / 2);
             }
-            if (index$2.color.isColorStr(desc.strokeColor) && desc.strokeWidth !== undefined && desc.strokeWidth > 0) {
-                var _y_2 = elem.y;
-                if (lines.length * fontHeight < elem.h) {
-                    _y_2 += ((elem.h - lines.length * fontHeight) / 2);
+            lines.forEach(function (line, i) {
+                var _x = elem.x;
+                if (desc.textAlign === 'center') {
+                    _x = elem.x + (elem.w - line.width) / 2;
                 }
-                lines.forEach(function (line, i) {
-                    var _x = elem.x;
-                    if (desc.textAlign === 'center') {
-                        _x = elem.x + (elem.w - line.width) / 2;
-                    }
-                    else if (desc.textAlign === 'right') {
-                        _x = elem.x + (elem.w - line.width);
-                    }
-                    if (desc.strokeColor !== undefined) {
-                        ctx.setStrokeStyle(desc.strokeColor);
-                    }
-                    if (desc.strokeWidth !== undefined && desc.strokeWidth > 0) {
-                        ctx.setLineWidth(desc.strokeWidth);
-                    }
-                    ctx.strokeText(line.text, _x, _y_2 + fontHeight * i);
-                });
-            }
+                else if (desc.textAlign === 'right') {
+                    _x = elem.x + (elem.w - line.width);
+                }
+                ctx.fillText(line.text, _x, _y + fontHeight * i);
+            });
         });
     }
     function drawCircle(ctx, elem) {
-        clearContext(ctx);
         rotateElement(ctx, elem, function (ctx) {
             var x = elem.x, y = elem.y, w = elem.w, h = elem.h, desc = elem.desc;
-            var _a = desc.bgColor, bgColor = _a === void 0 ? '#000000' : _a, _b = desc.borderColor, borderColor = _b === void 0 ? '#000000' : _b, _c = desc.borderWidth, borderWidth = _c === void 0 ? 0 : _c;
+            var _a = desc.bgColor, bgColor = _a === void 0 ? '#000000' : _a, _b = desc.borderColor, borderColor = _b === void 0 ? '#000000' : _b, borderWidth = desc.borderWidth;
             var a = w / 2;
             var b = h / 2;
             var centerX = x + a;
@@ -2209,21 +1924,13 @@ var iDraw = (function () {
                 ctx.closePath();
                 ctx.setFillStyle(wrapper.color);
                 [
-                    wrapper.dots.topLeft,
-                    wrapper.dots.top,
-                    wrapper.dots.topRight,
-                    wrapper.dots.right,
-                    wrapper.dots.bottomRight,
-                    wrapper.dots.bottom,
-                    wrapper.dots.bottomLeft,
-                    wrapper.dots.left,
+                    wrapper.dots.topLeft, wrapper.dots.top, wrapper.dots.topRight, wrapper.dots.right,
+                    wrapper.dots.bottomRight, wrapper.dots.bottom, wrapper.dots.bottomLeft, wrapper.dots.left,
                 ].forEach(function (dot) {
-                    if (dot.invisible !== true) {
-                        ctx.beginPath();
-                        ctx.arc(dot.x, dot.y, wrapper.dotSize, 0, Math.PI * 2);
-                        ctx.fill();
-                        ctx.closePath();
-                    }
+                    ctx.beginPath();
+                    ctx.arc(dot.x, dot.y, wrapper.dotSize, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.closePath();
                 });
             }
             else {
@@ -2519,18 +2226,7 @@ var iDraw = (function () {
     function limitAngle(angle) {
         return limitNum(angle % 360);
     }
-    var elementTypes = {
-        'text': {},
-        'rect': {},
-        'image': {},
-        'svg': {},
-        'circle': {},
-        'html': {},
-    };
-    var elementNames = Object.keys(elementTypes);
-    var LIMIT_QBLIQUE_ANGLE = 15;
     var createUUID$1 = index$2.uuid.createUUID;
-    var limitQbliqueAngle$1 = LIMIT_QBLIQUE_ANGLE;
     var Element = (function () {
         function Element(ctx) {
             this._ctx = ctx;
@@ -2544,16 +2240,14 @@ var iDraw = (function () {
             return data;
         };
         Element.prototype.isPointInElement = function (p, data) {
-            var _a, _b;
+            var _a;
             var ctx = this._ctx;
             var idx = -1;
             var uuid = null;
             var _loop_1 = function (i) {
                 var ele = data.elements[i];
-                if (((_a = ele.operation) === null || _a === void 0 ? void 0 : _a.invisible) === true)
-                    return "continue";
                 var bw = 0;
-                if (((_b = ele.desc) === null || _b === void 0 ? void 0 : _b.borderWidth) > 0) {
+                if (((_a = ele.desc) === null || _a === void 0 ? void 0 : _a.borderWidth) > 0) {
                     bw = ele.desc.borderWidth;
                 }
                 rotateElement(ctx, ele, function () {
@@ -2562,7 +2256,8 @@ var iDraw = (function () {
                     ctx.lineTo(ele.x + ele.w + bw, ele.y - bw);
                     ctx.lineTo(ele.x + ele.w + bw, ele.y + ele.h + bw);
                     ctx.lineTo(ele.x - bw, ele.y + ele.h + bw);
-                    ctx.lineTo(ele.x - bw, ele.y - bw);
+                    ctx.lineTo(ele.x, ele.y);
+                    ctx.rect(ele.x, ele.y, ele.w, ele.h);
                     ctx.closePath();
                     if (ctx.isPointInPath(p.x, p.y)) {
                         idx = i;
@@ -2603,20 +2298,71 @@ var iDraw = (function () {
             var moveX = (point.x - prevPoint.x) / scale;
             var moveY = (point.y - prevPoint.y) / scale;
             var elem = data.elements[index];
-            if ([
-                'top-left', 'top', 'top-right', 'right',
-                'bottom-right', 'bottom', 'bottom-left', 'left'
-            ].includes(direction)) {
-                var p = calcuScaleElemPosition(elem, moveX, moveY, direction);
-                elem.x = p.x;
-                elem.y = p.y;
-                elem.w = p.w;
-                elem.h = p.h;
-            }
-            else if (direction === 'rotate') {
-                var center = calcElementCenter(elem);
-                var radian = calcRadian(center, prevPoint, point);
-                elem.angle = (elem.angle || 0) + parseRadianToAngle(radian);
+            switch (direction) {
+                case 'top-left': {
+                    if (elem.w - moveX > 0 && elem.h - moveY > 0) {
+                        elem.x += moveX;
+                        elem.y += moveY;
+                        elem.w -= moveX;
+                        elem.h -= moveY;
+                    }
+                    break;
+                }
+                case 'top': {
+                    if (elem.h - moveY > 0) {
+                        elem.y += moveY;
+                        elem.h -= moveY;
+                    }
+                    break;
+                }
+                case 'top-right': {
+                    if (elem.h - moveY > 0 && elem.w + moveX > 0) {
+                        elem.y += moveY;
+                        elem.w += moveX;
+                        elem.h -= moveY;
+                    }
+                    break;
+                }
+                case 'right': {
+                    if (elem.w + moveX > 0) {
+                        elem.w += moveX;
+                    }
+                    break;
+                }
+                case 'bottom-right': {
+                    if (elem.w + moveX > 0 && elem.h + moveY > 0) {
+                        elem.w += moveX;
+                        elem.h += moveY;
+                    }
+                    break;
+                }
+                case 'bottom': {
+                    if (elem.h + moveY > 0) {
+                        elem.h += moveY;
+                    }
+                    break;
+                }
+                case 'bottom-left': {
+                    if (elem.w - moveX > 0 && elem.h + moveY > 0) {
+                        elem.x += moveX;
+                        elem.w -= moveX;
+                        elem.h += moveY;
+                    }
+                    break;
+                }
+                case 'left': {
+                    if (elem.w - moveX > 0) {
+                        elem.x += moveX;
+                        elem.w -= moveX;
+                    }
+                    break;
+                }
+                case 'rotate': {
+                    var center = calcElementCenter(elem);
+                    var radian = calcRadian(center, prevPoint, point);
+                    elem.angle = (elem.angle || 0) + parseRadianToAngle(radian);
+                    break;
+                }
             }
             this.limitElementAttrs(elem);
             return {
@@ -2644,268 +2390,6 @@ var iDraw = (function () {
         };
         return Element;
     }());
-    function calcuScaleElemPosition(elem, moveX, moveY, direction, scale) {
-        var p = { x: elem.x, y: elem.y, w: elem.w, h: elem.h };
-        elem.angle;
-        switch (direction) {
-            case 'top-left': {
-                if (elem.w - moveX > 0 && elem.h - moveY > 0) {
-                    p.x += moveX;
-                    p.y += moveY;
-                    p.w -= moveX;
-                    p.h -= moveY;
-                }
-                break;
-            }
-            case 'top': {
-                if (elem.angle === 0 || Math.abs(elem.angle) < limitQbliqueAngle$1) {
-                    if (p.h - moveY > 0) {
-                        p.y += moveY;
-                        p.h -= moveY;
-                    }
-                }
-                else if (elem.angle > 0 || elem.angle < 0) {
-                    var angle_1 = elem.angle > 0 ? elem.angle : Math.max(0, elem.angle + 360);
-                    var moveDist = calcMoveDist(moveX, moveY);
-                    var centerX = p.x + elem.w / 2;
-                    var centerY = p.y + elem.h / 2;
-                    if (angle_1 < 90) {
-                        moveDist = 0 - changeMoveDistDirect(moveDist, moveY);
-                        var radian = parseRadian(angle_1);
-                        var centerMoveDist = moveDist / 2;
-                        centerX = centerX + centerMoveDist * Math.sin(radian);
-                        centerY = centerY - centerMoveDist * Math.cos(radian);
-                    }
-                    else if (angle_1 < 180) {
-                        moveDist = changeMoveDistDirect(moveDist, moveX);
-                        var radian = parseRadian(angle_1 - 90);
-                        var centerMoveDist = moveDist / 2;
-                        centerX = centerX + centerMoveDist * Math.cos(radian);
-                        centerY = centerY + centerMoveDist * Math.sin(radian);
-                    }
-                    else if (angle_1 < 270) {
-                        moveDist = changeMoveDistDirect(moveDist, moveY);
-                        var radian = parseRadian(angle_1 - 180);
-                        var centerMoveDist = moveDist / 2;
-                        centerX = centerX - centerMoveDist * Math.sin(radian);
-                        centerY = centerY + centerMoveDist * Math.cos(radian);
-                    }
-                    else if (angle_1 < 360) {
-                        moveDist = 0 - changeMoveDistDirect(moveDist, moveX);
-                        var radian = parseRadian(angle_1 - 270);
-                        var centerMoveDist = moveDist / 2;
-                        centerX = centerX - centerMoveDist * Math.cos(radian);
-                        centerY = centerY - centerMoveDist * Math.sin(radian);
-                    }
-                    if (p.h + moveDist > 0) {
-                        p.h = p.h + moveDist;
-                        p.x = centerX - p.w / 2;
-                        p.y = centerY - p.h / 2;
-                    }
-                }
-                else {
-                    if (p.h - moveY > 0) {
-                        p.y += moveY;
-                        p.h -= moveY;
-                    }
-                }
-                break;
-            }
-            case 'top-right': {
-                if (p.h - moveY > 0 && p.w + moveX > 0) {
-                    p.y += moveY;
-                    p.w += moveX;
-                    p.h -= moveY;
-                }
-                break;
-            }
-            case 'right': {
-                if (elem.angle === 0 || Math.abs(elem.angle) < limitQbliqueAngle$1) {
-                    if (elem.w + moveX > 0) {
-                        p.w += moveX;
-                    }
-                }
-                else if (elem.angle > 0 || elem.angle < 0) {
-                    var angle_2 = elem.angle > 0 ? elem.angle : Math.max(0, elem.angle + 360);
-                    var moveDist = calcMoveDist(moveX, moveY);
-                    var centerX = p.x + elem.w / 2;
-                    var centerY = p.y + elem.h / 2;
-                    if (angle_2 < 90) {
-                        moveDist = changeMoveDistDirect(moveDist, moveY);
-                        var radian = parseRadian(angle_2);
-                        var centerMoveDist = moveDist / 2;
-                        centerX = centerX + centerMoveDist * Math.cos(radian);
-                        centerY = centerY + centerMoveDist * Math.sin(radian);
-                    }
-                    else if (angle_2 < 180) {
-                        moveDist = changeMoveDistDirect(moveDist, moveY);
-                        var radian = parseRadian(angle_2 - 90);
-                        var centerMoveDist = moveDist / 2;
-                        centerX = centerX - centerMoveDist * Math.sin(radian);
-                        centerY = centerY + centerMoveDist * Math.cos(radian);
-                    }
-                    else if (angle_2 < 270) {
-                        moveDist = changeMoveDistDirect(moveDist, moveY);
-                        var radian = parseRadian(angle_2 - 180);
-                        var centerMoveDist = moveDist / 2;
-                        centerX = centerX + centerMoveDist * Math.cos(radian);
-                        centerY = centerY + centerMoveDist * Math.sin(radian);
-                        moveDist = 0 - moveDist;
-                    }
-                    else if (angle_2 < 360) {
-                        moveDist = changeMoveDistDirect(moveDist, moveX);
-                        var radian = parseRadian(angle_2 - 270);
-                        var centerMoveDist = moveDist / 2;
-                        centerX = centerX + centerMoveDist * Math.sin(radian);
-                        centerY = centerY - centerMoveDist * Math.cos(radian);
-                    }
-                    if (p.w + moveDist > 0) {
-                        p.w = p.w + moveDist;
-                        p.x = centerX - p.w / 2;
-                        p.y = centerY - p.h / 2;
-                    }
-                }
-                else {
-                    if (elem.w + moveX > 0) {
-                        p.w += moveX;
-                    }
-                }
-                break;
-            }
-            case 'bottom-right': {
-                if (elem.w + moveX > 0 && elem.h + moveY > 0) {
-                    p.w += moveX;
-                    p.h += moveY;
-                }
-                break;
-            }
-            case 'bottom': {
-                if (elem.angle === 0 || Math.abs(elem.angle) < limitQbliqueAngle$1) {
-                    if (elem.h + moveY > 0) {
-                        p.h += moveY;
-                    }
-                }
-                else if (elem.angle > 0 || elem.angle < 0) {
-                    var angle_3 = elem.angle > 0 ? elem.angle : Math.max(0, elem.angle + 360);
-                    var moveDist = calcMoveDist(moveX, moveY);
-                    var centerX = p.x + elem.w / 2;
-                    var centerY = p.y + elem.h / 2;
-                    if (angle_3 < 90) {
-                        moveDist = changeMoveDistDirect(moveDist, moveY);
-                        var radian = parseRadian(angle_3);
-                        var centerMoveDist = moveDist / 2;
-                        centerX = centerX - centerMoveDist * Math.sin(radian);
-                        centerY = centerY + centerMoveDist * Math.cos(radian);
-                    }
-                    else if (angle_3 < 180) {
-                        moveDist = 0 - changeMoveDistDirect(moveDist, moveX);
-                        var radian = parseRadian(angle_3 - 90);
-                        var centerMoveDist = moveDist / 2;
-                        centerX = centerX - centerMoveDist * Math.cos(radian);
-                        centerY = centerY - centerMoveDist * Math.sin(radian);
-                    }
-                    else if (angle_3 < 270) {
-                        moveDist = changeMoveDistDirect(moveDist, moveX);
-                        var radian = parseRadian(angle_3 - 180);
-                        var centerMoveDist = moveDist / 2;
-                        centerX = centerX + centerMoveDist * Math.sin(radian);
-                        centerY = centerY - centerMoveDist * Math.cos(radian);
-                    }
-                    else if (angle_3 < 360) {
-                        moveDist = changeMoveDistDirect(moveDist, moveX);
-                        var radian = parseRadian(angle_3 - 270);
-                        var centerMoveDist = moveDist / 2;
-                        centerX = centerX + centerMoveDist * Math.cos(radian);
-                        centerY = centerY + centerMoveDist * Math.sin(radian);
-                    }
-                    if (p.h + moveDist > 0) {
-                        p.h = p.h + moveDist;
-                        p.x = centerX - p.w / 2;
-                        p.y = centerY - p.h / 2;
-                    }
-                }
-                else {
-                    if (elem.h + moveY > 0) {
-                        p.h += moveY;
-                    }
-                }
-                break;
-            }
-            case 'bottom-left': {
-                if (elem.w - moveX > 0 && elem.h + moveY > 0) {
-                    p.x += moveX;
-                    p.w -= moveX;
-                    p.h += moveY;
-                }
-                break;
-            }
-            case 'left': {
-                if (elem.angle === 0 || Math.abs(elem.angle) < limitQbliqueAngle$1) {
-                    if (elem.w - moveX > 0) {
-                        p.x += moveX;
-                        p.w -= moveX;
-                    }
-                }
-                else if (elem.angle > 0 || elem.angle < 0) {
-                    var angle_4 = elem.angle > 0 ? elem.angle : Math.max(0, elem.angle + 360);
-                    var moveDist = calcMoveDist(moveX, moveY);
-                    var centerX = p.x + elem.w / 2;
-                    var centerY = p.y + elem.h / 2;
-                    if (angle_4 < 90) {
-                        moveDist = 0 - changeMoveDistDirect(moveDist, moveX);
-                        var radian = parseRadian(angle_4);
-                        var centerMoveDist = moveDist / 2;
-                        centerX = centerX - centerMoveDist * Math.cos(radian);
-                        centerY = centerY - centerMoveDist * Math.sin(radian);
-                    }
-                    else if (angle_4 < 180) {
-                        moveDist = changeMoveDistDirect(moveDist, moveX);
-                        var radian = parseRadian(angle_4 - 90);
-                        var centerMoveDist = moveDist / 2;
-                        centerX = centerX + centerMoveDist * Math.sin(radian);
-                        centerY = centerY - centerMoveDist * Math.cos(radian);
-                    }
-                    else if (angle_4 < 270) {
-                        moveDist = changeMoveDistDirect(moveDist, moveY);
-                        var radian = parseRadian(angle_4 - 180);
-                        var centerMoveDist = moveDist / 2;
-                        centerX = centerX + centerMoveDist * Math.cos(radian);
-                        centerY = centerY + centerMoveDist * Math.sin(radian);
-                    }
-                    else if (angle_4 < 360) {
-                        moveDist = changeMoveDistDirect(moveDist, moveY);
-                        var radian = parseRadian(angle_4 - 270);
-                        var centerMoveDist = moveDist / 2;
-                        centerX = centerX - centerMoveDist * Math.sin(radian);
-                        centerY = centerY + centerMoveDist * Math.cos(radian);
-                    }
-                    if (p.w + moveDist > 0) {
-                        p.w = p.w + moveDist;
-                        p.x = centerX - p.w / 2;
-                        p.y = centerY - p.h / 2;
-                    }
-                }
-                else {
-                    if (elem.w - moveX > 0) {
-                        p.x += moveX;
-                        p.w -= moveX;
-                    }
-                }
-                break;
-            }
-        }
-        return p;
-    }
-    function parseRadian(angle) {
-        return angle * Math.PI / 180;
-    }
-    function calcMoveDist(moveX, moveY) {
-        return Math.sqrt(moveX * moveX + moveY * moveY);
-    }
-    function changeMoveDistDirect(moveDist, moveDirect) {
-        return moveDirect > 0 ? Math.abs(moveDist) : 0 - Math.abs(moveDist);
-    }
-    var limitQbliqueAngle = LIMIT_QBLIQUE_ANGLE;
     var deepClone$4 = index$2.data.deepClone;
     var Helper = (function () {
         function Helper(board, config) {
@@ -2933,108 +2417,43 @@ var iDraw = (function () {
             }
             return null;
         };
-        Helper.prototype.isPointInElementWrapperDot = function (p, data) {
+        Helper.prototype.isPointInElementWrapperDot = function (p) {
             var _a, _b;
             var ctx = this._ctx;
-            var uuid = ((_b = (_a = this._helperConfig) === null || _a === void 0 ? void 0 : _a.selectedElementWrapper) === null || _b === void 0 ? void 0 : _b.uuid) || null;
-            var directIndex = null;
-            var selectedDotDirection = null;
-            var hoverDotDirection = null;
+            var uuid = (_b = (_a = this._helperConfig) === null || _a === void 0 ? void 0 : _a.selectedElementWrapper) === null || _b === void 0 ? void 0 : _b.uuid;
+            var direction = null;
             if (!this._helperConfig.selectedElementWrapper) {
-                return { uuid: uuid, selectedDotDirection: selectedDotDirection, directIndex: directIndex, hoverDotDirection: hoverDotDirection };
+                return [null, null];
             }
             var wrapper = this._helperConfig.selectedElementWrapper;
             var dots = [
-                wrapper.dots.right,
-                wrapper.dots.topRight,
-                wrapper.dots.top,
-                wrapper.dots.topLeft,
-                wrapper.dots.left,
-                wrapper.dots.bottomLeft,
-                wrapper.dots.bottom,
-                wrapper.dots.bottomRight,
+                wrapper.dots.topLeft, wrapper.dots.top, wrapper.dots.topRight, wrapper.dots.right,
+                wrapper.dots.bottomRight, wrapper.dots.bottom, wrapper.dots.bottomLeft, wrapper.dots.left,
+                wrapper.dots.rotate,
             ];
             var directionNames = [
-                'right',
-                'top-right',
-                'top',
-                'top-left',
-                'left',
-                'bottom-left',
-                'bottom',
-                'bottom-right',
+                'top-left', 'top', 'top-right', 'right',
+                'bottom-right', 'bottom', 'bottom-left', 'left',
+                'rotate',
             ];
-            var hoverDirectionNames = index$2.data.deepClone(directionNames);
-            var angleMoveNum = 0;
-            if (data && uuid) {
-                var elemIdx = this.getElementIndexByUUID(uuid);
-                if (elemIdx !== null && elemIdx >= 0) {
-                    var elem = data.elements[elemIdx];
-                    var angle = elem.angle;
-                    if (angle < 0) {
-                        angle += 360;
-                    }
-                    if (angle < 45) {
-                        angleMoveNum = 0;
-                    }
-                    else if (angle < 90) {
-                        angleMoveNum = 1;
-                    }
-                    else if (angle < 135) {
-                        angleMoveNum = 2;
-                    }
-                    else if (angle < 180) {
-                        angleMoveNum = 3;
-                    }
-                    else if (angle < 225) {
-                        angleMoveNum = 4;
-                    }
-                    else if (angle < 270) {
-                        angleMoveNum = 5;
-                    }
-                    else if (angle < 315) {
-                        angleMoveNum = 6;
-                    }
-                }
-            }
-            if (angleMoveNum > 0) {
-                hoverDirectionNames = hoverDirectionNames.slice(-angleMoveNum).concat(hoverDirectionNames.slice(0, -angleMoveNum));
-            }
             rotateContext(ctx, wrapper.translate, wrapper.radian || 0, function () {
                 for (var i = 0; i < dots.length; i++) {
                     var dot = dots[i];
-                    if (dot.invisible === true) {
-                        continue;
-                    }
                     ctx.beginPath();
                     ctx.arc(dot.x, dot.y, wrapper.dotSize, 0, Math.PI * 2);
                     ctx.closePath();
                     if (ctx.isPointInPath(p.x, p.y)) {
-                        selectedDotDirection = directionNames[i];
-                        hoverDotDirection = hoverDirectionNames[i];
+                        direction = directionNames[i];
                     }
-                    if (selectedDotDirection) {
-                        directIndex = i;
+                    if (direction) {
                         break;
                     }
                 }
             });
-            if (selectedDotDirection === null) {
-                rotateContext(ctx, wrapper.translate, wrapper.radian || 0, function () {
-                    var dot = wrapper.dots.rotate;
-                    ctx.beginPath();
-                    ctx.arc(dot.x, dot.y, wrapper.dotSize, 0, Math.PI * 2);
-                    ctx.closePath();
-                    if (ctx.isPointInPath(p.x, p.y)) {
-                        selectedDotDirection = 'rotate';
-                        hoverDotDirection = 'rotate';
-                    }
-                });
-            }
-            return { uuid: uuid, selectedDotDirection: selectedDotDirection, hoverDotDirection: hoverDotDirection, directIndex: directIndex };
+            return [uuid, direction];
         };
         Helper.prototype.isPointInElementList = function (p, data) {
-            var _a, _b, _c;
+            var _a, _b;
             var ctx = this._ctx;
             var idx = -1;
             var uuid = null;
@@ -3045,10 +2464,8 @@ var iDraw = (function () {
                 var ele = data.elements[elemIdx];
                 if (!ele)
                     return "continue";
-                if (((_b = ele.operation) === null || _b === void 0 ? void 0 : _b.invisible) === true)
-                    return "continue";
                 var bw = 0;
-                if (((_c = ele.desc) === null || _c === void 0 ? void 0 : _c.borderWidth) > 0) {
+                if (((_b = ele.desc) === null || _b === void 0 ? void 0 : _b.borderWidth) > 0) {
                     bw = ele.desc.borderWidth;
                 }
                 rotateElement(ctx, ele, function () {
@@ -3057,7 +2474,8 @@ var iDraw = (function () {
                     ctx.lineTo(ele.x + ele.w + bw, ele.y - bw);
                     ctx.lineTo(ele.x + ele.w + bw, ele.y + ele.h + bw);
                     ctx.lineTo(ele.x - bw, ele.y + ele.h + bw);
-                    ctx.lineTo(ele.x - bw, ele.y - bw);
+                    ctx.lineTo(ele.x, ele.y);
+                    ctx.rect(ele.x, ele.y, ele.w, ele.h);
                     ctx.closePath();
                     if (ctx.isPointInPath(p.x, p.y)) {
                         idx = i;
@@ -3187,10 +2605,6 @@ var iDraw = (function () {
             var lineDash = elemWrapper.lineDash.map(function (n) { return (n / scale); });
             var rotateLimit = 12;
             var bw = ((_a = elem.desc) === null || _a === void 0 ? void 0 : _a.borderWidth) || 0;
-            var hideObliqueDirection = false;
-            if (typeof elem.angle === 'number' && Math.abs(elem.angle) > limitQbliqueAngle) {
-                hideObliqueDirection = true;
-            }
             var wrapper = {
                 uuid: elem.uuid,
                 dotSize: dotSize,
@@ -3199,7 +2613,6 @@ var iDraw = (function () {
                     topLeft: {
                         x: elem.x - dotSize - bw,
                         y: elem.y - dotSize - bw,
-                        invisible: hideObliqueDirection,
                     },
                     top: {
                         x: elem.x + elem.w / 2,
@@ -3208,7 +2621,6 @@ var iDraw = (function () {
                     topRight: {
                         x: elem.x + elem.w + dotSize + bw,
                         y: elem.y - dotSize - bw,
-                        invisible: hideObliqueDirection,
                     },
                     right: {
                         x: elem.x + elem.w + dotSize + bw,
@@ -3217,7 +2629,6 @@ var iDraw = (function () {
                     bottomRight: {
                         x: elem.x + elem.w + dotSize + bw,
                         y: elem.y + elem.h + dotSize + bw,
-                        invisible: hideObliqueDirection,
                     },
                     bottom: {
                         x: elem.x + elem.w / 2,
@@ -3226,7 +2637,6 @@ var iDraw = (function () {
                     bottomLeft: {
                         x: elem.x - dotSize - bw,
                         y: elem.y + elem.h + dotSize + bw,
-                        invisible: hideObliqueDirection,
                     },
                     left: {
                         x: elem.x - dotSize - bw,
@@ -3506,9 +2916,9 @@ var iDraw = (function () {
             _loadAction();
         };
         Loader.prototype._loadElementSource = function (params) {
-            return __awaiter$2(this, void 0, void 0, function () {
+            return __awaiter(this, void 0, void 0, function () {
                 var image, image, image;
-                return __generator$2(this, function (_a) {
+                return __generator(this, function (_a) {
                     switch (_a.label) {
                         case 0:
                             if (!(params && params.type === 'image')) return [3, 2];
@@ -3562,20 +2972,19 @@ var iDraw = (function () {
             if (!this.isEffectivePoint(p)) {
                 return { cursor: cursor, elementUUID: elementUUID };
             }
-            var _a = this[_helper$1].isPointInElementWrapperDot(p, data), uuid = _a.uuid, hoverDotDirection = _a.hoverDotDirection;
-            var direction = hoverDotDirection;
+            var _a = this[_helper$1].isPointInElementWrapperDot(p), uuid = _a[0], direction = _a[1];
             if (uuid && direction) {
                 switch (direction) {
-                    case 'top-right': {
-                        cursor = 'ne-resize';
-                        break;
-                    }
                     case 'top-left': {
                         cursor = 'nw-resize';
                         break;
                     }
                     case 'top': {
                         cursor = 'n-resize';
+                        break;
+                    }
+                    case 'top-right': {
+                        cursor = 'ne-resize';
                         break;
                     }
                     case 'right': {
@@ -3623,6 +3032,15 @@ var iDraw = (function () {
         };
         return Mapper;
     }());
+    var elementTypes = {
+        'text': {},
+        'rect': {},
+        'image': {},
+        'svg': {},
+        'circle': {},
+        'html': {},
+    };
+    var elementNames = Object.keys(elementTypes);
     function parseData(data) {
         var result = {
             elements: [],
@@ -3652,97 +3070,33 @@ var iDraw = (function () {
     function isNumber(num) {
         return (num >= 0 || num < 0);
     }
-    var RendererEvent = (function () {
-        function RendererEvent() {
-            this._listeners = new Map();
-        }
-        RendererEvent.prototype.on = function (eventKey, callback) {
-            if (this._listeners.has(eventKey)) {
-                var callbacks = this._listeners.get(eventKey);
-                callbacks === null || callbacks === void 0 ? void 0 : callbacks.push(callback);
-                this._listeners.set(eventKey, callbacks || []);
-            }
-            else {
-                this._listeners.set(eventKey, [callback]);
-            }
-        };
-        RendererEvent.prototype.off = function (eventKey, callback) {
-            if (this._listeners.has(eventKey)) {
-                var callbacks = this._listeners.get(eventKey);
-                if (Array.isArray(callbacks)) {
-                    for (var i = 0; i < (callbacks === null || callbacks === void 0 ? void 0 : callbacks.length); i++) {
-                        if (callbacks[i] === callback) {
-                            callbacks.splice(i, 1);
-                            break;
-                        }
-                    }
-                }
-                this._listeners.set(eventKey, callbacks || []);
-            }
-        };
-        RendererEvent.prototype.trigger = function (eventKey, arg) {
-            var callbacks = this._listeners.get(eventKey);
-            if (Array.isArray(callbacks)) {
-                callbacks.forEach(function (cb) {
-                    cb(arg);
-                });
-                return true;
-            }
-            else {
-                return false;
-            }
-        };
-        RendererEvent.prototype.has = function (name) {
-            if (this._listeners.has(name)) {
-                var list = this._listeners.get(name);
-                if (Array.isArray(list) && list.length > 0) {
-                    return true;
-                }
-            }
-            return false;
-        };
-        return RendererEvent;
-    }());
     var requestAnimationFrame = window.requestAnimationFrame;
     var deepClone$3 = index$2.data.deepClone;
     var DrawStatus;
     (function (DrawStatus) {
-        DrawStatus["NULL"] = "null";
         DrawStatus["FREE"] = "free";
         DrawStatus["DRAWING"] = "drawing";
-        DrawStatus["FREEZE"] = "freeze";
     })(DrawStatus || (DrawStatus = {}));
-    var Renderer = (function (_super) {
-        __extends(Renderer, _super);
+    var Renderer = (function () {
         function Renderer(board) {
-            var _this = _super.call(this) || this;
-            _this._queue = [];
-            _this._status = DrawStatus.NULL;
-            _this._board = board;
-            _this._loader = new Loader({
+            var _this = this;
+            this._queue = [];
+            this._status = DrawStatus.FREE;
+            this._board = board;
+            this._loader = new Loader({
                 board: board,
                 maxParallelNum: 6
             });
-            _this._loader.on('load', function (res) {
+            this._loader.on('load', function (res) {
                 _this._drawFrame();
             });
-            _this._loader.on('error', function (res) {
+            this._loader.on('error', function (res) {
                 console.log('Loader Error: ', res);
             });
-            _this._loader.on('complete', function (res) {
+            this._loader.on('complete', function (res) {
             });
-            return _this;
         }
-        Renderer.prototype.freeze = function () {
-            this._status = DrawStatus.FREEZE;
-        };
-        Renderer.prototype.thaw = function () {
-            this._status = DrawStatus.FREE;
-        };
         Renderer.prototype.render = function (data, helper, changeResourceUUIDs) {
-            if ([DrawStatus.FREEZE].includes(this._status)) {
-                return;
-            }
             var _data = deepClone$3({ data: data, helper: helper });
             this._queue.push(_data);
             if (this._status !== DrawStatus.DRAWING) {
@@ -3753,13 +3107,7 @@ var iDraw = (function () {
         };
         Renderer.prototype._drawFrame = function () {
             var _this = this;
-            if (this._status === DrawStatus.FREEZE) {
-                return;
-            }
             requestAnimationFrame(function () {
-                if (_this._status === DrawStatus.FREEZE) {
-                    return;
-                }
                 var ctx = _this._board.getContext();
                 var item = _this._queue[0];
                 var isLastFrame = false;
@@ -3790,11 +3138,6 @@ var iDraw = (function () {
                 else {
                     _this._status = DrawStatus.FREE;
                 }
-                _this.trigger('drawFrame', undefined);
-                if (_this._loader.isComplete() === true && _this._queue.length === 1 && _this._status === DrawStatus.FREE) {
-                    _this.trigger('drawFrameComplete', undefined);
-                    _this.freeze();
-                }
             });
         };
         Renderer.prototype._retainQueueOneItem = function () {
@@ -3805,7 +3148,7 @@ var iDraw = (function () {
             this._queue = [lastOne];
         };
         return Renderer;
-    }(RendererEvent));
+    }());
     var Mode;
     (function (Mode) {
         Mode["NULL"] = "null";
@@ -3829,7 +3172,6 @@ var iDraw = (function () {
             selectedUUIDList: [],
             hoverUUID: null,
             selectedDotDirection: null,
-            hoverDotDirection: null,
             prevPoint: null,
         };
     }
@@ -4033,12 +3375,6 @@ var iDraw = (function () {
         core[_board].on('moveStart', handleMoveStart(core));
         core[_board].on('move', time.throttle(handleMove(core), 16));
         core[_board].on('moveEnd', handleMoveEnd(core));
-        core[_renderer].on('drawFrame', function () {
-            core[_coreEvent].trigger('drawFrame', undefined);
-        });
-        core[_renderer].on('drawFrameComplete', function () {
-            core[_coreEvent].trigger('drawFrameComplete', undefined);
-        });
         core[_tempData$1].set('hasInited', true);
     }
     function handleDoubleClick(core) {
@@ -4064,10 +3400,10 @@ var iDraw = (function () {
                 core[_tempData$1].set('mode', Mode.SELECT_ELEMENT_LIST);
             }
             else {
-                var _d = core[_helper].isPointInElementWrapperDot(point, core[_data]), uuid = _d.uuid, selectedDotDirection = _d.selectedDotDirection;
-                if (uuid && selectedDotDirection) {
+                var _d = core[_helper].isPointInElementWrapperDot(point), uuid = _d[0], direction = _d[1];
+                if (uuid && direction) {
                     core[_tempData$1].set('mode', Mode.SELECT_ELEMENT_WRAPPER_DOT);
-                    core[_tempData$1].set('selectedDotDirection', selectedDotDirection);
+                    core[_tempData$1].set('selectedDotDirection', direction);
                     core[_tempData$1].set('selectedUUID', uuid);
                 }
                 else {
@@ -4082,7 +3418,6 @@ var iDraw = (function () {
                     }
                     else {
                         core[_tempData$1].set('selectedUUIDList', []);
-                        core[_tempData$1].set('selectedUUID', null);
                         core[_tempData$1].set('mode', Mode.SELECT_AREA);
                     }
                 }
@@ -4309,7 +3644,6 @@ var iDraw = (function () {
                 scrollX: transfrom.scrollX,
                 scrollY: transfrom.scrollY,
             });
-            this[_renderer].thaw();
             this[_renderer].render(this[_data], this[_helper].getConfig(), (opts === null || opts === void 0 ? void 0 : opts.resourceChangeUUIDs) || []);
         };
         Core.prototype.getElement = function (uuid) {
@@ -4398,7 +3732,6 @@ var iDraw = (function () {
         };
         Core.prototype.clearOperation = function () {
             this[_tempData$1].clear();
-            this[_tempData$1].set('onlyRender', this[_opts$3].onlyRender === true);
             this[_draw]();
         };
         Core.prototype.on = function (key, callback) {
@@ -4412,12 +3745,6 @@ var iDraw = (function () {
         };
         Core.prototype.pointContextToScreen = function (p) {
             return this[_board].pointContextToScreen(p);
-        };
-        Core.prototype.setOnlyRender = function () {
-            this[_tempData$1].set('onlyRender', true);
-        };
-        Core.prototype.cancelOnlyRender = function () {
-            this[_tempData$1].set('onlyRender', false);
         };
         Core.prototype.__getBoardContext = function () {
             return this[_board].getContext();
@@ -4458,18 +3785,14 @@ var iDraw = (function () {
         disableKeyboard: true,
     };
 
-    function createDefaultData() {
-        return {
-            isFocus: false,
-            doRecords: [],
-            unDoRecords: [],
-            clipboardElements: [],
-            isDownloading: false,
-        };
-    }
     var TempData = (function () {
         function TempData() {
-            this._temp = createDefaultData();
+            this._temp = {
+                isFocus: false,
+                doRecords: [],
+                unDoRecords: [],
+                clipboardElements: [],
+            };
         }
         TempData.prototype.set = function (name, value) {
             this._temp[name] = value;
@@ -4478,7 +3801,12 @@ var iDraw = (function () {
             return this._temp[name];
         };
         TempData.prototype.clear = function () {
-            this._temp = createDefaultData();
+            this._temp = {
+                isFocus: false,
+                doRecords: [],
+                unDoRecords: [],
+                clipboardElements: [],
+            };
         };
         return TempData;
     }());
@@ -4621,35 +3949,6 @@ var iDraw = (function () {
         };
     }
 
-    function exportDataURL(idraw, type, quality) {
-        return __awaiter$4(this, void 0, void 0, function () {
-            return __generator$4(this, function (_a) {
-                if (idraw[_tempData].get('isDownloading') === true) {
-                    return [2, Promise.reject('Busy!')];
-                }
-                idraw[_tempData].set('isDownloading', true);
-                return [2, new Promise(function (resolve, reject) {
-                        var dataURL = '';
-                        function listenRenderFrameComplete() {
-                            idraw.off('drawFrameComplete', listenRenderFrameComplete);
-                            idraw[_tempData].set('isDownloading', false);
-                            var ctx = idraw.__getOriginContext();
-                            var canvas = ctx.canvas;
-                            dataURL = canvas.toDataURL(type, quality);
-                            resolve(dataURL);
-                        }
-                        try {
-                            idraw.on('drawFrameComplete', listenRenderFrameComplete);
-                            idraw.clearOperation();
-                        }
-                        catch (err) {
-                            reject(err);
-                        }
-                    })];
-            });
-        });
-    }
-
     function compose(middleware) {
         return function (context, next) {
             return dispatch(0);
@@ -4781,77 +4080,14 @@ var iDraw = (function () {
         promise: function (data) {
             return parsePrototype(data) === 'Promise';
         },
-    };
-    function __awaiter(thisArg, _arguments, P, generator) {
-        function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-        return new (P || (P = Promise))(function (resolve, reject) {
-            function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-            function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-            function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-            step((generator = generator.apply(thisArg, _arguments || [])).next());
-        });
-    }
-    function __generator(thisArg, body) {
-        var _ = { label: 0, sent: function() { if (t[0] & 1) throw t[1]; return t[1]; }, trys: [], ops: [] }, f, y, t, g;
-        return g = { next: verb(0), "throw": verb(1), "return": verb(2) }, typeof Symbol === "function" && (g[Symbol.iterator] = function() { return this; }), g;
-        function verb(n) { return function (v) { return step([n, v]); }; }
-        function step(op) {
-            if (f) throw new TypeError("Generator is already executing.");
-            while (_) try {
-                if (f = 1, y && (t = op[0] & 2 ? y["return"] : op[0] ? y["throw"] || ((t = y["return"]) && t.call(y), 0) : y.next) && !(t = t.call(y, op[1])).done) return t;
-                if (y = 0, t) op = [op[0] & 2, t.value];
-                switch (op[0]) {
-                    case 0: case 1: t = op; break;
-                    case 4: _.label++; return { value: op[1], done: false };
-                    case 5: _.label++; y = op[1]; op = [0]; continue;
-                    case 7: op = _.ops.pop(); _.trys.pop(); continue;
-                    default:
-                        if (!(t = _.trys, t = t.length > 0 && t[t.length - 1]) && (op[0] === 6 || op[0] === 2)) { _ = 0; continue; }
-                        if (op[0] === 3 && (!t || (op[1] > t[0] && op[1] < t[3]))) { _.label = op[1]; break; }
-                        if (op[0] === 6 && _.label < t[1]) { _.label = t[1]; t = op; break; }
-                        if (t && _.label < t[2]) { _.label = t[2]; _.ops.push(op); break; }
-                        if (t[2]) _.ops.pop();
-                        _.trys.pop(); continue;
-                }
-                op = body.call(thisArg, _);
-            } catch (e) { op = [6, e]; y = 0; } finally { f = t = 0; }
-            if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
+        nodeList: function (data) {
+            return parsePrototype(data) === 'NodeList';
+        },
+        imageData: function (data) {
+            return parsePrototype(data) === 'ImageData';
         }
-    }
-    function parseHTMLToDataURL(html, opts) {
-        var width = opts.width, height = opts.height;
-        return new Promise(function (resolve, reject) {
-            var _svg = "\n    <svg xmlns=\"http://www.w3.org/2000/svg\" width=\"" + (width || '') + "\" height = \"" + (height || '') + "\">\n      <foreignObject width=\"100%\" height=\"100%\">\n        <div xmlns = \"http://www.w3.org/1999/xhtml\">\n          " + html + "\n        </div>\n      </foreignObject>\n    </svg>\n    ";
-            var blob = new Blob([_svg], { type: 'image/svg+xml;charset=utf-8' });
-            var reader = new FileReader();
-            reader.readAsDataURL(blob);
-            reader.onload = function (event) {
-                var _a;
-                var base64 = (_a = event === null || event === void 0 ? void 0 : event.target) === null || _a === void 0 ? void 0 : _a.result;
-                resolve(base64);
-            };
-            reader.onerror = function (err) {
-                reject(err);
-            };
-        });
-    }
-    function parseSVGToDataURL(svg) {
-        return new Promise(function (resolve, reject) {
-            var _svg = svg;
-            var blob = new Blob([_svg], { type: 'image/svg+xml;charset=utf-8' });
-            var reader = new FileReader();
-            reader.readAsDataURL(blob);
-            reader.onload = function (event) {
-                var _a;
-                var base64 = (_a = event === null || event === void 0 ? void 0 : event.target) === null || _a === void 0 ? void 0 : _a.result;
-                resolve(base64);
-            };
-            reader.onerror = function (err) {
-                reject(err);
-            };
-        });
-    }
-    var Image = window.Image;
+    };
+    var Image = window.Image, Blob = window.Blob, FileReader = window.FileReader;
     function loadImage(src) {
         return new Promise(function (resolve, reject) {
             var img = new Image;
@@ -4864,35 +4100,44 @@ var iDraw = (function () {
         });
     }
     function loadSVG(svg) {
-        return __awaiter(this, void 0, void 0, function () {
-            var dataURL, image;
-            return __generator(this, function (_a) {
-                switch (_a.label) {
-                    case 0: return [4, parseSVGToDataURL(svg)];
-                    case 1:
-                        dataURL = _a.sent();
-                        return [4, loadImage(dataURL)];
-                    case 2:
-                        image = _a.sent();
-                        return [2, image];
-                }
-            });
+        return new Promise(function (resolve, reject) {
+            var _svg = svg;
+            var image = new Image();
+            var blob = new Blob([_svg], { type: 'image/svg+xml;charset=utf-8' });
+            var reader = new FileReader();
+            reader.readAsDataURL(blob);
+            reader.onload = function (event) {
+                var _a;
+                var base64 = (_a = event === null || event === void 0 ? void 0 : event.target) === null || _a === void 0 ? void 0 : _a.result;
+                image.onload = function () {
+                    resolve(image);
+                };
+                image.src = base64;
+            };
+            reader.onerror = function (err) {
+                reject(err);
+            };
         });
     }
     function loadHTML(html, opts) {
-        return __awaiter(this, void 0, void 0, function () {
-            var dataURL, image;
-            return __generator(this, function (_a) {
-                switch (_a.label) {
-                    case 0: return [4, parseHTMLToDataURL(html, opts)];
-                    case 1:
-                        dataURL = _a.sent();
-                        return [4, loadImage(dataURL)];
-                    case 2:
-                        image = _a.sent();
-                        return [2, image];
-                }
-            });
+        var width = opts.width, height = opts.height;
+        return new Promise(function (resolve, reject) {
+            var _svg = "\n    <svg xmlns=\"http://www.w3.org/2000/svg\" width=\"" + (width || '') + "\" height = \"" + (height || '') + "\">\n      <foreignObject width=\"100%\" height=\"100%\">\n        <div xmlns = \"http://www.w3.org/1999/xhtml\">\n          " + html + "\n        </div>\n      </foreignObject>\n    </svg>\n    ";
+            var image = new Image();
+            var blob = new Blob([_svg], { type: 'image/svg+xml;charset=utf-8' });
+            var reader = new FileReader();
+            reader.readAsDataURL(blob);
+            reader.onload = function (event) {
+                var _a;
+                var base64 = (_a = event === null || event === void 0 ? void 0 : event.target) === null || _a === void 0 ? void 0 : _a.result;
+                image.onload = function () {
+                    resolve(image);
+                };
+                image.src = base64;
+            };
+            reader.onerror = function (err) {
+                reject(err);
+            };
         });
     }
     var index = {
@@ -4922,6 +4167,25 @@ var iDraw = (function () {
             deepClone: deepClone,
         }
     };
+
+    function exportDataURL(idraw, type, quality) {
+        return __awaiter$1(this, void 0, void 0, function () {
+            var ctx, canvas, dataURL;
+            return __generator$1(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        idraw.clearOperation();
+                        return [4, index.time.delay(300)];
+                    case 1:
+                        _a.sent();
+                        ctx = idraw.__getOriginContext();
+                        canvas = ctx.canvas;
+                        dataURL = canvas.toDataURL(type, quality);
+                        return [2, dataURL];
+                }
+            });
+        });
+    }
 
     function copyElements(idraw) {
         if (idraw[_tempData].get('isFocus') !== true) {
@@ -5021,7 +4285,7 @@ var iDraw = (function () {
 
     var _a, _b, _c;
     var iDraw = (function (_super) {
-        __extends$1(iDraw, _super);
+        __extends(iDraw, _super);
         function iDraw(mount, opts, config) {
             var _this = _super.call(this, mount, {
                 width: opts.width || defaultOptions.width,
@@ -5045,8 +4309,8 @@ var iDraw = (function () {
             return redo(this);
         };
         iDraw.prototype.exportDataURL = function (type, quality) {
-            return __awaiter$4(this, void 0, void 0, function () {
-                return __generator$4(this, function (_d) {
+            return __awaiter$1(this, void 0, void 0, function () {
+                return __generator$1(this, function (_d) {
                     return [2, exportDataURL(this, type, quality)];
                 });
             });
@@ -5096,4 +4360,4 @@ var iDraw = (function () {
 
     return iDraw;
 
-})();
+}());
