@@ -17,7 +17,7 @@ const config = {
   },
   elementWrapper: {
     color: '#e91e63',
-    dotSize: 8,
+    controllerSize: 8,
     lineWidth: 1,
     lineDash: [12, 12],
   },
