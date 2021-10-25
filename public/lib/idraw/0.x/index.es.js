@@ -1,13 +1,13 @@
-var extendStatics = function(d, b) {
-    extendStatics = Object.setPrototypeOf ||
+var extendStatics$1 = function(d, b) {
+    extendStatics$1 = Object.setPrototypeOf ||
         ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
         function (d, b) { for (var p in b) if (Object.prototype.hasOwnProperty.call(b, p)) d[p] = b[p]; };
-    return extendStatics(d, b);
+    return extendStatics$1(d, b);
 };
-function __extends(d, b) {
+function __extends$1(d, b) {
     if (typeof b !== "function" && b !== null)
         throw new TypeError("Class extends value " + String(b) + " is not a constructor or null");
-    extendStatics(d, b);
+    extendStatics$1(d, b);
     function __() { this.constructor = d; }
     d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 }
@@ -21,7 +21,7 @@ var __assign$2 = function() {
     };
     return __assign$2.apply(this, arguments);
 };
-function __awaiter$1(thisArg, _arguments, P, generator) {
+function __awaiter$4(thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
         function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
@@ -30,7 +30,7 @@ function __awaiter$1(thisArg, _arguments, P, generator) {
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 }
-function __generator$1(thisArg, body) {
+function __generator$4(thisArg, body) {
     var _ = { label: 0, sent: function() { if (t[0] & 1) throw t[1]; return t[1]; }, trys: [], ops: [] }, f, y, t, g;
     return g = { next: verb(0), "throw": verb(1), "return": verb(2) }, typeof Symbol === "function" && (g[Symbol.iterator] = function() { return this; }), g;
     function verb(n) { return function (v) { return step([n, v]); }; }
@@ -58,6 +58,19 @@ function __generator$1(thisArg, body) {
     }
 }
 
+var extendStatics = function(d, b) {
+    extendStatics = Object.setPrototypeOf ||
+        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+        function (d, b) { for (var p in b) if (Object.prototype.hasOwnProperty.call(b, p)) d[p] = b[p]; };
+    return extendStatics(d, b);
+};
+function __extends(d, b) {
+    if (typeof b !== "function" && b !== null)
+        throw new TypeError("Class extends value " + String(b) + " is not a constructor or null");
+    extendStatics(d, b);
+    function __() { this.constructor = d; }
+    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+}
 var __assign$1 = function() {
     __assign$1 = Object.assign || function __assign(t) {
         for (var s, i = 1, n = arguments.length; i < n; i++) {
@@ -68,7 +81,7 @@ var __assign$1 = function() {
     };
     return __assign$1.apply(this, arguments);
 };
-function __awaiter(thisArg, _arguments, P, generator) {
+function __awaiter$2(thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
         function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
@@ -77,7 +90,7 @@ function __awaiter(thisArg, _arguments, P, generator) {
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 }
-function __generator(thisArg, body) {
+function __generator$2(thisArg, body) {
     var _ = { label: 0, sent: function() { if (t[0] & 1) throw t[1]; return t[1]; }, trys: [], ops: [] }, f, y, t, g;
     return g = { next: verb(0), "throw": verb(1), "return": verb(2) }, typeof Symbol === "function" && (g[Symbol.iterator] = function() { return this; }), g;
     function verb(n) { return function (v) { return step([n, v]); }; }
@@ -245,14 +258,77 @@ var istype$2 = {
     promise: function (data) {
         return parsePrototype$1(data) === 'Promise';
     },
-    nodeList: function (data) {
-        return parsePrototype$1(data) === 'NodeList';
-    },
-    imageData: function (data) {
-        return parsePrototype$1(data) === 'ImageData';
-    }
 };
-var Image$1 = window.Image, Blob$1 = window.Blob, FileReader$1 = window.FileReader;
+function __awaiter$1(thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+}
+function __generator$1(thisArg, body) {
+    var _ = { label: 0, sent: function() { if (t[0] & 1) throw t[1]; return t[1]; }, trys: [], ops: [] }, f, y, t, g;
+    return g = { next: verb(0), "throw": verb(1), "return": verb(2) }, typeof Symbol === "function" && (g[Symbol.iterator] = function() { return this; }), g;
+    function verb(n) { return function (v) { return step([n, v]); }; }
+    function step(op) {
+        if (f) throw new TypeError("Generator is already executing.");
+        while (_) try {
+            if (f = 1, y && (t = op[0] & 2 ? y["return"] : op[0] ? y["throw"] || ((t = y["return"]) && t.call(y), 0) : y.next) && !(t = t.call(y, op[1])).done) return t;
+            if (y = 0, t) op = [op[0] & 2, t.value];
+            switch (op[0]) {
+                case 0: case 1: t = op; break;
+                case 4: _.label++; return { value: op[1], done: false };
+                case 5: _.label++; y = op[1]; op = [0]; continue;
+                case 7: op = _.ops.pop(); _.trys.pop(); continue;
+                default:
+                    if (!(t = _.trys, t = t.length > 0 && t[t.length - 1]) && (op[0] === 6 || op[0] === 2)) { _ = 0; continue; }
+                    if (op[0] === 3 && (!t || (op[1] > t[0] && op[1] < t[3]))) { _.label = op[1]; break; }
+                    if (op[0] === 6 && _.label < t[1]) { _.label = t[1]; t = op; break; }
+                    if (t && _.label < t[2]) { _.label = t[2]; _.ops.push(op); break; }
+                    if (t[2]) _.ops.pop();
+                    _.trys.pop(); continue;
+            }
+            op = body.call(thisArg, _);
+        } catch (e) { op = [6, e]; y = 0; } finally { f = t = 0; }
+        if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
+    }
+}
+function parseHTMLToDataURL$1(html, opts) {
+    var width = opts.width, height = opts.height;
+    return new Promise(function (resolve, reject) {
+        var _svg = "\n    <svg xmlns=\"http://www.w3.org/2000/svg\" width=\"" + (width || '') + "\" height = \"" + (height || '') + "\">\n      <foreignObject width=\"100%\" height=\"100%\">\n        <div xmlns = \"http://www.w3.org/1999/xhtml\">\n          " + html + "\n        </div>\n      </foreignObject>\n    </svg>\n    ";
+        var blob = new Blob([_svg], { type: 'image/svg+xml;charset=utf-8' });
+        var reader = new FileReader();
+        reader.readAsDataURL(blob);
+        reader.onload = function (event) {
+            var _a;
+            var base64 = (_a = event === null || event === void 0 ? void 0 : event.target) === null || _a === void 0 ? void 0 : _a.result;
+            resolve(base64);
+        };
+        reader.onerror = function (err) {
+            reject(err);
+        };
+    });
+}
+function parseSVGToDataURL$1(svg) {
+    return new Promise(function (resolve, reject) {
+        var _svg = svg;
+        var blob = new Blob([_svg], { type: 'image/svg+xml;charset=utf-8' });
+        var reader = new FileReader();
+        reader.readAsDataURL(blob);
+        reader.onload = function (event) {
+            var _a;
+            var base64 = (_a = event === null || event === void 0 ? void 0 : event.target) === null || _a === void 0 ? void 0 : _a.result;
+            resolve(base64);
+        };
+        reader.onerror = function (err) {
+            reject(err);
+        };
+    });
+}
+var Image$1 = window.Image;
 function loadImage$2(src) {
     return new Promise(function (resolve, reject) {
         var img = new Image$1;
@@ -265,44 +341,35 @@ function loadImage$2(src) {
     });
 }
 function loadSVG$2(svg) {
-    return new Promise(function (resolve, reject) {
-        var _svg = svg;
-        var image = new Image$1();
-        var blob = new Blob$1([_svg], { type: 'image/svg+xml;charset=utf-8' });
-        var reader = new FileReader$1();
-        reader.readAsDataURL(blob);
-        reader.onload = function (event) {
-            var _a;
-            var base64 = (_a = event === null || event === void 0 ? void 0 : event.target) === null || _a === void 0 ? void 0 : _a.result;
-            image.onload = function () {
-                resolve(image);
-            };
-            image.src = base64;
-        };
-        reader.onerror = function (err) {
-            reject(err);
-        };
+    return __awaiter$1(this, void 0, void 0, function () {
+        var dataURL, image;
+        return __generator$1(this, function (_a) {
+            switch (_a.label) {
+                case 0: return [4, parseSVGToDataURL$1(svg)];
+                case 1:
+                    dataURL = _a.sent();
+                    return [4, loadImage$2(dataURL)];
+                case 2:
+                    image = _a.sent();
+                    return [2, image];
+            }
+        });
     });
 }
 function loadHTML$2(html, opts) {
-    var width = opts.width, height = opts.height;
-    return new Promise(function (resolve, reject) {
-        var _svg = "\n    <svg xmlns=\"http://www.w3.org/2000/svg\" width=\"" + (width || '') + "\" height = \"" + (height || '') + "\">\n      <foreignObject width=\"100%\" height=\"100%\">\n        <div xmlns = \"http://www.w3.org/1999/xhtml\">\n          " + html + "\n        </div>\n      </foreignObject>\n    </svg>\n    ";
-        var image = new Image$1();
-        var blob = new Blob$1([_svg], { type: 'image/svg+xml;charset=utf-8' });
-        var reader = new FileReader$1();
-        reader.readAsDataURL(blob);
-        reader.onload = function (event) {
-            var _a;
-            var base64 = (_a = event === null || event === void 0 ? void 0 : event.target) === null || _a === void 0 ? void 0 : _a.result;
-            image.onload = function () {
-                resolve(image);
-            };
-            image.src = base64;
-        };
-        reader.onerror = function (err) {
-            reject(err);
-        };
+    return __awaiter$1(this, void 0, void 0, function () {
+        var dataURL, image;
+        return __generator$1(this, function (_a) {
+            switch (_a.label) {
+                case 0: return [4, parseHTMLToDataURL$1(html, opts)];
+                case 1:
+                    dataURL = _a.sent();
+                    return [4, loadImage$2(dataURL)];
+                case 2:
+                    image = _a.sent();
+                    return [2, image];
+            }
+        });
     });
 }
 var index$1 = {
@@ -383,11 +450,16 @@ var BoardEvent = (function () {
     };
     return BoardEvent;
 }());
+function createTempData() {
+    return {
+        prevClickPoint: null,
+        isHoverCanvas: false,
+        isDragCanvas: false,
+    };
+}
 var TempData$1 = (function () {
     function TempData() {
-        this._temp = {
-            prevClickPoint: null
-        };
+        this._temp = createTempData();
     }
     TempData.prototype.set = function (name, value) {
         this._temp[name] = value;
@@ -396,42 +468,59 @@ var TempData$1 = (function () {
         return this._temp[name];
     };
     TempData.prototype.clear = function () {
-        this._temp = {
-            prevClickPoint: null,
-        };
+        this._temp = createTempData();
     };
     return TempData;
 }());
-var Watcher = (function () {
-    function Watcher(canvas) {
+var ScreenWatcher = (function () {
+    function ScreenWatcher(canvas) {
         this._isMoving = false;
         this._temp = new TempData$1;
+        this._container = window;
         this._canvas = canvas;
         this._isMoving = false;
         this._initEvent();
         this._event = new BoardEvent;
     }
-    Watcher.prototype.on = function (name, callback) {
+    ScreenWatcher.prototype.on = function (name, callback) {
         this._event.on(name, callback);
     };
-    Watcher.prototype.off = function (name, callback) {
+    ScreenWatcher.prototype.off = function (name, callback) {
         this._event.off(name, callback);
     };
-    Watcher.prototype._initEvent = function () {
+    ScreenWatcher.prototype._initEvent = function () {
         var canvas = this._canvas;
-        canvas.addEventListener('mousemove', this._listenHover.bind(this), true);
-        canvas.addEventListener('mousedown', this._listenMoveStart.bind(this), true);
-        canvas.addEventListener('mousemove', this._listenMove.bind(this), true);
-        canvas.addEventListener('mouseup', this._listenMoveEnd.bind(this), true);
-        canvas.addEventListener('mouseleave', this._listenMoveEnd.bind(this), true);
-        canvas.addEventListener('mouseleave', this._listenLeave.bind(this), true);
-        canvas.addEventListener('click', this._listenClick.bind(this), true);
-        canvas.addEventListener('wheel', this._listenWheel.bind(this), true);
-        canvas.addEventListener('touchstart', this._listenMoveStart.bind(this), true);
-        canvas.addEventListener('touchmove', this._listenMove.bind(this), true);
-        canvas.addEventListener('touchend', this._listenMoveEnd.bind(this), true);
+        var container = this._container;
+        container.addEventListener('mousemove', this._listenWindowMove.bind(this), false);
+        container.addEventListener('mouseup', this._listenWindowMoveEnd.bind(this), false);
+        canvas.addEventListener('mousemove', this._listenHover.bind(this), false);
+        canvas.addEventListener('mousedown', this._listenMoveStart.bind(this), false);
+        canvas.addEventListener('mousemove', this._listenMove.bind(this), false);
+        canvas.addEventListener('mouseup', this._listenMoveEnd.bind(this), false);
+        canvas.addEventListener('click', this._listenCanvasClick.bind(this), false);
+        canvas.addEventListener('wheel', this._listenCanvasWheel.bind(this), false);
+        canvas.addEventListener('mousedown', this._listenCanvasMoveStart.bind(this), true);
+        canvas.addEventListener('mouseup', this._listenCanvasMoveEnd.bind(this), true);
+        canvas.addEventListener('mouseover', this._listenCanvasMoveOver.bind(this), true);
+        canvas.addEventListener('mouseleave', this._listenCanvasMoveLeave.bind(this), true);
+        this._initParentEvent();
     };
-    Watcher.prototype._listenHover = function (e) {
+    ScreenWatcher.prototype._initParentEvent = function () {
+        var target = window;
+        var targetOrigin = target.origin;
+        while (target.self !== target.top) {
+            if (target.self !== target.parent) {
+                if (target.origin === targetOrigin) {
+                    target.parent.window.addEventListener('mousemove', this._listSameOriginParentWindow.bind(this), false);
+                }
+            }
+            target = target.parent;
+            if (!target) {
+                break;
+            }
+        }
+    };
+    ScreenWatcher.prototype._listenHover = function (e) {
         e.preventDefault();
         var p = this._getPosition(e);
         if (this._isVaildPoint(p)) {
@@ -441,13 +530,7 @@ var Watcher = (function () {
         }
         this._isMoving = true;
     };
-    Watcher.prototype._listenLeave = function (e) {
-        e.preventDefault();
-        if (this._event.has('leave')) {
-            this._event.trigger('leave', undefined);
-        }
-    };
-    Watcher.prototype._listenMoveStart = function (e) {
+    ScreenWatcher.prototype._listenMoveStart = function (e) {
         e.preventDefault();
         var p = this._getPosition(e);
         if (this._isVaildPoint(p)) {
@@ -460,7 +543,7 @@ var Watcher = (function () {
         }
         this._isMoving = true;
     };
-    Watcher.prototype._listenMove = function (e) {
+    ScreenWatcher.prototype._listenMove = function (e) {
         e.preventDefault();
         e.stopPropagation();
         if (this._event.has('move') && this._isMoving === true) {
@@ -470,7 +553,7 @@ var Watcher = (function () {
             }
         }
     };
-    Watcher.prototype._listenMoveEnd = function (e) {
+    ScreenWatcher.prototype._listenMoveEnd = function (e) {
         e.preventDefault();
         if (this._event.has('moveEnd')) {
             var p = this._getPosition(e);
@@ -480,7 +563,66 @@ var Watcher = (function () {
         }
         this._isMoving = false;
     };
-    Watcher.prototype._listenWheel = function (e) {
+    ScreenWatcher.prototype._listSameOriginParentWindow = function () {
+        if (this._temp.get('isHoverCanvas')) {
+            if (this._event.has('leave')) {
+                this._event.trigger('leave', undefined);
+            }
+        }
+        if (this._temp.get('isDragCanvas')) {
+            if (this._event.has('moveEnd')) {
+                this._event.trigger('moveEnd', { x: NaN, y: NaN });
+            }
+        }
+        this._isMoving = false;
+        this._temp.set('isDragCanvas', false);
+        this._temp.set('isHoverCanvas', false);
+    };
+    ScreenWatcher.prototype._listenCanvasMoveStart = function () {
+        if (this._temp.get('isHoverCanvas')) {
+            this._temp.set('isDragCanvas', true);
+        }
+    };
+    ScreenWatcher.prototype._listenCanvasMoveEnd = function () {
+        this._temp.set('isDragCanvas', false);
+    };
+    ScreenWatcher.prototype._listenCanvasMoveOver = function () {
+        this._temp.set('isHoverCanvas', true);
+    };
+    ScreenWatcher.prototype._listenCanvasMoveLeave = function () {
+        this._temp.set('isHoverCanvas', false);
+        if (this._event.has('leave')) {
+            this._event.trigger('leave', undefined);
+        }
+    };
+    ScreenWatcher.prototype._listenWindowMove = function (e) {
+        if (this._temp.get('isDragCanvas') !== true) {
+            return;
+        }
+        e.preventDefault();
+        e.stopPropagation();
+        if (this._event.has('move') && this._isMoving === true) {
+            var p = this._getPosition(e);
+            if (this._isVaildPoint(p)) {
+                this._event.trigger('move', p);
+            }
+        }
+    };
+    ScreenWatcher.prototype._listenWindowMoveEnd = function (e) {
+        if (!this._temp.get('isDragCanvas') === true) {
+            return;
+        }
+        e.preventDefault();
+        if (this._event.has('moveEnd')) {
+            var p = this._getPosition(e);
+            if (this._isVaildPoint(p)) {
+                this._event.trigger('moveEnd', p);
+            }
+        }
+        this._temp.set('isDragCanvas', false);
+        this._isMoving = false;
+    };
+    ScreenWatcher.prototype._listenCanvasWheel = function (e) {
         e.preventDefault();
         if (this._event.has('wheelX') && (e.deltaX > 0 || e.deltaX < 0)) {
             this._event.trigger('wheelX', e.deltaX);
@@ -489,7 +631,7 @@ var Watcher = (function () {
             this._event.trigger('wheelY', e.deltaY);
         }
     };
-    Watcher.prototype._listenClick = function (e) {
+    ScreenWatcher.prototype._listenCanvasClick = function (e) {
         e.preventDefault();
         var maxLimitTime = 500;
         var p = this._getPosition(e);
@@ -508,7 +650,7 @@ var Watcher = (function () {
             }
         }
     };
-    Watcher.prototype._getPosition = function (e) {
+    ScreenWatcher.prototype._getPosition = function (e) {
         var canvas = this._canvas;
         var x = 0;
         var y = 0;
@@ -530,11 +672,14 @@ var Watcher = (function () {
         };
         return p;
     };
-    Watcher.prototype._isVaildPoint = function (p) {
-        return (p.x > 0 && p.y > 0);
+    ScreenWatcher.prototype._isVaildPoint = function (p) {
+        return isAvailableNum(p.x) && isAvailableNum(p.y);
     };
-    return Watcher;
+    return ScreenWatcher;
 }());
+function isAvailableNum(num) {
+    return (num > 0 || num < 0 || num === 0);
+}
 function setStyle(dom, style) {
     var originStyle = getStyle(dom);
     var _style = __assign(__assign({}, originStyle), style);
@@ -691,6 +836,14 @@ var Context = (function () {
             return this._ctx.fillText(text, this._doSize(x), this._doSize(y));
         }
     };
+    Context.prototype.strokeText = function (text, x, y, maxWidth) {
+        if (maxWidth !== undefined) {
+            return this._ctx.strokeText(text, this._doSize(x), this._doSize(y), this._doSize(maxWidth));
+        }
+        else {
+            return this._ctx.strokeText(text, this._doSize(x), this._doSize(y));
+        }
+    };
     Context.prototype.setFont = function (opts) {
         var strList = [];
         if (opts.fontWeight === 'bold') {
@@ -714,6 +867,18 @@ var Context = (function () {
     };
     Context.prototype.scale = function (ratioX, ratioY) {
         this._ctx.scale(ratioX, ratioY);
+    };
+    Context.prototype.setShadowColor = function (color) {
+        this._ctx.shadowColor = color;
+    };
+    Context.prototype.setShadowOffsetX = function (offsetX) {
+        this._ctx.shadowOffsetX = this._doSize(offsetX);
+    };
+    Context.prototype.setShadowOffsetY = function (offsetY) {
+        this._ctx.shadowOffsetY = this._doSize(offsetY);
+    };
+    Context.prototype.setShadowBlur = function (blur) {
+        this._ctx.shadowBlur = this._doSize(blur);
     };
     Context.prototype._doSize = function (num) {
         return this._opts.devicePixelRatio * num;
@@ -993,7 +1158,7 @@ var Board = (function () {
         this[_displayCtx] = this[_displayCanvas].getContext('2d');
         this[_ctx] = new Context(this[_originCtx], this[_opts$2]);
         this[_screen] = new Screen(this[_ctx], this[_opts$2]);
-        this[_watcher] = new Watcher(this[_displayCanvas]);
+        this[_watcher] = new ScreenWatcher(this[_displayCanvas]);
         this[_scroller] = new Scroller(this[_displayCtx], {
             width: opts.width,
             height: opts.height,
@@ -1326,14 +1491,77 @@ var istype$1 = {
     promise: function (data) {
         return parsePrototype$2(data) === 'Promise';
     },
-    nodeList: function (data) {
-        return parsePrototype$2(data) === 'NodeList';
-    },
-    imageData: function (data) {
-        return parsePrototype$2(data) === 'ImageData';
-    }
 };
-var Image$2 = window.Image, Blob$2 = window.Blob, FileReader$2 = window.FileReader;
+function __awaiter$3(thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+}
+function __generator$3(thisArg, body) {
+    var _ = { label: 0, sent: function() { if (t[0] & 1) throw t[1]; return t[1]; }, trys: [], ops: [] }, f, y, t, g;
+    return g = { next: verb(0), "throw": verb(1), "return": verb(2) }, typeof Symbol === "function" && (g[Symbol.iterator] = function() { return this; }), g;
+    function verb(n) { return function (v) { return step([n, v]); }; }
+    function step(op) {
+        if (f) throw new TypeError("Generator is already executing.");
+        while (_) try {
+            if (f = 1, y && (t = op[0] & 2 ? y["return"] : op[0] ? y["throw"] || ((t = y["return"]) && t.call(y), 0) : y.next) && !(t = t.call(y, op[1])).done) return t;
+            if (y = 0, t) op = [op[0] & 2, t.value];
+            switch (op[0]) {
+                case 0: case 1: t = op; break;
+                case 4: _.label++; return { value: op[1], done: false };
+                case 5: _.label++; y = op[1]; op = [0]; continue;
+                case 7: op = _.ops.pop(); _.trys.pop(); continue;
+                default:
+                    if (!(t = _.trys, t = t.length > 0 && t[t.length - 1]) && (op[0] === 6 || op[0] === 2)) { _ = 0; continue; }
+                    if (op[0] === 3 && (!t || (op[1] > t[0] && op[1] < t[3]))) { _.label = op[1]; break; }
+                    if (op[0] === 6 && _.label < t[1]) { _.label = t[1]; t = op; break; }
+                    if (t && _.label < t[2]) { _.label = t[2]; _.ops.push(op); break; }
+                    if (t[2]) _.ops.pop();
+                    _.trys.pop(); continue;
+            }
+            op = body.call(thisArg, _);
+        } catch (e) { op = [6, e]; y = 0; } finally { f = t = 0; }
+        if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
+    }
+}
+function parseHTMLToDataURL$2(html, opts) {
+    var width = opts.width, height = opts.height;
+    return new Promise(function (resolve, reject) {
+        var _svg = "\n    <svg xmlns=\"http://www.w3.org/2000/svg\" width=\"" + (width || '') + "\" height = \"" + (height || '') + "\">\n      <foreignObject width=\"100%\" height=\"100%\">\n        <div xmlns = \"http://www.w3.org/1999/xhtml\">\n          " + html + "\n        </div>\n      </foreignObject>\n    </svg>\n    ";
+        var blob = new Blob([_svg], { type: 'image/svg+xml;charset=utf-8' });
+        var reader = new FileReader();
+        reader.readAsDataURL(blob);
+        reader.onload = function (event) {
+            var _a;
+            var base64 = (_a = event === null || event === void 0 ? void 0 : event.target) === null || _a === void 0 ? void 0 : _a.result;
+            resolve(base64);
+        };
+        reader.onerror = function (err) {
+            reject(err);
+        };
+    });
+}
+function parseSVGToDataURL$2(svg) {
+    return new Promise(function (resolve, reject) {
+        var _svg = svg;
+        var blob = new Blob([_svg], { type: 'image/svg+xml;charset=utf-8' });
+        var reader = new FileReader();
+        reader.readAsDataURL(blob);
+        reader.onload = function (event) {
+            var _a;
+            var base64 = (_a = event === null || event === void 0 ? void 0 : event.target) === null || _a === void 0 ? void 0 : _a.result;
+            resolve(base64);
+        };
+        reader.onerror = function (err) {
+            reject(err);
+        };
+    });
+}
+var Image$2 = window.Image;
 function loadImage$1(src) {
     return new Promise(function (resolve, reject) {
         var img = new Image$2;
@@ -1346,44 +1574,35 @@ function loadImage$1(src) {
     });
 }
 function loadSVG$1(svg) {
-    return new Promise(function (resolve, reject) {
-        var _svg = svg;
-        var image = new Image$2();
-        var blob = new Blob$2([_svg], { type: 'image/svg+xml;charset=utf-8' });
-        var reader = new FileReader$2();
-        reader.readAsDataURL(blob);
-        reader.onload = function (event) {
-            var _a;
-            var base64 = (_a = event === null || event === void 0 ? void 0 : event.target) === null || _a === void 0 ? void 0 : _a.result;
-            image.onload = function () {
-                resolve(image);
-            };
-            image.src = base64;
-        };
-        reader.onerror = function (err) {
-            reject(err);
-        };
+    return __awaiter$3(this, void 0, void 0, function () {
+        var dataURL, image;
+        return __generator$3(this, function (_a) {
+            switch (_a.label) {
+                case 0: return [4, parseSVGToDataURL$2(svg)];
+                case 1:
+                    dataURL = _a.sent();
+                    return [4, loadImage$1(dataURL)];
+                case 2:
+                    image = _a.sent();
+                    return [2, image];
+            }
+        });
     });
 }
 function loadHTML$1(html, opts) {
-    var width = opts.width, height = opts.height;
-    return new Promise(function (resolve, reject) {
-        var _svg = "\n    <svg xmlns=\"http://www.w3.org/2000/svg\" width=\"" + (width || '') + "\" height = \"" + (height || '') + "\">\n      <foreignObject width=\"100%\" height=\"100%\">\n        <div xmlns = \"http://www.w3.org/1999/xhtml\">\n          " + html + "\n        </div>\n      </foreignObject>\n    </svg>\n    ";
-        var image = new Image$2();
-        var blob = new Blob$2([_svg], { type: 'image/svg+xml;charset=utf-8' });
-        var reader = new FileReader$2();
-        reader.readAsDataURL(blob);
-        reader.onload = function (event) {
-            var _a;
-            var base64 = (_a = event === null || event === void 0 ? void 0 : event.target) === null || _a === void 0 ? void 0 : _a.result;
-            image.onload = function () {
-                resolve(image);
-            };
-            image.src = base64;
-        };
-        reader.onerror = function (err) {
-            reject(err);
-        };
+    return __awaiter$3(this, void 0, void 0, function () {
+        var dataURL, image;
+        return __generator$3(this, function (_a) {
+            switch (_a.label) {
+                case 0: return [4, parseHTMLToDataURL$2(html, opts)];
+                case 1:
+                    dataURL = _a.sent();
+                    return [4, loadImage$1(dataURL)];
+                case 2:
+                    image = _a.sent();
+                    return [2, image];
+            }
+        });
     });
 }
 var index$2 = {
@@ -1474,6 +1693,9 @@ function fontSize(value) {
 function lineHeight(value) {
     return number(value) && value > 0;
 }
+function strokeWidth(value) {
+    return number(value) && value > 0;
+}
 function textAlign(value) {
     return ['center', 'left', 'right'].includes(value);
 }
@@ -1504,6 +1726,7 @@ var is$3 = {
     textAlign: textAlign,
     fontFamily: fontFamily,
     fontWeight: fontWeight,
+    strokeWidth: strokeWidth,
 };
 function attrs(attrs) {
     var x = attrs.x, y = attrs.y, w = attrs.w, h = attrs.h, angle = attrs.angle;
@@ -1574,7 +1797,7 @@ function htmlDesc(desc) {
     return true;
 }
 function textDesc(desc) {
-    var text = desc.text, color = desc.color, fontSize = desc.fontSize, lineHeight = desc.lineHeight, fontFamily = desc.fontFamily, textAlign = desc.textAlign, fontWeight = desc.fontWeight, bgColor = desc.bgColor;
+    var text = desc.text, color = desc.color, fontSize = desc.fontSize, lineHeight = desc.lineHeight, fontFamily = desc.fontFamily, textAlign = desc.textAlign, fontWeight = desc.fontWeight, bgColor = desc.bgColor, strokeWidth = desc.strokeWidth, strokeColor = desc.strokeColor;
     if (!is$3.text(text)) {
         return false;
     }
@@ -1597,6 +1820,12 @@ function textDesc(desc) {
         return false;
     }
     if (desc.hasOwnProperty('textAlign') && !is$3.textAlign(textAlign)) {
+        return false;
+    }
+    if (desc.hasOwnProperty('strokeWidth') && !is$3.strokeWidth(strokeWidth)) {
+        return false;
+    }
+    if (desc.hasOwnProperty('strokeColor') && !is$3.color(strokeColor)) {
         return false;
     }
     if (!box(desc)) {
@@ -1701,6 +1930,10 @@ function clearContext(ctx) {
     ctx.setStrokeStyle('#000000');
     ctx.setLineDash([]);
     ctx.setGlobalAlpha(1);
+    ctx.setShadowColor('#00000000');
+    ctx.setShadowOffsetX(0);
+    ctx.setShadowOffsetY(0);
+    ctx.setShadowBlur(0);
 }
 function drawBgColor(ctx, color) {
     var size = ctx.getSize();
@@ -1710,6 +1943,7 @@ function drawBgColor(ctx, color) {
 function drawBox(ctx, elem, pattern) {
     clearContext(ctx);
     drawBoxBorder(ctx, elem);
+    clearContext(ctx);
     rotateElement(ctx, elem, function () {
         var x = elem.x, y = elem.y, w = elem.w, h = elem.h;
         var r = elem.desc.borderRadius || 0;
@@ -1752,6 +1986,19 @@ function drawBoxBorder(ctx, elem) {
         r = Math.min(r, w / 2, h / 2);
         if (r < w / 2 && r < h / 2) {
             r = r + bw / 2;
+        }
+        var desc = elem.desc;
+        if (desc.shadowColor !== undefined && index$2.color.isColorStr(desc.shadowColor)) {
+            ctx.setShadowColor(desc.shadowColor);
+        }
+        if (desc.shadowOffsetX !== undefined && is$3.number(desc.shadowOffsetX)) {
+            ctx.setShadowOffsetX(desc.shadowOffsetX);
+        }
+        if (desc.shadowOffsetY !== undefined && is$3.number(desc.shadowOffsetY)) {
+            ctx.setShadowOffsetY(desc.shadowOffsetY);
+        }
+        if (desc.shadowBlur !== undefined && is$3.number(desc.shadowBlur)) {
+            ctx.setShadowBlur(desc.shadowBlur);
         }
         ctx.beginPath();
         ctx.setLineWidth(bw);
@@ -1841,26 +2088,64 @@ function drawText(ctx, elem, loader, helperConfig) {
                 }
             }
         });
-        var _y = elem.y;
-        if (lines.length * fontHeight < elem.h) {
-            _y += ((elem.h - lines.length * fontHeight) / 2);
+        {
+            var _y_1 = elem.y;
+            if (lines.length * fontHeight < elem.h) {
+                _y_1 += ((elem.h - lines.length * fontHeight) / 2);
+            }
+            if (desc.textShadowColor !== undefined && index$2.color.isColorStr(desc.textShadowColor)) {
+                ctx.setShadowColor(desc.textShadowColor);
+            }
+            if (desc.textShadowOffsetX !== undefined && is$3.number(desc.textShadowOffsetX)) {
+                ctx.setShadowOffsetX(desc.textShadowOffsetX);
+            }
+            if (desc.textShadowOffsetY !== undefined && is$3.number(desc.textShadowOffsetY)) {
+                ctx.setShadowOffsetY(desc.textShadowOffsetY);
+            }
+            if (desc.textShadowBlur !== undefined && is$3.number(desc.textShadowBlur)) {
+                ctx.setShadowBlur(desc.textShadowBlur);
+            }
+            lines.forEach(function (line, i) {
+                var _x = elem.x;
+                if (desc.textAlign === 'center') {
+                    _x = elem.x + (elem.w - line.width) / 2;
+                }
+                else if (desc.textAlign === 'right') {
+                    _x = elem.x + (elem.w - line.width);
+                }
+                ctx.fillText(line.text, _x, _y_1 + fontHeight * i);
+            });
+            clearContext(ctx);
         }
-        lines.forEach(function (line, i) {
-            var _x = elem.x;
-            if (desc.textAlign === 'center') {
-                _x = elem.x + (elem.w - line.width) / 2;
+        if (index$2.color.isColorStr(desc.strokeColor) && desc.strokeWidth !== undefined && desc.strokeWidth > 0) {
+            var _y_2 = elem.y;
+            if (lines.length * fontHeight < elem.h) {
+                _y_2 += ((elem.h - lines.length * fontHeight) / 2);
             }
-            else if (desc.textAlign === 'right') {
-                _x = elem.x + (elem.w - line.width);
-            }
-            ctx.fillText(line.text, _x, _y + fontHeight * i);
-        });
+            lines.forEach(function (line, i) {
+                var _x = elem.x;
+                if (desc.textAlign === 'center') {
+                    _x = elem.x + (elem.w - line.width) / 2;
+                }
+                else if (desc.textAlign === 'right') {
+                    _x = elem.x + (elem.w - line.width);
+                }
+                if (desc.strokeColor !== undefined) {
+                    ctx.setStrokeStyle(desc.strokeColor);
+                }
+                if (desc.strokeWidth !== undefined && desc.strokeWidth > 0) {
+                    ctx.setLineWidth(desc.strokeWidth);
+                }
+                ctx.strokeText(line.text, _x, _y_2 + fontHeight * i);
+            });
+        }
     });
 }
 function drawCircle(ctx, elem) {
+    clearContext(ctx);
     rotateElement(ctx, elem, function (ctx) {
         var x = elem.x, y = elem.y, w = elem.w, h = elem.h, desc = elem.desc;
-        var _a = desc.bgColor, bgColor = _a === void 0 ? '#000000' : _a, _b = desc.borderColor, borderColor = _b === void 0 ? '#000000' : _b, borderWidth = desc.borderWidth;
+        var _a = desc.bgColor, bgColor = _a === void 0 ? '#000000' : _a, _b = desc.borderColor, borderColor = _b === void 0 ? '#000000' : _b, _c = desc.borderWidth, borderWidth = _c === void 0 ? 0 : _c;
         var a = w / 2;
         var b = h / 2;
         var centerX = x + a;
@@ -1900,51 +2185,61 @@ function drawElementWrapper(ctx, config) {
         ctx.setLineDash(wrapper.lineDash);
         ctx.setLineWidth(wrapper.lineWidth);
         ctx.setStrokeStyle(wrapper.color);
-        ctx.moveTo(wrapper.dots.topLeft.x, wrapper.dots.topLeft.y);
-        ctx.lineTo(wrapper.dots.topRight.x, wrapper.dots.topRight.y);
-        ctx.lineTo(wrapper.dots.bottomRight.x, wrapper.dots.bottomRight.y);
-        ctx.lineTo(wrapper.dots.bottomLeft.x, wrapper.dots.bottomLeft.y);
-        ctx.lineTo(wrapper.dots.topLeft.x, wrapper.dots.topLeft.y - wrapper.lineWidth / 2);
+        ctx.moveTo(wrapper.controllers.topLeft.x, wrapper.controllers.topLeft.y);
+        ctx.lineTo(wrapper.controllers.topRight.x, wrapper.controllers.topRight.y);
+        ctx.lineTo(wrapper.controllers.bottomRight.x, wrapper.controllers.bottomRight.y);
+        ctx.lineTo(wrapper.controllers.bottomLeft.x, wrapper.controllers.bottomLeft.y);
+        ctx.lineTo(wrapper.controllers.topLeft.x, wrapper.controllers.topLeft.y - wrapper.lineWidth / 2);
         ctx.stroke();
         ctx.closePath();
         if (wrapper.lock !== true) {
-            ctx.beginPath();
-            ctx.moveTo(wrapper.dots.top.x, wrapper.dots.top.y);
-            ctx.lineTo(wrapper.dots.rotate.x, wrapper.dots.rotate.y + wrapper.dotSize);
-            ctx.stroke();
-            ctx.closePath();
-            ctx.beginPath();
-            ctx.setLineDash([]);
-            ctx.setLineWidth(wrapper.dotSize / 2);
-            ctx.arc(wrapper.dots.rotate.x, wrapper.dots.rotate.y, wrapper.dotSize * 0.8, Math.PI / 6, Math.PI * 2);
-            ctx.stroke();
-            ctx.closePath();
+            if (wrapper.controllers.rotate.invisible !== true) {
+                ctx.beginPath();
+                ctx.moveTo(wrapper.controllers.top.x, wrapper.controllers.top.y);
+                ctx.lineTo(wrapper.controllers.rotate.x, wrapper.controllers.rotate.y + wrapper.controllerSize);
+                ctx.stroke();
+                ctx.closePath();
+                ctx.beginPath();
+                ctx.setLineDash([]);
+                ctx.setLineWidth(wrapper.controllerSize / 2);
+                ctx.arc(wrapper.controllers.rotate.x, wrapper.controllers.rotate.y, wrapper.controllerSize * 0.8, Math.PI / 6, Math.PI * 2);
+                ctx.stroke();
+                ctx.closePath();
+            }
             ctx.setFillStyle(wrapper.color);
             [
-                wrapper.dots.topLeft, wrapper.dots.top, wrapper.dots.topRight, wrapper.dots.right,
-                wrapper.dots.bottomRight, wrapper.dots.bottom, wrapper.dots.bottomLeft, wrapper.dots.left,
-            ].forEach(function (dot) {
-                ctx.beginPath();
-                ctx.arc(dot.x, dot.y, wrapper.dotSize, 0, Math.PI * 2);
-                ctx.fill();
-                ctx.closePath();
+                wrapper.controllers.topLeft,
+                wrapper.controllers.top,
+                wrapper.controllers.topRight,
+                wrapper.controllers.right,
+                wrapper.controllers.bottomRight,
+                wrapper.controllers.bottom,
+                wrapper.controllers.bottomLeft,
+                wrapper.controllers.left,
+            ].forEach(function (controller) {
+                if (controller.invisible !== true) {
+                    ctx.beginPath();
+                    ctx.arc(controller.x, controller.y, wrapper.controllerSize, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.closePath();
+                }
             });
         }
         else {
             clearContext(ctx);
             ctx.setStrokeStyle(wrapper.color);
             [
-                wrapper.dots.topLeft, wrapper.dots.top, wrapper.dots.topRight, wrapper.dots.right,
-                wrapper.dots.bottomRight, wrapper.dots.bottom, wrapper.dots.bottomLeft, wrapper.dots.left,
-            ].forEach(function (dot) {
+                wrapper.controllers.topLeft, wrapper.controllers.top, wrapper.controllers.topRight, wrapper.controllers.right,
+                wrapper.controllers.bottomRight, wrapper.controllers.bottom, wrapper.controllers.bottomLeft, wrapper.controllers.left,
+            ].forEach(function (controller) {
                 ctx.beginPath();
-                ctx.moveTo(dot.x - wrapper.dotSize / 2, dot.y - wrapper.dotSize / 2);
-                ctx.lineTo(dot.x + wrapper.dotSize / 2, dot.y + wrapper.dotSize / 2);
+                ctx.moveTo(controller.x - wrapper.controllerSize / 2, controller.y - wrapper.controllerSize / 2);
+                ctx.lineTo(controller.x + wrapper.controllerSize / 2, controller.y + wrapper.controllerSize / 2);
                 ctx.stroke();
                 ctx.closePath();
                 ctx.beginPath();
-                ctx.moveTo(dot.x + wrapper.dotSize / 2, dot.y - wrapper.dotSize / 2);
-                ctx.lineTo(dot.x - wrapper.dotSize / 2, dot.y + wrapper.dotSize / 2);
+                ctx.moveTo(controller.x + wrapper.controllerSize / 2, controller.y - wrapper.controllerSize / 2);
+                ctx.lineTo(controller.x - wrapper.controllerSize / 2, controller.y + wrapper.controllerSize / 2);
                 ctx.stroke();
                 ctx.closePath();
             });
@@ -1986,34 +2281,34 @@ function drawElementListWrappers(ctx, config) {
             clearContext(ctx);
             ctx.setGlobalAlpha(0.05);
             ctx.setFillStyle(wrapper.color);
-            ctx.fillRect(wrapper.dots.topLeft.x, wrapper.dots.topLeft.y, wrapper.dots.bottomRight.x - wrapper.dots.topLeft.x, wrapper.dots.bottomRight.y - wrapper.dots.topLeft.y);
+            ctx.fillRect(wrapper.controllers.topLeft.x, wrapper.controllers.topLeft.y, wrapper.controllers.bottomRight.x - wrapper.controllers.topLeft.x, wrapper.controllers.bottomRight.y - wrapper.controllers.topLeft.y);
             clearContext(ctx);
             ctx.beginPath();
             ctx.setLineDash(wrapper.lineDash);
             ctx.setLineWidth(wrapper.lineWidth);
             ctx.setStrokeStyle(wrapper.color);
-            ctx.moveTo(wrapper.dots.topLeft.x, wrapper.dots.topLeft.y);
-            ctx.lineTo(wrapper.dots.topRight.x, wrapper.dots.topRight.y);
-            ctx.lineTo(wrapper.dots.bottomRight.x, wrapper.dots.bottomRight.y);
-            ctx.lineTo(wrapper.dots.bottomLeft.x, wrapper.dots.bottomLeft.y);
-            ctx.lineTo(wrapper.dots.topLeft.x, wrapper.dots.topLeft.y - wrapper.lineWidth / 2);
+            ctx.moveTo(wrapper.controllers.topLeft.x, wrapper.controllers.topLeft.y);
+            ctx.lineTo(wrapper.controllers.topRight.x, wrapper.controllers.topRight.y);
+            ctx.lineTo(wrapper.controllers.bottomRight.x, wrapper.controllers.bottomRight.y);
+            ctx.lineTo(wrapper.controllers.bottomLeft.x, wrapper.controllers.bottomLeft.y);
+            ctx.lineTo(wrapper.controllers.topLeft.x, wrapper.controllers.topLeft.y - wrapper.lineWidth / 2);
             ctx.stroke();
             ctx.closePath();
             if (wrapper.lock === true) {
                 clearContext(ctx);
                 ctx.setStrokeStyle(wrapper.color);
                 [
-                    wrapper.dots.topLeft, wrapper.dots.top, wrapper.dots.topRight, wrapper.dots.right,
-                    wrapper.dots.bottomRight, wrapper.dots.bottom, wrapper.dots.bottomLeft, wrapper.dots.left,
-                ].forEach(function (dot) {
+                    wrapper.controllers.topLeft, wrapper.controllers.top, wrapper.controllers.topRight, wrapper.controllers.right,
+                    wrapper.controllers.bottomRight, wrapper.controllers.bottom, wrapper.controllers.bottomLeft, wrapper.controllers.left,
+                ].forEach(function (controller) {
                     ctx.beginPath();
-                    ctx.moveTo(dot.x - wrapper.dotSize / 2, dot.y - wrapper.dotSize / 2);
-                    ctx.lineTo(dot.x + wrapper.dotSize / 2, dot.y + wrapper.dotSize / 2);
+                    ctx.moveTo(controller.x - wrapper.controllerSize / 2, controller.y - wrapper.controllerSize / 2);
+                    ctx.lineTo(controller.x + wrapper.controllerSize / 2, controller.y + wrapper.controllerSize / 2);
                     ctx.stroke();
                     ctx.closePath();
                     ctx.beginPath();
-                    ctx.moveTo(dot.x + wrapper.dotSize / 2, dot.y - wrapper.dotSize / 2);
-                    ctx.lineTo(dot.x - wrapper.dotSize / 2, dot.y + wrapper.dotSize / 2);
+                    ctx.moveTo(controller.x + wrapper.controllerSize / 2, controller.y - wrapper.controllerSize / 2);
+                    ctx.lineTo(controller.x - wrapper.controllerSize / 2, controller.y + wrapper.controllerSize / 2);
                     ctx.stroke();
                     ctx.closePath();
                 });
@@ -2073,7 +2368,7 @@ var defaultConfig = {
     elementWrapper: {
         color: '#2ab6f1',
         lockColor: '#aaaaaa',
-        dotSize: 6,
+        controllerSize: 6,
         lineWidth: 1,
         lineDash: [4, 3],
     }
@@ -2223,7 +2518,18 @@ function limitNum(num) {
 function limitAngle(angle) {
     return limitNum(angle % 360);
 }
+var elementTypes = {
+    'text': {},
+    'rect': {},
+    'image': {},
+    'svg': {},
+    'circle': {},
+    'html': {},
+};
+var elementNames = Object.keys(elementTypes);
+var LIMIT_QBLIQUE_ANGLE = 15;
 var createUUID$1 = index$2.uuid.createUUID;
+var limitQbliqueAngle$1 = LIMIT_QBLIQUE_ANGLE;
 var Element = (function () {
     function Element(ctx) {
         this._ctx = ctx;
@@ -2237,14 +2543,16 @@ var Element = (function () {
         return data;
     };
     Element.prototype.isPointInElement = function (p, data) {
-        var _a;
+        var _a, _b;
         var ctx = this._ctx;
         var idx = -1;
         var uuid = null;
         var _loop_1 = function (i) {
             var ele = data.elements[i];
+            if (((_a = ele.operation) === null || _a === void 0 ? void 0 : _a.invisible) === true)
+                return "continue";
             var bw = 0;
-            if (((_a = ele.desc) === null || _a === void 0 ? void 0 : _a.borderWidth) > 0) {
+            if (((_b = ele.desc) === null || _b === void 0 ? void 0 : _b.borderWidth) > 0) {
                 bw = ele.desc.borderWidth;
             }
             rotateElement(ctx, ele, function () {
@@ -2253,8 +2561,7 @@ var Element = (function () {
                 ctx.lineTo(ele.x + ele.w + bw, ele.y - bw);
                 ctx.lineTo(ele.x + ele.w + bw, ele.y + ele.h + bw);
                 ctx.lineTo(ele.x - bw, ele.y + ele.h + bw);
-                ctx.lineTo(ele.x, ele.y);
-                ctx.rect(ele.x, ele.y, ele.w, ele.h);
+                ctx.lineTo(ele.x - bw, ele.y - bw);
                 ctx.closePath();
                 if (ctx.isPointInPath(p.x, p.y)) {
                     idx = i;
@@ -2295,71 +2602,20 @@ var Element = (function () {
         var moveX = (point.x - prevPoint.x) / scale;
         var moveY = (point.y - prevPoint.y) / scale;
         var elem = data.elements[index];
-        switch (direction) {
-            case 'top-left': {
-                if (elem.w - moveX > 0 && elem.h - moveY > 0) {
-                    elem.x += moveX;
-                    elem.y += moveY;
-                    elem.w -= moveX;
-                    elem.h -= moveY;
-                }
-                break;
-            }
-            case 'top': {
-                if (elem.h - moveY > 0) {
-                    elem.y += moveY;
-                    elem.h -= moveY;
-                }
-                break;
-            }
-            case 'top-right': {
-                if (elem.h - moveY > 0 && elem.w + moveX > 0) {
-                    elem.y += moveY;
-                    elem.w += moveX;
-                    elem.h -= moveY;
-                }
-                break;
-            }
-            case 'right': {
-                if (elem.w + moveX > 0) {
-                    elem.w += moveX;
-                }
-                break;
-            }
-            case 'bottom-right': {
-                if (elem.w + moveX > 0 && elem.h + moveY > 0) {
-                    elem.w += moveX;
-                    elem.h += moveY;
-                }
-                break;
-            }
-            case 'bottom': {
-                if (elem.h + moveY > 0) {
-                    elem.h += moveY;
-                }
-                break;
-            }
-            case 'bottom-left': {
-                if (elem.w - moveX > 0 && elem.h + moveY > 0) {
-                    elem.x += moveX;
-                    elem.w -= moveX;
-                    elem.h += moveY;
-                }
-                break;
-            }
-            case 'left': {
-                if (elem.w - moveX > 0) {
-                    elem.x += moveX;
-                    elem.w -= moveX;
-                }
-                break;
-            }
-            case 'rotate': {
-                var center = calcElementCenter(elem);
-                var radian = calcRadian(center, prevPoint, point);
-                elem.angle = (elem.angle || 0) + parseRadianToAngle(radian);
-                break;
-            }
+        if ([
+            'top-left', 'top', 'top-right', 'right',
+            'bottom-right', 'bottom', 'bottom-left', 'left'
+        ].includes(direction)) {
+            var p = calcuScaleElemPosition(elem, moveX, moveY, direction);
+            elem.x = p.x;
+            elem.y = p.y;
+            elem.w = p.w;
+            elem.h = p.h;
+        }
+        else if (direction === 'rotate') {
+            var center = calcElementCenter(elem);
+            var radian = calcRadian(center, prevPoint, point);
+            elem.angle = (elem.angle || 0) + parseRadianToAngle(radian);
         }
         this.limitElementAttrs(elem);
         return {
@@ -2387,6 +2643,268 @@ var Element = (function () {
     };
     return Element;
 }());
+function calcuScaleElemPosition(elem, moveX, moveY, direction, scale) {
+    var p = { x: elem.x, y: elem.y, w: elem.w, h: elem.h };
+    elem.angle;
+    switch (direction) {
+        case 'top-left': {
+            if (elem.w - moveX > 0 && elem.h - moveY > 0) {
+                p.x += moveX;
+                p.y += moveY;
+                p.w -= moveX;
+                p.h -= moveY;
+            }
+            break;
+        }
+        case 'top': {
+            if (elem.angle === 0 || Math.abs(elem.angle) < limitQbliqueAngle$1) {
+                if (p.h - moveY > 0) {
+                    p.y += moveY;
+                    p.h -= moveY;
+                }
+            }
+            else if (elem.angle > 0 || elem.angle < 0) {
+                var angle_1 = elem.angle > 0 ? elem.angle : Math.max(0, elem.angle + 360);
+                var moveDist = calcMoveDist(moveX, moveY);
+                var centerX = p.x + elem.w / 2;
+                var centerY = p.y + elem.h / 2;
+                if (angle_1 < 90) {
+                    moveDist = 0 - changeMoveDistDirect(moveDist, moveY);
+                    var radian = parseRadian(angle_1);
+                    var centerMoveDist = moveDist / 2;
+                    centerX = centerX + centerMoveDist * Math.sin(radian);
+                    centerY = centerY - centerMoveDist * Math.cos(radian);
+                }
+                else if (angle_1 < 180) {
+                    moveDist = changeMoveDistDirect(moveDist, moveX);
+                    var radian = parseRadian(angle_1 - 90);
+                    var centerMoveDist = moveDist / 2;
+                    centerX = centerX + centerMoveDist * Math.cos(radian);
+                    centerY = centerY + centerMoveDist * Math.sin(radian);
+                }
+                else if (angle_1 < 270) {
+                    moveDist = changeMoveDistDirect(moveDist, moveY);
+                    var radian = parseRadian(angle_1 - 180);
+                    var centerMoveDist = moveDist / 2;
+                    centerX = centerX - centerMoveDist * Math.sin(radian);
+                    centerY = centerY + centerMoveDist * Math.cos(radian);
+                }
+                else if (angle_1 < 360) {
+                    moveDist = 0 - changeMoveDistDirect(moveDist, moveX);
+                    var radian = parseRadian(angle_1 - 270);
+                    var centerMoveDist = moveDist / 2;
+                    centerX = centerX - centerMoveDist * Math.cos(radian);
+                    centerY = centerY - centerMoveDist * Math.sin(radian);
+                }
+                if (p.h + moveDist > 0) {
+                    p.h = p.h + moveDist;
+                    p.x = centerX - p.w / 2;
+                    p.y = centerY - p.h / 2;
+                }
+            }
+            else {
+                if (p.h - moveY > 0) {
+                    p.y += moveY;
+                    p.h -= moveY;
+                }
+            }
+            break;
+        }
+        case 'top-right': {
+            if (p.h - moveY > 0 && p.w + moveX > 0) {
+                p.y += moveY;
+                p.w += moveX;
+                p.h -= moveY;
+            }
+            break;
+        }
+        case 'right': {
+            if (elem.angle === 0 || Math.abs(elem.angle) < limitQbliqueAngle$1) {
+                if (elem.w + moveX > 0) {
+                    p.w += moveX;
+                }
+            }
+            else if (elem.angle > 0 || elem.angle < 0) {
+                var angle_2 = elem.angle > 0 ? elem.angle : Math.max(0, elem.angle + 360);
+                var moveDist = calcMoveDist(moveX, moveY);
+                var centerX = p.x + elem.w / 2;
+                var centerY = p.y + elem.h / 2;
+                if (angle_2 < 90) {
+                    moveDist = changeMoveDistDirect(moveDist, moveY);
+                    var radian = parseRadian(angle_2);
+                    var centerMoveDist = moveDist / 2;
+                    centerX = centerX + centerMoveDist * Math.cos(radian);
+                    centerY = centerY + centerMoveDist * Math.sin(radian);
+                }
+                else if (angle_2 < 180) {
+                    moveDist = changeMoveDistDirect(moveDist, moveY);
+                    var radian = parseRadian(angle_2 - 90);
+                    var centerMoveDist = moveDist / 2;
+                    centerX = centerX - centerMoveDist * Math.sin(radian);
+                    centerY = centerY + centerMoveDist * Math.cos(radian);
+                }
+                else if (angle_2 < 270) {
+                    moveDist = changeMoveDistDirect(moveDist, moveY);
+                    var radian = parseRadian(angle_2 - 180);
+                    var centerMoveDist = moveDist / 2;
+                    centerX = centerX + centerMoveDist * Math.cos(radian);
+                    centerY = centerY + centerMoveDist * Math.sin(radian);
+                    moveDist = 0 - moveDist;
+                }
+                else if (angle_2 < 360) {
+                    moveDist = changeMoveDistDirect(moveDist, moveX);
+                    var radian = parseRadian(angle_2 - 270);
+                    var centerMoveDist = moveDist / 2;
+                    centerX = centerX + centerMoveDist * Math.sin(radian);
+                    centerY = centerY - centerMoveDist * Math.cos(radian);
+                }
+                if (p.w + moveDist > 0) {
+                    p.w = p.w + moveDist;
+                    p.x = centerX - p.w / 2;
+                    p.y = centerY - p.h / 2;
+                }
+            }
+            else {
+                if (elem.w + moveX > 0) {
+                    p.w += moveX;
+                }
+            }
+            break;
+        }
+        case 'bottom-right': {
+            if (elem.w + moveX > 0 && elem.h + moveY > 0) {
+                p.w += moveX;
+                p.h += moveY;
+            }
+            break;
+        }
+        case 'bottom': {
+            if (elem.angle === 0 || Math.abs(elem.angle) < limitQbliqueAngle$1) {
+                if (elem.h + moveY > 0) {
+                    p.h += moveY;
+                }
+            }
+            else if (elem.angle > 0 || elem.angle < 0) {
+                var angle_3 = elem.angle > 0 ? elem.angle : Math.max(0, elem.angle + 360);
+                var moveDist = calcMoveDist(moveX, moveY);
+                var centerX = p.x + elem.w / 2;
+                var centerY = p.y + elem.h / 2;
+                if (angle_3 < 90) {
+                    moveDist = changeMoveDistDirect(moveDist, moveY);
+                    var radian = parseRadian(angle_3);
+                    var centerMoveDist = moveDist / 2;
+                    centerX = centerX - centerMoveDist * Math.sin(radian);
+                    centerY = centerY + centerMoveDist * Math.cos(radian);
+                }
+                else if (angle_3 < 180) {
+                    moveDist = 0 - changeMoveDistDirect(moveDist, moveX);
+                    var radian = parseRadian(angle_3 - 90);
+                    var centerMoveDist = moveDist / 2;
+                    centerX = centerX - centerMoveDist * Math.cos(radian);
+                    centerY = centerY - centerMoveDist * Math.sin(radian);
+                }
+                else if (angle_3 < 270) {
+                    moveDist = changeMoveDistDirect(moveDist, moveX);
+                    var radian = parseRadian(angle_3 - 180);
+                    var centerMoveDist = moveDist / 2;
+                    centerX = centerX + centerMoveDist * Math.sin(radian);
+                    centerY = centerY - centerMoveDist * Math.cos(radian);
+                }
+                else if (angle_3 < 360) {
+                    moveDist = changeMoveDistDirect(moveDist, moveX);
+                    var radian = parseRadian(angle_3 - 270);
+                    var centerMoveDist = moveDist / 2;
+                    centerX = centerX + centerMoveDist * Math.cos(radian);
+                    centerY = centerY + centerMoveDist * Math.sin(radian);
+                }
+                if (p.h + moveDist > 0) {
+                    p.h = p.h + moveDist;
+                    p.x = centerX - p.w / 2;
+                    p.y = centerY - p.h / 2;
+                }
+            }
+            else {
+                if (elem.h + moveY > 0) {
+                    p.h += moveY;
+                }
+            }
+            break;
+        }
+        case 'bottom-left': {
+            if (elem.w - moveX > 0 && elem.h + moveY > 0) {
+                p.x += moveX;
+                p.w -= moveX;
+                p.h += moveY;
+            }
+            break;
+        }
+        case 'left': {
+            if (elem.angle === 0 || Math.abs(elem.angle) < limitQbliqueAngle$1) {
+                if (elem.w - moveX > 0) {
+                    p.x += moveX;
+                    p.w -= moveX;
+                }
+            }
+            else if (elem.angle > 0 || elem.angle < 0) {
+                var angle_4 = elem.angle > 0 ? elem.angle : Math.max(0, elem.angle + 360);
+                var moveDist = calcMoveDist(moveX, moveY);
+                var centerX = p.x + elem.w / 2;
+                var centerY = p.y + elem.h / 2;
+                if (angle_4 < 90) {
+                    moveDist = 0 - changeMoveDistDirect(moveDist, moveX);
+                    var radian = parseRadian(angle_4);
+                    var centerMoveDist = moveDist / 2;
+                    centerX = centerX - centerMoveDist * Math.cos(radian);
+                    centerY = centerY - centerMoveDist * Math.sin(radian);
+                }
+                else if (angle_4 < 180) {
+                    moveDist = changeMoveDistDirect(moveDist, moveX);
+                    var radian = parseRadian(angle_4 - 90);
+                    var centerMoveDist = moveDist / 2;
+                    centerX = centerX + centerMoveDist * Math.sin(radian);
+                    centerY = centerY - centerMoveDist * Math.cos(radian);
+                }
+                else if (angle_4 < 270) {
+                    moveDist = changeMoveDistDirect(moveDist, moveY);
+                    var radian = parseRadian(angle_4 - 180);
+                    var centerMoveDist = moveDist / 2;
+                    centerX = centerX + centerMoveDist * Math.cos(radian);
+                    centerY = centerY + centerMoveDist * Math.sin(radian);
+                }
+                else if (angle_4 < 360) {
+                    moveDist = changeMoveDistDirect(moveDist, moveY);
+                    var radian = parseRadian(angle_4 - 270);
+                    var centerMoveDist = moveDist / 2;
+                    centerX = centerX - centerMoveDist * Math.sin(radian);
+                    centerY = centerY + centerMoveDist * Math.cos(radian);
+                }
+                if (p.w + moveDist > 0) {
+                    p.w = p.w + moveDist;
+                    p.x = centerX - p.w / 2;
+                    p.y = centerY - p.h / 2;
+                }
+            }
+            else {
+                if (elem.w - moveX > 0) {
+                    p.x += moveX;
+                    p.w -= moveX;
+                }
+            }
+            break;
+        }
+    }
+    return p;
+}
+function parseRadian(angle) {
+    return angle * Math.PI / 180;
+}
+function calcMoveDist(moveX, moveY) {
+    return Math.sqrt(moveX * moveX + moveY * moveY);
+}
+function changeMoveDistDirect(moveDist, moveDirect) {
+    return moveDirect > 0 ? Math.abs(moveDist) : 0 - Math.abs(moveDist);
+}
+var limitQbliqueAngle = LIMIT_QBLIQUE_ANGLE;
 var deepClone$4 = index$2.data.deepClone;
 var Helper = (function () {
     function Helper(board, config) {
@@ -2414,43 +2932,110 @@ var Helper = (function () {
         }
         return null;
     };
-    Helper.prototype.isPointInElementWrapperDot = function (p) {
+    Helper.prototype.isPointInElementWrapperController = function (p, data) {
         var _a, _b;
         var ctx = this._ctx;
-        var uuid = (_b = (_a = this._helperConfig) === null || _a === void 0 ? void 0 : _a.selectedElementWrapper) === null || _b === void 0 ? void 0 : _b.uuid;
-        var direction = null;
+        var uuid = ((_b = (_a = this._helperConfig) === null || _a === void 0 ? void 0 : _a.selectedElementWrapper) === null || _b === void 0 ? void 0 : _b.uuid) || null;
+        var directIndex = null;
+        var selectedControllerDirection = null;
+        var hoverControllerDirection = null;
         if (!this._helperConfig.selectedElementWrapper) {
-            return [null, null];
+            return { uuid: uuid, selectedControllerDirection: selectedControllerDirection, directIndex: directIndex, hoverControllerDirection: hoverControllerDirection };
         }
         var wrapper = this._helperConfig.selectedElementWrapper;
-        var dots = [
-            wrapper.dots.topLeft, wrapper.dots.top, wrapper.dots.topRight, wrapper.dots.right,
-            wrapper.dots.bottomRight, wrapper.dots.bottom, wrapper.dots.bottomLeft, wrapper.dots.left,
-            wrapper.dots.rotate,
+        var controllers = [
+            wrapper.controllers.right,
+            wrapper.controllers.topRight,
+            wrapper.controllers.top,
+            wrapper.controllers.topLeft,
+            wrapper.controllers.left,
+            wrapper.controllers.bottomLeft,
+            wrapper.controllers.bottom,
+            wrapper.controllers.bottomRight,
         ];
         var directionNames = [
-            'top-left', 'top', 'top-right', 'right',
-            'bottom-right', 'bottom', 'bottom-left', 'left',
-            'rotate',
+            'right',
+            'top-right',
+            'top',
+            'top-left',
+            'left',
+            'bottom-left',
+            'bottom',
+            'bottom-right',
         ];
+        var hoverDirectionNames = index$2.data.deepClone(directionNames);
+        var angleMoveNum = 0;
+        if (data && uuid) {
+            var elemIdx = this.getElementIndexByUUID(uuid);
+            if (elemIdx !== null && elemIdx >= 0) {
+                var elem = data.elements[elemIdx];
+                var angle = elem.angle;
+                if (angle < 0) {
+                    angle += 360;
+                }
+                if (angle < 45) {
+                    angleMoveNum = 0;
+                }
+                else if (angle < 90) {
+                    angleMoveNum = 1;
+                }
+                else if (angle < 135) {
+                    angleMoveNum = 2;
+                }
+                else if (angle < 180) {
+                    angleMoveNum = 3;
+                }
+                else if (angle < 225) {
+                    angleMoveNum = 4;
+                }
+                else if (angle < 270) {
+                    angleMoveNum = 5;
+                }
+                else if (angle < 315) {
+                    angleMoveNum = 6;
+                }
+            }
+        }
+        if (angleMoveNum > 0) {
+            hoverDirectionNames = hoverDirectionNames.slice(-angleMoveNum).concat(hoverDirectionNames.slice(0, -angleMoveNum));
+        }
         rotateContext(ctx, wrapper.translate, wrapper.radian || 0, function () {
-            for (var i = 0; i < dots.length; i++) {
-                var dot = dots[i];
+            for (var i = 0; i < controllers.length; i++) {
+                var controller = controllers[i];
+                if (controller.invisible === true) {
+                    continue;
+                }
                 ctx.beginPath();
-                ctx.arc(dot.x, dot.y, wrapper.dotSize, 0, Math.PI * 2);
+                ctx.arc(controller.x, controller.y, wrapper.controllerSize, 0, Math.PI * 2);
                 ctx.closePath();
                 if (ctx.isPointInPath(p.x, p.y)) {
-                    direction = directionNames[i];
+                    selectedControllerDirection = directionNames[i];
+                    hoverControllerDirection = hoverDirectionNames[i];
                 }
-                if (direction) {
+                if (selectedControllerDirection) {
+                    directIndex = i;
                     break;
                 }
             }
         });
-        return [uuid, direction];
+        if (selectedControllerDirection === null) {
+            var controller_1 = wrapper.controllers.rotate;
+            if (controller_1.invisible !== true) {
+                rotateContext(ctx, wrapper.translate, wrapper.radian || 0, function () {
+                    ctx.beginPath();
+                    ctx.arc(controller_1.x, controller_1.y, wrapper.controllerSize, 0, Math.PI * 2);
+                    ctx.closePath();
+                    if (ctx.isPointInPath(p.x, p.y)) {
+                        selectedControllerDirection = 'rotate';
+                        hoverControllerDirection = 'rotate';
+                    }
+                });
+            }
+        }
+        return { uuid: uuid, selectedControllerDirection: selectedControllerDirection, hoverControllerDirection: hoverControllerDirection, directIndex: directIndex };
     };
     Helper.prototype.isPointInElementList = function (p, data) {
-        var _a, _b;
+        var _a, _b, _c;
         var ctx = this._ctx;
         var idx = -1;
         var uuid = null;
@@ -2461,8 +3046,10 @@ var Helper = (function () {
             var ele = data.elements[elemIdx];
             if (!ele)
                 return "continue";
+            if (((_b = ele.operation) === null || _b === void 0 ? void 0 : _b.invisible) === true)
+                return "continue";
             var bw = 0;
-            if (((_b = ele.desc) === null || _b === void 0 ? void 0 : _b.borderWidth) > 0) {
+            if (((_c = ele.desc) === null || _c === void 0 ? void 0 : _c.borderWidth) > 0) {
                 bw = ele.desc.borderWidth;
             }
             rotateElement(ctx, ele, function () {
@@ -2471,8 +3058,7 @@ var Helper = (function () {
                 ctx.lineTo(ele.x + ele.w + bw, ele.y - bw);
                 ctx.lineTo(ele.x + ele.w + bw, ele.y + ele.h + bw);
                 ctx.lineTo(ele.x - bw, ele.y + ele.h + bw);
-                ctx.lineTo(ele.x, ele.y);
-                ctx.rect(ele.x, ele.y, ele.w, ele.h);
+                ctx.lineTo(ele.x - bw, ele.y - bw);
                 ctx.closePath();
                 if (ctx.isPointInPath(p.x, p.y)) {
                     idx = i;
@@ -2594,59 +3180,72 @@ var Helper = (function () {
         this._helperConfig.selectedElementListWrappers = wrapperList;
     };
     Helper.prototype._createSelectedElementWrapper = function (elem, opts) {
-        var _a, _b, _c;
+        var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m;
         var scale = opts.scale;
         var elemWrapper = this._coreConfig.elementWrapper;
-        var dotSize = elemWrapper.dotSize / scale;
+        var controllerSize = elemWrapper.controllerSize / scale;
         var lineWidth = elemWrapper.lineWidth / scale;
         var lineDash = elemWrapper.lineDash.map(function (n) { return (n / scale); });
         var rotateLimit = 12;
         var bw = ((_a = elem.desc) === null || _a === void 0 ? void 0 : _a.borderWidth) || 0;
+        var hideObliqueDirection = false;
+        if (typeof elem.angle === 'number' && Math.abs(elem.angle) > limitQbliqueAngle) {
+            hideObliqueDirection = true;
+        }
         var wrapper = {
             uuid: elem.uuid,
-            dotSize: dotSize,
+            controllerSize: controllerSize,
             lock: ((_b = elem === null || elem === void 0 ? void 0 : elem.operation) === null || _b === void 0 ? void 0 : _b.lock) === true,
-            dots: {
+            controllers: {
                 topLeft: {
-                    x: elem.x - dotSize - bw,
-                    y: elem.y - dotSize - bw,
+                    x: elem.x - controllerSize - bw,
+                    y: elem.y - controllerSize - bw,
+                    invisible: hideObliqueDirection || ((_c = elem === null || elem === void 0 ? void 0 : elem.operation) === null || _c === void 0 ? void 0 : _c.disbaleScale) === true,
                 },
                 top: {
                     x: elem.x + elem.w / 2,
-                    y: elem.y - dotSize - bw,
+                    y: elem.y - controllerSize - bw,
+                    invisible: ((_d = elem === null || elem === void 0 ? void 0 : elem.operation) === null || _d === void 0 ? void 0 : _d.disbaleScale) === true,
                 },
                 topRight: {
-                    x: elem.x + elem.w + dotSize + bw,
-                    y: elem.y - dotSize - bw,
+                    x: elem.x + elem.w + controllerSize + bw,
+                    y: elem.y - controllerSize - bw,
+                    invisible: hideObliqueDirection || ((_e = elem === null || elem === void 0 ? void 0 : elem.operation) === null || _e === void 0 ? void 0 : _e.disbaleScale) === true,
                 },
                 right: {
-                    x: elem.x + elem.w + dotSize + bw,
+                    x: elem.x + elem.w + controllerSize + bw,
                     y: elem.y + elem.h / 2,
+                    invisible: ((_f = elem === null || elem === void 0 ? void 0 : elem.operation) === null || _f === void 0 ? void 0 : _f.disbaleScale) === true
                 },
                 bottomRight: {
-                    x: elem.x + elem.w + dotSize + bw,
-                    y: elem.y + elem.h + dotSize + bw,
+                    x: elem.x + elem.w + controllerSize + bw,
+                    y: elem.y + elem.h + controllerSize + bw,
+                    invisible: hideObliqueDirection || ((_g = elem === null || elem === void 0 ? void 0 : elem.operation) === null || _g === void 0 ? void 0 : _g.disbaleScale) === true,
                 },
                 bottom: {
                     x: elem.x + elem.w / 2,
-                    y: elem.y + elem.h + dotSize + bw,
+                    y: elem.y + elem.h + controllerSize + bw,
+                    invisible: ((_h = elem === null || elem === void 0 ? void 0 : elem.operation) === null || _h === void 0 ? void 0 : _h.disbaleScale) === true,
                 },
                 bottomLeft: {
-                    x: elem.x - dotSize - bw,
-                    y: elem.y + elem.h + dotSize + bw,
+                    x: elem.x - controllerSize - bw,
+                    y: elem.y + elem.h + controllerSize + bw,
+                    invisible: hideObliqueDirection || ((_j = elem === null || elem === void 0 ? void 0 : elem.operation) === null || _j === void 0 ? void 0 : _j.disbaleScale) === true,
                 },
                 left: {
-                    x: elem.x - dotSize - bw,
+                    x: elem.x - controllerSize - bw,
                     y: elem.y + elem.h / 2,
+                    invisible: ((_k = elem === null || elem === void 0 ? void 0 : elem.operation) === null || _k === void 0 ? void 0 : _k.disbaleScale) === true
                 },
                 rotate: {
                     x: elem.x + elem.w / 2,
-                    y: elem.y - dotSize - (dotSize * 2 + rotateLimit) - bw,
+                    y: elem.y - controllerSize - (controllerSize * 2 + rotateLimit) - bw,
+                    invisible: ((_l = elem === null || elem === void 0 ? void 0 : elem.operation) === null || _l === void 0 ? void 0 : _l.disbaleRotate) === true
                 }
             },
             lineWidth: lineWidth,
             lineDash: lineDash,
-            color: ((_c = elem === null || elem === void 0 ? void 0 : elem.operation) === null || _c === void 0 ? void 0 : _c.lock) === true ? elemWrapper.lockColor : elemWrapper.color,
+            color: ((_m = elem === null || elem === void 0 ? void 0 : elem.operation) === null || _m === void 0 ? void 0 : _m.lock) === true ? elemWrapper.lockColor : elemWrapper.color,
         };
         if (typeof elem.angle === 'number' && (elem.angle > 0 || elem.angle < 0)) {
             wrapper.radian = parseAngleToRadian(elem.angle);
@@ -2913,9 +3512,9 @@ var Loader = (function () {
         _loadAction();
     };
     Loader.prototype._loadElementSource = function (params) {
-        return __awaiter(this, void 0, void 0, function () {
+        return __awaiter$2(this, void 0, void 0, function () {
             var image, image, image;
-            return __generator(this, function (_a) {
+            return __generator$2(this, function (_a) {
                 switch (_a.label) {
                     case 0:
                         if (!(params && params.type === 'image')) return [3, 2];
@@ -2969,19 +3568,20 @@ var Mapper = (function () {
         if (!this.isEffectivePoint(p)) {
             return { cursor: cursor, elementUUID: elementUUID };
         }
-        var _a = this[_helper$1].isPointInElementWrapperDot(p), uuid = _a[0], direction = _a[1];
+        var _a = this[_helper$1].isPointInElementWrapperController(p, data), uuid = _a.uuid, hoverControllerDirection = _a.hoverControllerDirection;
+        var direction = hoverControllerDirection;
         if (uuid && direction) {
             switch (direction) {
+                case 'top-right': {
+                    cursor = 'ne-resize';
+                    break;
+                }
                 case 'top-left': {
                     cursor = 'nw-resize';
                     break;
                 }
                 case 'top': {
                     cursor = 'n-resize';
-                    break;
-                }
-                case 'top-right': {
-                    cursor = 'ne-resize';
                     break;
                 }
                 case 'right': {
@@ -3029,15 +3629,6 @@ var Mapper = (function () {
     };
     return Mapper;
 }());
-var elementTypes = {
-    'text': {},
-    'rect': {},
-    'image': {},
-    'svg': {},
-    'circle': {},
-    'html': {},
-};
-var elementNames = Object.keys(elementTypes);
 function parseData(data) {
     var result = {
         elements: [],
@@ -3067,33 +3658,97 @@ function isElement(elem) {
 function isNumber(num) {
     return (num >= 0 || num < 0);
 }
+var RendererEvent = (function () {
+    function RendererEvent() {
+        this._listeners = new Map();
+    }
+    RendererEvent.prototype.on = function (eventKey, callback) {
+        if (this._listeners.has(eventKey)) {
+            var callbacks = this._listeners.get(eventKey);
+            callbacks === null || callbacks === void 0 ? void 0 : callbacks.push(callback);
+            this._listeners.set(eventKey, callbacks || []);
+        }
+        else {
+            this._listeners.set(eventKey, [callback]);
+        }
+    };
+    RendererEvent.prototype.off = function (eventKey, callback) {
+        if (this._listeners.has(eventKey)) {
+            var callbacks = this._listeners.get(eventKey);
+            if (Array.isArray(callbacks)) {
+                for (var i = 0; i < (callbacks === null || callbacks === void 0 ? void 0 : callbacks.length); i++) {
+                    if (callbacks[i] === callback) {
+                        callbacks.splice(i, 1);
+                        break;
+                    }
+                }
+            }
+            this._listeners.set(eventKey, callbacks || []);
+        }
+    };
+    RendererEvent.prototype.trigger = function (eventKey, arg) {
+        var callbacks = this._listeners.get(eventKey);
+        if (Array.isArray(callbacks)) {
+            callbacks.forEach(function (cb) {
+                cb(arg);
+            });
+            return true;
+        }
+        else {
+            return false;
+        }
+    };
+    RendererEvent.prototype.has = function (name) {
+        if (this._listeners.has(name)) {
+            var list = this._listeners.get(name);
+            if (Array.isArray(list) && list.length > 0) {
+                return true;
+            }
+        }
+        return false;
+    };
+    return RendererEvent;
+}());
 var requestAnimationFrame = window.requestAnimationFrame;
 var deepClone$3 = index$2.data.deepClone;
 var DrawStatus;
 (function (DrawStatus) {
+    DrawStatus["NULL"] = "null";
     DrawStatus["FREE"] = "free";
     DrawStatus["DRAWING"] = "drawing";
+    DrawStatus["FREEZE"] = "freeze";
 })(DrawStatus || (DrawStatus = {}));
-var Renderer = (function () {
+var Renderer = (function (_super) {
+    __extends(Renderer, _super);
     function Renderer(board) {
-        var _this = this;
-        this._queue = [];
-        this._status = DrawStatus.FREE;
-        this._board = board;
-        this._loader = new Loader({
+        var _this = _super.call(this) || this;
+        _this._queue = [];
+        _this._status = DrawStatus.NULL;
+        _this._board = board;
+        _this._loader = new Loader({
             board: board,
             maxParallelNum: 6
         });
-        this._loader.on('load', function (res) {
+        _this._loader.on('load', function (res) {
             _this._drawFrame();
         });
-        this._loader.on('error', function (res) {
+        _this._loader.on('error', function (res) {
             console.log('Loader Error: ', res);
         });
-        this._loader.on('complete', function (res) {
+        _this._loader.on('complete', function (res) {
         });
+        return _this;
     }
+    Renderer.prototype.freeze = function () {
+        this._status = DrawStatus.FREEZE;
+    };
+    Renderer.prototype.thaw = function () {
+        this._status = DrawStatus.FREE;
+    };
     Renderer.prototype.render = function (data, helper, changeResourceUUIDs) {
+        if ([DrawStatus.FREEZE].includes(this._status)) {
+            return;
+        }
         var _data = deepClone$3({ data: data, helper: helper });
         this._queue.push(_data);
         if (this._status !== DrawStatus.DRAWING) {
@@ -3104,7 +3759,13 @@ var Renderer = (function () {
     };
     Renderer.prototype._drawFrame = function () {
         var _this = this;
+        if (this._status === DrawStatus.FREEZE) {
+            return;
+        }
         requestAnimationFrame(function () {
+            if (_this._status === DrawStatus.FREEZE) {
+                return;
+            }
             var ctx = _this._board.getContext();
             var item = _this._queue[0];
             var isLastFrame = false;
@@ -3135,6 +3796,11 @@ var Renderer = (function () {
             else {
                 _this._status = DrawStatus.FREE;
             }
+            _this.trigger('drawFrame', undefined);
+            if (_this._loader.isComplete() === true && _this._queue.length === 1 && _this._status === DrawStatus.FREE) {
+                _this.trigger('drawFrameComplete', undefined);
+                _this.freeze();
+            }
         });
     };
     Renderer.prototype._retainQueueOneItem = function () {
@@ -3145,13 +3811,13 @@ var Renderer = (function () {
         this._queue = [lastOne];
     };
     return Renderer;
-}());
+}(RendererEvent));
 var Mode;
 (function (Mode) {
     Mode["NULL"] = "null";
     Mode["SELECT_ELEMENT"] = "select-element";
     Mode["SELECT_ELEMENT_LIST"] = "select-element-list";
-    Mode["SELECT_ELEMENT_WRAPPER_DOT"] = "select-element-wrapper-dot";
+    Mode["SELECT_ELEMENT_WRAPPER_CONTROLLER"] = "select-element-wrapper-controller";
     Mode["SELECT_AREA"] = "select-area";
 })(Mode || (Mode = {}));
 var CursorStatus;
@@ -3168,7 +3834,8 @@ function createData() {
         selectedUUID: null,
         selectedUUIDList: [],
         hoverUUID: null,
-        selectedDotDirection: null,
+        selectedControllerDirection: null,
+        hoverControllerDirection: null,
         prevPoint: null,
     };
 }
@@ -3372,6 +4039,12 @@ function initEvent(core) {
     core[_board].on('moveStart', handleMoveStart(core));
     core[_board].on('move', time.throttle(handleMove(core), 16));
     core[_board].on('moveEnd', handleMoveEnd(core));
+    core[_renderer].on('drawFrame', function () {
+        core[_coreEvent].trigger('drawFrame', undefined);
+    });
+    core[_renderer].on('drawFrameComplete', function () {
+        core[_coreEvent].trigger('drawFrameComplete', undefined);
+    });
     core[_tempData$1].set('hasInited', true);
 }
 function handleDoubleClick(core) {
@@ -3397,10 +4070,10 @@ function handlePoint(core) {
             core[_tempData$1].set('mode', Mode.SELECT_ELEMENT_LIST);
         }
         else {
-            var _d = core[_helper].isPointInElementWrapperDot(point), uuid = _d[0], direction = _d[1];
-            if (uuid && direction) {
-                core[_tempData$1].set('mode', Mode.SELECT_ELEMENT_WRAPPER_DOT);
-                core[_tempData$1].set('selectedDotDirection', direction);
+            var _d = core[_helper].isPointInElementWrapperController(point, core[_data]), uuid = _d.uuid, selectedControllerDirection = _d.selectedControllerDirection;
+            if (uuid && selectedControllerDirection) {
+                core[_tempData$1].set('mode', Mode.SELECT_ELEMENT_WRAPPER_CONTROLLER);
+                core[_tempData$1].set('selectedControllerDirection', selectedControllerDirection);
                 core[_tempData$1].set('selectedUUID', uuid);
             }
             else {
@@ -3415,6 +4088,7 @@ function handlePoint(core) {
                 }
                 else {
                     core[_tempData$1].set('selectedUUIDList', []);
+                    core[_tempData$1].set('selectedUUID', null);
                     core[_tempData$1].set('mode', Mode.SELECT_AREA);
                 }
             }
@@ -3465,8 +4139,8 @@ function handleMove(core) {
                 core[_draw]();
                 core[_tempData$1].set('cursorStatus', CursorStatus.DRAGGING);
             }
-            else if (core[_tempData$1].get('mode') === Mode.SELECT_ELEMENT_WRAPPER_DOT && core[_tempData$1].get('selectedDotDirection')) {
-                transfromElement(core, core[_tempData$1].get('selectedUUID'), point, core[_tempData$1].get('prevPoint'), core[_tempData$1].get('selectedDotDirection'));
+            else if (core[_tempData$1].get('mode') === Mode.SELECT_ELEMENT_WRAPPER_CONTROLLER && core[_tempData$1].get('selectedControllerDirection')) {
+                transfromElement(core, core[_tempData$1].get('selectedUUID'), point, core[_tempData$1].get('prevPoint'), core[_tempData$1].get('selectedControllerDirection'));
                 core[_tempData$1].set('cursorStatus', CursorStatus.DRAGGING);
             }
         }
@@ -3641,6 +4315,7 @@ var Core = (function () {
             scrollX: transfrom.scrollX,
             scrollY: transfrom.scrollY,
         });
+        this[_renderer].thaw();
         this[_renderer].render(this[_data], this[_helper].getConfig(), (opts === null || opts === void 0 ? void 0 : opts.resourceChangeUUIDs) || []);
     };
     Core.prototype.getElement = function (uuid) {
@@ -3729,6 +4404,7 @@ var Core = (function () {
     };
     Core.prototype.clearOperation = function () {
         this[_tempData$1].clear();
+        this[_tempData$1].set('onlyRender', this[_opts$3].onlyRender === true);
         this[_draw]();
     };
     Core.prototype.on = function (key, callback) {
@@ -3742,6 +4418,12 @@ var Core = (function () {
     };
     Core.prototype.pointContextToScreen = function (p) {
         return this[_board].pointContextToScreen(p);
+    };
+    Core.prototype.setOnlyRender = function () {
+        this[_tempData$1].set('onlyRender', true);
+    };
+    Core.prototype.cancelOnlyRender = function () {
+        this[_tempData$1].set('onlyRender', false);
     };
     Core.prototype.__getBoardContext = function () {
         return this[_board].getContext();
@@ -3782,14 +4464,18 @@ var defaultOptions = {
     disableKeyboard: true,
 };
 
+function createDefaultData() {
+    return {
+        isFocus: false,
+        doRecords: [],
+        unDoRecords: [],
+        clipboardElements: [],
+        isDownloading: false,
+    };
+}
 var TempData = (function () {
     function TempData() {
-        this._temp = {
-            isFocus: false,
-            doRecords: [],
-            unDoRecords: [],
-            clipboardElements: [],
-        };
+        this._temp = createDefaultData();
     }
     TempData.prototype.set = function (name, value) {
         this._temp[name] = value;
@@ -3798,12 +4484,7 @@ var TempData = (function () {
         return this._temp[name];
     };
     TempData.prototype.clear = function () {
-        this._temp = {
-            isFocus: false,
-            doRecords: [],
-            unDoRecords: [],
-            clipboardElements: [],
-        };
+        this._temp = createDefaultData();
     };
     return TempData;
 }());
@@ -3946,6 +4627,35 @@ function redo(idraw) {
     };
 }
 
+function exportDataURL(idraw, type, quality) {
+    return __awaiter$4(this, void 0, void 0, function () {
+        return __generator$4(this, function (_a) {
+            if (idraw[_tempData].get('isDownloading') === true) {
+                return [2, Promise.reject('Busy!')];
+            }
+            idraw[_tempData].set('isDownloading', true);
+            return [2, new Promise(function (resolve, reject) {
+                    var dataURL = '';
+                    function listenRenderFrameComplete() {
+                        idraw.off('drawFrameComplete', listenRenderFrameComplete);
+                        idraw[_tempData].set('isDownloading', false);
+                        var ctx = idraw.__getOriginContext();
+                        var canvas = ctx.canvas;
+                        dataURL = canvas.toDataURL(type, quality);
+                        resolve(dataURL);
+                    }
+                    try {
+                        idraw.on('drawFrameComplete', listenRenderFrameComplete);
+                        idraw.clearOperation();
+                    }
+                    catch (err) {
+                        reject(err);
+                    }
+                })];
+        });
+    });
+}
+
 function compose(middleware) {
     return function (context, next) {
         return dispatch(0);
@@ -4077,14 +4787,77 @@ var istype = {
     promise: function (data) {
         return parsePrototype(data) === 'Promise';
     },
-    nodeList: function (data) {
-        return parsePrototype(data) === 'NodeList';
-    },
-    imageData: function (data) {
-        return parsePrototype(data) === 'ImageData';
-    }
 };
-var Image = window.Image, Blob = window.Blob, FileReader = window.FileReader;
+function __awaiter(thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+}
+function __generator(thisArg, body) {
+    var _ = { label: 0, sent: function() { if (t[0] & 1) throw t[1]; return t[1]; }, trys: [], ops: [] }, f, y, t, g;
+    return g = { next: verb(0), "throw": verb(1), "return": verb(2) }, typeof Symbol === "function" && (g[Symbol.iterator] = function() { return this; }), g;
+    function verb(n) { return function (v) { return step([n, v]); }; }
+    function step(op) {
+        if (f) throw new TypeError("Generator is already executing.");
+        while (_) try {
+            if (f = 1, y && (t = op[0] & 2 ? y["return"] : op[0] ? y["throw"] || ((t = y["return"]) && t.call(y), 0) : y.next) && !(t = t.call(y, op[1])).done) return t;
+            if (y = 0, t) op = [op[0] & 2, t.value];
+            switch (op[0]) {
+                case 0: case 1: t = op; break;
+                case 4: _.label++; return { value: op[1], done: false };
+                case 5: _.label++; y = op[1]; op = [0]; continue;
+                case 7: op = _.ops.pop(); _.trys.pop(); continue;
+                default:
+                    if (!(t = _.trys, t = t.length > 0 && t[t.length - 1]) && (op[0] === 6 || op[0] === 2)) { _ = 0; continue; }
+                    if (op[0] === 3 && (!t || (op[1] > t[0] && op[1] < t[3]))) { _.label = op[1]; break; }
+                    if (op[0] === 6 && _.label < t[1]) { _.label = t[1]; t = op; break; }
+                    if (t && _.label < t[2]) { _.label = t[2]; _.ops.push(op); break; }
+                    if (t[2]) _.ops.pop();
+                    _.trys.pop(); continue;
+            }
+            op = body.call(thisArg, _);
+        } catch (e) { op = [6, e]; y = 0; } finally { f = t = 0; }
+        if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
+    }
+}
+function parseHTMLToDataURL(html, opts) {
+    var width = opts.width, height = opts.height;
+    return new Promise(function (resolve, reject) {
+        var _svg = "\n    <svg xmlns=\"http://www.w3.org/2000/svg\" width=\"" + (width || '') + "\" height = \"" + (height || '') + "\">\n      <foreignObject width=\"100%\" height=\"100%\">\n        <div xmlns = \"http://www.w3.org/1999/xhtml\">\n          " + html + "\n        </div>\n      </foreignObject>\n    </svg>\n    ";
+        var blob = new Blob([_svg], { type: 'image/svg+xml;charset=utf-8' });
+        var reader = new FileReader();
+        reader.readAsDataURL(blob);
+        reader.onload = function (event) {
+            var _a;
+            var base64 = (_a = event === null || event === void 0 ? void 0 : event.target) === null || _a === void 0 ? void 0 : _a.result;
+            resolve(base64);
+        };
+        reader.onerror = function (err) {
+            reject(err);
+        };
+    });
+}
+function parseSVGToDataURL(svg) {
+    return new Promise(function (resolve, reject) {
+        var _svg = svg;
+        var blob = new Blob([_svg], { type: 'image/svg+xml;charset=utf-8' });
+        var reader = new FileReader();
+        reader.readAsDataURL(blob);
+        reader.onload = function (event) {
+            var _a;
+            var base64 = (_a = event === null || event === void 0 ? void 0 : event.target) === null || _a === void 0 ? void 0 : _a.result;
+            resolve(base64);
+        };
+        reader.onerror = function (err) {
+            reject(err);
+        };
+    });
+}
+var Image = window.Image;
 function loadImage(src) {
     return new Promise(function (resolve, reject) {
         var img = new Image;
@@ -4097,44 +4870,35 @@ function loadImage(src) {
     });
 }
 function loadSVG(svg) {
-    return new Promise(function (resolve, reject) {
-        var _svg = svg;
-        var image = new Image();
-        var blob = new Blob([_svg], { type: 'image/svg+xml;charset=utf-8' });
-        var reader = new FileReader();
-        reader.readAsDataURL(blob);
-        reader.onload = function (event) {
-            var _a;
-            var base64 = (_a = event === null || event === void 0 ? void 0 : event.target) === null || _a === void 0 ? void 0 : _a.result;
-            image.onload = function () {
-                resolve(image);
-            };
-            image.src = base64;
-        };
-        reader.onerror = function (err) {
-            reject(err);
-        };
+    return __awaiter(this, void 0, void 0, function () {
+        var dataURL, image;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0: return [4, parseSVGToDataURL(svg)];
+                case 1:
+                    dataURL = _a.sent();
+                    return [4, loadImage(dataURL)];
+                case 2:
+                    image = _a.sent();
+                    return [2, image];
+            }
+        });
     });
 }
 function loadHTML(html, opts) {
-    var width = opts.width, height = opts.height;
-    return new Promise(function (resolve, reject) {
-        var _svg = "\n    <svg xmlns=\"http://www.w3.org/2000/svg\" width=\"" + (width || '') + "\" height = \"" + (height || '') + "\">\n      <foreignObject width=\"100%\" height=\"100%\">\n        <div xmlns = \"http://www.w3.org/1999/xhtml\">\n          " + html + "\n        </div>\n      </foreignObject>\n    </svg>\n    ";
-        var image = new Image();
-        var blob = new Blob([_svg], { type: 'image/svg+xml;charset=utf-8' });
-        var reader = new FileReader();
-        reader.readAsDataURL(blob);
-        reader.onload = function (event) {
-            var _a;
-            var base64 = (_a = event === null || event === void 0 ? void 0 : event.target) === null || _a === void 0 ? void 0 : _a.result;
-            image.onload = function () {
-                resolve(image);
-            };
-            image.src = base64;
-        };
-        reader.onerror = function (err) {
-            reject(err);
-        };
+    return __awaiter(this, void 0, void 0, function () {
+        var dataURL, image;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0: return [4, parseHTMLToDataURL(html, opts)];
+                case 1:
+                    dataURL = _a.sent();
+                    return [4, loadImage(dataURL)];
+                case 2:
+                    image = _a.sent();
+                    return [2, image];
+            }
+        });
     });
 }
 var index = {
@@ -4164,25 +4928,6 @@ var index = {
         deepClone: deepClone,
     }
 };
-
-function exportDataURL(idraw, type, quality) {
-    return __awaiter$1(this, void 0, void 0, function () {
-        var ctx, canvas, dataURL;
-        return __generator$1(this, function (_a) {
-            switch (_a.label) {
-                case 0:
-                    idraw.clearOperation();
-                    return [4, index.time.delay(300)];
-                case 1:
-                    _a.sent();
-                    ctx = idraw.__getOriginContext();
-                    canvas = ctx.canvas;
-                    dataURL = canvas.toDataURL(type, quality);
-                    return [2, dataURL];
-            }
-        });
-    });
-}
 
 function copyElements(idraw) {
     if (idraw[_tempData].get('isFocus') !== true) {
@@ -4282,7 +5027,7 @@ function keyUndo(idraw) {
 
 var _a, _b, _c;
 var iDraw = (function (_super) {
-    __extends(iDraw, _super);
+    __extends$1(iDraw, _super);
     function iDraw(mount, opts, config) {
         var _this = _super.call(this, mount, {
             width: opts.width || defaultOptions.width,
@@ -4306,8 +5051,8 @@ var iDraw = (function (_super) {
         return redo(this);
     };
     iDraw.prototype.exportDataURL = function (type, quality) {
-        return __awaiter$1(this, void 0, void 0, function () {
-            return __generator$1(this, function (_d) {
+        return __awaiter$4(this, void 0, void 0, function () {
+            return __generator$4(this, function (_d) {
                 return [2, exportDataURL(this, type, quality)];
             });
         });
