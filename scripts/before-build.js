@@ -1,5 +1,6 @@
 const fs = require('fs');
 const path = require('path');
+const { dependencies } = require('./../package.json');
 
 const projectDir = path.join(__dirname, '..');
 const configPath = path.join(projectDir, 'src', 'config.json');
@@ -15,8 +16,16 @@ function moveIDrawDepFile() {
   const idrawGlobalFile = path.join(nodeModuleDir, 'idraw', 'dist', 'index.global.js');
   const idrawESFile = path.join(nodeModuleDir, 'idraw', 'dist', 'index.es.js');
 
-  const libGlobalPath = path.join(projectDir, 'public', 'lib', 'idraw', '0.x', 'index.global.js');
-  const libESPath = path.join(projectDir, 'public', 'lib', 'idraw', '0.x', 'index.es.js');
+  const libIDrawDir = path.join(projectDir, 'public', 'lib', 'idraw');
+  if (fs.existsSync(libIDrawDir) && fs.statSync(libIDrawDir).isDirectory()) {
+    fs.rmSync(libIDrawDir, {recursive: true});
+  }
+
+  const version = dependencies.idraw.replace(/(\^|\~)/ig, '');
+  const libIDrawVersionDir = path.join(libIDrawDir, version);
+  fs.mkdirSync(libIDrawVersionDir, {recursive: true});
+  const libGlobalPath = path.join(libIDrawVersionDir, 'index.global.js');
+  const libESPath = path.join(libIDrawVersionDir, 'index.es.js');
 
   const globalFile = fs.readFileSync(idrawGlobalFile, { encoding: 'utf8' });
   fs.writeFileSync(libGlobalPath, globalFile);
