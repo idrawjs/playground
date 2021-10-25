@@ -2,6 +2,7 @@ import { TypeCodeFile } from './store';
 import demoList from './../constant/demo-list';
 import srcdocHTML from './srcdoc.html?raw';
 import config from './../config.json';
+import { dependencies } from './../../package.json'
 
 export function getUrlParams(name: string): string | null {
   const urlParams = new URLSearchParams(window.location.search);
@@ -161,11 +162,13 @@ export function getPreivewAssets(files: TypeCodeFile[]): TypePrevewAssets {
 export function mergePreviewDoc(assets: TypePrevewAssets) {
   const srcdoc = srcdocHTML;
   const sandboxSrc = srcdoc
+    .replace(/\$\{idrawVersion\}/ig, dependencies.idraw.replace(/(\^|\~)/ig, ''))
     .replace(/<!--__INJECT_STYLE__-->/, `\<style\>${assets.css}\</style\>`)
     .replace(/<!--__INJECT_IMPORTMAP__-->/, `\<script type="importmap"\>${assets.importmap}\</script\>`)
     .replace(/<!--__INJECT_HTML__-->/, assets.html.replace(/<script[\s\S]*?<\/script>/ig, ''))
     // .replace(/<!--__INJECT_JS__-->/, `\<script type="module"\>${assets.js}\</script\>`);
     .replace(/<!--__INJECT_JS__-->/, `\<script type="module"\>${mergeJavaScript(assets)}\</script\>`);
+
   return sandboxSrc;
 }
 
