@@ -111,4 +111,6 @@ dist-ssr
 *.local
 
 #docs/
+docs/
 yarn.lock
+pnpm-lock.yaml
