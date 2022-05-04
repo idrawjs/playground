@@ -14,7 +14,7 @@ function main() {
 
 function moveIDrawDepFile() {
   const idrawGlobalFile = path.join(nodeModuleDir, 'idraw', 'dist', 'index.global.js');
-  const idrawESFile = path.join(nodeModuleDir, 'idraw', 'dist', 'index.es.js');
+  const idrawESFile = path.join(nodeModuleDir, 'idraw', 'dist', 'index.esm.js');
 
   const libIDrawDir = path.join(projectDir, 'public', 'lib', 'idraw');
   if (fs.existsSync(libIDrawDir) && fs.statSync(libIDrawDir).isDirectory()) {
@@ -25,7 +25,7 @@ function moveIDrawDepFile() {
   const libIDrawVersionDir = path.join(libIDrawDir, version);
   fs.mkdirSync(libIDrawVersionDir, {recursive: true});
   const libGlobalPath = path.join(libIDrawVersionDir, 'index.global.js');
-  const libESPath = path.join(libIDrawVersionDir, 'index.es.js');
+  const libESPath = path.join(libIDrawVersionDir, 'index.esm.js');
 
   const globalFile = fs.readFileSync(idrawGlobalFile, { encoding: 'utf8' });
   fs.writeFileSync(libGlobalPath, globalFile);

@@ -112,3 +112,4 @@ dist-ssr
 
 docs/
 yarn.lock
+pnpm-lock.yaml
