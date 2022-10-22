@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "scripts": {
     "dev": "node ./scripts/before-build.js && vite",
-    "build": "node ./scripts/before-build.js && vue-tsc --noEmit && vite build",
+    "build": "node ./scripts/before-build.js && vite build",
     "serve": "vite preview",
     "docs": "npm run build && node ./scripts/docs.js"
   },

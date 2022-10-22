@@ -296,6 +296,7 @@ var iDraw = (function () {
     function loadImage$2(src) {
         return new Promise(function (resolve, reject) {
             var img = new Image$2;
+            img.crossOrigin = 'anonymous';
             img.onload = function () {
                 resolve(img);
             };
@@ -1836,6 +1837,7 @@ var iDraw = (function () {
     function loadImage$1(src) {
         return new Promise(function (resolve, reject) {
             var img = new Image$1;
+            img.crossOrigin = 'anonymous';
             img.onload = function () {
                 resolve(img);
             };
@@ -2582,6 +2584,7 @@ var iDraw = (function () {
     function loadImage$3(src) {
         return new Promise(function (resolve, reject) {
             var img = new Image$3;
+            img.crossOrigin = 'anonymous';
             img.onload = function () {
                 resolve(img);
             };
@@ -3554,9 +3557,7 @@ var iDraw = (function () {
             }
             var maxParallelNum = this._opts.maxParallelNum;
             var uuids = this._currentUUIDQueue.splice(0, maxParallelNum);
-            var uuidMap = {};
             uuids.forEach(function (url, i) {
-                uuidMap[url] = i;
             });
             var loadUUIDList = [];
             var _loadAction = function () {
@@ -6450,6 +6451,7 @@ var iDraw = (function () {
     function loadImage(src) {
         return new Promise(function (resolve, reject) {
             var img = new Image;
+            img.crossOrigin = 'anonymous';
             img.onload = function () {
                 resolve(img);
             };
