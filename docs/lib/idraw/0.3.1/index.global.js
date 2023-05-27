@@ -3657,6 +3657,7 @@ var iDraw = function() {
           resourceChangeUUIDs.push(result);
         }
         data.elements[i] = _elem;
+        core.setData(data);
         break;
       }
     }
