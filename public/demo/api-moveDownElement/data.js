@@ -8,7 +8,7 @@ export default {
       w: 200,
       h: 100,
       type: "rect",
-      desc: {
+      detail: {
         bgColor: "#d5f5f9",
         borderRadius: 20,
         borderWidth: 4,
@@ -23,7 +23,7 @@ export default {
       h: 120,
       // angle: 30,
       type: "rect",
-      desc: {
+      detail: {
         bgColor: "#d5f5f9",
         borderRadius: 60,
         borderWidth: 4,

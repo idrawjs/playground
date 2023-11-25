@@ -1,4 +1,4 @@
-import iDraw from 'idraw';
+import { iDraw } from 'idraw';
 const data = {
   // bgColor: '#f0f0f0',
   elements: [
@@ -10,7 +10,7 @@ const data = {
       h: 200,
       angle: 0,
       type: "text",
-      desc: {
+      detail: {
         text: 'Hello World',
         color: "#3f51b5",
         fontSize: 60,

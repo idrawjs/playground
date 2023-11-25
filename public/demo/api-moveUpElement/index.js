@@ -1,4 +1,4 @@
-import iDraw from 'idraw';
+import { iDraw } from 'idraw';
 import data from './data';
 
 const app = document.querySelector('#app');

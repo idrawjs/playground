@@ -1,4 +1,4 @@
-import iDraw from 'idraw';
+import { iDraw } from 'idraw';
 const data = {
   elements: [
     {
@@ -9,7 +9,7 @@ const data = {
       h: 200,
       angle: 0,
       type: "image",
-      desc: {
+      detail: {
         src: './image/github.png'
       },
     },

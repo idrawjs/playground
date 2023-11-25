@@ -1,4 +1,4 @@
-import iDraw from 'idraw';
+import { iDraw } from 'idraw';
 const data = {
   elements: [
     {
@@ -9,7 +9,7 @@ const data = {
       h: 100,
       type: "html",
       angle: 0,
-      desc: {
+      detail: {
         html: `
           <style>
           .btn-box {

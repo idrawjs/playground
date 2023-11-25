@@ -1,4 +1,4 @@
-import iDraw from 'idraw';
+import { iDraw } from 'idraw';
 import data from './data';
 
 const app = document.querySelector('#app');
@@ -20,7 +20,7 @@ idraw.insertElementBefore({
   w: 200,
   h: 100,
   type: "rect",
-  desc: {
+  detail: {
     bgColor: "#f7d3c1",
     borderRadius: 20,
     borderWidth: 4,

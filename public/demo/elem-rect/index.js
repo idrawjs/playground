@@ -1,4 +1,4 @@
-import iDraw from 'idraw';
+import { iDraw } from 'idraw';
 const data = {
   // bgColor: '#f0f0f0',
   elements: [
@@ -10,7 +10,7 @@ const data = {
       h: 100,
       angle: 30,
       type: "rect",
-      desc: {
+      detail: {
         bgColor: "#d5f5f9",
         borderRadius: 10,
         borderWidth: 2,
