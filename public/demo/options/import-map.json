@@ -1,6 +1,6 @@
 {
   "imports": {
-    "idraw": "./lib/idraw/index.esm.js",
+    "idraw": "./lib/idraw.esm.js",
     "./data": "./demo/options/data.js"
   }
 }

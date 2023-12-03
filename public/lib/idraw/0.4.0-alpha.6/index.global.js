@@ -1679,6 +1679,80 @@ var __privateSet = (obj, member, value, setter) => {
   function isResourceElement(elem) {
     return ["image", "svg", "html"].includes(elem === null || elem === void 0 ? void 0 : elem.type);
   }
+  function findElementsFromListByPositions(positions, list) {
+    const elements = [];
+    positions.forEach((pos) => {
+      const elem = findElementFromListByPosition(pos, list);
+      if (elem) {
+        elements.push(elem);
+      }
+    });
+    return elements;
+  }
+  function findElementFromListByPosition(position, list) {
+    let result = null;
+    let tempList = list;
+    for (let i = 0; i < position.length; i++) {
+      const pos = position[i];
+      const item = tempList[pos];
+      if (i < position.length - 1 && item.type === "group") {
+        tempList = item.detail.children;
+      } else if (i === position.length - 1) {
+        result = item;
+      } else {
+        break;
+      }
+    }
+    return result;
+  }
+  function insertElementToListByPosition(element, position, list) {
+    let result = false;
+    if (position.length === 1) {
+      const pos = position[0];
+      list.splice(pos, 0, element);
+      result = true;
+    } else if (position.length > 1) {
+      let tempList = list;
+      for (let i = 0; i < position.length; i++) {
+        const pos = position[i];
+        const item = tempList[pos];
+        if (i === position.length - 1) {
+          const pos2 = position[i];
+          tempList.splice(pos2, 0, element);
+          result = true;
+        } else if (i < position.length - 1 && item.type === "group") {
+          tempList = item.detail.children;
+        } else {
+          break;
+        }
+      }
+    }
+    return result;
+  }
+  function deleteElementInListByPosition(position, list) {
+    let result = false;
+    if (position.length === 1) {
+      const pos = position[0];
+      list.splice(pos, 1);
+      result = true;
+    } else if (position.length > 1) {
+      let tempList = list;
+      for (let i = 0; i < position.length; i++) {
+        const pos = position[i];
+        const item = tempList[pos];
+        if (i === position.length - 1) {
+          const pos2 = position[i];
+          tempList.splice(pos2, 1);
+          result = true;
+        } else if (i < position.length - 1 && item.type === "group") {
+          tempList = item.detail.children;
+        } else {
+          break;
+        }
+      }
+    }
+    return result;
+  }
   function checkRectIntersect(rect1, rect2) {
     const react1MinX = rect1.x;
     const react1MinY = rect1.y;
@@ -1689,6 +1763,25 @@ var __privateSet = (obj, member, value, setter) => {
     const react2MaxX = rect2.x + rect2.w;
     const react2MaxY = rect2.y + rect2.h;
     return react1MinX <= react2MaxX && react1MaxX >= react2MinX && react1MinY <= react2MaxY && react1MaxY >= react2MinY;
+  }
+  function calcViewScaleInfo(info, opts) {
+    const { scale, offsetX, offsetY } = info;
+    const { viewSizeInfo } = opts;
+    const { width, height, contextWidth, contextHeight } = viewSizeInfo;
+    const w2 = contextWidth * scale;
+    const h2 = contextHeight * scale;
+    const offsetLeft = 0 - offsetX * scale;
+    const offsetTop = 0 - offsetY * scale;
+    const offsetRight = width - (w2 + offsetLeft / scale);
+    const offsetBottom = height - (h2 + offsetTop / scale);
+    const newScaleInfo = {
+      scale,
+      offsetLeft,
+      offsetTop,
+      offsetRight,
+      offsetBottom
+    };
+    return newScaleInfo;
   }
   function viewScale(opts) {
     const { scale, point, viewScaleInfo: prevViewScaleInfo } = opts;
@@ -2260,7 +2353,7 @@ var __privateSet = (obj, member, value, setter) => {
   }
   function getDefaultElementDetailConfig() {
     const config = {
-      boxSizing: "center-line",
+      boxSizing: "border-box",
       borderWidth: 0,
       borderColor: "#000000",
       shadowColor: "#000000",
@@ -2276,9 +2369,59 @@ var __privateSet = (obj, member, value, setter) => {
       fontSize: 16,
       lineHeight: 20,
       fontFamily: "sans-serif",
-      fontWeight: 400
+      fontWeight: 400,
+      overflow: "hidden"
     };
     return config;
+  }
+  function getDefaultElementRectDetail() {
+    const detail = {
+      background: "#D9D9D9"
+    };
+    return detail;
+  }
+  function getDefaultElementCircleDetail(opts) {
+    const detail = {
+      background: "#D9D9D9",
+      radius: 0
+    };
+    return detail;
+  }
+  function getDefaultElementTextDetail(opts) {
+    var _a;
+    const detailConfig2 = getDefaultElementDetailConfig();
+    const scale = ((_a = opts === null || opts === void 0 ? void 0 : opts.viewScaleInfo) === null || _a === void 0 ? void 0 : _a.scale) || 1;
+    const detail = {
+      text: "Text Element",
+      color: detailConfig2.color,
+      fontFamily: detailConfig2.fontFamily,
+      fontWeight: detailConfig2.fontWeight,
+      lineHeight: detailConfig2.fontSize * scale,
+      fontSize: detailConfig2.fontSize * scale,
+      textAlign: "center",
+      verticalAlign: "middle"
+    };
+    return detail;
+  }
+  function getDefaultElementSVGDetail() {
+    const detail = {
+      svg: '<svg t="1701004189871" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg"   width="200" height="200"><path d="M908.1 353.1l-253.9-36.9L540.7 86.1c-3.1-6.3-8.2-11.4-14.5-14.5-15.8-7.8-35-1.3-42.9 14.5L369.8 316.2l-253.9 36.9c-7 1-13.4 4.3-18.3 9.3-12.3 12.7-12.1 32.9 0.6 45.3l183.7 179.1-43.4 252.9c-1.2 6.9-0.1 14.1 3.2 20.3 8.2 15.6 27.6 21.7 43.2 13.4L512 754l227.1 119.4c6.2 3.3 13.4 4.4 20.3 3.2 17.4-3 29.1-19.5 26.1-36.9l-43.4-252.9 183.7-179.1c5-4.9 8.3-11.3 9.3-18.3 2.7-17.5-9.5-33.7-27-36.3zM664.8 561.6l36.1 210.3L512 672.7 323.1 772l36.1-210.3-152.8-149L417.6 382 512 190.7 606.4 382l211.2 30.7-152.8 148.9z"   fill="#2c2c2c"></path></svg>'
+    };
+    return detail;
+  }
+  function getDefaultElementImageDetail() {
+    const detail = {
+      src: "data:image/svg+xml;base64,PHN2ZyAgIHZpZXdCb3g9IjAgMCAxMDI0IDEwMjQiIHZlcnNpb249IjEuMSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiAgd2lkdGg9IjIwMCIgaGVpZ2h0PSIyMDAiPjxwYXRoIGQ9Ik05MjggMTYwSDk2Yy0xNy43IDAtMzIgMTQuMy0zMiAzMnY2NDBjMCAxNy43IDE0LjMgMzIgMzIgMzJoODMyYzE3LjcgMCAzMi0xNC4zIDMyLTMyVjE5MmMwLTE3LjctMTQuMy0zMi0zMi0zMnogbS00MCA2MzJIMTM2di0zOS45bDEzOC41LTE2NC4zIDE1MC4xIDE3OEw2NTguMSA0ODkgODg4IDc2MS42Vjc5MnogbTAtMTI5LjhMNjY0LjIgMzk2LjhjLTMuMi0zLjgtOS0zLjgtMTIuMiAwTDQyNC42IDY2Ni40bC0xNDQtMTcwLjdjLTMuMi0zLjgtOS0zLjgtMTIuMiAwTDEzNiA2NTIuN1YyMzJoNzUydjQzMC4yeiIgIGZpbGw9IiM1MTUxNTEiPjwvcGF0aD48cGF0aCBkPSJNMzA0IDQ1NmM0OC42IDAgODgtMzkuNCA4OC04OHMtMzkuNC04OC04OC04OC04OCAzOS40LTg4IDg4IDM5LjQgODggODggODh6IG0wLTExNmMxNS41IDAgMjggMTIuNSAyOCAyOHMtMTIuNSAyOC0yOCAyOC0yOC0xMi41LTI4LTI4IDEyLjUtMjggMjgtMjh6IiAgZmlsbD0iIzUxNTE1MSI+PC9wYXRoPjwvc3ZnPg=="
+    };
+    return detail;
+  }
+  function getDefaultElementGroupDetail(opts) {
+    const detail = {
+      children: [],
+      background: "#D9D9D9",
+      overflow: "hidden"
+    };
+    return detail;
   }
   const defaultElemConfig$1 = getDefaultElementDetailConfig();
   function calcViewBoxSize(viewElem, opts) {
@@ -2298,7 +2441,7 @@ var __privateSet = (obj, member, value, setter) => {
     }
     let bw = 0;
     if (typeof borderWidth2 === "number") {
-      bw = (borderWidth2 || 1) * scale;
+      bw = (borderWidth2 || 0) * scale;
     }
     if (boxSizing === "border-box") {
       x2 = viewElem.x + bw / 2;
@@ -2316,6 +2459,11 @@ var __privateSet = (obj, member, value, setter) => {
       w2 = viewElem.w;
       h2 = viewElem.h;
     }
+    w2 = Math.max(w2, 1);
+    h2 = Math.max(h2, 1);
+    radiusList = radiusList.map((r) => {
+      return Math.min(r, w2 / 2, h2 / 2);
+    });
     return {
       x: x2,
       y: y2,
@@ -2323,6 +2471,113 @@ var __privateSet = (obj, member, value, setter) => {
       h: h2,
       radiusList
     };
+  }
+  const defaultViewWidth = 200;
+  const defaultViewHeight = 200;
+  const defaultDetail$1 = getDefaultElementDetailConfig();
+  function createElementSize(type, opts) {
+    let x2 = 0;
+    let y2 = 0;
+    let w2 = defaultViewWidth;
+    let h2 = defaultViewHeight;
+    if (opts) {
+      const { viewScaleInfo, viewSizeInfo } = opts;
+      const { scale, offsetLeft, offsetTop } = viewScaleInfo;
+      const { width, height } = viewSizeInfo;
+      if (type === "text") {
+        const textDetail = getDefaultElementTextDetail();
+        w2 = defaultDetail$1.fontSize * scale * textDetail.text.length;
+        h2 = defaultDetail$1.fontSize * scale * 2;
+      } else {
+        const limitViewWidth = width / 4;
+        const limitViewHeight = height / 4;
+        if (defaultViewWidth >= limitViewWidth) {
+          w2 = limitViewWidth / scale;
+        } else {
+          w2 = defaultViewWidth / scale;
+        }
+        if (defaultViewHeight >= limitViewHeight) {
+          h2 = limitViewHeight / scale;
+        } else {
+          h2 = defaultViewHeight / scale;
+        }
+        if (["circle", "svg", "image"].includes(type)) {
+          w2 = h2 = Math.max(w2, h2);
+        }
+      }
+      x2 = (0 - offsetLeft + width / 2 - w2 * scale / 2) / scale;
+      y2 = (0 - offsetTop + height / 2 - h2 * scale / 2) / scale;
+    }
+    const elemSize = {
+      x: x2,
+      y: y2,
+      w: w2,
+      h: h2
+    };
+    return elemSize;
+  }
+  function createElement(type, baseElem, opts) {
+    const elemSize = createElementSize(type, opts);
+    let detail = {};
+    if (type === "rect") {
+      detail = getDefaultElementRectDetail();
+    } else if (type === "circle") {
+      detail = getDefaultElementCircleDetail({
+        radius: elemSize.w
+      });
+    } else if (type === "text") {
+      detail = getDefaultElementTextDetail(opts);
+    } else if (type === "svg") {
+      detail = getDefaultElementSVGDetail();
+    } else if (type === "image") {
+      detail = getDefaultElementImageDetail();
+    } else if (type === "group") {
+      detail = getDefaultElementGroupDetail();
+    }
+    const elem = Object.assign(Object.assign(Object.assign({}, elemSize), baseElem), { uuid: createUUID(), type, detail: Object.assign(Object.assign({}, detail), baseElem.detail || {}) });
+    return elem;
+  }
+  function moveElementPosition(elements, opts) {
+    const { from, to } = opts;
+    if (from.length === 0 || to.length === 0) {
+      return elements;
+    }
+    if (from.length <= to.length) {
+      for (let i = 0; i < from.length; i++) {
+        if (to[i] === from[i]) {
+          if (i === from.length - 1) {
+            return elements;
+          }
+          continue;
+        }
+      }
+    }
+    const target = findElementFromListByPosition(from, elements);
+    if (target) {
+      const insterResult = insertElementToListByPosition(target, to, elements);
+      if (!insterResult) {
+        return elements;
+      }
+      let trimDeletePosIndex = -1;
+      for (let i = 0; i < from.length; i++) {
+        if (!(to[i] >= 0)) {
+          break;
+        }
+        if (to[i] === from[i]) {
+          continue;
+        }
+        if (to[i] < from[i] && i == to.length - 1) {
+          trimDeletePosIndex = i;
+        }
+      }
+      if (trimDeletePosIndex >= 0) {
+        {
+          from[trimDeletePosIndex] = from[trimDeletePosIndex] + 1;
+        }
+      }
+      deleteElementInListByPosition(from, elements);
+    }
+    return elements;
   }
   function createColorStyle(ctx, color2, opts) {
     if (typeof color2 === "string") {
@@ -2595,6 +2850,11 @@ var __privateSet = (obj, member, value, setter) => {
       } else {
         ctx.lineCap = "square";
       }
+      w2 = Math.max(w2, 1);
+      h2 = Math.max(h2, 1);
+      radiusList = radiusList.map((r) => {
+        return Math.min(r, w2 / 2, h2 / 2);
+      });
       ctx.setLineDash(viewBorderDash);
       ctx.lineWidth = bw;
       ctx.beginPath();
@@ -2719,6 +2979,7 @@ var __privateSet = (obj, member, value, setter) => {
                   viewSizeInfo
                 });
                 ctx.save();
+                ctx.fillStyle = "transparent";
                 ctx.beginPath();
                 ctx.moveTo(x3 + radiusList[0], y3);
                 ctx.arcTo(x3 + w3, y3, x3 + w3, y3 + h3, radiusList[1]);
@@ -2971,49 +3232,65 @@ var __privateSet = (obj, member, value, setter) => {
     const { x: x2, y: y2, w: w2, h: h2, angle: angle2 } = calculator.elementSize({ x: elem.x, y: elem.y, w: elem.w, h: elem.h, angle: elem.angle }, viewScaleInfo, viewSizeInfo);
     const viewElem = Object.assign(Object.assign({}, elem), { x: x2, y: y2, w: w2, h: h2, angle: angle2 });
     rotateElement(ctx, { x: x2, y: y2, w: w2, h: h2, angle: angle2 }, () => {
-      drawBox(ctx, viewElem, {
-        originElem: elem,
-        calcElemSize: { x: x2, y: y2, w: w2, h: h2, angle: angle2 },
+      drawBoxShadow(ctx, viewElem, {
         viewScaleInfo,
         viewSizeInfo,
         renderContent: () => {
-          if (Array.isArray(elem.detail.children)) {
-            const { parentElementSize: parentSize } = opts;
-            const newParentSize = {
-              x: parentSize.x + elem.x,
-              y: parentSize.y + elem.y,
-              w: elem.w || parentSize.w,
-              h: elem.h || parentSize.h,
-              angle: elem.angle
-            };
-            const { calculator: calculator2 } = opts;
-            if (elem.detail.overflow === "hidden") {
-              ctx.save();
-              ctx.beginPath();
-              ctx.moveTo(x2, y2);
-              ctx.lineTo(x2 + w2, y2);
-              ctx.lineTo(x2 + w2, y2 + h2);
-              ctx.lineTo(x2, y2 + h2);
-              ctx.closePath();
-              ctx.clip();
-            }
-            for (let i = 0; i < elem.detail.children.length; i++) {
-              let child = elem.detail.children[i];
-              child = Object.assign(Object.assign({}, child), {
-                x: newParentSize.x + child.x,
-                y: newParentSize.y + child.y
+          drawBox(ctx, viewElem, {
+            originElem: elem,
+            calcElemSize: { x: x2, y: y2, w: w2, h: h2, angle: angle2 },
+            viewScaleInfo,
+            viewSizeInfo,
+            renderContent: () => {
+              const { x: x3, y: y3, w: w3, h: h3, radiusList } = calcViewBoxSize(viewElem, {
+                viewScaleInfo,
+                viewSizeInfo
               });
-              if (!calculator2.isElementInView(child, opts.viewScaleInfo, opts.viewSizeInfo)) {
-                continue;
+              if (elem.detail.overflow === "hidden") {
+                ctx.save();
+                ctx.fillStyle = "transparent";
+                ctx.beginPath();
+                ctx.moveTo(x3 + radiusList[0], y3);
+                ctx.arcTo(x3 + w3, y3, x3 + w3, y3 + h3, radiusList[1]);
+                ctx.arcTo(x3 + w3, y3 + h3, x3, y3 + h3, radiusList[2]);
+                ctx.arcTo(x3, y3 + h3, x3, y3, radiusList[3]);
+                ctx.arcTo(x3, y3, x3 + w3, y3, radiusList[0]);
+                ctx.closePath();
+                ctx.fill();
+                ctx.clip();
               }
-              try {
-                drawElement(ctx, child, Object.assign({}, opts));
-              } catch (err) {
-                console.error(err);
+              if (Array.isArray(elem.detail.children)) {
+                const { parentElementSize: parentSize } = opts;
+                const newParentSize = {
+                  x: parentSize.x + elem.x,
+                  y: parentSize.y + elem.y,
+                  w: elem.w || parentSize.w,
+                  h: elem.h || parentSize.h,
+                  angle: elem.angle
+                };
+                const { calculator: calculator2 } = opts;
+                for (let i = 0; i < elem.detail.children.length; i++) {
+                  let child = elem.detail.children[i];
+                  child = Object.assign(Object.assign({}, child), {
+                    x: newParentSize.x + child.x,
+                    y: newParentSize.y + child.y
+                  });
+                  if (!calculator2.isElementInView(child, opts.viewScaleInfo, opts.viewSizeInfo)) {
+                    continue;
+                  }
+                  try {
+                    drawElement(ctx, child, Object.assign({}, opts));
+                  } catch (err) {
+                    console.error(err);
+                  }
+                }
+              }
+              if (elem.detail.overflow === "hidden") {
+                ctx.globalAlpha = 1;
+                ctx.restore();
               }
             }
-            ctx.restore();
-          }
+          });
         }
       });
     });
@@ -3622,6 +3899,14 @@ var __privateSet = (obj, member, value, setter) => {
       sharer.setActiveViewScaleInfo(viewScaleInfo);
       return viewScaleInfo;
     }
+    updateViewScaleInfo(opts) {
+      const { sharer } = this._opts;
+      const viewScaleInfo = calcViewScaleInfo(opts, {
+        viewSizeInfo: sharer.getActiveViewSizeInfo()
+      });
+      sharer.setActiveViewScaleInfo(viewScaleInfo);
+      return viewScaleInfo;
+    }
     resize(viewSize = {}) {
       const { sharer } = this._opts;
       const originViewSize = sharer.getActiveViewSizeInfo();
@@ -3642,7 +3927,7 @@ var __privateSet = (obj, member, value, setter) => {
       return newViewSize;
     }
   }
-  const frameTime = 16;
+  const throttleTime = 10;
   const LOCK_MODES = ["RULER"];
   class Board {
     constructor(opts) {
@@ -3665,7 +3950,6 @@ var __privateSet = (obj, member, value, setter) => {
       });
       this._opts = opts;
       this._sharer = sharer;
-      this._renderer = renderer;
       this._watcher = watcher;
       this._calculator = calculator;
       this._viewer = new Viewer({
@@ -3688,19 +3972,19 @@ var __privateSet = (obj, member, value, setter) => {
       this._watcher.on("pointEnd", this._handlePointEnd.bind(this));
       this._watcher.on("pointMove", throttle((e) => {
         this._handlePointMove(e);
-      }, frameTime));
+      }, throttleTime));
       this._watcher.on("hover", throttle((e) => {
         this._handleHover(e);
-      }, frameTime));
+      }, throttleTime));
       this._watcher.on("wheelX", throttle((e) => {
         this._handleWheelX(e);
-      }, frameTime));
+      }, throttleTime));
       this._watcher.on("wheelY", throttle((e) => {
         this._handleWheelY(e);
-      }, frameTime));
+      }, throttleTime));
       this._watcher.on("wheelScale", throttle((e) => {
         this._handleWheelScale(e);
-      }, frameTime));
+      }, throttleTime));
       this._watcher.on("scrollX", this._handleScrollX.bind(this));
       this._watcher.on("scrollY", this._handleScrollY.bind(this));
       this._watcher.on("resize", this._handleResize.bind(this));
@@ -3897,6 +4181,9 @@ var __privateSet = (obj, member, value, setter) => {
     }
     scroll(opts) {
       return this._viewer.scroll(opts);
+    }
+    updateViewScaleInfo(opts) {
+      return this._viewer.updateViewScaleInfo(opts);
     }
     resize(newViewSize) {
       const viewSize = this._viewer.resize(newViewSize);
@@ -5007,10 +5294,15 @@ var __privateSet = (obj, member, value, setter) => {
     const { helperContext } = viewContent;
     let prevPoint = null;
     let inBusyMode = null;
-    eventHub.on(middlewareEventSelect, ({ uuids }) => {
+    eventHub.on(middlewareEventSelect, ({ uuids, positions }) => {
+      let elements = [];
       const actionType = sharer.getSharedStorage(keyActionType);
       const data = sharer.getActiveStorage("data");
-      const elements = findElementsFromList(uuids, (data === null || data === void 0 ? void 0 : data.elements) || []);
+      if (positions && Array.isArray(positions)) {
+        elements = findElementsFromListByPositions(positions, (data === null || data === void 0 ? void 0 : data.elements) || []);
+      } else {
+        elements = findElementsFromList(uuids, (data === null || data === void 0 ? void 0 : data.elements) || []);
+      }
       let needRefresh = false;
       if (!actionType && elements.length === 1) {
         sharer.setSharedStorage(keyActionType, "select");
@@ -5754,8 +6046,8 @@ var __privateSet = (obj, member, value, setter) => {
   const fontFamily = "monospace";
   const fontSize = 10;
   const fontWeight = 100;
-  const gridColor = "#AAAAAA30";
-  const gridKeyColor = "#AAAAAA70";
+  const gridColor = "#AAAAAA20";
+  const gridKeyColor = "#AAAAAA40";
   const lineSize = 1;
   function calcRulerScaleList(opts) {
     const { scale, viewLength, viewOffset } = opts;
@@ -6053,6 +6345,22 @@ var __privateSet = (obj, member, value, setter) => {
       const eventHub = __classPrivateFieldGet(this, _Core_board, "f").getEventHub();
       eventHub.trigger(name, e);
     }
+    getViewInfo() {
+      const board = __classPrivateFieldGet(this, _Core_board, "f");
+      const sharer = board.getSharer();
+      const viewSizeInfo = sharer.getActiveViewSizeInfo();
+      const viewScaleInfo = sharer.getActiveViewScaleInfo();
+      return {
+        viewSizeInfo,
+        viewScaleInfo
+      };
+    }
+    refresh() {
+      __classPrivateFieldGet(this, _Core_board, "f").getViewer().drawFrame();
+    }
+    updateViewScale(opts) {
+      __classPrivateFieldGet(this, _Core_board, "f").updateViewScaleInfo(opts);
+    }
   }
   _Core_board = /* @__PURE__ */ new WeakMap(), _Core_container = /* @__PURE__ */ new WeakMap(), _Core_instances = /* @__PURE__ */ new WeakSet(), _Core_initContainer = function _Core_initContainer2() {
     const container = __classPrivateFieldGet(this, _Core_container, "f");
@@ -6076,37 +6384,13 @@ var __privateSet = (obj, member, value, setter) => {
     getData() {
       return __privateGet(this, _core).getData();
     }
-    selectElements(uuids) {
-      this.trigger(middlewareEventSelect, { uuids });
-    }
-    // selectElementByIndex() {
-    //   // TODO
-    // }
-    cancelElement() {
-    }
-    // cancelElementByIndex() {
-    //   // TODO
-    // }
-    updateElement() {
-    }
-    addElement() {
-    }
-    deleteElement() {
-    }
-    moveUpElement() {
-    }
-    moveDownElement() {
-    }
-    insertElementBefore() {
-    }
-    insertElementBeforeIndex() {
-    }
-    insertElementAfter() {
-    }
-    insertElementAfterIndex() {
-    }
     scale(opts) {
       __privateGet(this, _core).scale(opts);
+    }
+    updateViewScale(opts) {
+      const core = __privateGet(this, _core);
+      core.updateViewScale(opts);
+      core.refresh();
     }
     resize(opts) {
       __privateGet(this, _core).resize(opts);
@@ -6119,6 +6403,44 @@ var __privateSet = (obj, member, value, setter) => {
     }
     trigger(name, e) {
       __privateGet(this, _core).trigger(name, e);
+    }
+    selectElements(uuids) {
+      this.trigger(middlewareEventSelect, { uuids });
+    }
+    selectElementsByPositions(positions) {
+      this.trigger(middlewareEventSelect, { positions });
+    }
+    cancelElements() {
+      this.trigger(middlewareEventSelect, { uuids: [] });
+    }
+    createElement(type, opts) {
+      const { viewScaleInfo, viewSizeInfo } = __privateGet(this, _core).getViewInfo();
+      return createElement(
+        type,
+        (opts == null ? void 0 : opts.element) || {},
+        (opts == null ? void 0 : opts.viewCenter) === true ? {
+          viewScaleInfo,
+          viewSizeInfo
+        } : void 0
+      );
+    }
+    updateElement() {
+    }
+    addElement(element, opts) {
+      const core = __privateGet(this, _core);
+      const data = core.getData() || { elements: [] };
+      if (!opts) {
+        data.elements.push(element);
+      }
+      core.setData(data);
+      core.refresh();
+      return data;
+    }
+    deleteElement(uuid) {
+    }
+    moveElementToFront(uuid, referenceUUID) {
+    }
+    moveElementToBack(uuid, referenceUUID) {
     }
     // scrollLeft() {
     //   // TODO
@@ -6165,6 +6487,7 @@ var __privateSet = (obj, member, value, setter) => {
   exports.createAssetId = createAssetId;
   exports.createBoardContexts = createBoardContexts;
   exports.createContext2D = createContext2D;
+  exports.createElement = createElement;
   exports.createOffscreenContext2D = createOffscreenContext2D;
   exports.createUUID = createUUID;
   exports.deepClone = deepClone;
@@ -6174,7 +6497,9 @@ var __privateSet = (obj, member, value, setter) => {
   exports.equalTouchPoint = equalTouchPoint;
   exports.filterElementAsset = filterElementAsset;
   exports.findElementFromList = findElementFromList;
+  exports.findElementFromListByPosition = findElementFromListByPosition;
   exports.findElementsFromList = findElementsFromList;
+  exports.findElementsFromListByPositions = findElementsFromListByPositions;
   exports.formatNumber = formatNumber;
   exports.generateHTML = generateHTML;
   exports.generateSVGPath = generateSVGPath;
@@ -6208,6 +6533,7 @@ var __privateSet = (obj, member, value, setter) => {
   exports.middlewareEventRuler = middlewareEventRuler;
   exports.middlewareEventScale = middlewareEventScale;
   exports.middlewareEventSelect = middlewareEventSelect;
+  exports.moveElementPosition = moveElementPosition;
   exports.parseAngleToRadian = parseAngleToRadian;
   exports.parseFileToBase64 = parseFileToBase64;
   exports.parseFileToText = parseFileToText;
