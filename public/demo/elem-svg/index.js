@@ -2,6 +2,7 @@ import { iDraw } from 'idraw';
 const data = {
   elements: [
     {
+      uuid: '5db6061d-c813-ac42-7837-9e5a69a5abea',
       name: "rect-001",
       x: 160,
       y: 100,
@@ -19,10 +20,7 @@ const data = {
 const app = document.querySelector('#app');
 const idraw = new iDraw(app, {
   width: 600,
-  height: 400,
-  contextWidth: 600,
-  contextHeight: 400,
-  devicePixelRatio: 4,
+  height: 400, 
+  devicePixelRatio: 2,
 });
-idraw.setData(data)
-idraw.selectElementByIndex(0);
+idraw.setData(data) 

@@ -3,6 +3,7 @@ const data = {
   // bgColor: '#f0f0f0',
   elements: [
     {
+      uuid: 'b0124555-768d-9fb7-eaa3-24ce35ccea4e',
       name: "circle-001",
       x: 160,
       y: 100,
@@ -11,9 +12,8 @@ const data = {
       angle: 0,
       type: "circle",
       detail: {
-        bgColor: "#d5f5f9",
-        borderRadius: 10,
-        borderWidth: 4,
+        background: "#d5f5f9", 
+        borderWidth: 10,
         borderColor: "#3f51b5",
       },
     },
@@ -23,10 +23,7 @@ const data = {
 const app = document.querySelector('#app');
 const idraw = new iDraw(app, {
   width: 600,
-  height: 400,
-  contextWidth: 600,
-  contextHeight: 400,
-  devicePixelRatio: 4,
+  height: 400, 
+  devicePixelRatio: 2,
 });
-idraw.setData(data)
-idraw.selectElementByIndex(0);
+idraw.setData(data) 
