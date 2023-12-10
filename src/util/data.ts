@@ -2,7 +2,7 @@ import { TypeCodeFile } from './store';
 import demoList from './../constant/demo-list';
 import srcdocHTML from './srcdoc.html?raw';
 import config from './../config.json';
-import { dependencies } from './../../package.json'
+import { dependencies } from './../../package.json';
 
 export function getUrlParams(name: string): string | null {
   const urlParams = new URLSearchParams(window.location.search);
@@ -11,15 +11,20 @@ export function getUrlParams(name: string): string | null {
 
 function fetchText(url: string): Promise<string> {
   return new Promise((resolve, reject) => {
-    fetch(url).then(res => {
-      if (res.status === 200) {
-        return res.text().then((text) => {
-          resolve(text);
-        }).catch(reject)
-      } else {
-        reject(res)
-      }
-    }).catch(reject)
+    fetch(url)
+      .then((res) => {
+        if (res.status === 200) {
+          return res
+            .text()
+            .then((text) => {
+              resolve(text);
+            })
+            .catch(reject);
+        } else {
+          reject(res);
+        }
+      })
+      .catch(reject);
   });
 }
 
@@ -43,7 +48,7 @@ export async function getExampleFiles(name: string): Promise<TypeCodeFile[]> {
       name: 'index.js',
       fileName: 'index.js',
       code: parsePreivewJavaScript(jsModue),
-      type: 'js',
+      type: 'js'
     });
   } catch (err) {
     console.log(err);
@@ -56,7 +61,7 @@ export async function getExampleFiles(name: string): Promise<TypeCodeFile[]> {
         name: 'data.js',
         fileName: 'data.js',
         code: parsePreivewJavaScript(jsDataModue),
-        type: 'js',
+        type: 'js'
       });
     }
   } catch (err) {
@@ -69,7 +74,7 @@ export async function getExampleFiles(name: string): Promise<TypeCodeFile[]> {
       name: 'html',
       fileName: 'index.html',
       code: htmlModule,
-      type: 'html',
+      type: 'html'
     });
   } catch (err) {
     console.log(err);
@@ -78,7 +83,7 @@ export async function getExampleFiles(name: string): Promise<TypeCodeFile[]> {
   try {
     let cssModule = await fetchText(`${basePath}/demo/${name}/index.css?v=${config?.hash || ''}`);
     if (import.meta.env.DEV) {
-      const lines = cssModule.replace(/\r\n/ig, '\n').split('\n');
+      const lines = cssModule.replace(/\r\n/gi, '\n').split('\n');
       cssModule = '';
       for (let i = 0; i < lines.length; i++) {
         const line = lines[i];
@@ -92,7 +97,7 @@ export async function getExampleFiles(name: string): Promise<TypeCodeFile[]> {
       name: 'css',
       fileName: 'index.css',
       code: cssModule,
-      type: 'css',
+      type: 'css'
     });
   } catch (err) {
     console.log(err);
@@ -104,7 +109,7 @@ export async function getExampleFiles(name: string): Promise<TypeCodeFile[]> {
       name: 'import-map',
       fileName: 'import-map.json',
       code: importMap,
-      type: 'json',
+      type: 'json'
     });
   } catch (err) {
     console.log(err);
@@ -114,9 +119,9 @@ export async function getExampleFiles(name: string): Promise<TypeCodeFile[]> {
 }
 
 export function parsePreivewJavaScript(js: string) {
-  const regLib = /\'\/node_modules\/\.vite\/([\w]+)\.js\?v=[0-9a-zA_Z]{1,}\'/
+  const regLib = /\'\/node_modules\/\.vite\/([\w]+)\.js\?v=[0-9a-zA_Z]{1,}\'/;
   let result = js.replace(regLib, (str) => {
-    let mod = '\'\'';
+    let mod = "''";
     const matchResult = regLib?.exec(str);
     if (matchResult && matchResult[1]) {
       mod = `'${matchResult[1]}'`;
@@ -124,9 +129,9 @@ export function parsePreivewJavaScript(js: string) {
     return mod;
   });
 
-  const regDataFile = /\'\/public\/demo\/[0-9a-zA-Z\-\_]{1,}\/([0-9a-zA-Z\-\_]+)\.(js\?t=[0-9]{1,}|js)\'/
+  const regDataFile = /\'\/public\/demo\/[0-9a-zA-Z\-\_]{1,}\/([0-9a-zA-Z\-\_]+)\.(js\?t=[0-9]{1,}|js)\'/;
   result = result.replace(regDataFile, (str) => {
-    let mod = '\'./\'';
+    let mod = "'./'";
     const matchResult = regDataFile?.exec(str);
     if (matchResult && matchResult[1]) {
       mod = `'./${matchResult[1]}'`;
@@ -136,9 +141,7 @@ export function parsePreivewJavaScript(js: string) {
   return result;
 }
 
-
-
-export type TypePrevewAssets = { html: string,  css: string, js: string, datajs: string, importmap: string }
+export type TypePrevewAssets = { html: string; css: string; js: string; datajs: string; importmap: string };
 
 export function getPreivewAssets(files: TypeCodeFile[]): TypePrevewAssets {
   const assets = { html: '', css: '', js: '', datajs: '', importmap: '{}' };
@@ -158,54 +161,51 @@ export function getPreivewAssets(files: TypeCodeFile[]): TypePrevewAssets {
   return assets;
 }
 
-
 export function mergePreviewDoc(assets: TypePrevewAssets) {
   const srcdoc = srcdocHTML;
   const sandboxSrc = srcdoc
-    .replace(/\$\{idrawVersion\}/ig, dependencies.idraw.replace(/(\^|\~)/ig, ''))
+    .replace(/\$\{idrawVersion\}/gi, dependencies.idraw.replace(/(\^|\~)/gi, ''))
     .replace(/<!--__INJECT_STYLE__-->/, `\<style\>${assets.css}\</style\>`)
     .replace(/<!--__INJECT_IMPORTMAP__-->/, `\<script type="importmap"\>${assets.importmap}\</script\>`)
-    .replace(/<!--__INJECT_HTML__-->/, assets.html.replace(/<script[\s\S]*?<\/script>/ig, ''))
+    .replace(/<!--__INJECT_HTML__-->/, assets.html.replace(/<script[\s\S]*?<\/script>/gi, ''))
     // .replace(/<!--__INJECT_JS__-->/, `\<script type="module"\>${assets.js}\</script\>`);
     .replace(/<!--__INJECT_JS__-->/, `\<script type="module"\>${mergeJavaScript(assets)}\</script\>`);
 
   return sandboxSrc;
 }
 
-
 export function mergeJavaScript(assets: TypePrevewAssets) {
   // parse data.js
   const dataReg = /import[\s]{1,}([a-zA-Z\_]+)[\s]{1,}from[\s]{1,}\'\.\/data\'/;
   let jsContext: string = assets.js;
-  jsContext = jsContext.replace(dataReg, (str) => {
-    const matchResult = dataReg?.exec(str);
-    let result = str;
-    if (matchResult && matchResult[1]) {
-      const dataName = `${matchResult[1]}`;
-      const regExport = /export[\s]{1,}default[\s]{1,}\{/;
-      if (assets.datajs && regExport.test(`${assets.datajs}`)) {
-        result = `const ${dataName} = ${assets.datajs.replace(regExport, '{')}`;
-      }
-    }
-    return result;
-  });
+  // jsContext = jsContext.replace(dataReg, (str) => {
+  //   const matchResult = dataReg?.exec(str);
+  //   let result = str;
+  //   if (matchResult && matchResult[1]) {
+  //     const dataName = `${matchResult[1]}`;
+  //     const regExport = /export[\s]{1,}default[\s]{1,}\{/;
+  //     if (assets.datajs && regExport.test(`${assets.datajs}`)) {
+  //       result = `const ${dataName} = ${assets.datajs.replace(regExport, '{')}`;
+  //     }
+  //   }
+  //   return result;
+  // });
 
-  // parse import idraw
-  const idrawReg = /import[\s]{1,}([a-zA-Z\_]+)[\s]{1,}from[\s]{1,}\'idraw\'/;
-  jsContext = jsContext.replace(idrawReg, (str) => {
-    const matchResult = idrawReg?.exec(str);
-    let result = str;
-    if (matchResult && matchResult[1]) {
-      const dataName = `${matchResult[1]}`;
-      // result = `import ${dataName} from './lib/idraw/0.x/index.es.js'`;
-      result = `const ${dataName} = window.iDraw`;
-    }
-    return result;
-  });
+  // // parse import idraw
+  // const idrawReg = /import[\s]{1,}([a-zA-Z\_]+)[\s]{1,}from[\s]{1,}\'idraw\'/;
+  // jsContext = jsContext.replace(idrawReg, (str) => {
+  //   const matchResult = idrawReg?.exec(str);
+  //   let result = str;
+  //   if (matchResult && matchResult[1]) {
+  //     const dataName = `${matchResult[1]}`;
+  //     // result = `import ${dataName} from './lib/idraw/0.x/index.es.js'`;
+  //     result = `const ${dataName} = window.iDraw`;
+  //   }
+  //   return result;
+  // });
 
   return jsContext;
 }
-
 
 export function includeDemoList(demoKey: string) {
   for (let i = 0; i < demoList.length; i++) {

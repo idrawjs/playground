@@ -98,10 +98,9 @@ const {
   matrixToRadian,
   getDefaultElementDetailConfig,
   calcViewBoxSize
- } = window.iDraw;
-   
+} = window.iDraw;
 
- export default {
+export {
   iDraw,
   Core,
   Renderer,
@@ -201,4 +200,4 @@ const {
   matrixToRadian,
   getDefaultElementDetailConfig,
   calcViewBoxSize
- }
+};
