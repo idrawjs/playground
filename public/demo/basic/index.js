@@ -1,14 +1,14 @@
-import iDraw from 'idraw';
+import {iDraw} from 'idraw';
 import data from './data';
 
 const app = document.querySelector('#app');
 const options = {
-  width: 600,
-  height: 400,
-  contextWidth: 600,
-  contextHeight: 400,
-  devicePixelRatio: 4,
+  width: 500,
+  height: 400, 
+  devicePixelRatio: 2,
 }
 const idraw = new iDraw(app, options);
 idraw.setData(data)
-idraw.selectElementByIndex(0);
+idraw.selectElements([
+  data.elements[0].uuid
+])
