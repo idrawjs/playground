@@ -815,21 +815,38 @@ var __privateSet = (obj, member, value, setter) => {
     svgDesc,
     htmlDesc
   };
+  var __classPrivateFieldSet$1 = function(receiver, state, value, kind, f) {
+    if (kind === "m")
+      throw new TypeError("Private method is not writable");
+    if (kind === "a" && !f)
+      throw new TypeError("Private accessor was defined without a setter");
+    if (typeof state === "function" ? receiver !== state || !f : !state.has(receiver))
+      throw new TypeError("Cannot write private member to an object whose class did not declare it");
+    return kind === "a" ? f.call(receiver, value) : f ? f.value = value : state.set(receiver, value), value;
+  };
+  var __classPrivateFieldGet$1 = function(receiver, state, kind, f) {
+    if (kind === "a" && !f)
+      throw new TypeError("Private accessor was defined without a getter");
+    if (typeof state === "function" ? receiver !== state || !f : !state.has(receiver))
+      throw new TypeError("Cannot read private member from an object whose class did not declare it");
+    return kind === "m" ? f : kind === "a" ? f.call(receiver) : f ? f.value : state.get(receiver);
+  };
+  var _Context2D_ctx, _Context2D_opts;
   class Context2D {
     constructor(ctx, opts) {
-      this._devicePixelRatio = 1;
-      const { devicePixelRatio = 1 } = opts;
-      this._ctx = ctx;
-      this._devicePixelRatio = devicePixelRatio;
+      _Context2D_ctx.set(this, void 0);
+      _Context2D_opts.set(this, void 0);
+      __classPrivateFieldSet$1(this, _Context2D_ctx, ctx, "f");
+      __classPrivateFieldSet$1(this, _Context2D_opts, Object.assign({ devicePixelRatio: 1, offscreenCanvas: null }, opts), "f");
     }
     $undoPixelRatio(num) {
-      return num / this._devicePixelRatio;
+      return num / __classPrivateFieldGet$1(this, _Context2D_opts, "f").devicePixelRatio;
     }
     $doPixelRatio(num) {
-      return this._devicePixelRatio * num;
+      return __classPrivateFieldGet$1(this, _Context2D_opts, "f").devicePixelRatio * num;
     }
     $getContext() {
-      return this._ctx;
+      return __classPrivateFieldGet$1(this, _Context2D_ctx, "f");
     }
     $setFont(opts) {
       const strList = [];
@@ -838,135 +855,153 @@ var __privateSet = (obj, member, value, setter) => {
       }
       strList.push(`${this.$doPixelRatio(opts.fontSize || 12)}px`);
       strList.push(`${opts.fontFamily || "sans-serif"}`);
-      this._ctx.font = `${strList.join(" ")}`;
+      __classPrivateFieldGet$1(this, _Context2D_ctx, "f").font = `${strList.join(" ")}`;
+    }
+    $getOffscreenCanvas() {
+      return __classPrivateFieldGet$1(this, _Context2D_opts, "f").offscreenCanvas;
     }
     $resize(opts) {
-      const { width, height, devicePixelRatio } = opts;
-      const { canvas } = this._ctx;
+      const { width, height, devicePixelRatio, resetStyle } = opts;
+      const { canvas } = __classPrivateFieldGet$1(this, _Context2D_ctx, "f");
       canvas.width = width * devicePixelRatio;
       canvas.height = height * devicePixelRatio;
-      this._devicePixelRatio = devicePixelRatio;
+      __classPrivateFieldSet$1(this, _Context2D_opts, Object.assign(Object.assign({}, __classPrivateFieldGet$1(this, _Context2D_opts, "f")), {
+        devicePixelRatio
+      }), "f");
+      if (resetStyle === true) {
+        canvas.style.width = `${width}px`;
+        canvas.style.height = `${height}px`;
+      }
+    }
+    $getSize() {
+      const { devicePixelRatio } = __classPrivateFieldGet$1(this, _Context2D_opts, "f");
+      const { width, height } = __classPrivateFieldGet$1(this, _Context2D_ctx, "f").canvas;
+      return {
+        width: width / devicePixelRatio,
+        height: height / devicePixelRatio,
+        devicePixelRatio
+      };
     }
     get canvas() {
-      return this._ctx.canvas;
+      return __classPrivateFieldGet$1(this, _Context2D_ctx, "f").canvas;
     }
     get fillStyle() {
-      return this._ctx.fillStyle;
+      return __classPrivateFieldGet$1(this, _Context2D_ctx, "f").fillStyle;
     }
     set fillStyle(value) {
-      this._ctx.fillStyle = value;
+      __classPrivateFieldGet$1(this, _Context2D_ctx, "f").fillStyle = value;
     }
     get strokeStyle() {
-      return this._ctx.strokeStyle;
+      return __classPrivateFieldGet$1(this, _Context2D_ctx, "f").strokeStyle;
     }
     set strokeStyle(color2) {
-      this._ctx.strokeStyle = color2;
+      __classPrivateFieldGet$1(this, _Context2D_ctx, "f").strokeStyle = color2;
     }
     get lineWidth() {
-      return this.$undoPixelRatio(this._ctx.lineWidth);
+      return this.$undoPixelRatio(__classPrivateFieldGet$1(this, _Context2D_ctx, "f").lineWidth);
     }
     set lineWidth(w2) {
-      this._ctx.lineWidth = this.$doPixelRatio(w2);
+      __classPrivateFieldGet$1(this, _Context2D_ctx, "f").lineWidth = this.$doPixelRatio(w2);
     }
     get textAlign() {
-      return this._ctx.textAlign;
+      return __classPrivateFieldGet$1(this, _Context2D_ctx, "f").textAlign;
     }
     set textAlign(align) {
-      this._ctx.textAlign = align;
+      __classPrivateFieldGet$1(this, _Context2D_ctx, "f").textAlign = align;
     }
     get textBaseline() {
-      return this._ctx.textBaseline;
+      return __classPrivateFieldGet$1(this, _Context2D_ctx, "f").textBaseline;
     }
     set textBaseline(baseline) {
-      this._ctx.textBaseline = baseline;
+      __classPrivateFieldGet$1(this, _Context2D_ctx, "f").textBaseline = baseline;
     }
     get globalAlpha() {
-      return this._ctx.globalAlpha;
+      return __classPrivateFieldGet$1(this, _Context2D_ctx, "f").globalAlpha;
     }
     set globalAlpha(alpha) {
-      this._ctx.globalAlpha = alpha;
+      __classPrivateFieldGet$1(this, _Context2D_ctx, "f").globalAlpha = alpha;
     }
     get shadowColor() {
-      return this._ctx.shadowColor;
+      return __classPrivateFieldGet$1(this, _Context2D_ctx, "f").shadowColor;
     }
     set shadowColor(color2) {
-      this._ctx.shadowColor = color2;
+      __classPrivateFieldGet$1(this, _Context2D_ctx, "f").shadowColor = color2;
     }
     get shadowOffsetX() {
-      return this.$undoPixelRatio(this._ctx.shadowOffsetX);
+      return this.$undoPixelRatio(__classPrivateFieldGet$1(this, _Context2D_ctx, "f").shadowOffsetX);
     }
     set shadowOffsetX(offsetX) {
-      this._ctx.shadowOffsetX = this.$doPixelRatio(offsetX);
+      __classPrivateFieldGet$1(this, _Context2D_ctx, "f").shadowOffsetX = this.$doPixelRatio(offsetX);
     }
     get shadowOffsetY() {
-      return this.$undoPixelRatio(this._ctx.shadowOffsetY);
+      return this.$undoPixelRatio(__classPrivateFieldGet$1(this, _Context2D_ctx, "f").shadowOffsetY);
     }
     set shadowOffsetY(offsetY) {
-      this._ctx.shadowOffsetY = this.$doPixelRatio(offsetY);
+      __classPrivateFieldGet$1(this, _Context2D_ctx, "f").shadowOffsetY = this.$doPixelRatio(offsetY);
     }
     get shadowBlur() {
-      return this.$undoPixelRatio(this._ctx.shadowBlur);
+      return this.$undoPixelRatio(__classPrivateFieldGet$1(this, _Context2D_ctx, "f").shadowBlur);
     }
     set shadowBlur(blur) {
-      this._ctx.shadowBlur = this.$doPixelRatio(blur);
+      __classPrivateFieldGet$1(this, _Context2D_ctx, "f").shadowBlur = this.$doPixelRatio(blur);
     }
     get lineCap() {
-      return this._ctx.lineCap;
+      return __classPrivateFieldGet$1(this, _Context2D_ctx, "f").lineCap;
     }
     set lineCap(lineCap) {
-      this._ctx.lineCap = lineCap;
+      __classPrivateFieldGet$1(this, _Context2D_ctx, "f").lineCap = lineCap;
     }
     get globalCompositeOperation() {
-      return this._ctx.globalCompositeOperation;
+      return __classPrivateFieldGet$1(this, _Context2D_ctx, "f").globalCompositeOperation;
     }
     set globalCompositeOperation(operations) {
-      this._ctx.globalCompositeOperation = operations;
+      __classPrivateFieldGet$1(this, _Context2D_ctx, "f").globalCompositeOperation = operations;
     }
     fill(...args) {
-      return this._ctx.fill(...args);
+      return __classPrivateFieldGet$1(this, _Context2D_ctx, "f").fill(...args);
     }
     arc(x2, y2, radius, startAngle, endAngle, anticlockwise) {
-      return this._ctx.arc(this.$doPixelRatio(x2), this.$doPixelRatio(y2), this.$doPixelRatio(radius), startAngle, endAngle, anticlockwise);
+      return __classPrivateFieldGet$1(this, _Context2D_ctx, "f").arc(this.$doPixelRatio(x2), this.$doPixelRatio(y2), this.$doPixelRatio(radius), startAngle, endAngle, anticlockwise);
     }
     rect(x2, y2, w2, h2) {
-      return this._ctx.rect(this.$doPixelRatio(x2), this.$doPixelRatio(y2), this.$doPixelRatio(w2), this.$doPixelRatio(h2));
+      return __classPrivateFieldGet$1(this, _Context2D_ctx, "f").rect(this.$doPixelRatio(x2), this.$doPixelRatio(y2), this.$doPixelRatio(w2), this.$doPixelRatio(h2));
     }
     fillRect(x2, y2, w2, h2) {
-      return this._ctx.fillRect(this.$doPixelRatio(x2), this.$doPixelRatio(y2), this.$doPixelRatio(w2), this.$doPixelRatio(h2));
+      return __classPrivateFieldGet$1(this, _Context2D_ctx, "f").fillRect(this.$doPixelRatio(x2), this.$doPixelRatio(y2), this.$doPixelRatio(w2), this.$doPixelRatio(h2));
     }
     clearRect(x2, y2, w2, h2) {
-      return this._ctx.clearRect(this.$doPixelRatio(x2), this.$doPixelRatio(y2), this.$doPixelRatio(w2), this.$doPixelRatio(h2));
+      return __classPrivateFieldGet$1(this, _Context2D_ctx, "f").clearRect(this.$doPixelRatio(x2), this.$doPixelRatio(y2), this.$doPixelRatio(w2), this.$doPixelRatio(h2));
     }
     beginPath() {
-      return this._ctx.beginPath();
+      return __classPrivateFieldGet$1(this, _Context2D_ctx, "f").beginPath();
     }
     closePath() {
-      return this._ctx.closePath();
+      return __classPrivateFieldGet$1(this, _Context2D_ctx, "f").closePath();
     }
     lineTo(x2, y2) {
-      return this._ctx.lineTo(this.$doPixelRatio(x2), this.$doPixelRatio(y2));
+      return __classPrivateFieldGet$1(this, _Context2D_ctx, "f").lineTo(this.$doPixelRatio(x2), this.$doPixelRatio(y2));
     }
     moveTo(x2, y2) {
-      return this._ctx.moveTo(this.$doPixelRatio(x2), this.$doPixelRatio(y2));
+      return __classPrivateFieldGet$1(this, _Context2D_ctx, "f").moveTo(this.$doPixelRatio(x2), this.$doPixelRatio(y2));
     }
     arcTo(x1, y1, x2, y2, radius) {
-      return this._ctx.arcTo(this.$doPixelRatio(x1), this.$doPixelRatio(y1), this.$doPixelRatio(x2), this.$doPixelRatio(y2), this.$doPixelRatio(radius));
+      return __classPrivateFieldGet$1(this, _Context2D_ctx, "f").arcTo(this.$doPixelRatio(x1), this.$doPixelRatio(y1), this.$doPixelRatio(x2), this.$doPixelRatio(y2), this.$doPixelRatio(radius));
     }
     getLineDash() {
-      return this._ctx.getLineDash();
+      return __classPrivateFieldGet$1(this, _Context2D_ctx, "f").getLineDash();
     }
     setLineDash(nums) {
       const dash = nums.map((n) => this.$doPixelRatio(n));
-      return this._ctx.setLineDash(dash);
+      return __classPrivateFieldGet$1(this, _Context2D_ctx, "f").setLineDash(dash);
     }
     stroke(path) {
-      return path ? this._ctx.stroke(path) : this._ctx.stroke();
+      return path ? __classPrivateFieldGet$1(this, _Context2D_ctx, "f").stroke(path) : __classPrivateFieldGet$1(this, _Context2D_ctx, "f").stroke();
     }
     translate(x2, y2) {
-      return this._ctx.translate(this.$doPixelRatio(x2), this.$doPixelRatio(y2));
+      return __classPrivateFieldGet$1(this, _Context2D_ctx, "f").translate(this.$doPixelRatio(x2), this.$doPixelRatio(y2));
     }
     rotate(angle2) {
-      return this._ctx.rotate(angle2);
+      return __classPrivateFieldGet$1(this, _Context2D_ctx, "f").rotate(angle2);
     }
     drawImage(...args) {
       const image = args[0];
@@ -979,66 +1014,67 @@ var __privateSet = (obj, member, value, setter) => {
       const dw = args[args.length - 2];
       const dh = args[args.length - 1];
       if (args.length === 9) {
-        return this._ctx.drawImage(image, this.$doPixelRatio(sx), this.$doPixelRatio(sy), this.$doPixelRatio(sw), this.$doPixelRatio(sh), this.$doPixelRatio(dx), this.$doPixelRatio(dy), this.$doPixelRatio(dw), this.$doPixelRatio(dh));
+        return __classPrivateFieldGet$1(this, _Context2D_ctx, "f").drawImage(image, this.$doPixelRatio(sx), this.$doPixelRatio(sy), this.$doPixelRatio(sw), this.$doPixelRatio(sh), this.$doPixelRatio(dx), this.$doPixelRatio(dy), this.$doPixelRatio(dw), this.$doPixelRatio(dh));
       } else {
-        return this._ctx.drawImage(image, this.$doPixelRatio(dx), this.$doPixelRatio(dy), this.$doPixelRatio(dw), this.$doPixelRatio(dh));
+        return __classPrivateFieldGet$1(this, _Context2D_ctx, "f").drawImage(image, this.$doPixelRatio(dx), this.$doPixelRatio(dy), this.$doPixelRatio(dw), this.$doPixelRatio(dh));
       }
     }
     createPattern(image, repetition) {
-      return this._ctx.createPattern(image, repetition);
+      return __classPrivateFieldGet$1(this, _Context2D_ctx, "f").createPattern(image, repetition);
     }
     measureText(text2) {
-      const textMetrics = this._ctx.measureText(text2);
+      const textMetrics = __classPrivateFieldGet$1(this, _Context2D_ctx, "f").measureText(text2);
       return textMetrics;
     }
     fillText(text2, x2, y2, maxWidth) {
       if (maxWidth !== void 0) {
-        return this._ctx.fillText(text2, this.$doPixelRatio(x2), this.$doPixelRatio(y2), this.$doPixelRatio(maxWidth));
+        return __classPrivateFieldGet$1(this, _Context2D_ctx, "f").fillText(text2, this.$doPixelRatio(x2), this.$doPixelRatio(y2), this.$doPixelRatio(maxWidth));
       } else {
-        return this._ctx.fillText(text2, this.$doPixelRatio(x2), this.$doPixelRatio(y2));
+        return __classPrivateFieldGet$1(this, _Context2D_ctx, "f").fillText(text2, this.$doPixelRatio(x2), this.$doPixelRatio(y2));
       }
     }
     strokeText(text2, x2, y2, maxWidth) {
       if (maxWidth !== void 0) {
-        return this._ctx.strokeText(text2, this.$doPixelRatio(x2), this.$doPixelRatio(y2), this.$doPixelRatio(maxWidth));
+        return __classPrivateFieldGet$1(this, _Context2D_ctx, "f").strokeText(text2, this.$doPixelRatio(x2), this.$doPixelRatio(y2), this.$doPixelRatio(maxWidth));
       } else {
-        return this._ctx.strokeText(text2, this.$doPixelRatio(x2), this.$doPixelRatio(y2));
+        return __classPrivateFieldGet$1(this, _Context2D_ctx, "f").strokeText(text2, this.$doPixelRatio(x2), this.$doPixelRatio(y2));
       }
     }
     save() {
-      this._ctx.save();
+      __classPrivateFieldGet$1(this, _Context2D_ctx, "f").save();
     }
     restore() {
-      this._ctx.restore();
+      __classPrivateFieldGet$1(this, _Context2D_ctx, "f").restore();
     }
     scale(ratioX, ratioY) {
-      this._ctx.scale(ratioX, ratioY);
+      __classPrivateFieldGet$1(this, _Context2D_ctx, "f").scale(ratioX, ratioY);
     }
     circle(x2, y2, radiusX, radiusY, rotation, startAngle, endAngle, counterclockwise) {
-      this._ctx.ellipse(this.$doPixelRatio(x2), this.$doPixelRatio(y2), this.$doPixelRatio(radiusX), this.$doPixelRatio(radiusY), rotation, startAngle, endAngle, counterclockwise);
+      __classPrivateFieldGet$1(this, _Context2D_ctx, "f").ellipse(this.$doPixelRatio(x2), this.$doPixelRatio(y2), this.$doPixelRatio(radiusX), this.$doPixelRatio(radiusY), rotation, startAngle, endAngle, counterclockwise);
     }
     isPointInPath(x2, y2) {
-      return this._ctx.isPointInPath(this.$doPixelRatio(x2), this.$doPixelRatio(y2));
+      return __classPrivateFieldGet$1(this, _Context2D_ctx, "f").isPointInPath(this.$doPixelRatio(x2), this.$doPixelRatio(y2));
     }
     clip(...args) {
-      return this._ctx.clip(...args);
+      return __classPrivateFieldGet$1(this, _Context2D_ctx, "f").clip(...args);
     }
     setTransform(a, b, c, d, e, f) {
-      return this._ctx.setTransform(a, b, c, d, e, f);
+      return __classPrivateFieldGet$1(this, _Context2D_ctx, "f").setTransform(a, b, c, d, e, f);
     }
     getTransform() {
-      return this._ctx.getTransform();
+      return __classPrivateFieldGet$1(this, _Context2D_ctx, "f").getTransform();
     }
     createLinearGradient(x0, y0, x1, y1) {
-      return this._ctx.createLinearGradient(this.$doPixelRatio(x0), this.$doPixelRatio(y0), this.$doPixelRatio(x1), this.$doPixelRatio(y1));
+      return __classPrivateFieldGet$1(this, _Context2D_ctx, "f").createLinearGradient(this.$doPixelRatio(x0), this.$doPixelRatio(y0), this.$doPixelRatio(x1), this.$doPixelRatio(y1));
     }
     createRadialGradient(x0, y0, r0, x1, y1, r1) {
-      return this._ctx.createRadialGradient(this.$doPixelRatio(x0), this.$doPixelRatio(y0), this.$doPixelRatio(r0), this.$doPixelRatio(x1), this.$doPixelRatio(y1), this.$doPixelRatio(r1));
+      return __classPrivateFieldGet$1(this, _Context2D_ctx, "f").createRadialGradient(this.$doPixelRatio(x0), this.$doPixelRatio(y0), this.$doPixelRatio(r0), this.$doPixelRatio(x1), this.$doPixelRatio(y1), this.$doPixelRatio(r1));
     }
     createConicGradient(startAngle, x2, y2) {
-      return this._ctx.createConicGradient(startAngle, this.$doPixelRatio(x2), this.$doPixelRatio(y2));
+      return __classPrivateFieldGet$1(this, _Context2D_ctx, "f").createConicGradient(startAngle, this.$doPixelRatio(x2), this.$doPixelRatio(y2));
     }
   }
+  _Context2D_ctx = /* @__PURE__ */ new WeakMap(), _Context2D_opts = /* @__PURE__ */ new WeakMap();
   function createContext2D(opts) {
     const { width, height, ctx, devicePixelRatio } = opts;
     let context = ctx;
@@ -1052,29 +1088,71 @@ var __privateSet = (obj, member, value, setter) => {
     return context2d;
   }
   function createOffscreenContext2D(opts) {
-    const { width, height } = opts;
-    const offCanvas = new OffscreenCanvas(width, height);
+    const { width, height, devicePixelRatio } = opts;
+    const offCanvas = new OffscreenCanvas(width * devicePixelRatio, height * devicePixelRatio);
     const offRenderCtx = offCanvas.getContext("2d");
     const offCtx = offRenderCtx.canvas.getContext("2d");
-    return offCtx;
+    const context2d = new Context2D(offCtx, {
+      devicePixelRatio,
+      offscreenCanvas: offCanvas
+    });
+    return context2d;
   }
-  function createBoardContexts(ctx, opts) {
+  function createViewContent(canvas, opts) {
+    const { width, height, devicePixelRatio, offscreen } = opts;
     const ctxOpts = {
-      width: ctx.canvas.width,
-      height: ctx.canvas.height,
-      devicePixelRatio: (opts === null || opts === void 0 ? void 0 : opts.devicePixelRatio) || 1
+      width,
+      height,
+      devicePixelRatio
     };
-    const viewContext = createContext2D(ctxOpts);
-    const helperContext = createContext2D(ctxOpts);
-    const underContext = createContext2D(ctxOpts);
-    const boardContext = createContext2D(Object.assign({ ctx }, ctxOpts));
-    const content = {
-      underContext,
-      viewContext,
-      helperContext,
-      boardContext
-    };
-    return content;
+    if (offscreen === true) {
+      const ctx = canvas.getContext("2d");
+      const viewContext = createOffscreenContext2D(ctxOpts);
+      const helperContext = createOffscreenContext2D(ctxOpts);
+      const underContext = createOffscreenContext2D(ctxOpts);
+      const boardContext = createContext2D(Object.assign({ ctx }, ctxOpts));
+      const drawView = () => {
+        const { width: w2, height: h2 } = viewContext.$getSize();
+        boardContext.clearRect(0, 0, w2, h2);
+        boardContext.drawImage(underContext.canvas, 0, 0, w2, h2);
+        boardContext.drawImage(viewContext.canvas, 0, 0, w2, h2);
+        boardContext.drawImage(helperContext.canvas, 0, 0, w2, h2);
+        underContext.clearRect(0, 0, w2, h2);
+        viewContext.clearRect(0, 0, w2, h2);
+        helperContext.clearRect(0, 0, w2, h2);
+      };
+      const content = {
+        underContext,
+        viewContext,
+        helperContext,
+        boardContext,
+        drawView
+      };
+      return content;
+    } else {
+      const ctx = canvas.getContext("2d");
+      const viewContext = createContext2D(ctxOpts);
+      const helperContext = createContext2D(ctxOpts);
+      const underContext = createContext2D(ctxOpts);
+      const boardContext = createContext2D(Object.assign({ ctx }, ctxOpts));
+      const drawView = () => {
+        boardContext.clearRect(0, 0, width, height);
+        boardContext.drawImage(underContext.canvas, 0, 0, width, height);
+        boardContext.drawImage(viewContext.canvas, 0, 0, width, height);
+        boardContext.drawImage(helperContext.canvas, 0, 0, width, height);
+        underContext.clearRect(0, 0, width, height);
+        viewContext.clearRect(0, 0, width, height);
+        helperContext.clearRect(0, 0, width, height);
+      };
+      const content = {
+        underContext,
+        viewContext,
+        helperContext,
+        boardContext,
+        drawView
+      };
+      return content;
+    }
   }
   class EventEmitter {
     constructor() {
@@ -1570,51 +1648,6 @@ var __privateSet = (obj, member, value, setter) => {
     _scan(uuid, elements);
     return groupQueue;
   }
-  function mergeElement(originElem, updateContent) {
-    var _a;
-    const commonKeys = Object.keys(updateContent);
-    for (let i = 0; i < commonKeys.length; i++) {
-      const commonKey = commonKeys[i];
-      if (["x", "y", "w", "h", "angle", "name"].includes(commonKey)) {
-        originElem[commonKey] = updateContent[commonKey];
-      } else if (["detail", "operations"].includes(commonKey)) {
-        if (istype.json(updateContent[commonKey])) {
-          if (!(originElem === null || originElem === void 0 ? void 0 : originElem.hasOwnProperty(commonKey))) {
-            originElem[commonKey] = {};
-          }
-          if (istype.json(originElem[commonKey])) {
-            originElem[commonKey] = Object.assign(Object.assign({}, originElem[commonKey]), updateContent[commonKey]);
-          }
-        } else if (istype.array(updateContent[commonKey])) {
-          if (!(originElem === null || originElem === void 0 ? void 0 : originElem.hasOwnProperty(commonKey))) {
-            originElem[commonKey] = [];
-          }
-          if (istype.array(originElem[commonKey])) {
-            (_a = updateContent === null || updateContent === void 0 ? void 0 : updateContent[commonKey]) === null || _a === void 0 ? void 0 : _a.forEach((item, i2) => {
-              originElem[commonKey][i2] = item;
-            });
-            originElem[commonKey] = [...originElem[commonKey], ...updateContent[commonKey]];
-          }
-        }
-      }
-    }
-    return originElem;
-  }
-  function updateElementInList(uuid, updateContent, elements) {
-    var _a;
-    let targetElement = null;
-    for (let i = 0; i < elements.length; i++) {
-      const elem = elements[i];
-      if (elem.uuid === uuid) {
-        mergeElement(elem, updateContent);
-        targetElement = elem;
-        break;
-      } else if (elem.type === "group") {
-        targetElement = updateElementInList(uuid, updateContent, ((_a = elem === null || elem === void 0 ? void 0 : elem.detail) === null || _a === void 0 ? void 0 : _a.children) || []);
-      }
-    }
-    return targetElement;
-  }
   function getElementSize(elem) {
     const { x: x2, y: y2, w: w2, h: h2, angle: angle2 } = elem;
     const size = { x: x2, y: y2, w: w2, h: h2, angle: angle2 };
@@ -1705,52 +1738,30 @@ var __privateSet = (obj, member, value, setter) => {
     }
     return result;
   }
-  function insertElementToListByPosition(element, position, list) {
-    let result = false;
-    if (position.length === 1) {
-      const pos = position[0];
-      list.splice(pos, 0, element);
-      result = true;
-    } else if (position.length > 1) {
-      let tempList = list;
-      for (let i = 0; i < position.length; i++) {
-        const pos = position[i];
-        const item = tempList[pos];
-        if (i === position.length - 1) {
-          const pos2 = position[i];
-          tempList.splice(pos2, 0, element);
-          result = true;
-        } else if (i < position.length - 1 && item.type === "group") {
-          tempList = item.detail.children;
-        } else {
+  function getElementPositionFromList(uuid, elements) {
+    let result = [];
+    let over = false;
+    const _loop = (list) => {
+      var _a;
+      for (let i = 0; i < list.length; i++) {
+        if (over === true) {
           break;
         }
-      }
-    }
-    return result;
-  }
-  function deleteElementInListByPosition(position, list) {
-    let result = false;
-    if (position.length === 1) {
-      const pos = position[0];
-      list.splice(pos, 1);
-      result = true;
-    } else if (position.length > 1) {
-      let tempList = list;
-      for (let i = 0; i < position.length; i++) {
-        const pos = position[i];
-        const item = tempList[pos];
-        if (i === position.length - 1) {
-          const pos2 = position[i];
-          tempList.splice(pos2, 1);
-          result = true;
-        } else if (i < position.length - 1 && item.type === "group") {
-          tempList = item.detail.children;
-        } else {
+        result.push(i);
+        const elem = list[i];
+        if (elem.uuid === uuid) {
+          over = true;
+          break;
+        } else if (elem.type === "group") {
+          _loop(((_a = elem === null || elem === void 0 ? void 0 : elem.detail) === null || _a === void 0 ? void 0 : _a.children) || []);
+        }
+        if (over) {
           break;
         }
+        result.pop();
       }
-    }
+    };
+    _loop(elements);
     return result;
   }
   function checkRectIntersect(rect1, rect2) {
@@ -2537,6 +2548,58 @@ var __privateSet = (obj, member, value, setter) => {
     const elem = Object.assign(Object.assign(Object.assign({}, elemSize), baseElem), { uuid: createUUID(), type, detail: Object.assign(Object.assign({}, detail), baseElem.detail || {}) });
     return elem;
   }
+  function insertElementToListByPosition(element, position, list) {
+    let result = false;
+    if (position.length === 1) {
+      const pos = position[0];
+      list.splice(pos, 0, element);
+      result = true;
+    } else if (position.length > 1) {
+      let tempList = list;
+      for (let i = 0; i < position.length; i++) {
+        const pos = position[i];
+        const item = tempList[pos];
+        if (i === position.length - 1) {
+          const pos2 = position[i];
+          tempList.splice(pos2, 0, element);
+          result = true;
+        } else if (i < position.length - 1 && item.type === "group") {
+          tempList = item.detail.children;
+        } else {
+          break;
+        }
+      }
+    }
+    return result;
+  }
+  function deleteElementInListByPosition(position, list) {
+    let result = false;
+    if (position.length === 1) {
+      const pos = position[0];
+      list.splice(pos, 1);
+      result = true;
+    } else if (position.length > 1) {
+      let tempList = list;
+      for (let i = 0; i < position.length; i++) {
+        const pos = position[i];
+        const item = tempList[pos];
+        if (i === position.length - 1) {
+          const pos2 = position[i];
+          tempList.splice(pos2, 1);
+          result = true;
+        } else if (i < position.length - 1 && item.type === "group") {
+          tempList = item.detail.children;
+        } else {
+          break;
+        }
+      }
+    }
+    return result;
+  }
+  function deleteElementInList(uuid, list) {
+    const position = getElementPositionFromList(uuid, list);
+    return deleteElementInListByPosition(position, list);
+  }
   function moveElementPosition(elements, opts) {
     const { from, to } = opts;
     if (from.length === 0 || to.length === 0) {
@@ -2578,6 +2641,51 @@ var __privateSet = (obj, member, value, setter) => {
       deleteElementInListByPosition(from, elements);
     }
     return elements;
+  }
+  function mergeElement(originElem, updateContent) {
+    var _a;
+    const commonKeys = Object.keys(updateContent);
+    for (let i = 0; i < commonKeys.length; i++) {
+      const commonKey = commonKeys[i];
+      if (["x", "y", "w", "h", "angle", "name"].includes(commonKey)) {
+        originElem[commonKey] = updateContent[commonKey];
+      } else if (["detail", "operations"].includes(commonKey)) {
+        if (istype.json(updateContent[commonKey])) {
+          if (!(originElem === null || originElem === void 0 ? void 0 : originElem.hasOwnProperty(commonKey))) {
+            originElem[commonKey] = {};
+          }
+          if (istype.json(originElem[commonKey])) {
+            originElem[commonKey] = Object.assign(Object.assign({}, originElem[commonKey]), updateContent[commonKey]);
+          }
+        } else if (istype.array(updateContent[commonKey])) {
+          if (!(originElem === null || originElem === void 0 ? void 0 : originElem.hasOwnProperty(commonKey))) {
+            originElem[commonKey] = [];
+          }
+          if (istype.array(originElem[commonKey])) {
+            (_a = updateContent === null || updateContent === void 0 ? void 0 : updateContent[commonKey]) === null || _a === void 0 ? void 0 : _a.forEach((item, i2) => {
+              originElem[commonKey][i2] = item;
+            });
+            originElem[commonKey] = [...originElem[commonKey], ...updateContent[commonKey]];
+          }
+        }
+      }
+    }
+    return originElem;
+  }
+  function updateElementInList(uuid, updateContent, elements) {
+    var _a;
+    let targetElement = null;
+    for (let i = 0; i < elements.length; i++) {
+      const elem = elements[i];
+      if (elem.uuid === uuid) {
+        mergeElement(elem, updateContent);
+        targetElement = elem;
+        break;
+      } else if (elem.type === "group") {
+        targetElement = updateElementInList(uuid, updateContent, ((_a = elem === null || elem === void 0 ? void 0 : elem.detail) === null || _a === void 0 ? void 0 : _a.children) || []);
+      }
+    }
+    return targetElement;
   }
   function createColorStyle(ctx, color2, opts) {
     if (typeof color2 === "string") {
@@ -3216,7 +3324,8 @@ var __privateSet = (obj, member, value, setter) => {
           break;
         }
         case "group": {
-          drawGroup(ctx, elem, opts);
+          const assets = Object.assign(Object.assign({}, opts.elementAssets || {}), elem.detail.assets || {});
+          drawGroup(ctx, elem, Object.assign(Object.assign({}, opts), { elementAssets: assets }));
           break;
         }
         default: {
@@ -3664,10 +3773,8 @@ var __privateSet = (obj, member, value, setter) => {
         const deltaY = e.deltaY > 0 || e.deltaY < 0 ? e.deltaY : 0;
         if (e.ctrlKey === true && this.has("wheelScale")) {
           this.trigger("wheelScale", { deltaX, deltaY, point });
-        } else if (this.has("wheelX") && deltaX !== 0) {
-          this.trigger("wheelX", { deltaX, point });
-        } else if (this.has("wheelY") && deltaY !== 0) {
-          this.trigger("wheelY", { deltaY, point });
+        } else if (this.has("wheel")) {
+          this.trigger("wheel", { deltaX, deltaY, point });
         }
       }, { passive: false });
       container.addEventListener("click", (e) => {
@@ -3824,7 +3931,6 @@ var __privateSet = (obj, member, value, setter) => {
       const { renderer, viewContent, beforeDrawFrame, afterDrawFrame } = this._opts;
       if (snapshot) {
         const { scale, offsetTop, offsetBottom, offsetLeft, offsetRight, width, height, contextHeight, contextWidth, devicePixelRatio } = snapshot.activeStore;
-        const { underContext, viewContext, helperContext, boardContext } = viewContent;
         if (snapshot === null || snapshot === void 0 ? void 0 : snapshot.activeStore.data) {
           renderer.drawData(snapshot.activeStore.data, {
             viewScaleInfo: {
@@ -3844,13 +3950,7 @@ var __privateSet = (obj, member, value, setter) => {
           });
         }
         beforeDrawFrame({ snapshot });
-        boardContext.clearRect(0, 0, width, height);
-        boardContext.drawImage(underContext.canvas, 0, 0, width, height);
-        boardContext.drawImage(viewContext.canvas, 0, 0, width, height);
-        boardContext.drawImage(helperContext.canvas, 0, 0, width, height);
-        underContext.clearRect(0, 0, width, height);
-        viewContext.clearRect(0, 0, width, height);
-        helperContext.clearRect(0, 0, width, height);
+        viewContent.drawView();
         afterDrawFrame({ snapshot });
       }
       if (this._drawFrameSnapshotQueue.length === 0) {
@@ -3976,11 +4076,8 @@ var __privateSet = (obj, member, value, setter) => {
       this._watcher.on("hover", throttle((e) => {
         this._handleHover(e);
       }, throttleTime));
-      this._watcher.on("wheelX", throttle((e) => {
-        this._handleWheelX(e);
-      }, throttleTime));
-      this._watcher.on("wheelY", throttle((e) => {
-        this._handleWheelY(e);
+      this._watcher.on("wheel", throttle((e) => {
+        this._handleWheel(e);
       }, throttleTime));
       this._watcher.on("wheelScale", throttle((e) => {
         this._handleWheelScale(e);
@@ -4040,21 +4137,11 @@ var __privateSet = (obj, member, value, setter) => {
         }
       }
     }
-    _handleWheelX(e) {
+    _handleWheel(e) {
       var _a;
       for (let i = 0; i < this._activeMiddlewareObjs.length; i++) {
         const obj = this._activeMiddlewareObjs[i];
-        const result = (_a = obj === null || obj === void 0 ? void 0 : obj.wheelX) === null || _a === void 0 ? void 0 : _a.call(obj, e);
-        if (result === false) {
-          return;
-        }
-      }
-    }
-    _handleWheelY(e) {
-      var _a;
-      for (let i = 0; i < this._activeMiddlewareObjs.length; i++) {
-        const obj = this._activeMiddlewareObjs[i];
-        const result = (_a = obj === null || obj === void 0 ? void 0 : obj.wheelY) === null || _a === void 0 ? void 0 : _a.call(obj, e);
+        const result = (_a = obj === null || obj === void 0 ? void 0 : obj.wheel) === null || _a === void 0 ? void 0 : _a.call(obj, e);
         if (result === false) {
           return;
         }
@@ -4190,9 +4277,6 @@ var __privateSet = (obj, member, value, setter) => {
       const { width, height, devicePixelRatio } = newViewSize;
       const { viewContent } = this._opts;
       viewContent.viewContext.$resize({ width, height, devicePixelRatio });
-      const canvas = viewContent.viewContext.canvas;
-      canvas.style.width = `${width}px`;
-      canvas.style.height = `${height}px`;
       viewContent.helperContext.$resize({ width, height, devicePixelRatio });
       viewContent.boardContext.$resize({ width, height, devicePixelRatio });
       this._viewer.drawFrame();
@@ -5233,13 +5317,24 @@ var __privateSet = (obj, member, value, setter) => {
         parent = createBox({ size, parent });
       }
       const detail = Object.assign(Object.assign({}, defaultElementDetail), element.detail);
+      let elemX = element.x * scale + offsetLeft;
+      let elemY = element.y * scale + offsetTop;
+      let elemW = element.w * scale;
+      let elemH = element.h * scale;
+      if (groupQueue.length > 0) {
+        elemX = element.x * scale;
+        elemY = element.y * scale;
+        elemW = element.w * scale;
+        elemH = element.h * scale;
+      }
       textarea.style.position = "absolute";
-      textarea.style.left = `${element.x * scale}px`;
-      textarea.style.top = `${element.y * scale}px`;
-      textarea.style.width = `${element.w * scale}px`;
-      textarea.style.height = `${element.h * scale}px`;
+      textarea.style.left = `${elemX}px`;
+      textarea.style.top = `${elemY}px`;
+      textarea.style.width = `${elemW}px`;
+      textarea.style.height = `${elemH}px`;
       textarea.style.transform = `rotate(${limitAngle(element.angle || 0)}deg)`;
-      textarea.style.border = "none";
+      textarea.style.boxSizing = "border-box";
+      textarea.style.border = "1px solid #1973ba";
       textarea.style.resize = "none";
       textarea.style.overflow = "hidden";
       textarea.style.wordBreak = "break-all";
@@ -5958,17 +6053,12 @@ var __privateSet = (obj, member, value, setter) => {
     };
     return {
       mode: key,
-      wheelX: (e) => {
-        if (e.deltaX >= 0 || e.deltaX < 0) {
-          viewer.scroll({ moveX: 0 - e.deltaX });
-          viewer.drawFrame();
-        }
-      },
-      wheelY: (e) => {
-        if (e.deltaY >= 0 || e.deltaY < 0) {
-          viewer.scroll({ moveY: 0 - e.deltaY });
-          viewer.drawFrame();
-        }
+      wheel: (e) => {
+        viewer.scroll({
+          moveX: 0 - e.deltaX,
+          moveY: 0 - e.deltaY
+        });
+        viewer.drawFrame();
       },
       pointStart: (e) => {
         const { point } = e;
@@ -6291,8 +6381,7 @@ var __privateSet = (obj, member, value, setter) => {
       const canvas = document.createElement("canvas");
       __classPrivateFieldGet(this, _Core_instances, "m", _Core_initContainer).call(this);
       container.appendChild(canvas);
-      const ctx = canvas.getContext("2d");
-      const viewContent = createBoardContexts(ctx, { devicePixelRatio });
+      const viewContent = createViewContent(canvas, { width, height, devicePixelRatio, offscreen: true });
       const board = new Board({ viewContent, container });
       const sharer = board.getSharer();
       sharer.setActiveViewSizeInfo({
@@ -6358,7 +6447,7 @@ var __privateSet = (obj, member, value, setter) => {
     refresh() {
       __classPrivateFieldGet(this, _Core_board, "f").getViewer().drawFrame();
     }
-    updateViewScale(opts) {
+    setViewScale(opts) {
       __classPrivateFieldGet(this, _Core_board, "f").updateViewScaleInfo(opts);
     }
   }
@@ -6379,7 +6468,9 @@ var __privateSet = (obj, member, value, setter) => {
       core.use(MiddlewareTextEditor);
     }
     setData(data) {
-      __privateGet(this, _core).setData(data);
+      const core = __privateGet(this, _core);
+      core.setData(data);
+      core.trigger("change", { data, type: "set-data" });
     }
     getData() {
       return __privateGet(this, _core).getData();
@@ -6387,9 +6478,9 @@ var __privateSet = (obj, member, value, setter) => {
     scale(opts) {
       __privateGet(this, _core).scale(opts);
     }
-    updateViewScale(opts) {
+    setViewScale(opts) {
       const core = __privateGet(this, _core);
-      core.updateViewScale(opts);
+      core.setViewScale(opts);
       core.refresh();
     }
     resize(opts) {
@@ -6404,8 +6495,14 @@ var __privateSet = (obj, member, value, setter) => {
     trigger(name, e) {
       __privateGet(this, _core).trigger(name, e);
     }
+    selectElement(uuid) {
+      this.selectElements([uuid]);
+    }
     selectElements(uuids) {
       this.trigger(middlewareEventSelect, { uuids });
+    }
+    selectElementByPosition(position) {
+      this.selectElementsByPositions([position]);
     }
     selectElementsByPositions(positions) {
       this.trigger(middlewareEventSelect, { positions });
@@ -6424,33 +6521,45 @@ var __privateSet = (obj, member, value, setter) => {
         } : void 0
       );
     }
-    updateElement() {
+    updateElement(element) {
+      const core = __privateGet(this, _core);
+      const data = core.getData() || { elements: [] };
+      updateElementInList(element.uuid, element, data.elements);
+      core.setData(data);
+      core.refresh();
+      core.trigger("change", { data, type: "update-element" });
     }
     addElement(element, opts) {
       const core = __privateGet(this, _core);
       const data = core.getData() || { elements: [] };
       if (!opts) {
         data.elements.push(element);
+      } else if (opts == null ? void 0 : opts.position) {
+        insertElementToListByPosition(element, opts == null ? void 0 : opts.position, data.elements);
       }
       core.setData(data);
       core.refresh();
+      core.trigger("change", { data, type: "add-element" });
       return data;
     }
     deleteElement(uuid) {
+      const core = __privateGet(this, _core);
+      const data = core.getData() || { elements: [] };
+      deleteElementInList(uuid, data.elements);
+      core.setData(data);
+      core.refresh();
+      core.trigger("change", { data, type: "delete-element" });
     }
-    moveElementToFront(uuid, referenceUUID) {
+    moveElement(uuid, to) {
+      const core = __privateGet(this, _core);
+      const data = core.getData() || { elements: [] };
+      const from = getElementPositionFromList(uuid, data.elements);
+      const list = moveElementPosition(data.elements, { from, to });
+      data.elements = list;
+      core.setData(data);
+      core.refresh();
+      core.trigger("change", { data, type: "move-element" });
     }
-    moveElementToBack(uuid, referenceUUID) {
-    }
-    // scrollLeft() {
-    //   // TODO
-    // }
-    // scrollTop() {
-    //   // TODO
-    // }
-    // exportDataURL() {
-    //   // TODO
-    // }
   }
   _core = new WeakMap();
   exports.Context2D = Context2D;
@@ -6485,13 +6594,15 @@ var __privateSet = (obj, member, value, setter) => {
   exports.compose = compose;
   exports.compressImage = compressImage;
   exports.createAssetId = createAssetId;
-  exports.createBoardContexts = createBoardContexts;
   exports.createContext2D = createContext2D;
   exports.createElement = createElement;
   exports.createOffscreenContext2D = createOffscreenContext2D;
   exports.createUUID = createUUID;
+  exports.createViewContent = createViewContent;
   exports.deepClone = deepClone;
   exports.delay = delay;
+  exports.deleteElementInList = deleteElementInList;
+  exports.deleteElementInListByPosition = deleteElementInListByPosition;
   exports.downloadImageFromCanvas = downloadImageFromCanvas;
   exports.equalPoint = equalPoint;
   exports.equalTouchPoint = equalTouchPoint;
@@ -6515,6 +6626,7 @@ var __privateSet = (obj, member, value, setter) => {
   exports.getViewScaleInfoFromSnapshot = getViewScaleInfoFromSnapshot;
   exports.getViewSizeInfoFromSnapshot = getViewSizeInfoFromSnapshot;
   exports.iDraw = iDraw2;
+  exports.insertElementToListByPosition = insertElementToListByPosition;
   exports.is = is;
   exports.isAssetId = isAssetId;
   exports.isColorStr = isColorStr;
