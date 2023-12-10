@@ -82,6 +82,26 @@ const demoList: TypeDemoList = [
       {
         name: 'getData',
         key: 'api-getData'
+      },
+      {
+        name: 'selectElement',
+        key: 'api-selectElement'
+      },
+      {
+        name: 'addElement',
+        key: 'api-addElement'
+      },
+      {
+        name: 'updateElement',
+        key: 'api-updateElement'
+      },
+      {
+        name: 'deleteElement',
+        key: 'api-deleteElement'
+      },
+      {
+        name: 'moveElement',
+        key: 'api-moveElement'
       }
       // {
       //   name: 'resetSize',
@@ -98,18 +118,6 @@ const demoList: TypeDemoList = [
       // {
       //   name: 'getSelectedElements',
       //   key: 'api-getSelectedElements',
-      // },
-      // {
-      //   name: 'updateElement',
-      //   key: 'api-updateElement',
-      // },
-      // {
-      //   name: 'addElement',
-      //   key: 'api-addElement',
-      // },
-      // {
-      //   name: 'deleteElement',
-      //   key: 'api-deleteElement',
       // },
       // {
       //   name: 'moveDownElement',

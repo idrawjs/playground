@@ -10,6 +10,4 @@ const options = {
 const idraw = new iDraw(app, options);
 idraw.setData(data);
 
-setTimeout(() => {
-  idraw.deleteElement(idraw.getData().elements[1].uuid);
-}, 3000);
+idraw.moveElement(idraw.getData().elements[0].uuid, [1, 0]);
