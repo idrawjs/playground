@@ -62,7 +62,7 @@ function createSandbox() {
     'allow-top-navigation-by-user-activation'
   ].join(' '))
   
-  const sandboxSrc = mergePreviewDoc(assets);
+  let sandboxSrc = mergePreviewDoc(assets); 
   sandbox.srcdoc = sandboxSrc;
   container.value.appendChild(sandbox);
   proxy = createPreviewProxy(sandbox);
