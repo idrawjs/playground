@@ -102,11 +102,11 @@ const demoList: TypeDemoList = [
       {
         name: 'moveElement',
         key: 'api-moveElement'
+      },
+      {
+        name: 'resize',
+        key: 'api-resize'
       }
-      // {
-      //   name: 'resetSize',
-      //   key: 'api-resetSize',
-      // },
       // {
       //   name: 'selectElement',
       //   key: 'api-selectElement',
