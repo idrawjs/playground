@@ -1,63 +1,63 @@
 export default {
   elements: [
     {
-      name: "rect-001",
+      name: 'rect-001',
       x: 40,
       y: 80,
       w: 200,
       h: 100,
-      type: "rect",
+      type: 'rect',
       detail: {
-        bgColor: "#d5f5f9",
+        background: '#d5f5f9',
         borderRadius: 20,
         borderWidth: 4,
-        borderColor: "#3f51b5",
-      },
+        borderColor: '#3f51b5'
+      }
     },
     {
-      name: "rect-002",
+      name: 'rect-002',
       x: 120,
       y: 120,
       w: 200,
       h: 120,
       // angle: 30,
-      type: "rect",
+      type: 'rect',
       detail: {
-        bgColor: "#d5f5f9",
+        background: '#d5f5f9',
         borderRadius: 60,
         borderWidth: 4,
-        borderColor: "#3f51b5",
-      },
+        borderColor: '#3f51b5'
+      }
     },
     {
-      name: "rect-003",
+      name: 'rect-003',
       x: 300,
       y: 200,
       w: 200,
       h: 20,
-      type: "rect",
+      type: 'rect',
       angle: 45,
       detail: {
-        bgColor: "#c0c0c0",
+        background: '#c0c0c0',
         borderRadius: 20,
         borderWidth: 4,
-        borderColor: "#3f51b5",
-      },
+        borderColor: '#3f51b5'
+      }
     },
     {
-      name: "rect-004",
+      name: 'rect-004',
       x: 400 - 20,
       y: 300 - 20,
       w: 200,
       h: 100,
-      type: "rect",
+      type: 'rect',
       lock: true,
       detail: {
-        bgColor: "#e0e0e0",
+        background: '#e0e0e0',
         borderRadius: 20,
         borderWidth: 4,
-        borderColor: "#3f51b5",
-      },
-    },
-  ],
+        borderColor: '#3f51b5'
+      }
+    }
+  ]
 };

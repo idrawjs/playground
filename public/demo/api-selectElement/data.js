@@ -11,7 +11,7 @@ export default {
       h: 100,
       type: 'rect',
       detail: {
-        bgColor: '#d5f5f9',
+        background: '#d5f5f9',
         borderRadius: 20,
         borderWidth: 4,
         borderColor: '#3f51b5'
@@ -27,7 +27,7 @@ export default {
       // angle: 30,
       type: 'rect',
       detail: {
-        bgColor: '#d5f5f9',
+        background: '#d5f5f9',
         borderRadius: 60,
         borderWidth: 4,
         borderColor: '#3f51b5'
@@ -43,7 +43,7 @@ export default {
       type: 'rect',
       angle: 45,
       detail: {
-        bgColor: '#c0c0c0',
+        background: '#c0c0c0',
         borderRadius: 20,
         borderWidth: 4,
         borderColor: '#3f51b5'
@@ -59,7 +59,7 @@ export default {
       type: 'rect',
       lock: true,
       detail: {
-        bgColor: '#e0e0e0',
+        background: '#e0e0e0',
         borderRadius: 20,
         borderWidth: 4,
         borderColor: '#3f51b5'
