@@ -17,8 +17,12 @@ var __privateSet = (obj, member, value, setter) => {
   setter ? setter.call(obj, value) : member.set(obj, value);
   return value;
 };
+var __privateMethod = (obj, member, method) => {
+  __accessCheck(obj, member, "access private method");
+  return method;
+};
 
-  var _core;
+  var _core, _opts, _init, init_fn;
   function compose(middleware) {
     return function(context, next) {
       return dispatch(0);
@@ -4418,7 +4422,9 @@ var __privateSet = (obj, member, value, setter) => {
   const keySelectedElementController = Symbol(`${key$1}_selectedElementController`);
   const keyGroupQueue = Symbol(`${key$1}_groupQueue`);
   const keyGroupQueueVertexesList = Symbol(`${key$1}_groupQueueVertexesList`);
-  const resizeControllerBorderWidth = 2;
+  const selectWrapperBorderWidth = 2;
+  const resizeControllerBorderWidth = 4;
+  const areaBorderWidth = 1;
   const wrapperColor = "#1973ba";
   function drawVertexes(ctx, vertexes, opts) {
     const { borderColor: borderColor2, borderWidth: borderWidth2, background: background2, lineDash } = opts;
@@ -4448,8 +4454,8 @@ var __privateSet = (obj, member, value, setter) => {
     if (!controller) {
       return;
     }
-    const { elementWrapper, left, right, top, bottom, topLeft, topRight, bottomLeft, bottomRight } = controller;
-    const wrapperOpts = { borderColor: wrapperColor, borderWidth: 1, background: "transparent", lineDash: [] };
+    const { elementWrapper, topLeft, topRight, bottomLeft, bottomRight } = controller;
+    const wrapperOpts = { borderColor: wrapperColor, borderWidth: selectWrapperBorderWidth, background: "transparent", lineDash: [] };
     const ctrlOpts = Object.assign(Object.assign({}, wrapperOpts), { borderWidth: resizeControllerBorderWidth, background: "#FFFFFF" });
     drawVertexes(ctx, calcViewVertexes(elementWrapper, opts), wrapperOpts);
     drawVertexes(ctx, calcViewVertexes(topLeft.vertexes, opts), ctrlOpts);
@@ -4460,7 +4466,7 @@ var __privateSet = (obj, member, value, setter) => {
   function drawArea(ctx, opts) {
     const { start, end } = opts;
     ctx.setLineDash([]);
-    ctx.lineWidth = 1;
+    ctx.lineWidth = areaBorderWidth;
     ctx.strokeStyle = wrapperColor;
     ctx.fillStyle = "#1976d24f";
     ctx.beginPath();
@@ -4476,7 +4482,7 @@ var __privateSet = (obj, member, value, setter) => {
     const { areaSize } = opts;
     const { x: x2, y: y2, w: w2, h: h2 } = areaSize;
     ctx.setLineDash([]);
-    ctx.lineWidth = 1;
+    ctx.lineWidth = areaBorderWidth;
     ctx.strokeStyle = wrapperColor;
     ctx.fillStyle = "#1976d21c";
     ctx.beginPath();
@@ -4491,7 +4497,7 @@ var __privateSet = (obj, member, value, setter) => {
   function drawGroupQueueVertexesWrappers(ctx, vertexesList, opts) {
     for (let i = 0; i < vertexesList.length; i++) {
       const vertexes = vertexesList[i];
-      const wrapperOpts = { borderColor: wrapperColor, borderWidth: 2, background: "transparent", lineDash: [4, 4] };
+      const wrapperOpts = { borderColor: wrapperColor, borderWidth: selectWrapperBorderWidth, background: "transparent", lineDash: [4, 4] };
       drawVertexes(ctx, calcViewVertexes(vertexes, opts), wrapperOpts);
     }
   }
@@ -6456,16 +6462,15 @@ var __privateSet = (obj, member, value, setter) => {
     container.style.position = "relative";
   };
   class iDraw2 {
-    // private #opts: IDrawOptions;
     constructor(mount, opts) {
+      __privateAdd(this, _init);
       __privateAdd(this, _core, void 0);
-      const core = new Core(mount, opts);
+      __privateAdd(this, _opts, void 0);
+      const { width, height, devicePixelRatio } = opts;
+      const core = new Core(mount, { width, height, devicePixelRatio });
       __privateSet(this, _core, core);
-      core.use(MiddlewareScroller);
-      core.use(MiddlewareSelector);
-      core.use(MiddlewareScaler);
-      core.use(MiddlewareRuler);
-      core.use(MiddlewareTextEditor);
+      __privateSet(this, _opts, opts);
+      __privateMethod(this, _init, init_fn).call(this);
     }
     setData(data) {
       const core = __privateGet(this, _core);
@@ -6562,6 +6567,17 @@ var __privateSet = (obj, member, value, setter) => {
     }
   }
   _core = new WeakMap();
+  _opts = new WeakMap();
+  _init = new WeakSet();
+  init_fn = function() {
+    const { disableRuler, disableScale, disableScroll, disableSelect, disableTextEdit } = __privateGet(this, _opts);
+    const core = __privateGet(this, _core);
+    disableScroll !== true && core.use(MiddlewareScroller);
+    disableSelect !== true && core.use(MiddlewareSelector);
+    disableScale !== true && core.use(MiddlewareScaler);
+    disableRuler !== true && core.use(MiddlewareRuler);
+    disableTextEdit !== true && core.use(MiddlewareTextEditor);
+  };
   exports.Context2D = Context2D;
   exports.Core = Core;
   exports.EventEmitter = EventEmitter;
