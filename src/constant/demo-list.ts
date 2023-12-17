@@ -16,11 +16,11 @@ const demoList: TypeDemoList = [
       {
         name: 'Basic',
         key: 'basic'
+      },
+      {
+        name: 'Options',
+        key: 'basic-options'
       }
-      // {
-      //   name: 'Options',
-      //   key: 'options',
-      // },
       // {
       //   name: 'Config',
       //   key: 'config',
