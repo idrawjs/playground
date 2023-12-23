@@ -32,8 +32,8 @@ const data = {
 
 const app = document.querySelector('#app');
 const idraw = new iDraw(app, {
-  width: 600,
-  height: 400,
+  width: 320,
+  height: 320,
   devicePixelRatio: 2
 });
 idraw.setData(data);

@@ -5,10 +5,10 @@ const data = {
     {
       uuid: 'b0124555-768d-9fb7-eaa3-24ce35ccea4e',
       name: 'circle-001',
-      x: 160,
-      y: 100,
-      w: 200,
-      h: 200,
+      x: 50,
+      y: 50,
+      w: 100,
+      h: 100,
       angle: 0,
       type: 'circle',
       detail: {
@@ -22,8 +22,8 @@ const data = {
 
 const app = document.querySelector('#app');
 const idraw = new iDraw(app, {
-  width: 600,
-  height: 400,
+  width: 320,
+  height: 320,
   devicePixelRatio: 2
 });
 idraw.setData(data);

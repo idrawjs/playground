@@ -5,8 +5,8 @@ const data = {
     {
       uuid: '8b1fd36e-30b8-f6ab-05e6-7f7773e32c99',
       name: 'rect-001',
-      x: 160,
-      y: 120,
+      x: 50,
+      y: 100,
       w: 200,
       h: 100,
       angle: 30,
@@ -23,8 +23,8 @@ const data = {
 
 const app = document.querySelector('#app');
 const idraw = new iDraw(app, {
-  width: 600,
-  height: 400,
+  width: 320,
+  height: 320,
   devicePixelRatio: 2
 });
 idraw.setData(data);
