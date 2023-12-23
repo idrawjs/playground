@@ -3,14 +3,14 @@ import data from './data';
 
 const app = document.querySelector('#app');
 const options = {
-  width: 500,
-  height: 400,
+  width: 320,
+  height: 320,
   devicePixelRatio: 2,
-  disableScroll: true,
-  disableSelect: true,
-  disableScale: true,
-  disableRuler: true,
-  disableTextEdit: true
+  enableScroll: false,
+  enableSelect: false,
+  enableScale: false,
+  enableRuler: false,
+  enableTextEdit: false
 };
 const idraw = new iDraw(app, options);
 idraw.setData(data);

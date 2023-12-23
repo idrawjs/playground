@@ -5,10 +5,10 @@ const data = {
     {
       uuid: createUUID(),
       name: 'rect-001',
-      x: 120,
-      y: 120,
-      w: 300,
-      h: 200,
+      x: 50,
+      y: 50,
+      w: 200,
+      h: 150,
       type: 'group',
       detail: {
         background: '#d5f5f9',
@@ -18,8 +18,8 @@ const data = {
           {
             uuid: createUUID(),
             name: 'rect-001',
-            x: 50,
-            y: 50,
+            x: 20,
+            y: 20,
             w: 100,
             h: 50,
             type: 'rect',
@@ -33,7 +33,7 @@ const data = {
           {
             uuid: createUUID(),
             name: 'circle-001',
-            x: 150,
+            x: 100,
             y: 80,
             w: 100,
             h: 100,
@@ -51,8 +51,8 @@ const data = {
 
 const app = document.querySelector('#app');
 const idraw = new iDraw(app, {
-  width: 600,
-  height: 400,
+  width: 320,
+  height: 320,
   devicePixelRatio: 2
 });
 idraw.setData(data);

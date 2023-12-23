@@ -3,12 +3,12 @@ const data = {
   elements: [
     {
       uuid: '30f03c9b-dd1c-08d9-6398-93f8c2b9a4d0',
-      name: "html-001",
-      x: 200,
-      y: 120,
+      name: 'html-001',
+      x: 60,
+      y: 60,
       w: 150,
       h: 100,
-      type: "html",
+      type: 'html',
       angle: 0,
       detail: {
         html: `
@@ -56,16 +56,16 @@ const data = {
               </button> 
             </div>
           </div>
-        `,
-      },
-    },
-  ],
-}
+        `
+      }
+    }
+  ]
+};
 
 const app = document.querySelector('#app');
 const idraw = new iDraw(app, {
-  width: 600,
-  height: 400, 
-  devicePixelRatio: 2,
+  width: 320,
+  height: 320,
+  devicePixelRatio: 2
 });
-idraw.setData(data) 
+idraw.setData(data);

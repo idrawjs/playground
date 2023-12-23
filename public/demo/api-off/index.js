@@ -3,17 +3,17 @@ import data from './data';
 
 const app = document.querySelector('#app');
 const options = {
-  width: 600,
-  height: 400,
+  width: 320,
+  height: 320,
   contextWidth: 600,
   contextHeight: 400,
-  devicePixelRatio: 4,
-}
+  devicePixelRatio: 4
+};
 const idraw = new iDraw(app, options);
 
 const listener = (e) => {
   console.log('changeData: event = ', e);
-}
+};
 
 idraw.on('changeData', listener);
 idraw.setData(data, {
