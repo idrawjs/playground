@@ -24,7 +24,7 @@ import { store, setActiveIndex } from '../../util/store';
 .tab {
   display: inline-block;
   font-size: 13px;
-  font-family: var(--font-code);
+  /* font-family: var(--font-code); */
   cursor: pointer;
   color: #999;
   box-sizing: border-box;
@@ -35,8 +35,30 @@ import { store, setActiveIndex } from '../../util/store';
   cursor: text;
 }
 .tab span {
+  position: relative;
   display: inline-block;
-  padding: 8px 10px 6px;
+  padding: 8px 6px 6px;
+
+  &::after {
+    content: '';
+    display: block;
+    position: absolute;
+    right: 0;
+    top: 6px;
+    bottom: 4px;
+    width: 1px;
+    background: #ccc;
+  } 
+}
+
+.tab {
+  &:last-child {
+    span {
+        &::after { 
+        display: none;
+      }
+    }
+  }
 }
 
 
