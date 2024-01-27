@@ -106,15 +106,15 @@ const demoList: TypeDemoList = [
       {
         name: 'resize',
         key: 'api-resize'
-      }
-      // {
-      //   name: 'selectElement',
-      //   key: 'api-selectElement',
-      // },
-      // {
-      //   name: 'selectElementByIndex',
-      //   key: 'api-selectElementByIndex',
-      // },
+      },
+      {
+        name: 'centerContent',
+        key: 'api-centerContent',
+      },
+      {
+        name: 'destroy',
+        key: 'api-destroy',
+      },
       // {
       //   name: 'getSelectedElements',
       //   key: 'api-getSelectedElements',

@@ -51,7 +51,7 @@ var __privateMethod = (obj, member, method) => {
   function throttle(fn, timeout) {
     let timer = -1;
     return function(...args) {
-      if (timer > 0) {
+      if (timer >= 0) {
         return;
       }
       timer = setTimeout(() => {
@@ -60,20 +60,34 @@ var __privateMethod = (obj, member, method) => {
       }, timeout);
     };
   }
+  function debounce(fn, timeout) {
+    let timer = -1;
+    return function(...args) {
+      if (timer >= 0) {
+        window.clearTimeout(timer);
+      }
+      timer = setTimeout(() => {
+        fn(...args);
+        timer = -1;
+      }, timeout);
+    };
+  }
   function downloadImageFromCanvas(canvas, opts) {
-    const { filename, type = "image/jpeg" } = opts;
+    const { fileName, type = "image/jpeg" } = opts;
     const stream = canvas.toDataURL(type);
-    const downloadLink = document.createElement("a");
+    let downloadLink = document.createElement("a");
     downloadLink.href = stream;
-    downloadLink.download = filename;
-    const downloadClickEvent = document.createEvent("MouseEvents");
-    downloadClickEvent.initEvent("click", true, false);
-    downloadLink.dispatchEvent(downloadClickEvent);
+    downloadLink.download = fileName;
+    downloadLink.click();
+    downloadLink = null;
   }
   function pickFile(opts) {
-    const { success, error } = opts;
+    const { accept, success, error } = opts;
     let input = document.createElement("input");
     input.type = "file";
+    if (accept) {
+      input.accept = accept;
+    }
     input.addEventListener("change", function() {
       var _a;
       const file = (_a = input.files) === null || _a === void 0 ? void 0 : _a[0];
@@ -125,6 +139,23 @@ var __privateMethod = (obj, member, method) => {
       });
       reader.readAsText(file);
     });
+  }
+  function parseTextToBlobURL(text2) {
+    const bytes = new TextEncoder().encode(text2);
+    const blob = new Blob([bytes], {
+      type: "text/plain;charset=utf-8"
+    });
+    const blobURL = window.URL.createObjectURL(blob);
+    return blobURL;
+  }
+  function downloadFileFromText(text2, opts) {
+    const { fileName } = opts;
+    const blobURL = parseTextToBlobURL(text2);
+    let downloadLink = document.createElement("a");
+    downloadLink.href = blobURL;
+    downloadLink.download = fileName;
+    downloadLink.click();
+    downloadLink = null;
   }
   function toColorHexNum(color2) {
     return parseInt(color2.replace(/^\#/, "0x"));
@@ -410,6 +441,19 @@ var __privateMethod = (obj, member, method) => {
     }
     return _clone(target);
   }
+  function deepCloneElement(element) {
+    const elem = deepClone(element);
+    const _resetUUID = (e) => {
+      e.uuid = createUUID();
+      if (e.type === "group" && e.detail.children) {
+        e.detail.children.forEach((child) => {
+          _resetUUID(child);
+        });
+      }
+    };
+    _resetUUID(elem);
+    return elem;
+  }
   function is$1(target) {
     return Object.prototype.toString.call(target).replace(/[\]|\[]{1,1}/gi, "").split(" ")[1];
   }
@@ -446,7 +490,77 @@ var __privateMethod = (obj, member, method) => {
           const assetUUID = createAssetId(html2);
           if (!assets[assetUUID]) {
             assets[assetUUID] = {
+              type: "html",
+              value: html2
+            };
+          }
+          elem.detail.html = assetUUID;
+        } else if (elem.type === "group" && Array.isArray(elem.detail.children)) {
+          const groupAssets = elem.detail.assets || {};
+          Object.keys(groupAssets).forEach((assetId) => {
+            if (!assets[assetId]) {
+              assets[assetId] = groupAssets[assetId];
+            }
+          });
+          delete elem.detail.assets;
+          _scanElements(elem.detail.children);
+        }
+      });
+    };
+    _scanElements(sortedData.elements);
+    sortedData.assets = assets;
+    return sortedData;
+  }
+  function filterCompactData(data, opts) {
+    const assets = data.assets || {};
+    const sortedData = deepClone(data);
+    const loadItemMap = (opts === null || opts === void 0 ? void 0 : opts.loadItemMap) || {};
+    const _scanElements = (elems) => {
+      elems.forEach((elem) => {
+        var _a, _b, _c;
+        if (elem.type === "image" && elem.detail.src) {
+          const src = elem.detail.src;
+          if (isAssetId(src) && !assets[src] && loadItemMap[src] && typeof ((_a = loadItemMap[src]) === null || _a === void 0 ? void 0 : _a.source) === "string") {
+            assets[src] = {
+              type: "image",
+              value: loadItemMap[src].source
+            };
+          } else {
+            const assetUUID = createAssetId(src);
+            if (!assets[assetUUID]) {
+              assets[assetUUID] = {
+                type: "image",
+                value: src
+              };
+            }
+            elem.detail.src = assetUUID;
+          }
+        } else if (elem.type === "svg") {
+          const svg2 = elem.detail.svg;
+          const assetUUID = createAssetId(svg2);
+          if (isAssetId(svg2) && !assets[svg2] && loadItemMap[svg2] && typeof ((_b = loadItemMap[svg2]) === null || _b === void 0 ? void 0 : _b.source) === "string") {
+            assets[svg2] = {
               type: "svg",
+              value: loadItemMap[svg2].source
+            };
+          } else if (!assets[assetUUID]) {
+            assets[assetUUID] = {
+              type: "svg",
+              value: svg2
+            };
+          }
+          elem.detail.svg = assetUUID;
+        } else if (elem.type === "html") {
+          const html2 = elem.detail.html;
+          const assetUUID = createAssetId(html2);
+          if (isAssetId(html2) && !assets[html2] && loadItemMap[html2] && typeof ((_c = loadItemMap[html2]) === null || _c === void 0 ? void 0 : _c.source) === "string") {
+            assets[html2] = {
+              type: "html",
+              value: loadItemMap[html2].source
+            };
+          } else if (!assets[assetUUID]) {
+            assets[assetUUID] = {
+              type: "html",
               value: html2
             };
           }
@@ -819,7 +933,7 @@ var __privateMethod = (obj, member, method) => {
     svgDesc,
     htmlDesc
   };
-  var __classPrivateFieldSet$3 = function(receiver, state, value, kind, f) {
+  var __classPrivateFieldSet$a = function(receiver, state, value, kind, f) {
     if (kind === "m")
       throw new TypeError("Private method is not writable");
     if (kind === "a" && !f)
@@ -828,7 +942,7 @@ var __privateMethod = (obj, member, method) => {
       throw new TypeError("Cannot write private member to an object whose class did not declare it");
     return kind === "a" ? f.call(receiver, value) : f ? f.value = value : state.set(receiver, value), value;
   };
-  var __classPrivateFieldGet$3 = function(receiver, state, kind, f) {
+  var __classPrivateFieldGet$a = function(receiver, state, kind, f) {
     if (kind === "a" && !f)
       throw new TypeError("Private accessor was defined without a getter");
     if (typeof state === "function" ? receiver !== state || !f : !state.has(receiver))
@@ -840,17 +954,20 @@ var __privateMethod = (obj, member, method) => {
     constructor(ctx, opts) {
       _Context2D_ctx.set(this, void 0);
       _Context2D_opts.set(this, void 0);
-      __classPrivateFieldSet$3(this, _Context2D_ctx, ctx, "f");
-      __classPrivateFieldSet$3(this, _Context2D_opts, Object.assign({ devicePixelRatio: 1, offscreenCanvas: null }, opts), "f");
+      __classPrivateFieldSet$a(this, _Context2D_ctx, ctx, "f");
+      __classPrivateFieldSet$a(this, _Context2D_opts, Object.assign({ devicePixelRatio: 1, offscreenCanvas: null }, opts), "f");
     }
     $undoPixelRatio(num) {
-      return num / __classPrivateFieldGet$3(this, _Context2D_opts, "f").devicePixelRatio;
+      return num / __classPrivateFieldGet$a(this, _Context2D_opts, "f").devicePixelRatio;
     }
     $doPixelRatio(num) {
-      return __classPrivateFieldGet$3(this, _Context2D_opts, "f").devicePixelRatio * num;
+      return __classPrivateFieldGet$a(this, _Context2D_opts, "f").devicePixelRatio * num;
     }
     $getContext() {
-      return __classPrivateFieldGet$3(this, _Context2D_ctx, "f");
+      return __classPrivateFieldGet$a(this, _Context2D_ctx, "f");
+    }
+    $setContext(ctx) {
+      __classPrivateFieldSet$a(this, _Context2D_ctx, ctx, "f");
     }
     $setFont(opts) {
       const strList = [];
@@ -859,17 +976,17 @@ var __privateMethod = (obj, member, method) => {
       }
       strList.push(`${this.$doPixelRatio(opts.fontSize || 12)}px`);
       strList.push(`${opts.fontFamily || "sans-serif"}`);
-      __classPrivateFieldGet$3(this, _Context2D_ctx, "f").font = `${strList.join(" ")}`;
+      __classPrivateFieldGet$a(this, _Context2D_ctx, "f").font = `${strList.join(" ")}`;
     }
     $getOffscreenCanvas() {
-      return __classPrivateFieldGet$3(this, _Context2D_opts, "f").offscreenCanvas;
+      return __classPrivateFieldGet$a(this, _Context2D_opts, "f").offscreenCanvas;
     }
     $resize(opts) {
       const { width, height, devicePixelRatio, resetStyle } = opts;
-      const { canvas } = __classPrivateFieldGet$3(this, _Context2D_ctx, "f");
+      const { canvas } = __classPrivateFieldGet$a(this, _Context2D_ctx, "f");
       canvas.width = width * devicePixelRatio;
       canvas.height = height * devicePixelRatio;
-      __classPrivateFieldSet$3(this, _Context2D_opts, Object.assign(Object.assign({}, __classPrivateFieldGet$3(this, _Context2D_opts, "f")), {
+      __classPrivateFieldSet$a(this, _Context2D_opts, Object.assign(Object.assign({}, __classPrivateFieldGet$a(this, _Context2D_opts, "f")), {
         devicePixelRatio
       }), "f");
       if (resetStyle === true) {
@@ -878,8 +995,8 @@ var __privateMethod = (obj, member, method) => {
       }
     }
     $getSize() {
-      const { devicePixelRatio } = __classPrivateFieldGet$3(this, _Context2D_opts, "f");
-      const { width, height } = __classPrivateFieldGet$3(this, _Context2D_ctx, "f").canvas;
+      const { devicePixelRatio } = __classPrivateFieldGet$a(this, _Context2D_opts, "f");
+      const { width, height } = __classPrivateFieldGet$a(this, _Context2D_ctx, "f").canvas;
       return {
         width: width / devicePixelRatio,
         height: height / devicePixelRatio,
@@ -887,125 +1004,125 @@ var __privateMethod = (obj, member, method) => {
       };
     }
     get canvas() {
-      return __classPrivateFieldGet$3(this, _Context2D_ctx, "f").canvas;
+      return __classPrivateFieldGet$a(this, _Context2D_ctx, "f").canvas;
     }
     get fillStyle() {
-      return __classPrivateFieldGet$3(this, _Context2D_ctx, "f").fillStyle;
+      return __classPrivateFieldGet$a(this, _Context2D_ctx, "f").fillStyle;
     }
     set fillStyle(value) {
-      __classPrivateFieldGet$3(this, _Context2D_ctx, "f").fillStyle = value;
+      __classPrivateFieldGet$a(this, _Context2D_ctx, "f").fillStyle = value;
     }
     get strokeStyle() {
-      return __classPrivateFieldGet$3(this, _Context2D_ctx, "f").strokeStyle;
+      return __classPrivateFieldGet$a(this, _Context2D_ctx, "f").strokeStyle;
     }
     set strokeStyle(color2) {
-      __classPrivateFieldGet$3(this, _Context2D_ctx, "f").strokeStyle = color2;
+      __classPrivateFieldGet$a(this, _Context2D_ctx, "f").strokeStyle = color2;
     }
     get lineWidth() {
-      return this.$undoPixelRatio(__classPrivateFieldGet$3(this, _Context2D_ctx, "f").lineWidth);
+      return this.$undoPixelRatio(__classPrivateFieldGet$a(this, _Context2D_ctx, "f").lineWidth);
     }
     set lineWidth(w2) {
-      __classPrivateFieldGet$3(this, _Context2D_ctx, "f").lineWidth = this.$doPixelRatio(w2);
+      __classPrivateFieldGet$a(this, _Context2D_ctx, "f").lineWidth = this.$doPixelRatio(w2);
     }
     get textAlign() {
-      return __classPrivateFieldGet$3(this, _Context2D_ctx, "f").textAlign;
+      return __classPrivateFieldGet$a(this, _Context2D_ctx, "f").textAlign;
     }
     set textAlign(align) {
-      __classPrivateFieldGet$3(this, _Context2D_ctx, "f").textAlign = align;
+      __classPrivateFieldGet$a(this, _Context2D_ctx, "f").textAlign = align;
     }
     get textBaseline() {
-      return __classPrivateFieldGet$3(this, _Context2D_ctx, "f").textBaseline;
+      return __classPrivateFieldGet$a(this, _Context2D_ctx, "f").textBaseline;
     }
     set textBaseline(baseline) {
-      __classPrivateFieldGet$3(this, _Context2D_ctx, "f").textBaseline = baseline;
+      __classPrivateFieldGet$a(this, _Context2D_ctx, "f").textBaseline = baseline;
     }
     get globalAlpha() {
-      return __classPrivateFieldGet$3(this, _Context2D_ctx, "f").globalAlpha;
+      return __classPrivateFieldGet$a(this, _Context2D_ctx, "f").globalAlpha;
     }
     set globalAlpha(alpha) {
-      __classPrivateFieldGet$3(this, _Context2D_ctx, "f").globalAlpha = alpha;
+      __classPrivateFieldGet$a(this, _Context2D_ctx, "f").globalAlpha = alpha;
     }
     get shadowColor() {
-      return __classPrivateFieldGet$3(this, _Context2D_ctx, "f").shadowColor;
+      return __classPrivateFieldGet$a(this, _Context2D_ctx, "f").shadowColor;
     }
     set shadowColor(color2) {
-      __classPrivateFieldGet$3(this, _Context2D_ctx, "f").shadowColor = color2;
+      __classPrivateFieldGet$a(this, _Context2D_ctx, "f").shadowColor = color2;
     }
     get shadowOffsetX() {
-      return this.$undoPixelRatio(__classPrivateFieldGet$3(this, _Context2D_ctx, "f").shadowOffsetX);
+      return this.$undoPixelRatio(__classPrivateFieldGet$a(this, _Context2D_ctx, "f").shadowOffsetX);
     }
     set shadowOffsetX(offsetX) {
-      __classPrivateFieldGet$3(this, _Context2D_ctx, "f").shadowOffsetX = this.$doPixelRatio(offsetX);
+      __classPrivateFieldGet$a(this, _Context2D_ctx, "f").shadowOffsetX = this.$doPixelRatio(offsetX);
     }
     get shadowOffsetY() {
-      return this.$undoPixelRatio(__classPrivateFieldGet$3(this, _Context2D_ctx, "f").shadowOffsetY);
+      return this.$undoPixelRatio(__classPrivateFieldGet$a(this, _Context2D_ctx, "f").shadowOffsetY);
     }
     set shadowOffsetY(offsetY) {
-      __classPrivateFieldGet$3(this, _Context2D_ctx, "f").shadowOffsetY = this.$doPixelRatio(offsetY);
+      __classPrivateFieldGet$a(this, _Context2D_ctx, "f").shadowOffsetY = this.$doPixelRatio(offsetY);
     }
     get shadowBlur() {
-      return this.$undoPixelRatio(__classPrivateFieldGet$3(this, _Context2D_ctx, "f").shadowBlur);
+      return this.$undoPixelRatio(__classPrivateFieldGet$a(this, _Context2D_ctx, "f").shadowBlur);
     }
     set shadowBlur(blur) {
-      __classPrivateFieldGet$3(this, _Context2D_ctx, "f").shadowBlur = this.$doPixelRatio(blur);
+      __classPrivateFieldGet$a(this, _Context2D_ctx, "f").shadowBlur = this.$doPixelRatio(blur);
     }
     get lineCap() {
-      return __classPrivateFieldGet$3(this, _Context2D_ctx, "f").lineCap;
+      return __classPrivateFieldGet$a(this, _Context2D_ctx, "f").lineCap;
     }
     set lineCap(lineCap) {
-      __classPrivateFieldGet$3(this, _Context2D_ctx, "f").lineCap = lineCap;
+      __classPrivateFieldGet$a(this, _Context2D_ctx, "f").lineCap = lineCap;
     }
     get globalCompositeOperation() {
-      return __classPrivateFieldGet$3(this, _Context2D_ctx, "f").globalCompositeOperation;
+      return __classPrivateFieldGet$a(this, _Context2D_ctx, "f").globalCompositeOperation;
     }
     set globalCompositeOperation(operations) {
-      __classPrivateFieldGet$3(this, _Context2D_ctx, "f").globalCompositeOperation = operations;
+      __classPrivateFieldGet$a(this, _Context2D_ctx, "f").globalCompositeOperation = operations;
     }
     fill(...args) {
-      return __classPrivateFieldGet$3(this, _Context2D_ctx, "f").fill(...args);
+      return __classPrivateFieldGet$a(this, _Context2D_ctx, "f").fill(...args);
     }
     arc(x2, y2, radius, startAngle, endAngle, anticlockwise) {
-      return __classPrivateFieldGet$3(this, _Context2D_ctx, "f").arc(this.$doPixelRatio(x2), this.$doPixelRatio(y2), this.$doPixelRatio(radius), startAngle, endAngle, anticlockwise);
+      return __classPrivateFieldGet$a(this, _Context2D_ctx, "f").arc(this.$doPixelRatio(x2), this.$doPixelRatio(y2), this.$doPixelRatio(radius), startAngle, endAngle, anticlockwise);
     }
     rect(x2, y2, w2, h2) {
-      return __classPrivateFieldGet$3(this, _Context2D_ctx, "f").rect(this.$doPixelRatio(x2), this.$doPixelRatio(y2), this.$doPixelRatio(w2), this.$doPixelRatio(h2));
+      return __classPrivateFieldGet$a(this, _Context2D_ctx, "f").rect(this.$doPixelRatio(x2), this.$doPixelRatio(y2), this.$doPixelRatio(w2), this.$doPixelRatio(h2));
     }
     fillRect(x2, y2, w2, h2) {
-      return __classPrivateFieldGet$3(this, _Context2D_ctx, "f").fillRect(this.$doPixelRatio(x2), this.$doPixelRatio(y2), this.$doPixelRatio(w2), this.$doPixelRatio(h2));
+      return __classPrivateFieldGet$a(this, _Context2D_ctx, "f").fillRect(this.$doPixelRatio(x2), this.$doPixelRatio(y2), this.$doPixelRatio(w2), this.$doPixelRatio(h2));
     }
     clearRect(x2, y2, w2, h2) {
-      return __classPrivateFieldGet$3(this, _Context2D_ctx, "f").clearRect(this.$doPixelRatio(x2), this.$doPixelRatio(y2), this.$doPixelRatio(w2), this.$doPixelRatio(h2));
+      return __classPrivateFieldGet$a(this, _Context2D_ctx, "f").clearRect(this.$doPixelRatio(x2), this.$doPixelRatio(y2), this.$doPixelRatio(w2), this.$doPixelRatio(h2));
     }
     beginPath() {
-      return __classPrivateFieldGet$3(this, _Context2D_ctx, "f").beginPath();
+      return __classPrivateFieldGet$a(this, _Context2D_ctx, "f").beginPath();
     }
     closePath() {
-      return __classPrivateFieldGet$3(this, _Context2D_ctx, "f").closePath();
+      return __classPrivateFieldGet$a(this, _Context2D_ctx, "f").closePath();
     }
     lineTo(x2, y2) {
-      return __classPrivateFieldGet$3(this, _Context2D_ctx, "f").lineTo(this.$doPixelRatio(x2), this.$doPixelRatio(y2));
+      return __classPrivateFieldGet$a(this, _Context2D_ctx, "f").lineTo(this.$doPixelRatio(x2), this.$doPixelRatio(y2));
     }
     moveTo(x2, y2) {
-      return __classPrivateFieldGet$3(this, _Context2D_ctx, "f").moveTo(this.$doPixelRatio(x2), this.$doPixelRatio(y2));
+      return __classPrivateFieldGet$a(this, _Context2D_ctx, "f").moveTo(this.$doPixelRatio(x2), this.$doPixelRatio(y2));
     }
     arcTo(x1, y1, x2, y2, radius) {
-      return __classPrivateFieldGet$3(this, _Context2D_ctx, "f").arcTo(this.$doPixelRatio(x1), this.$doPixelRatio(y1), this.$doPixelRatio(x2), this.$doPixelRatio(y2), this.$doPixelRatio(radius));
+      return __classPrivateFieldGet$a(this, _Context2D_ctx, "f").arcTo(this.$doPixelRatio(x1), this.$doPixelRatio(y1), this.$doPixelRatio(x2), this.$doPixelRatio(y2), this.$doPixelRatio(radius));
     }
     getLineDash() {
-      return __classPrivateFieldGet$3(this, _Context2D_ctx, "f").getLineDash();
+      return __classPrivateFieldGet$a(this, _Context2D_ctx, "f").getLineDash();
     }
     setLineDash(nums) {
       const dash = nums.map((n) => this.$doPixelRatio(n));
-      return __classPrivateFieldGet$3(this, _Context2D_ctx, "f").setLineDash(dash);
+      return __classPrivateFieldGet$a(this, _Context2D_ctx, "f").setLineDash(dash);
     }
     stroke(path) {
-      return path ? __classPrivateFieldGet$3(this, _Context2D_ctx, "f").stroke(path) : __classPrivateFieldGet$3(this, _Context2D_ctx, "f").stroke();
+      return path ? __classPrivateFieldGet$a(this, _Context2D_ctx, "f").stroke(path) : __classPrivateFieldGet$a(this, _Context2D_ctx, "f").stroke();
     }
     translate(x2, y2) {
-      return __classPrivateFieldGet$3(this, _Context2D_ctx, "f").translate(this.$doPixelRatio(x2), this.$doPixelRatio(y2));
+      return __classPrivateFieldGet$a(this, _Context2D_ctx, "f").translate(this.$doPixelRatio(x2), this.$doPixelRatio(y2));
     }
     rotate(angle2) {
-      return __classPrivateFieldGet$3(this, _Context2D_ctx, "f").rotate(angle2);
+      return __classPrivateFieldGet$a(this, _Context2D_ctx, "f").rotate(angle2);
     }
     drawImage(...args) {
       const image = args[0];
@@ -1018,64 +1135,64 @@ var __privateMethod = (obj, member, method) => {
       const dw = args[args.length - 2];
       const dh = args[args.length - 1];
       if (args.length === 9) {
-        return __classPrivateFieldGet$3(this, _Context2D_ctx, "f").drawImage(image, this.$doPixelRatio(sx), this.$doPixelRatio(sy), this.$doPixelRatio(sw), this.$doPixelRatio(sh), this.$doPixelRatio(dx), this.$doPixelRatio(dy), this.$doPixelRatio(dw), this.$doPixelRatio(dh));
+        return __classPrivateFieldGet$a(this, _Context2D_ctx, "f").drawImage(image, this.$doPixelRatio(sx), this.$doPixelRatio(sy), this.$doPixelRatio(sw), this.$doPixelRatio(sh), this.$doPixelRatio(dx), this.$doPixelRatio(dy), this.$doPixelRatio(dw), this.$doPixelRatio(dh));
       } else {
-        return __classPrivateFieldGet$3(this, _Context2D_ctx, "f").drawImage(image, this.$doPixelRatio(dx), this.$doPixelRatio(dy), this.$doPixelRatio(dw), this.$doPixelRatio(dh));
+        return __classPrivateFieldGet$a(this, _Context2D_ctx, "f").drawImage(image, this.$doPixelRatio(dx), this.$doPixelRatio(dy), this.$doPixelRatio(dw), this.$doPixelRatio(dh));
       }
     }
     createPattern(image, repetition) {
-      return __classPrivateFieldGet$3(this, _Context2D_ctx, "f").createPattern(image, repetition);
+      return __classPrivateFieldGet$a(this, _Context2D_ctx, "f").createPattern(image, repetition);
     }
     measureText(text2) {
-      const textMetrics = __classPrivateFieldGet$3(this, _Context2D_ctx, "f").measureText(text2);
+      const textMetrics = __classPrivateFieldGet$a(this, _Context2D_ctx, "f").measureText(text2);
       return textMetrics;
     }
     fillText(text2, x2, y2, maxWidth) {
       if (maxWidth !== void 0) {
-        return __classPrivateFieldGet$3(this, _Context2D_ctx, "f").fillText(text2, this.$doPixelRatio(x2), this.$doPixelRatio(y2), this.$doPixelRatio(maxWidth));
+        return __classPrivateFieldGet$a(this, _Context2D_ctx, "f").fillText(text2, this.$doPixelRatio(x2), this.$doPixelRatio(y2), this.$doPixelRatio(maxWidth));
       } else {
-        return __classPrivateFieldGet$3(this, _Context2D_ctx, "f").fillText(text2, this.$doPixelRatio(x2), this.$doPixelRatio(y2));
+        return __classPrivateFieldGet$a(this, _Context2D_ctx, "f").fillText(text2, this.$doPixelRatio(x2), this.$doPixelRatio(y2));
       }
     }
     strokeText(text2, x2, y2, maxWidth) {
       if (maxWidth !== void 0) {
-        return __classPrivateFieldGet$3(this, _Context2D_ctx, "f").strokeText(text2, this.$doPixelRatio(x2), this.$doPixelRatio(y2), this.$doPixelRatio(maxWidth));
+        return __classPrivateFieldGet$a(this, _Context2D_ctx, "f").strokeText(text2, this.$doPixelRatio(x2), this.$doPixelRatio(y2), this.$doPixelRatio(maxWidth));
       } else {
-        return __classPrivateFieldGet$3(this, _Context2D_ctx, "f").strokeText(text2, this.$doPixelRatio(x2), this.$doPixelRatio(y2));
+        return __classPrivateFieldGet$a(this, _Context2D_ctx, "f").strokeText(text2, this.$doPixelRatio(x2), this.$doPixelRatio(y2));
       }
     }
     save() {
-      __classPrivateFieldGet$3(this, _Context2D_ctx, "f").save();
+      __classPrivateFieldGet$a(this, _Context2D_ctx, "f").save();
     }
     restore() {
-      __classPrivateFieldGet$3(this, _Context2D_ctx, "f").restore();
+      __classPrivateFieldGet$a(this, _Context2D_ctx, "f").restore();
     }
     scale(ratioX, ratioY) {
-      __classPrivateFieldGet$3(this, _Context2D_ctx, "f").scale(ratioX, ratioY);
+      __classPrivateFieldGet$a(this, _Context2D_ctx, "f").scale(ratioX, ratioY);
     }
     circle(x2, y2, radiusX, radiusY, rotation, startAngle, endAngle, counterclockwise) {
-      __classPrivateFieldGet$3(this, _Context2D_ctx, "f").ellipse(this.$doPixelRatio(x2), this.$doPixelRatio(y2), this.$doPixelRatio(radiusX), this.$doPixelRatio(radiusY), rotation, startAngle, endAngle, counterclockwise);
+      __classPrivateFieldGet$a(this, _Context2D_ctx, "f").ellipse(this.$doPixelRatio(x2), this.$doPixelRatio(y2), this.$doPixelRatio(radiusX), this.$doPixelRatio(radiusY), rotation, startAngle, endAngle, counterclockwise);
     }
     isPointInPath(x2, y2) {
-      return __classPrivateFieldGet$3(this, _Context2D_ctx, "f").isPointInPath(this.$doPixelRatio(x2), this.$doPixelRatio(y2));
+      return __classPrivateFieldGet$a(this, _Context2D_ctx, "f").isPointInPath(this.$doPixelRatio(x2), this.$doPixelRatio(y2));
     }
     clip(...args) {
-      return __classPrivateFieldGet$3(this, _Context2D_ctx, "f").clip(...args);
+      return __classPrivateFieldGet$a(this, _Context2D_ctx, "f").clip(...args);
     }
     setTransform(a, b, c, d, e, f) {
-      return __classPrivateFieldGet$3(this, _Context2D_ctx, "f").setTransform(a, b, c, d, e, f);
+      return __classPrivateFieldGet$a(this, _Context2D_ctx, "f").setTransform(a, b, c, d, e, f);
     }
     getTransform() {
-      return __classPrivateFieldGet$3(this, _Context2D_ctx, "f").getTransform();
+      return __classPrivateFieldGet$a(this, _Context2D_ctx, "f").getTransform();
     }
     createLinearGradient(x0, y0, x1, y1) {
-      return __classPrivateFieldGet$3(this, _Context2D_ctx, "f").createLinearGradient(this.$doPixelRatio(x0), this.$doPixelRatio(y0), this.$doPixelRatio(x1), this.$doPixelRatio(y1));
+      return __classPrivateFieldGet$a(this, _Context2D_ctx, "f").createLinearGradient(this.$doPixelRatio(x0), this.$doPixelRatio(y0), this.$doPixelRatio(x1), this.$doPixelRatio(y1));
     }
     createRadialGradient(x0, y0, r0, x1, y1, r1) {
-      return __classPrivateFieldGet$3(this, _Context2D_ctx, "f").createRadialGradient(this.$doPixelRatio(x0), this.$doPixelRatio(y0), this.$doPixelRatio(r0), this.$doPixelRatio(x1), this.$doPixelRatio(y1), this.$doPixelRatio(r1));
+      return __classPrivateFieldGet$a(this, _Context2D_ctx, "f").createRadialGradient(this.$doPixelRatio(x0), this.$doPixelRatio(y0), this.$doPixelRatio(r0), this.$doPixelRatio(x1), this.$doPixelRatio(y1), this.$doPixelRatio(r1));
     }
     createConicGradient(startAngle, x2, y2) {
-      return __classPrivateFieldGet$3(this, _Context2D_ctx, "f").createConicGradient(startAngle, this.$doPixelRatio(x2), this.$doPixelRatio(y2));
+      return __classPrivateFieldGet$a(this, _Context2D_ctx, "f").createConicGradient(startAngle, this.$doPixelRatio(x2), this.$doPixelRatio(y2));
     }
   }
   _Context2D_ctx = /* @__PURE__ */ new WeakMap(), _Context2D_opts = /* @__PURE__ */ new WeakMap();
@@ -1103,14 +1220,38 @@ var __privateMethod = (obj, member, method) => {
     return context2d;
   }
   function createBoardContent(canvas, opts) {
-    const { width, height, devicePixelRatio, offscreen } = opts;
+    const { width, height, devicePixelRatio, offscreen, createCustomContext2D } = opts;
     const ctxOpts = {
       width,
       height,
       devicePixelRatio
     };
+    const ctx = canvas.getContext("2d");
+    if (createCustomContext2D) {
+      const viewContext = createCustomContext2D(ctxOpts);
+      const helperContext = createCustomContext2D(ctxOpts);
+      const underContext = createCustomContext2D(ctxOpts);
+      const boardContext = createContext2D(Object.assign({ ctx }, ctxOpts));
+      const drawView = () => {
+        const { width: w2, height: h2 } = viewContext.$getSize();
+        boardContext.clearRect(0, 0, w2, h2);
+        boardContext.drawImage(underContext.canvas, 0, 0, w2, h2);
+        boardContext.drawImage(viewContext.canvas, 0, 0, w2, h2);
+        boardContext.drawImage(helperContext.canvas, 0, 0, w2, h2);
+        underContext.clearRect(0, 0, w2, h2);
+        viewContext.clearRect(0, 0, w2, h2);
+        helperContext.clearRect(0, 0, w2, h2);
+      };
+      const content = {
+        underContext,
+        viewContext,
+        helperContext,
+        boardContext,
+        drawView
+      };
+      return content;
+    }
     if (offscreen === true) {
-      const ctx = canvas.getContext("2d");
       const viewContext = createOffscreenContext2D(ctxOpts);
       const helperContext = createOffscreenContext2D(ctxOpts);
       const underContext = createOffscreenContext2D(ctxOpts);
@@ -1134,7 +1275,6 @@ var __privateMethod = (obj, member, method) => {
       };
       return content;
     } else {
-      const ctx = canvas.getContext("2d");
       const viewContext = createContext2D(ctxOpts);
       const helperContext = createContext2D(ctxOpts);
       const underContext = createContext2D(ctxOpts);
@@ -1158,22 +1298,40 @@ var __privateMethod = (obj, member, method) => {
       return content;
     }
   }
+  var __classPrivateFieldSet$9 = function(receiver, state, value, kind, f) {
+    if (kind === "m")
+      throw new TypeError("Private method is not writable");
+    if (kind === "a" && !f)
+      throw new TypeError("Private accessor was defined without a setter");
+    if (typeof state === "function" ? receiver !== state || !f : !state.has(receiver))
+      throw new TypeError("Cannot write private member to an object whose class did not declare it");
+    return kind === "a" ? f.call(receiver, value) : f ? f.value = value : state.set(receiver, value), value;
+  };
+  var __classPrivateFieldGet$9 = function(receiver, state, kind, f) {
+    if (kind === "a" && !f)
+      throw new TypeError("Private accessor was defined without a getter");
+    if (typeof state === "function" ? receiver !== state || !f : !state.has(receiver))
+      throw new TypeError("Cannot read private member from an object whose class did not declare it");
+    return kind === "m" ? f : kind === "a" ? f.call(receiver) : f ? f.value : state.get(receiver);
+  };
+  var _EventEmitter_listeners;
   class EventEmitter {
     constructor() {
-      this._listeners = /* @__PURE__ */ new Map();
+      _EventEmitter_listeners.set(this, void 0);
+      __classPrivateFieldSet$9(this, _EventEmitter_listeners, /* @__PURE__ */ new Map(), "f");
     }
     on(eventKey, callback) {
-      if (this._listeners.has(eventKey)) {
-        const callbacks = this._listeners.get(eventKey) || [];
+      if (__classPrivateFieldGet$9(this, _EventEmitter_listeners, "f").has(eventKey)) {
+        const callbacks = __classPrivateFieldGet$9(this, _EventEmitter_listeners, "f").get(eventKey) || [];
         callbacks === null || callbacks === void 0 ? void 0 : callbacks.push(callback);
-        this._listeners.set(eventKey, callbacks);
+        __classPrivateFieldGet$9(this, _EventEmitter_listeners, "f").set(eventKey, callbacks);
       } else {
-        this._listeners.set(eventKey, [callback]);
+        __classPrivateFieldGet$9(this, _EventEmitter_listeners, "f").set(eventKey, [callback]);
       }
     }
     off(eventKey, callback) {
-      if (this._listeners.has(eventKey)) {
-        const callbacks = this._listeners.get(eventKey);
+      if (__classPrivateFieldGet$9(this, _EventEmitter_listeners, "f").has(eventKey)) {
+        const callbacks = __classPrivateFieldGet$9(this, _EventEmitter_listeners, "f").get(eventKey);
         if (Array.isArray(callbacks)) {
           for (let i = 0; i < (callbacks === null || callbacks === void 0 ? void 0 : callbacks.length); i++) {
             if (callbacks[i] === callback) {
@@ -1182,11 +1340,11 @@ var __privateMethod = (obj, member, method) => {
             }
           }
         }
-        this._listeners.set(eventKey, callbacks || []);
+        __classPrivateFieldGet$9(this, _EventEmitter_listeners, "f").set(eventKey, callbacks || []);
       }
     }
     trigger(eventKey, e) {
-      const callbacks = this._listeners.get(eventKey);
+      const callbacks = __classPrivateFieldGet$9(this, _EventEmitter_listeners, "f").get(eventKey);
       if (Array.isArray(callbacks)) {
         callbacks.forEach((cb) => {
           cb(e);
@@ -1197,15 +1355,19 @@ var __privateMethod = (obj, member, method) => {
       }
     }
     has(name) {
-      if (this._listeners.has(name)) {
-        const list = this._listeners.get(name);
+      if (__classPrivateFieldGet$9(this, _EventEmitter_listeners, "f").has(name)) {
+        const list = __classPrivateFieldGet$9(this, _EventEmitter_listeners, "f").get(name);
         if (Array.isArray(list) && list.length > 0) {
           return true;
         }
       }
       return false;
     }
+    destroy() {
+      __classPrivateFieldGet$9(this, _EventEmitter_listeners, "f").clear();
+    }
   }
+  _EventEmitter_listeners = /* @__PURE__ */ new WeakMap();
   function calcDistance(start, end) {
     const distance = (start.x - end.x) * (start.x - end.x) + (start.y - end.y) * (start.y - end.y);
     return distance === 0 ? distance : Math.sqrt(distance);
@@ -1236,27 +1398,50 @@ var __privateMethod = (obj, member, method) => {
       y: p1.y + (p2.y - p1.y) / 2
     };
   }
+  var __classPrivateFieldSet$8 = function(receiver, state, value, kind, f) {
+    if (kind === "m")
+      throw new TypeError("Private method is not writable");
+    if (kind === "a" && !f)
+      throw new TypeError("Private accessor was defined without a setter");
+    if (typeof state === "function" ? receiver !== state || !f : !state.has(receiver))
+      throw new TypeError("Cannot write private member to an object whose class did not declare it");
+    return kind === "a" ? f.call(receiver, value) : f ? f.value = value : state.set(receiver, value), value;
+  };
+  var __classPrivateFieldGet$8 = function(receiver, state, kind, f) {
+    if (kind === "a" && !f)
+      throw new TypeError("Private accessor was defined without a getter");
+    if (typeof state === "function" ? receiver !== state || !f : !state.has(receiver))
+      throw new TypeError("Cannot read private member from an object whose class did not declare it");
+    return kind === "m" ? f : kind === "a" ? f.call(receiver) : f ? f.value : state.get(receiver);
+  };
+  var _Store_instances, _Store_temp, _Store_backUpDefaultStorage, _Store_createTempStorage;
   class Store {
     constructor(opts) {
-      this._backUpDefaultStorage = deepClone(opts.defaultStorage);
-      this._temp = this._createTempStorage();
+      _Store_instances.add(this);
+      _Store_temp.set(this, void 0);
+      _Store_backUpDefaultStorage.set(this, void 0);
+      __classPrivateFieldSet$8(this, _Store_backUpDefaultStorage, deepClone(opts.defaultStorage), "f");
+      __classPrivateFieldSet$8(this, _Store_temp, __classPrivateFieldGet$8(this, _Store_instances, "m", _Store_createTempStorage).call(this), "f");
     }
     set(name, value) {
-      this._temp[name] = value;
+      __classPrivateFieldGet$8(this, _Store_temp, "f")[name] = value;
     }
     get(name) {
-      return this._temp[name];
+      return __classPrivateFieldGet$8(this, _Store_temp, "f")[name];
     }
     getSnapshot() {
-      return deepClone(this._temp);
+      return deepClone(__classPrivateFieldGet$8(this, _Store_temp, "f"));
     }
     clear() {
-      this._temp = this._createTempStorage();
+      __classPrivateFieldSet$8(this, _Store_temp, __classPrivateFieldGet$8(this, _Store_instances, "m", _Store_createTempStorage).call(this), "f");
     }
-    _createTempStorage() {
-      return deepClone(this._backUpDefaultStorage);
+    destroy() {
+      __classPrivateFieldSet$8(this, _Store_temp, null, "f");
     }
   }
+  _Store_temp = /* @__PURE__ */ new WeakMap(), _Store_backUpDefaultStorage = /* @__PURE__ */ new WeakMap(), _Store_instances = /* @__PURE__ */ new WeakSet(), _Store_createTempStorage = function _Store_createTempStorage2() {
+    return deepClone(__classPrivateFieldGet$8(this, _Store_backUpDefaultStorage, "f"));
+  };
   function getViewScaleInfoFromSnapshot(snapshot) {
     const { activeStore } = snapshot;
     const sacelInfo = {
@@ -2147,6 +2332,10 @@ var __privateMethod = (obj, member, method) => {
     const topRightCenter = vertexes[1];
     const bottomRightCenter = vertexes[2];
     const bottomLeftCenter = vertexes[3];
+    const topMiddleSize = createControllerElementSizeFromCenter(topCenter, { size: ctrlSize, angle: totalAngle });
+    const rightMiddleSize = createControllerElementSizeFromCenter(rightCenter, { size: ctrlSize, angle: totalAngle });
+    const bottomMiddleSize = createControllerElementSizeFromCenter(bottomCenter, { size: ctrlSize, angle: totalAngle });
+    const leftMiddleSize = createControllerElementSizeFromCenter(leftCenter, { size: ctrlSize, angle: totalAngle });
     const topLeftSize = createControllerElementSizeFromCenter(topLeftCenter, { size: ctrlSize, angle: totalAngle });
     const topRightSize = createControllerElementSizeFromCenter(topRightCenter, { size: ctrlSize, angle: totalAngle });
     const bottomLeftSize = createControllerElementSizeFromCenter(bottomLeftCenter, { size: ctrlSize, angle: totalAngle });
@@ -2159,6 +2348,10 @@ var __privateMethod = (obj, member, method) => {
     const rightVertexes = [topRightVertexes[3], topRightVertexes[2], bottomRightVertexes[1], bottomRightVertexes[0]];
     const bottomVertexes = [bottomLeftVertexes[1], bottomRightVertexes[0], bottomRightVertexes[3], bottomLeftVertexes[2]];
     const leftVertexes = [topLeftVertexes[3], topLeftVertexes[2], bottomLeftVertexes[1], bottomLeftVertexes[0]];
+    const topMiddleVertexes = calcElementVertexes(topMiddleSize);
+    const rightMiddleVertexes = calcElementVertexes(rightMiddleSize);
+    const bottomMiddleVertexes = calcElementVertexes(bottomMiddleSize);
+    const leftMiddleVertexes = calcElementVertexes(leftMiddleSize);
     const sizeController = {
       elementWrapper: vertexes,
       left: {
@@ -2200,6 +2393,26 @@ var __privateMethod = (obj, member, method) => {
         type: "bottom-right",
         vertexes: bottomRightVertexes,
         center: bottomRightCenter
+      },
+      leftMiddle: {
+        type: "left-middle",
+        vertexes: leftMiddleVertexes,
+        center: leftCenter
+      },
+      rightMiddle: {
+        type: "right-middle",
+        vertexes: rightMiddleVertexes,
+        center: rightCenter
+      },
+      topMiddle: {
+        type: "top-middle",
+        vertexes: topMiddleVertexes,
+        center: topCenter
+      },
+      bottomMiddle: {
+        type: "bottom-middle",
+        vertexes: bottomMiddleVertexes,
+        center: bottomCenter
       }
     };
     return sizeController;
@@ -2437,6 +2650,7 @@ var __privateMethod = (obj, member, method) => {
     }
     return radian;
   }
+  const defaultText = "Text Element";
   function getDefaultElementDetailConfig() {
     const config = {
       boxSizing: "border-box",
@@ -2466,24 +2680,22 @@ var __privateMethod = (obj, member, method) => {
     };
     return detail;
   }
-  function getDefaultElementCircleDetail(opts) {
+  function getDefaultElementCircleDetail() {
     const detail = {
       background: "#D9D9D9",
       radius: 0
     };
     return detail;
   }
-  function getDefaultElementTextDetail(opts) {
-    var _a;
+  function getDefaultElementTextDetail(elementSize) {
     const detailConfig2 = getDefaultElementDetailConfig();
-    const scale = ((_a = opts === null || opts === void 0 ? void 0 : opts.viewScaleInfo) === null || _a === void 0 ? void 0 : _a.scale) || 1;
     const detail = {
-      text: "Text Element",
+      text: defaultText,
       color: detailConfig2.color,
       fontFamily: detailConfig2.fontFamily,
       fontWeight: detailConfig2.fontWeight,
-      lineHeight: detailConfig2.fontSize * scale,
-      fontSize: detailConfig2.fontSize * scale,
+      lineHeight: elementSize.w / defaultText.length,
+      fontSize: elementSize.w / defaultText.length,
       textAlign: "center",
       verticalAlign: "middle"
     };
@@ -2501,7 +2713,7 @@ var __privateMethod = (obj, member, method) => {
     };
     return detail;
   }
-  function getDefaultElementGroupDetail(opts) {
+  function getDefaultElementGroupDetail() {
     const detail = {
       children: [],
       background: "#D9D9D9",
@@ -2515,7 +2727,7 @@ var __privateMethod = (obj, member, method) => {
     const { scale } = viewScaleInfo;
     let { borderRadius: borderRadius2 } = viewElem.detail;
     const { boxSizing = defaultElemConfig$1.boxSizing, borderWidth: borderWidth2 } = viewElem.detail;
-    if (typeof borderWidth2 !== "number") {
+    if (Array.isArray(borderWidth2)) {
       borderRadius2 = 0;
     }
     let { x: x2, y: y2, w: w2, h: h2 } = viewElem;
@@ -2559,9 +2771,105 @@ var __privateMethod = (obj, member, method) => {
       radiusList
     };
   }
+  const doNum = (n) => {
+    return formatNumber(n, { decimalPlaces: 4 });
+  };
+  function resizeElementBaseDetail(elem, opts) {
+    const { detail } = elem;
+    const { xRatio, yRatio, maxRatio } = opts;
+    const middleRatio = (xRatio + yRatio) / 2;
+    const { borderWidth: borderWidth2, borderRadius: borderRadius2, borderDash, shadowOffsetX, shadowOffsetY, shadowBlur } = detail;
+    if (typeof borderWidth2 === "number") {
+      detail.borderWidth = doNum(borderWidth2 * middleRatio);
+    } else if (Array.isArray(detail.borderWidth)) {
+      const bw = borderWidth2;
+      detail.borderWidth = [doNum(bw[0] * yRatio), doNum(bw[1] * xRatio), doNum(bw[2] * yRatio), doNum(bw[3] * xRatio)];
+    }
+    if (typeof borderRadius2 === "number") {
+      detail.borderRadius = doNum(borderRadius2 * middleRatio);
+    } else if (Array.isArray(detail.borderRadius)) {
+      const br = borderRadius2;
+      detail.borderRadius = [br[0] * xRatio, br[1] * xRatio, br[2] * yRatio, br[3] * yRatio];
+    }
+    if (Array.isArray(borderDash)) {
+      borderDash.forEach((dash, i) => {
+        detail.borderDash[i] = doNum(dash * maxRatio);
+      });
+    }
+    if (typeof shadowOffsetX === "number") {
+      detail.shadowOffsetX = doNum(shadowOffsetX * maxRatio);
+    }
+    if (typeof shadowOffsetY === "number") {
+      detail.shadowOffsetX = doNum(shadowOffsetY * maxRatio);
+    }
+    if (typeof shadowBlur === "number") {
+      detail.shadowOffsetX = doNum(shadowBlur * maxRatio);
+    }
+  }
+  function resizeElementBase(elem, opts) {
+    const { xRatio, yRatio } = opts;
+    const { x: x2, y: y2, w: w2, h: h2 } = elem;
+    elem.x = doNum(x2 * xRatio);
+    elem.y = doNum(y2 * yRatio);
+    elem.w = doNum(w2 * xRatio);
+    elem.h = doNum(h2 * yRatio);
+    resizeElementBaseDetail(elem, opts);
+  }
+  function resizeTextElementDetail(elem, opts) {
+    const { minRatio, maxRatio } = opts;
+    const { fontSize: fontSize2, lineHeight: lineHeight2 } = elem.detail;
+    const ratio = (minRatio + maxRatio) / 2;
+    if (fontSize2 && fontSize2 > 0) {
+      elem.detail.fontSize = doNum(fontSize2 * ratio);
+    }
+    if (lineHeight2 && lineHeight2 > 0) {
+      elem.detail.lineHeight = doNum(lineHeight2 * ratio);
+    }
+  }
+  function resizeElement$1(elem, opts) {
+    const { type } = elem;
+    resizeElementBase(elem, opts);
+    if (type === "circle")
+      ;
+    else if (type === "text") {
+      resizeTextElementDetail(elem, opts);
+    } else if (type === "image")
+      ;
+    else if (type === "svg")
+      ;
+    else if (type === "html")
+      ;
+    else if (type === "path")
+      ;
+    else if (type === "group" && Array.isArray(elem.detail.children)) {
+      elem.detail.children.forEach((child) => {
+        resizeElement$1(child, opts);
+      });
+    }
+  }
+  function deepResizeGroupElement(elem, size) {
+    const resizeW = size.w && size.w > 0 ? size.w : elem.w;
+    const resizeH = size.h && size.h > 0 ? size.h : elem.h;
+    const xRatio = resizeW / elem.w;
+    const yRatio = resizeH / elem.h;
+    if (xRatio === yRatio && xRatio === 1) {
+      return elem;
+    }
+    const minRatio = Math.min(xRatio, yRatio);
+    const maxRatio = Math.max(xRatio, yRatio);
+    elem.w = resizeW;
+    elem.h = resizeH;
+    const opts = { xRatio, yRatio, minRatio, maxRatio };
+    if (elem.type === "group" && Array.isArray(elem.detail.children)) {
+      elem.detail.children.forEach((child) => {
+        resizeElement$1(child, opts);
+      });
+    }
+    resizeElementBaseDetail(elem, opts);
+    return elem;
+  }
   const defaultViewWidth = 200;
   const defaultViewHeight = 200;
-  const defaultDetail$1 = getDefaultElementDetailConfig();
   function createElementSize(type, opts) {
     let x2 = 0;
     let y2 = 0;
@@ -2571,26 +2879,23 @@ var __privateMethod = (obj, member, method) => {
       const { viewScaleInfo, viewSizeInfo } = opts;
       const { scale, offsetLeft, offsetTop } = viewScaleInfo;
       const { width, height } = viewSizeInfo;
-      if (type === "text") {
-        const textDetail = getDefaultElementTextDetail();
-        w2 = defaultDetail$1.fontSize * scale * textDetail.text.length;
-        h2 = defaultDetail$1.fontSize * scale * 2;
+      const limitViewWidth = width / 4;
+      const limitViewHeight = height / 4;
+      if (defaultViewWidth >= limitViewWidth) {
+        w2 = limitViewWidth / scale;
       } else {
-        const limitViewWidth = width / 4;
-        const limitViewHeight = height / 4;
-        if (defaultViewWidth >= limitViewWidth) {
-          w2 = limitViewWidth / scale;
-        } else {
-          w2 = defaultViewWidth / scale;
-        }
-        if (defaultViewHeight >= limitViewHeight) {
-          h2 = limitViewHeight / scale;
-        } else {
-          h2 = defaultViewHeight / scale;
-        }
-        if (["circle", "svg", "image"].includes(type)) {
-          w2 = h2 = Math.max(w2, h2);
-        }
+        w2 = defaultViewWidth / scale;
+      }
+      if (defaultViewHeight >= limitViewHeight) {
+        h2 = limitViewHeight / scale;
+      } else {
+        h2 = defaultViewHeight / scale;
+      }
+      if (["circle", "svg", "image"].includes(type)) {
+        w2 = h2 = Math.max(w2, h2);
+      } else if (type === "text") {
+        const fontSize2 = w2 / defaultText.length;
+        h2 = fontSize2 * 2;
       }
       x2 = (0 - offsetLeft + width / 2 - w2 * scale / 2) / scale;
       y2 = (0 - offsetTop + height / 2 - h2 * scale / 2) / scale;
@@ -2604,16 +2909,14 @@ var __privateMethod = (obj, member, method) => {
     return elemSize;
   }
   function createElement(type, baseElem, opts) {
-    const elemSize = createElementSize(type, opts);
+    const elementSize = createElementSize(type, opts);
     let detail = {};
     if (type === "rect") {
       detail = getDefaultElementRectDetail();
     } else if (type === "circle") {
-      detail = getDefaultElementCircleDetail({
-        radius: elemSize.w
-      });
+      detail = getDefaultElementCircleDetail();
     } else if (type === "text") {
-      detail = getDefaultElementTextDetail(opts);
+      detail = getDefaultElementTextDetail(elementSize);
     } else if (type === "svg") {
       detail = getDefaultElementSVGDetail();
     } else if (type === "image") {
@@ -2621,7 +2924,7 @@ var __privateMethod = (obj, member, method) => {
     } else if (type === "group") {
       detail = getDefaultElementGroupDetail();
     }
-    const elem = Object.assign(Object.assign(Object.assign({}, elemSize), baseElem), { uuid: createUUID(), type, detail: Object.assign(Object.assign({}, detail), baseElem.detail || {}) });
+    const elem = Object.assign(Object.assign(Object.assign({}, elementSize), baseElem), { uuid: createUUID(), type, detail: Object.assign(Object.assign({}, detail), baseElem.detail || {}) });
     return elem;
   }
   function insertElementToListByPosition(element, position, list) {
@@ -2749,19 +3052,78 @@ var __privateMethod = (obj, member, method) => {
     return originElem;
   }
   function updateElementInList(uuid, updateContent, elements) {
-    var _a;
+    var _a, _b;
     let targetElement = null;
     for (let i = 0; i < elements.length; i++) {
       const elem = elements[i];
       if (elem.uuid === uuid) {
+        if (elem.type === "group" && ((_a = elem.operations) === null || _a === void 0 ? void 0 : _a.deepResize) === true) {
+          if (updateContent.w && updateContent.w > 0 || updateContent.h && updateContent.h > 0) {
+            deepResizeGroupElement(elem, {
+              w: updateContent.w,
+              h: updateContent.h
+            });
+          }
+        }
         mergeElement(elem, updateContent);
         targetElement = elem;
         break;
       } else if (elem.type === "group") {
-        targetElement = updateElementInList(uuid, updateContent, ((_a = elem === null || elem === void 0 ? void 0 : elem.detail) === null || _a === void 0 ? void 0 : _a.children) || []);
+        targetElement = updateElementInList(uuid, updateContent, ((_b = elem === null || elem === void 0 ? void 0 : elem.detail) === null || _b === void 0 ? void 0 : _b.children) || []);
       }
     }
     return targetElement;
+  }
+  function calcViewCenterContent(data, opts) {
+    let offsetX = 0;
+    let offsetY = 0;
+    let scale = 0;
+    let contentX = 0;
+    let contentY = 0;
+    let contentW = 0;
+    let contentH = 0;
+    const { width, height } = opts.viewSizeInfo;
+    data.elements.forEach((elem) => {
+      const elemSize = {
+        x: elem.x,
+        y: elem.y,
+        w: elem.w,
+        h: elem.h,
+        angle: elem.angle
+      };
+      if (elemSize.angle && (elemSize.angle > 0 || elemSize.angle < 0)) {
+        const ves = rotateElementVertexes(elemSize);
+        if (ves.length === 4) {
+          const xList = [ves[0].x, ves[1].x, ves[2].x, ves[3].x];
+          const yList = [ves[0].y, ves[1].y, ves[2].y, ves[3].y];
+          elemSize.x = Math.min(...xList);
+          elemSize.y = Math.min(...yList);
+          elemSize.w = Math.abs(Math.max(...xList) - Math.min(...xList));
+          elemSize.h = Math.abs(Math.max(...yList) - Math.min(...yList));
+        }
+      }
+      const areaStartX = Math.min(elemSize.x, contentX);
+      const areaStartY = Math.min(elemSize.y, contentY);
+      const areaEndX = Math.max(elemSize.x + elemSize.w, contentX + contentW);
+      const areaEndY = Math.max(elemSize.y + elemSize.h, contentY + contentH);
+      contentX = areaStartX;
+      contentY = areaStartY;
+      contentW = Math.abs(areaEndX - areaStartX);
+      contentH = Math.abs(areaEndY - areaStartY);
+    });
+    if (contentW > 0 && contentH > 0) {
+      const scaleW = formatNumber(width / contentW, { decimalPlaces: 4 });
+      const scaleH = formatNumber(height / contentH, { decimalPlaces: 4 });
+      scale = Math.min(scaleW, scaleH, 1);
+      offsetX = (contentW * scale - width) / 2 / scale;
+      offsetY = (contentH * scale - height) / 2 / scale;
+    }
+    const result = {
+      offsetX: formatNumber(offsetX, { decimalPlaces: 0 }),
+      offsetY: formatNumber(offsetY, { decimalPlaces: 0 }),
+      scale
+    };
+    return result;
   }
   function createColorStyle(ctx, color2, opts) {
     if (typeof color2 === "string") {
@@ -2807,30 +3169,35 @@ var __privateMethod = (obj, member, method) => {
     return "#000000";
   }
   const defaultElemConfig = getDefaultElementDetailConfig();
+  function getOpacity(elem) {
+    var _a, _b, _c, _d;
+    let opacity = 1;
+    if (((_a = elem === null || elem === void 0 ? void 0 : elem.detail) === null || _a === void 0 ? void 0 : _a.opacity) !== void 0 && ((_b = elem === null || elem === void 0 ? void 0 : elem.detail) === null || _b === void 0 ? void 0 : _b.opacity) >= 0 && ((_c = elem === null || elem === void 0 ? void 0 : elem.detail) === null || _c === void 0 ? void 0 : _c.opacity) <= 1) {
+      opacity = (_d = elem === null || elem === void 0 ? void 0 : elem.detail) === null || _d === void 0 ? void 0 : _d.opacity;
+    }
+    return opacity;
+  }
   function drawBox(ctx, viewElem, opts) {
     const { pattern, renderContent, originElem, calcElemSize, viewScaleInfo, viewSizeInfo } = opts || {};
+    const { parentOpacity } = opts;
+    const opacity = getOpacity(originElem) * parentOpacity;
     drawClipPath(ctx, viewElem, {
       originElem,
       calcElemSize,
       viewScaleInfo,
       viewSizeInfo,
       renderContent: () => {
-        var _a, _b;
-        if (((_a = viewElem === null || viewElem === void 0 ? void 0 : viewElem.detail) === null || _a === void 0 ? void 0 : _a.opacity) !== void 0 && ((_b = viewElem === null || viewElem === void 0 ? void 0 : viewElem.detail) === null || _b === void 0 ? void 0 : _b.opacity) >= 0) {
-          ctx.globalAlpha = viewElem.detail.opacity;
-        } else {
-          ctx.globalAlpha = 1;
-        }
+        ctx.globalAlpha = opacity;
         drawBoxBackground(ctx, viewElem, { pattern, viewScaleInfo, viewSizeInfo });
         renderContent === null || renderContent === void 0 ? void 0 : renderContent();
         drawBoxBorder(ctx, viewElem, { viewScaleInfo, viewSizeInfo });
-        ctx.globalAlpha = 1;
+        ctx.globalAlpha = parentOpacity;
       }
     });
   }
   function drawClipPath(ctx, viewElem, opts) {
-    const { renderContent, originElem, calcElemSize, viewScaleInfo, viewSizeInfo } = opts;
-    const totalScale = viewScaleInfo.scale * viewSizeInfo.devicePixelRatio;
+    const { renderContent, originElem, calcElemSize, viewSizeInfo } = opts;
+    const totalScale = viewSizeInfo.devicePixelRatio;
     const { clipPath } = (originElem === null || originElem === void 0 ? void 0 : originElem.detail) || {};
     if (clipPath && calcElemSize && clipPath.commands) {
       const { x: x2, y: y2, w: w2, h: h2 } = calcElemSize;
@@ -2861,8 +3228,6 @@ var __privateMethod = (obj, member, method) => {
     var _a, _b;
     const { pattern, viewScaleInfo, viewSizeInfo } = opts;
     const transform = [];
-    viewElem.detail;
-    viewElem.detail;
     if (viewElem.detail.background || pattern) {
       const { x: x2, y: y2, w: w2, h: h2, radiusList } = calcViewBoxSize(viewElem, {
         viewScaleInfo,
@@ -2915,17 +3280,11 @@ var __privateMethod = (obj, member, method) => {
     }
   }
   function drawBoxBorder(ctx, viewElem, opts) {
-    var _a, _b;
     if (viewElem.detail.borderWidth === 0) {
       return;
     }
     if (!isColorStr(viewElem.detail.borderColor)) {
       return;
-    }
-    if (((_a = viewElem === null || viewElem === void 0 ? void 0 : viewElem.detail) === null || _a === void 0 ? void 0 : _a.opacity) !== void 0 && ((_b = viewElem === null || viewElem === void 0 ? void 0 : viewElem.detail) === null || _b === void 0 ? void 0 : _b.opacity) >= 0) {
-      ctx.globalAlpha = viewElem.detail.opacity;
-    } else {
-      ctx.globalAlpha = 1;
     }
     const { viewScaleInfo } = opts;
     const { scale } = viewScaleInfo;
@@ -3050,7 +3409,6 @@ var __privateMethod = (obj, member, method) => {
       ctx.arcTo(x2, y2, x2 + w2, y2, radiusList[0]);
       ctx.closePath();
       ctx.stroke();
-      ctx.globalAlpha = 1;
     }
     ctx.setLineDash([]);
   }
@@ -3072,8 +3430,14 @@ var __privateMethod = (obj, member, method) => {
   }
   function drawCircle(ctx, elem, opts) {
     const { detail, angle: angle2 } = elem;
-    const { background: background2 = "#000000", borderColor: borderColor2 = "#000000", borderWidth: borderWidth2 = 0 } = detail;
-    const { calculator, viewScaleInfo, viewSizeInfo } = opts;
+    const { background: background2 = "#000000", borderColor: borderColor2 = "#000000", boxSizing, borderWidth: borderWidth2 = 0 } = detail;
+    let bw = 0;
+    if (typeof borderWidth2 === "number" && borderWidth2 > 0) {
+      bw = borderWidth2;
+    } else if (Array.isArray(borderWidth2) && typeof borderWidth2[0] === "number" && borderWidth2[0] > 0) {
+      bw = borderWidth2[0];
+    }
+    const { calculator, viewScaleInfo, viewSizeInfo, parentOpacity } = opts;
     const { x: x2, y: y2, w: w2, h: h2 } = (calculator === null || calculator === void 0 ? void 0 : calculator.elementSize({ x: elem.x, y: elem.y, w: elem.w, h: elem.h }, viewScaleInfo, viewSizeInfo)) || elem;
     const viewElem = Object.assign(Object.assign({}, elem), { x: x2, y: y2, w: w2, h: h2, angle: angle2 });
     rotateElement(ctx, { x: x2, y: y2, w: w2, h: h2, angle: angle2 }, () => {
@@ -3081,43 +3445,53 @@ var __privateMethod = (obj, member, method) => {
         viewScaleInfo,
         viewSizeInfo,
         renderContent: () => {
-          var _a, _b;
-          const a = w2 / 2;
-          const b = h2 / 2;
+          let a = w2 / 2;
+          let b = h2 / 2;
           const centerX = x2 + a;
           const centerY = y2 + b;
-          if (((_a = elem === null || elem === void 0 ? void 0 : elem.detail) === null || _a === void 0 ? void 0 : _a.opacity) !== void 0 && ((_b = elem === null || elem === void 0 ? void 0 : elem.detail) === null || _b === void 0 ? void 0 : _b.opacity) >= 0) {
-            ctx.globalAlpha = elem.detail.opacity;
-          } else {
-            ctx.globalAlpha = 1;
+          if (bw > 0) {
+            if (boxSizing === "border-box") {
+              a = a - bw;
+              b = b - bw;
+            } else if (boxSizing === "center-line") {
+              a = a - bw / 2;
+              b = b - bw / 2;
+            } else {
+              a = a - bw;
+              b = b - bw;
+            }
           }
-          if (typeof borderWidth2 === "number" && borderWidth2 > 0) {
-            const ba = borderWidth2 / 2 + a;
-            const bb = borderWidth2 / 2 + b;
+          if (a >= 0 && b >= 0) {
+            const opacity = getOpacity(viewElem) * parentOpacity;
+            ctx.globalAlpha = opacity;
+            if (typeof borderWidth2 === "number" && borderWidth2 > 0) {
+              const ba = borderWidth2 / 2 + a;
+              const bb = borderWidth2 / 2 + b;
+              ctx.beginPath();
+              ctx.strokeStyle = borderColor2;
+              ctx.lineWidth = borderWidth2;
+              ctx.circle(centerX, centerY, ba, bb, 0, 0, 2 * Math.PI);
+              ctx.closePath();
+              ctx.stroke();
+            }
             ctx.beginPath();
-            ctx.strokeStyle = borderColor2;
-            ctx.lineWidth = borderWidth2;
-            ctx.circle(centerX, centerY, ba, bb, 0, 0, 2 * Math.PI);
+            const fillStyle = createColorStyle(ctx, background2, {
+              viewElementSize: { x: x2, y: y2, w: w2, h: h2 },
+              viewScaleInfo,
+              opacity: ctx.globalAlpha
+            });
+            ctx.fillStyle = fillStyle;
+            ctx.circle(centerX, centerY, a, b, 0, 0, 2 * Math.PI);
             ctx.closePath();
-            ctx.stroke();
+            ctx.fill();
+            ctx.globalAlpha = parentOpacity;
           }
-          ctx.beginPath();
-          const fillStyle = createColorStyle(ctx, background2, {
-            viewElementSize: { x: x2, y: y2, w: w2, h: h2 },
-            viewScaleInfo,
-            opacity: ctx.globalAlpha
-          });
-          ctx.fillStyle = fillStyle;
-          ctx.circle(centerX, centerY, a, b, 0, 0, 2 * Math.PI);
-          ctx.closePath();
-          ctx.fill();
-          ctx.globalAlpha = 1;
         }
       });
     });
   }
   function drawRect(ctx, elem, opts) {
-    const { calculator, viewScaleInfo, viewSizeInfo } = opts;
+    const { calculator, viewScaleInfo, viewSizeInfo, parentOpacity } = opts;
     const { x: x2, y: y2, w: w2, h: h2, angle: angle2 } = (calculator === null || calculator === void 0 ? void 0 : calculator.elementSize(elem, viewScaleInfo, viewSizeInfo)) || elem;
     const viewElem = Object.assign(Object.assign({}, elem), { x: x2, y: y2, w: w2, h: h2, angle: angle2 });
     rotateElement(ctx, { x: x2, y: y2, w: w2, h: h2, angle: angle2 }, () => {
@@ -3130,6 +3504,7 @@ var __privateMethod = (obj, member, method) => {
             calcElemSize: { x: x2, y: y2, w: w2, h: h2, angle: angle2 },
             viewScaleInfo,
             viewSizeInfo,
+            parentOpacity,
             renderContent: () => {
             }
           });
@@ -3139,7 +3514,7 @@ var __privateMethod = (obj, member, method) => {
   }
   function drawImage(ctx, elem, opts) {
     const content = opts.loader.getContent(elem);
-    const { calculator, viewScaleInfo, viewSizeInfo } = opts;
+    const { calculator, viewScaleInfo, viewSizeInfo, parentOpacity } = opts;
     const { x: x2, y: y2, w: w2, h: h2, angle: angle2 } = (calculator === null || calculator === void 0 ? void 0 : calculator.elementSize(elem, viewScaleInfo, viewSizeInfo)) || elem;
     const viewElem = Object.assign(Object.assign({}, elem), { x: x2, y: y2, w: w2, h: h2, angle: angle2 });
     rotateElement(ctx, { x: x2, y: y2, w: w2, h: h2, angle: angle2 }, () => {
@@ -3152,13 +3527,13 @@ var __privateMethod = (obj, member, method) => {
             calcElemSize: { x: x2, y: y2, w: w2, h: h2, angle: angle2 },
             viewScaleInfo,
             viewSizeInfo,
+            parentOpacity,
             renderContent: () => {
               if (!content) {
                 opts.loader.load(elem, opts.elementAssets || {});
               }
               if (elem.type === "image" && content) {
-                const { opacity } = elem.detail;
-                ctx.globalAlpha = opacity ? opacity : 1;
+                ctx.globalAlpha = getOpacity(elem) * parentOpacity;
                 const { x: x3, y: y3, w: w3, h: h3, radiusList } = calcViewBoxSize(viewElem, {
                   viewScaleInfo,
                   viewSizeInfo
@@ -3175,7 +3550,7 @@ var __privateMethod = (obj, member, method) => {
                 ctx.fill();
                 ctx.clip();
                 ctx.drawImage(content, x3, y3, w3, h3);
-                ctx.globalAlpha = 1;
+                ctx.globalAlpha = parentOpacity;
                 ctx.restore();
               }
             }
@@ -3186,39 +3561,37 @@ var __privateMethod = (obj, member, method) => {
   }
   function drawSVG(ctx, elem, opts) {
     const content = opts.loader.getContent(elem);
-    const { calculator, viewScaleInfo, viewSizeInfo } = opts;
+    const { calculator, viewScaleInfo, viewSizeInfo, parentOpacity } = opts;
     const { x: x2, y: y2, w: w2, h: h2, angle: angle2 } = (calculator === null || calculator === void 0 ? void 0 : calculator.elementSize(elem, viewScaleInfo, viewSizeInfo)) || elem;
     rotateElement(ctx, { x: x2, y: y2, w: w2, h: h2, angle: angle2 }, () => {
       if (!content) {
         opts.loader.load(elem, opts.elementAssets || {});
       }
       if (elem.type === "svg" && content) {
-        const { opacity } = elem.detail;
-        ctx.globalAlpha = opacity ? opacity : 1;
+        ctx.globalAlpha = getOpacity(elem) * parentOpacity;
         ctx.drawImage(content, x2, y2, w2, h2);
-        ctx.globalAlpha = 1;
+        ctx.globalAlpha = parentOpacity;
       }
     });
   }
   function drawHTML(ctx, elem, opts) {
     const content = opts.loader.getContent(elem);
-    const { calculator, viewScaleInfo, viewSizeInfo } = opts;
+    const { calculator, viewScaleInfo, viewSizeInfo, parentOpacity } = opts;
     const { x: x2, y: y2, w: w2, h: h2, angle: angle2 } = (calculator === null || calculator === void 0 ? void 0 : calculator.elementSize(elem, viewScaleInfo, viewSizeInfo)) || elem;
     rotateElement(ctx, { x: x2, y: y2, w: w2, h: h2, angle: angle2 }, () => {
       if (!content) {
         opts.loader.load(elem, opts.elementAssets || {});
       }
       if (elem.type === "html" && content) {
-        const { opacity } = elem.detail;
-        ctx.globalAlpha = opacity ? opacity : 1;
+        ctx.globalAlpha = getOpacity(elem) * parentOpacity;
         ctx.drawImage(content, x2, y2, w2, h2);
-        ctx.globalAlpha = 1;
+        ctx.globalAlpha = parentOpacity;
       }
     });
   }
   const detailConfig = getDefaultElementDetailConfig();
   function drawText(ctx, elem, opts) {
-    const { calculator, viewScaleInfo, viewSizeInfo } = opts;
+    const { calculator, viewScaleInfo, viewSizeInfo, parentOpacity } = opts;
     const { x: x2, y: y2, w: w2, h: h2, angle: angle2 } = (calculator === null || calculator === void 0 ? void 0 : calculator.elementSize(elem, viewScaleInfo, viewSizeInfo)) || elem;
     const viewElem = Object.assign(Object.assign({}, elem), { x: x2, y: y2, w: w2, h: h2, angle: angle2 });
     rotateElement(ctx, { x: x2, y: y2, w: w2, h: h2, angle: angle2 }, () => {
@@ -3227,6 +3600,7 @@ var __privateMethod = (obj, member, method) => {
         calcElemSize: { x: x2, y: y2, w: w2, h: h2, angle: angle2 },
         viewScaleInfo,
         viewSizeInfo,
+        parentOpacity,
         renderContent: () => {
           const detail = Object.assign(Object.assign({}, detailConfig), elem.detail);
           const fontSize2 = (detail.fontSize || detailConfig.fontSize) * viewScaleInfo.scale;
@@ -3321,7 +3695,7 @@ var __privateMethod = (obj, member, method) => {
   function drawPath(ctx, elem, opts) {
     const { detail } = elem;
     const { originX, originY, originW, originH } = detail;
-    const { calculator, viewScaleInfo, viewSizeInfo } = opts;
+    const { calculator, viewScaleInfo, viewSizeInfo, parentOpacity } = opts;
     const { x: x2, y: y2, w: w2, h: h2, angle: angle2 } = (calculator === null || calculator === void 0 ? void 0 : calculator.elementSize(elem, viewScaleInfo, viewSizeInfo)) || elem;
     const scaleW = w2 / originW;
     const scaleH = h2 / originH;
@@ -3337,6 +3711,7 @@ var __privateMethod = (obj, member, method) => {
         calcElemSize: { x: x2, y: y2, w: w2, h: h2, angle: angle2 },
         viewScaleInfo,
         viewSizeInfo,
+        parentOpacity,
         renderContent: () => {
           drawBoxShadow(ctx, viewElem, {
             viewScaleInfo,
@@ -3368,6 +3743,11 @@ var __privateMethod = (obj, member, method) => {
   function drawElement(ctx, elem, opts) {
     var _a;
     if (((_a = elem === null || elem === void 0 ? void 0 : elem.operations) === null || _a === void 0 ? void 0 : _a.invisible) === true) {
+      return;
+    }
+    const { w: w2, h: h2 } = elem;
+    const { scale } = opts.viewScaleInfo;
+    if (scale < 1 && (w2 * scale < 1 || h2 * scale < 1) || opts.parentOpacity === 0) {
       return;
     }
     try {
@@ -3414,10 +3794,11 @@ var __privateMethod = (obj, member, method) => {
     }
   }
   function drawGroup(ctx, elem, opts) {
-    const { calculator, viewScaleInfo, viewSizeInfo } = opts;
+    const { calculator, viewScaleInfo, viewSizeInfo, parentOpacity } = opts;
     const { x: x2, y: y2, w: w2, h: h2, angle: angle2 } = (calculator === null || calculator === void 0 ? void 0 : calculator.elementSize({ x: elem.x, y: elem.y, w: elem.w, h: elem.h, angle: elem.angle }, viewScaleInfo, viewSizeInfo)) || elem;
     const viewElem = Object.assign(Object.assign({}, elem), { x: x2, y: y2, w: w2, h: h2, angle: angle2 });
     rotateElement(ctx, { x: x2, y: y2, w: w2, h: h2, angle: angle2 }, () => {
+      ctx.globalAlpha = getOpacity(elem) * parentOpacity;
       drawBoxShadow(ctx, viewElem, {
         viewScaleInfo,
         viewSizeInfo,
@@ -3427,6 +3808,7 @@ var __privateMethod = (obj, member, method) => {
             calcElemSize: { x: x2, y: y2, w: w2, h: h2, angle: angle2 },
             viewScaleInfo,
             viewSizeInfo,
+            parentOpacity,
             renderContent: () => {
               const { x: x3, y: y3, w: w3, h: h3, radiusList } = calcViewBoxSize(viewElem, {
                 viewScaleInfo,
@@ -3467,26 +3849,27 @@ var __privateMethod = (obj, member, method) => {
                     }
                   }
                   try {
-                    drawElement(ctx, child, Object.assign({}, opts));
+                    drawElement(ctx, child, Object.assign(Object.assign({}, opts), { parentOpacity: parentOpacity * getOpacity(elem) }));
                   } catch (err) {
                     console.error(err);
                   }
                 }
               }
               if (elem.detail.overflow === "hidden") {
-                ctx.globalAlpha = 1;
                 ctx.restore();
               }
             }
           });
         }
       });
+      ctx.globalAlpha = parentOpacity;
     });
   }
   const defaultDetail = getDefaultElementDetailConfig();
   function drawElementList(ctx, data, opts) {
     var _a;
     const { elements = [] } = data;
+    const { parentOpacity } = opts;
     for (let i = 0; i < elements.length; i++) {
       const element = elements[i];
       const elem = Object.assign(Object.assign({}, element), {
@@ -3498,11 +3881,35 @@ var __privateMethod = (obj, member, method) => {
         }
       }
       try {
-        drawElement(ctx, elem, opts);
+        drawElement(ctx, elem, Object.assign(Object.assign({}, opts), {
+          parentOpacity
+        }));
       } catch (err) {
         console.error(err);
       }
     }
+  }
+  function drawUnderlay(ctx, underlay, opts) {
+    const { calculator, viewScaleInfo, viewSizeInfo, parentOpacity } = opts;
+    const elem = Object.assign({ uuid: "underlay" }, underlay);
+    const { x: x2, y: y2, w: w2, h: h2 } = (calculator === null || calculator === void 0 ? void 0 : calculator.elementSize(elem, viewScaleInfo, viewSizeInfo)) || elem;
+    const angle2 = 0;
+    const viewElem = Object.assign(Object.assign({}, elem), { x: x2, y: y2, w: w2, h: h2, angle: angle2 });
+    drawBoxShadow(ctx, viewElem, {
+      viewScaleInfo,
+      viewSizeInfo,
+      renderContent: () => {
+        drawBox(ctx, viewElem, {
+          originElem: elem,
+          calcElemSize: { x: x2, y: y2, w: w2, h: h2, angle: angle2 },
+          viewScaleInfo,
+          viewSizeInfo,
+          parentOpacity,
+          renderContent: () => {
+          }
+        });
+      }
+    });
   }
   var __awaiter = function(thisArg, _arguments, P, generator) {
     function adopt(value) {
@@ -3531,6 +3938,23 @@ var __privateMethod = (obj, member, method) => {
       step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
   };
+  var __classPrivateFieldGet$7 = function(receiver, state, kind, f) {
+    if (kind === "a" && !f)
+      throw new TypeError("Private accessor was defined without a getter");
+    if (typeof state === "function" ? receiver !== state || !f : !state.has(receiver))
+      throw new TypeError("Cannot read private member from an object whose class did not declare it");
+    return kind === "m" ? f : kind === "a" ? f.call(receiver) : f ? f.value : state.get(receiver);
+  };
+  var __classPrivateFieldSet$7 = function(receiver, state, value, kind, f) {
+    if (kind === "m")
+      throw new TypeError("Private method is not writable");
+    if (kind === "a" && !f)
+      throw new TypeError("Private accessor was defined without a setter");
+    if (typeof state === "function" ? receiver !== state || !f : !state.has(receiver))
+      throw new TypeError("Cannot write private member to an object whose class did not declare it");
+    return kind === "a" ? f.call(receiver, value) : f ? f.value = value : state.set(receiver, value), value;
+  };
+  var _Loader_instances, _Loader_loadFuncMap, _Loader_currentLoadItemMap, _Loader_storageLoadItemMap, _Loader_registerLoadFunc, _Loader_getLoadElementSource, _Loader_createLoadItem, _Loader_emitLoad, _Loader_emitError, _Loader_loadResource, _Loader_isExistingErrorStorage;
   const supportElementTypes = ["image", "svg", "html"];
   const getAssetIdFromElement = (element) => {
     var _a, _b, _c;
@@ -3553,10 +3977,11 @@ var __privateMethod = (obj, member, method) => {
   class Loader extends EventEmitter {
     constructor() {
       super();
-      this._loadFuncMap = {};
-      this._currentLoadItemMap = {};
-      this._storageLoadItemMap = {};
-      this._registerLoadFunc("image", (elem, assets) => __awaiter(this, void 0, void 0, function* () {
+      _Loader_instances.add(this);
+      _Loader_loadFuncMap.set(this, {});
+      _Loader_currentLoadItemMap.set(this, {});
+      _Loader_storageLoadItemMap.set(this, {});
+      __classPrivateFieldGet$7(this, _Loader_instances, "m", _Loader_registerLoadFunc).call(this, "image", (elem, assets) => __awaiter(this, void 0, void 0, function* () {
         var _a;
         const src = ((_a = assets[elem.detail.src]) === null || _a === void 0 ? void 0 : _a.value) || elem.detail.src;
         const content = yield loadImage(src);
@@ -3566,12 +3991,12 @@ var __privateMethod = (obj, member, method) => {
           content
         };
       }));
-      this._registerLoadFunc("html", (elem, assets) => __awaiter(this, void 0, void 0, function* () {
+      __classPrivateFieldGet$7(this, _Loader_instances, "m", _Loader_registerLoadFunc).call(this, "html", (elem, assets) => __awaiter(this, void 0, void 0, function* () {
         var _b;
         const html2 = ((_b = assets[elem.detail.html]) === null || _b === void 0 ? void 0 : _b.value) || elem.detail.html;
         const content = yield loadHTML(html2, {
-          width: elem.detail.width || elem.w,
-          height: elem.detail.height || elem.h
+          width: elem.detail.originW || elem.w,
+          height: elem.detail.originH || elem.h
         });
         return {
           uuid: elem.uuid,
@@ -3579,7 +4004,7 @@ var __privateMethod = (obj, member, method) => {
           content
         };
       }));
-      this._registerLoadFunc("svg", (elem, assets) => __awaiter(this, void 0, void 0, function* () {
+      __classPrivateFieldGet$7(this, _Loader_instances, "m", _Loader_registerLoadFunc).call(this, "svg", (elem, assets) => __awaiter(this, void 0, void 0, function* () {
         var _c;
         const svg2 = ((_c = assets[elem.detail.svg]) === null || _c === void 0 ? void 0 : _c.value) || elem.detail.svg;
         const content = yield loadSVG(svg2);
@@ -3590,103 +4015,109 @@ var __privateMethod = (obj, member, method) => {
         };
       }));
     }
-    _registerLoadFunc(type, func) {
-      this._loadFuncMap[type] = func;
-    }
-    _getLoadElementSource(element) {
-      var _a, _b, _c;
-      let source = null;
-      if (element.type === "image") {
-        source = ((_a = element === null || element === void 0 ? void 0 : element.detail) === null || _a === void 0 ? void 0 : _a.src) || null;
-      } else if (element.type === "svg") {
-        source = ((_b = element === null || element === void 0 ? void 0 : element.detail) === null || _b === void 0 ? void 0 : _b.svg) || null;
-      } else if (element.type === "html") {
-        source = ((_c = element === null || element === void 0 ? void 0 : element.detail) === null || _c === void 0 ? void 0 : _c.html) || null;
-      }
-      return source;
-    }
-    _createLoadItem(element) {
-      return {
-        element,
-        status: "null",
-        content: null,
-        error: null,
-        startTime: -1,
-        endTime: -1,
-        source: this._getLoadElementSource(element)
-      };
-    }
-    _emitLoad(item) {
-      const assetId = getAssetIdFromElement(item.element);
-      const storageItem = this._storageLoadItemMap[assetId];
-      if (storageItem) {
-        if (storageItem.startTime < item.startTime) {
-          this._storageLoadItemMap[assetId] = item;
-          this.trigger("load", Object.assign(Object.assign({}, item), { countTime: item.endTime - item.startTime }));
-        }
-      } else {
-        this._storageLoadItemMap[assetId] = item;
-        this.trigger("load", Object.assign(Object.assign({}, item), { countTime: item.endTime - item.startTime }));
-      }
-    }
-    _emitError(item) {
-      const assetId = getAssetIdFromElement(item.element);
-      const storageItem = this._storageLoadItemMap[assetId];
-      if (storageItem) {
-        if (storageItem.startTime < item.startTime) {
-          this._storageLoadItemMap[assetId] = item;
-          this.trigger("error", Object.assign(Object.assign({}, item), { countTime: item.endTime - item.startTime }));
-        }
-      } else {
-        this._storageLoadItemMap[assetId] = item;
-        this.trigger("error", Object.assign(Object.assign({}, item), { countTime: item.endTime - item.startTime }));
-      }
-    }
-    _loadResource(element, assets) {
-      const item = this._createLoadItem(element);
-      const assetId = getAssetIdFromElement(element);
-      this._currentLoadItemMap[assetId] = item;
-      const loadFunc = this._loadFuncMap[element.type];
-      if (typeof loadFunc === "function") {
-        item.startTime = Date.now();
-        loadFunc(element, assets).then((result) => {
-          item.content = result.content;
-          item.endTime = Date.now();
-          item.status = "load";
-          this._emitLoad(item);
-        }).catch((err) => {
-          console.warn(`Load element source "${item.source}" fail`, err, element);
-          item.endTime = Date.now();
-          item.status = "error";
-          item.error = err;
-          this._emitError(item);
-        });
-      }
-    }
-    _isExistingErrorStorage(element) {
-      var _a;
-      const assetId = getAssetIdFromElement(element);
-      const existItem = (_a = this._currentLoadItemMap) === null || _a === void 0 ? void 0 : _a[assetId];
-      if (existItem && existItem.status === "error" && existItem.source && existItem.source === this._getLoadElementSource(element)) {
-        return true;
-      }
-      return false;
+    destroy() {
+      __classPrivateFieldSet$7(this, _Loader_loadFuncMap, null, "f");
+      __classPrivateFieldSet$7(this, _Loader_currentLoadItemMap, null, "f");
+      __classPrivateFieldSet$7(this, _Loader_storageLoadItemMap, null, "f");
     }
     load(element, assets) {
-      if (this._isExistingErrorStorage(element)) {
+      if (__classPrivateFieldGet$7(this, _Loader_instances, "m", _Loader_isExistingErrorStorage).call(this, element)) {
         return;
       }
       if (supportElementTypes.includes(element.type)) {
-        this._loadResource(element, assets);
+        __classPrivateFieldGet$7(this, _Loader_instances, "m", _Loader_loadResource).call(this, element, assets);
       }
     }
     getContent(element) {
       var _a, _b;
       const assetId = getAssetIdFromElement(element);
-      return ((_b = (_a = this._storageLoadItemMap) === null || _a === void 0 ? void 0 : _a[assetId]) === null || _b === void 0 ? void 0 : _b.content) || null;
+      return ((_b = (_a = __classPrivateFieldGet$7(this, _Loader_storageLoadItemMap, "f")) === null || _a === void 0 ? void 0 : _a[assetId]) === null || _b === void 0 ? void 0 : _b.content) || null;
+    }
+    getLoadItemMap() {
+      return __classPrivateFieldGet$7(this, _Loader_storageLoadItemMap, "f");
+    }
+    setLoadItemMap(itemMap) {
+      __classPrivateFieldSet$7(this, _Loader_storageLoadItemMap, itemMap, "f");
     }
   }
-  var __classPrivateFieldSet$2 = function(receiver, state, value, kind, f) {
+  _Loader_loadFuncMap = /* @__PURE__ */ new WeakMap(), _Loader_currentLoadItemMap = /* @__PURE__ */ new WeakMap(), _Loader_storageLoadItemMap = /* @__PURE__ */ new WeakMap(), _Loader_instances = /* @__PURE__ */ new WeakSet(), _Loader_registerLoadFunc = function _Loader_registerLoadFunc2(type, func) {
+    __classPrivateFieldGet$7(this, _Loader_loadFuncMap, "f")[type] = func;
+  }, _Loader_getLoadElementSource = function _Loader_getLoadElementSource2(element) {
+    var _a, _b, _c;
+    let source = null;
+    if (element.type === "image") {
+      source = ((_a = element === null || element === void 0 ? void 0 : element.detail) === null || _a === void 0 ? void 0 : _a.src) || null;
+    } else if (element.type === "svg") {
+      source = ((_b = element === null || element === void 0 ? void 0 : element.detail) === null || _b === void 0 ? void 0 : _b.svg) || null;
+    } else if (element.type === "html") {
+      source = ((_c = element === null || element === void 0 ? void 0 : element.detail) === null || _c === void 0 ? void 0 : _c.html) || null;
+    }
+    return source;
+  }, _Loader_createLoadItem = function _Loader_createLoadItem2(element) {
+    return {
+      element,
+      status: "null",
+      content: null,
+      error: null,
+      startTime: -1,
+      endTime: -1,
+      source: __classPrivateFieldGet$7(this, _Loader_instances, "m", _Loader_getLoadElementSource).call(this, element)
+    };
+  }, _Loader_emitLoad = function _Loader_emitLoad2(item) {
+    const assetId = getAssetIdFromElement(item.element);
+    const storageItem = __classPrivateFieldGet$7(this, _Loader_storageLoadItemMap, "f")[assetId];
+    if (storageItem) {
+      if (storageItem.startTime < item.startTime) {
+        __classPrivateFieldGet$7(this, _Loader_storageLoadItemMap, "f")[assetId] = item;
+        this.trigger("load", Object.assign(Object.assign({}, item), { countTime: item.endTime - item.startTime }));
+      }
+    } else {
+      __classPrivateFieldGet$7(this, _Loader_storageLoadItemMap, "f")[assetId] = item;
+      this.trigger("load", Object.assign(Object.assign({}, item), { countTime: item.endTime - item.startTime }));
+    }
+  }, _Loader_emitError = function _Loader_emitError2(item) {
+    var _a;
+    const assetId = getAssetIdFromElement(item.element);
+    const storageItem = (_a = __classPrivateFieldGet$7(this, _Loader_storageLoadItemMap, "f")) === null || _a === void 0 ? void 0 : _a[assetId];
+    if (storageItem) {
+      if (storageItem.startTime < item.startTime) {
+        __classPrivateFieldGet$7(this, _Loader_storageLoadItemMap, "f")[assetId] = item;
+        this.trigger("error", Object.assign(Object.assign({}, item), { countTime: item.endTime - item.startTime }));
+      }
+    } else {
+      __classPrivateFieldGet$7(this, _Loader_storageLoadItemMap, "f")[assetId] = item;
+      this.trigger("error", Object.assign(Object.assign({}, item), { countTime: item.endTime - item.startTime }));
+    }
+  }, _Loader_loadResource = function _Loader_loadResource2(element, assets) {
+    const item = __classPrivateFieldGet$7(this, _Loader_instances, "m", _Loader_createLoadItem).call(this, element);
+    const assetId = getAssetIdFromElement(element);
+    __classPrivateFieldGet$7(this, _Loader_currentLoadItemMap, "f")[assetId] = item;
+    const loadFunc = __classPrivateFieldGet$7(this, _Loader_loadFuncMap, "f")[element.type];
+    if (typeof loadFunc === "function") {
+      item.startTime = Date.now();
+      loadFunc(element, assets).then((result) => {
+        item.content = result.content;
+        item.endTime = Date.now();
+        item.status = "load";
+        __classPrivateFieldGet$7(this, _Loader_instances, "m", _Loader_emitLoad).call(this, item);
+      }).catch((err) => {
+        console.warn(`Load element source "${item.source}" fail`, err, element);
+        item.endTime = Date.now();
+        item.status = "error";
+        item.error = err;
+        __classPrivateFieldGet$7(this, _Loader_instances, "m", _Loader_emitError).call(this, item);
+      });
+    }
+  }, _Loader_isExistingErrorStorage = function _Loader_isExistingErrorStorage2(element) {
+    var _a;
+    const assetId = getAssetIdFromElement(element);
+    const existItem = (_a = __classPrivateFieldGet$7(this, _Loader_currentLoadItemMap, "f")) === null || _a === void 0 ? void 0 : _a[assetId];
+    if (existItem && existItem.status === "error" && existItem.source && existItem.source === __classPrivateFieldGet$7(this, _Loader_instances, "m", _Loader_getLoadElementSource).call(this, element)) {
+      return true;
+    }
+    return false;
+  };
+  var __classPrivateFieldSet$6 = function(receiver, state, value, kind, f) {
     if (kind === "m")
       throw new TypeError("Private method is not writable");
     if (kind === "a" && !f)
@@ -3695,7 +4126,7 @@ var __privateMethod = (obj, member, method) => {
       throw new TypeError("Cannot write private member to an object whose class did not declare it");
     return kind === "a" ? f.call(receiver, value) : f ? f.value = value : state.set(receiver, value), value;
   };
-  var __classPrivateFieldGet$2 = function(receiver, state, kind, f) {
+  var __classPrivateFieldGet$6 = function(receiver, state, kind, f) {
     if (kind === "a" && !f)
       throw new TypeError("Private accessor was defined without a getter");
     if (typeof state === "function" ? receiver !== state || !f : !state.has(receiver))
@@ -3709,16 +4140,21 @@ var __privateMethod = (obj, member, method) => {
       _Renderer_instances.add(this);
       _Renderer_opts.set(this, void 0);
       _Renderer_loader.set(this, new Loader());
-      __classPrivateFieldSet$2(this, _Renderer_opts, opts, "f");
-      __classPrivateFieldGet$2(this, _Renderer_instances, "m", _Renderer_init).call(this);
+      __classPrivateFieldSet$6(this, _Renderer_opts, opts, "f");
+      __classPrivateFieldGet$6(this, _Renderer_instances, "m", _Renderer_init).call(this);
+    }
+    destroy() {
+      __classPrivateFieldSet$6(this, _Renderer_opts, null, "f");
+      __classPrivateFieldGet$6(this, _Renderer_loader, "f").destroy();
+      __classPrivateFieldSet$6(this, _Renderer_loader, null, "f");
     }
     updateOptions(opts) {
-      __classPrivateFieldSet$2(this, _Renderer_opts, opts, "f");
+      __classPrivateFieldSet$6(this, _Renderer_opts, opts, "f");
     }
     drawData(data, opts) {
-      const loader = __classPrivateFieldGet$2(this, _Renderer_loader, "f");
-      const { calculator } = __classPrivateFieldGet$2(this, _Renderer_opts, "f");
-      const viewContext = __classPrivateFieldGet$2(this, _Renderer_opts, "f").viewContext;
+      const loader = __classPrivateFieldGet$6(this, _Renderer_loader, "f");
+      const { calculator } = __classPrivateFieldGet$6(this, _Renderer_opts, "f");
+      const viewContext = __classPrivateFieldGet$6(this, _Renderer_opts, "f").viewContext;
       viewContext.clearRect(0, 0, viewContext.canvas.width, viewContext.canvas.height);
       const parentElementSize = {
         x: 0,
@@ -3726,15 +4162,24 @@ var __privateMethod = (obj, member, method) => {
         w: opts.viewSizeInfo.width,
         h: opts.viewSizeInfo.height
       };
+      if (data.underlay) {
+        drawUnderlay(viewContext, data.underlay, Object.assign({
+          loader,
+          calculator,
+          parentElementSize,
+          parentOpacity: 1
+        }, opts));
+      }
       drawElementList(viewContext, data, Object.assign({
         loader,
         calculator,
         parentElementSize,
-        elementAssets: data.assets
+        elementAssets: data.assets,
+        parentOpacity: 1
       }, opts));
     }
     scale(num) {
-      const { sharer } = __classPrivateFieldGet$2(this, _Renderer_opts, "f");
+      const { sharer } = __classPrivateFieldGet$6(this, _Renderer_opts, "f");
       if (!sharer) {
         return;
       }
@@ -3758,18 +4203,48 @@ var __privateMethod = (obj, member, method) => {
         });
       }
     }
+    setLoadItemMap(itemMap) {
+      __classPrivateFieldGet$6(this, _Renderer_loader, "f").setLoadItemMap(itemMap);
+    }
+    getLoadItemMap() {
+      return __classPrivateFieldGet$6(this, _Renderer_loader, "f").getLoadItemMap();
+    }
+    getLoader() {
+      return __classPrivateFieldGet$6(this, _Renderer_loader, "f");
+    }
   }
   _Renderer_opts = /* @__PURE__ */ new WeakMap(), _Renderer_loader = /* @__PURE__ */ new WeakMap(), _Renderer_instances = /* @__PURE__ */ new WeakSet(), _Renderer_init = function _Renderer_init2() {
-    const loader = __classPrivateFieldGet$2(this, _Renderer_loader, "f");
+    const loader = __classPrivateFieldGet$6(this, _Renderer_loader, "f");
     loader.on("load", (e) => {
       this.trigger("load", e);
     });
     loader.on("error", () => {
     });
   };
+  var __classPrivateFieldSet$5 = function(receiver, state, value, kind, f) {
+    if (kind === "m")
+      throw new TypeError("Private method is not writable");
+    if (kind === "a" && !f)
+      throw new TypeError("Private accessor was defined without a setter");
+    if (typeof state === "function" ? receiver !== state || !f : !state.has(receiver))
+      throw new TypeError("Cannot write private member to an object whose class did not declare it");
+    return kind === "a" ? f.call(receiver, value) : f ? f.value = value : state.set(receiver, value), value;
+  };
+  var __classPrivateFieldGet$5 = function(receiver, state, kind, f) {
+    if (kind === "a" && !f)
+      throw new TypeError("Private accessor was defined without a getter");
+    if (typeof state === "function" ? receiver !== state || !f : !state.has(receiver))
+      throw new TypeError("Cannot read private member from an object whose class did not declare it");
+    return kind === "m" ? f : kind === "a" ? f.call(receiver) : f ? f.value : state.get(receiver);
+  };
+  var _Calculator_opts;
   class Calculator {
     constructor(opts) {
-      this._opts = opts;
+      _Calculator_opts.set(this, void 0);
+      __classPrivateFieldSet$5(this, _Calculator_opts, opts, "f");
+    }
+    destroy() {
+      __classPrivateFieldSet$5(this, _Calculator_opts, null, "f");
     }
     elementSize(size, viewScaleInfo, viewSizeInfo) {
       return calcViewElementSize(size, { viewScaleInfo, viewSizeInfo });
@@ -3778,7 +4253,7 @@ var __privateMethod = (obj, member, method) => {
       return isElementInView(elem, { viewScaleInfo, viewSizeInfo });
     }
     isPointInElement(p, elem, viewScaleInfo, viewSizeInfo) {
-      const context2d = this._opts.viewContext;
+      const context2d = __classPrivateFieldGet$5(this, _Calculator_opts, "f").viewContext;
       return isViewPointInElement(p, {
         context2d,
         element: elem,
@@ -3787,92 +4262,47 @@ var __privateMethod = (obj, member, method) => {
       });
     }
     getPointElement(p, opts) {
-      const context2d = this._opts.viewContext;
+      const context2d = __classPrivateFieldGet$5(this, _Calculator_opts, "f").viewContext;
       return getViewPointAtElement(p, Object.assign(Object.assign({}, opts), { context2d }));
     }
   }
+  _Calculator_opts = /* @__PURE__ */ new WeakMap();
+  var __classPrivateFieldSet$4 = function(receiver, state, value, kind, f) {
+    if (kind === "m")
+      throw new TypeError("Private method is not writable");
+    if (kind === "a" && !f)
+      throw new TypeError("Private accessor was defined without a setter");
+    if (typeof state === "function" ? receiver !== state || !f : !state.has(receiver))
+      throw new TypeError("Cannot write private member to an object whose class did not declare it");
+    return kind === "a" ? f.call(receiver, value) : f ? f.value = value : state.set(receiver, value), value;
+  };
+  var __classPrivateFieldGet$4 = function(receiver, state, kind, f) {
+    if (kind === "a" && !f)
+      throw new TypeError("Private accessor was defined without a getter");
+    if (typeof state === "function" ? receiver !== state || !f : !state.has(receiver))
+      throw new TypeError("Cannot read private member from an object whose class did not declare it");
+    return kind === "m" ? f : kind === "a" ? f.call(receiver) : f ? f.value : state.get(receiver);
+  };
+  var _BoardWatcher_instances, _BoardWatcher_opts, _BoardWatcher_store, _BoardWatcher_init, _BoardWatcher_onWheel, _BoardWatcher_onContextMenu, _BoardWatcher_onClick, _BoardWatcher_onPointLeave, _BoardWatcher_onPointEnd, _BoardWatcher_onPointMove, _BoardWatcher_onPointStart, _BoardWatcher_onHover, _BoardWatcher_isInTarget, _BoardWatcher_getPoint, _BoardWatcher_isVaildPoint;
   function isBoardAvailableNum(num) {
     return num > 0 || num < 0 || num === 0;
   }
   class BoardWatcher extends EventEmitter {
     constructor(opts) {
       super();
-      const store = new Store({ defaultStorage: { hasPointDown: false, prevClickPoint: null } });
-      this._store = store;
-      this._opts = opts;
-      this._init();
-    }
-    _init() {
-      const container = window;
-      container.addEventListener("mousemove", (e) => {
-        if (!this._isInTarget(e)) {
+      _BoardWatcher_instances.add(this);
+      _BoardWatcher_opts.set(this, void 0);
+      _BoardWatcher_store.set(this, void 0);
+      _BoardWatcher_onWheel.set(this, (e) => {
+        if (!__classPrivateFieldGet$4(this, _BoardWatcher_instances, "m", _BoardWatcher_isInTarget).call(this, e)) {
           return;
         }
-        e.preventDefault();
-        const point = this._getPoint(e);
-        if (!this._isVaildPoint(point)) {
-          return;
-        }
-        this.trigger("hover", { point });
-      });
-      container.addEventListener("mousedown", (e) => {
-        if (!this._isInTarget(e)) {
-          return;
-        }
-        e.preventDefault();
-        const point = this._getPoint(e);
-        if (!this._isVaildPoint(point)) {
-          return;
-        }
-        this._store.set("hasPointDown", true);
-        this.trigger("pointStart", { point });
-      });
-      container.addEventListener("mousemove", (e) => {
-        if (!this._isInTarget(e)) {
+        const point = __classPrivateFieldGet$4(this, _BoardWatcher_instances, "m", _BoardWatcher_getPoint).call(this, e);
+        if (!__classPrivateFieldGet$4(this, _BoardWatcher_instances, "m", _BoardWatcher_isVaildPoint).call(this, point)) {
           return;
         }
         e.preventDefault();
         e.stopPropagation();
-        const point = this._getPoint(e);
-        if (!this._isVaildPoint(point)) {
-          if (this._store.get("hasPointDown")) {
-            this.trigger("pointLeave", { point });
-            this._store.set("hasPointDown", false);
-          }
-          return;
-        }
-        if (this._store.get("hasPointDown") !== true) {
-          return;
-        }
-        this.trigger("pointMove", { point });
-      });
-      container.addEventListener("mouseup", (e) => {
-        this._store.set("hasPointDown", false);
-        if (!this._isInTarget(e)) {
-          return;
-        }
-        e.preventDefault();
-        const point = this._getPoint(e);
-        this.trigger("pointEnd", { point });
-      });
-      container.addEventListener("mouseleave", (e) => {
-        this._store.set("hasPointDown", false);
-        if (!this._isInTarget(e)) {
-          return;
-        }
-        e.preventDefault();
-        const point = this._getPoint(e);
-        this.trigger("pointLeave", { point });
-      });
-      container.addEventListener("wheel", (e) => {
-        if (!this._isInTarget(e)) {
-          return;
-        }
-        const point = this._getPoint(e);
-        if (!this._isVaildPoint(point)) {
-          return;
-        }
-        e.preventDefault();
         const deltaX = e.deltaX > 0 || e.deltaX < 0 ? e.deltaX : 0;
         const deltaY = e.deltaY > 0 || e.deltaY < 0 ? e.deltaY : 0;
         if (e.ctrlKey === true && this.has("wheelScale")) {
@@ -3880,58 +4310,158 @@ var __privateMethod = (obj, member, method) => {
         } else if (this.has("wheel")) {
           this.trigger("wheel", { deltaX, deltaY, point });
         }
-      }, { passive: false });
-      container.addEventListener("click", (e) => {
-        if (!this._isInTarget(e)) {
+      });
+      _BoardWatcher_onContextMenu.set(this, (e) => {
+        if (!__classPrivateFieldGet$4(this, _BoardWatcher_instances, "m", _BoardWatcher_isInTarget).call(this, e)) {
           return;
         }
         e.preventDefault();
-        const point = this._getPoint(e);
-        if (!this._isVaildPoint(point)) {
+        const point = __classPrivateFieldGet$4(this, _BoardWatcher_instances, "m", _BoardWatcher_getPoint).call(this, e);
+        if (!__classPrivateFieldGet$4(this, _BoardWatcher_instances, "m", _BoardWatcher_isVaildPoint).call(this, point)) {
+          return;
+        }
+      });
+      _BoardWatcher_onClick.set(this, (e) => {
+        if (!__classPrivateFieldGet$4(this, _BoardWatcher_instances, "m", _BoardWatcher_isInTarget).call(this, e)) {
+          return;
+        }
+        e.preventDefault();
+        const point = __classPrivateFieldGet$4(this, _BoardWatcher_instances, "m", _BoardWatcher_getPoint).call(this, e);
+        if (!__classPrivateFieldGet$4(this, _BoardWatcher_instances, "m", _BoardWatcher_isVaildPoint).call(this, point)) {
           return;
         }
         const maxLimitTime = 500;
         const t = Date.now();
-        const preClickPoint = this._store.get("prevClickPoint");
+        const preClickPoint = __classPrivateFieldGet$4(this, _BoardWatcher_store, "f").get("prevClickPoint");
         if (preClickPoint && t - preClickPoint.t <= maxLimitTime && Math.abs(preClickPoint.x - point.x) <= 5 && Math.abs(preClickPoint.y - point.y) <= 5) {
           this.trigger("doubleClick", { point });
         } else {
-          this._store.set("prevClickPoint", point);
+          __classPrivateFieldGet$4(this, _BoardWatcher_store, "f").set("prevClickPoint", point);
         }
       });
-      container.addEventListener("contextmenu", (e) => {
-        if (!this._isInTarget(e)) {
+      _BoardWatcher_onPointLeave.set(this, (e) => {
+        __classPrivateFieldGet$4(this, _BoardWatcher_store, "f").set("hasPointDown", false);
+        if (!__classPrivateFieldGet$4(this, _BoardWatcher_instances, "m", _BoardWatcher_isInTarget).call(this, e)) {
           return;
         }
         e.preventDefault();
-        const point = this._getPoint(e);
-        if (!this._isVaildPoint(point)) {
+        const point = __classPrivateFieldGet$4(this, _BoardWatcher_instances, "m", _BoardWatcher_getPoint).call(this, e);
+        this.trigger("pointLeave", { point });
+      });
+      _BoardWatcher_onPointEnd.set(this, (e) => {
+        __classPrivateFieldGet$4(this, _BoardWatcher_store, "f").set("hasPointDown", false);
+        if (!__classPrivateFieldGet$4(this, _BoardWatcher_instances, "m", _BoardWatcher_isInTarget).call(this, e)) {
           return;
         }
+        e.preventDefault();
+        const point = __classPrivateFieldGet$4(this, _BoardWatcher_instances, "m", _BoardWatcher_getPoint).call(this, e);
+        this.trigger("pointEnd", { point });
       });
+      _BoardWatcher_onPointMove.set(this, (e) => {
+        if (!__classPrivateFieldGet$4(this, _BoardWatcher_instances, "m", _BoardWatcher_isInTarget).call(this, e)) {
+          return;
+        }
+        e.preventDefault();
+        e.stopPropagation();
+        const point = __classPrivateFieldGet$4(this, _BoardWatcher_instances, "m", _BoardWatcher_getPoint).call(this, e);
+        if (!__classPrivateFieldGet$4(this, _BoardWatcher_instances, "m", _BoardWatcher_isVaildPoint).call(this, point)) {
+          if (__classPrivateFieldGet$4(this, _BoardWatcher_store, "f").get("hasPointDown")) {
+            this.trigger("pointLeave", { point });
+            __classPrivateFieldGet$4(this, _BoardWatcher_store, "f").set("hasPointDown", false);
+          }
+          return;
+        }
+        if (__classPrivateFieldGet$4(this, _BoardWatcher_store, "f").get("hasPointDown") !== true) {
+          return;
+        }
+        this.trigger("pointMove", { point });
+      });
+      _BoardWatcher_onPointStart.set(this, (e) => {
+        if (!__classPrivateFieldGet$4(this, _BoardWatcher_instances, "m", _BoardWatcher_isInTarget).call(this, e)) {
+          return;
+        }
+        e.preventDefault();
+        const point = __classPrivateFieldGet$4(this, _BoardWatcher_instances, "m", _BoardWatcher_getPoint).call(this, e);
+        if (!__classPrivateFieldGet$4(this, _BoardWatcher_instances, "m", _BoardWatcher_isVaildPoint).call(this, point)) {
+          return;
+        }
+        __classPrivateFieldGet$4(this, _BoardWatcher_store, "f").set("hasPointDown", true);
+        this.trigger("pointStart", { point });
+      });
+      _BoardWatcher_onHover.set(this, (e) => {
+        if (!__classPrivateFieldGet$4(this, _BoardWatcher_instances, "m", _BoardWatcher_isInTarget).call(this, e)) {
+          return;
+        }
+        e.preventDefault();
+        const point = __classPrivateFieldGet$4(this, _BoardWatcher_instances, "m", _BoardWatcher_getPoint).call(this, e);
+        if (!__classPrivateFieldGet$4(this, _BoardWatcher_instances, "m", _BoardWatcher_isVaildPoint).call(this, point)) {
+          return;
+        }
+        this.trigger("hover", { point });
+      });
+      const store = new Store({ defaultStorage: { hasPointDown: false, prevClickPoint: null } });
+      __classPrivateFieldSet$4(this, _BoardWatcher_store, store, "f");
+      __classPrivateFieldSet$4(this, _BoardWatcher_opts, opts, "f");
+      __classPrivateFieldGet$4(this, _BoardWatcher_instances, "m", _BoardWatcher_init).call(this);
     }
-    _isInTarget(e) {
-      return e.target === this._opts.boardContent.boardContext.canvas;
-    }
-    _getPoint(e) {
-      const boardCanvas = this._opts.boardContent.boardContext.canvas;
-      const rect = boardCanvas.getBoundingClientRect();
-      const p = {
-        x: e.clientX - rect.left,
-        y: e.clientY - rect.top,
-        t: Date.now()
-      };
-      return p;
-    }
-    _isVaildPoint(p) {
-      const viewSize = this._opts.sharer.getActiveViewSizeInfo();
-      const { width, height } = viewSize;
-      if (isBoardAvailableNum(p.x) && isBoardAvailableNum(p.y) && p.x <= width && p.y <= height) {
-        return true;
-      }
-      return false;
+    destroy() {
+      const container = window;
+      container.removeEventListener("mousemove", __classPrivateFieldGet$4(this, _BoardWatcher_onHover, "f"));
+      container.removeEventListener("mousedown", __classPrivateFieldGet$4(this, _BoardWatcher_onPointStart, "f"));
+      container.removeEventListener("mousemove", __classPrivateFieldGet$4(this, _BoardWatcher_onPointMove, "f"));
+      container.removeEventListener("mouseup", __classPrivateFieldGet$4(this, _BoardWatcher_onPointEnd, "f"));
+      container.removeEventListener("mouseleave", __classPrivateFieldGet$4(this, _BoardWatcher_onPointLeave, "f"));
+      container.removeEventListener("wheel", __classPrivateFieldGet$4(this, _BoardWatcher_onWheel, "f"));
+      container.removeEventListener("click", __classPrivateFieldGet$4(this, _BoardWatcher_onClick, "f"));
+      container.removeEventListener("contextmenu", __classPrivateFieldGet$4(this, _BoardWatcher_onContextMenu, "f"));
     }
   }
+  _BoardWatcher_opts = /* @__PURE__ */ new WeakMap(), _BoardWatcher_store = /* @__PURE__ */ new WeakMap(), _BoardWatcher_onWheel = /* @__PURE__ */ new WeakMap(), _BoardWatcher_onContextMenu = /* @__PURE__ */ new WeakMap(), _BoardWatcher_onClick = /* @__PURE__ */ new WeakMap(), _BoardWatcher_onPointLeave = /* @__PURE__ */ new WeakMap(), _BoardWatcher_onPointEnd = /* @__PURE__ */ new WeakMap(), _BoardWatcher_onPointMove = /* @__PURE__ */ new WeakMap(), _BoardWatcher_onPointStart = /* @__PURE__ */ new WeakMap(), _BoardWatcher_onHover = /* @__PURE__ */ new WeakMap(), _BoardWatcher_instances = /* @__PURE__ */ new WeakSet(), _BoardWatcher_init = function _BoardWatcher_init2() {
+    const container = window;
+    container.addEventListener("mousemove", __classPrivateFieldGet$4(this, _BoardWatcher_onHover, "f"));
+    container.addEventListener("mousedown", __classPrivateFieldGet$4(this, _BoardWatcher_onPointStart, "f"));
+    container.addEventListener("mousemove", __classPrivateFieldGet$4(this, _BoardWatcher_onPointMove, "f"));
+    container.addEventListener("mouseup", __classPrivateFieldGet$4(this, _BoardWatcher_onPointEnd, "f"));
+    container.addEventListener("mouseleave", __classPrivateFieldGet$4(this, _BoardWatcher_onPointLeave, "f"));
+    container.addEventListener("wheel", __classPrivateFieldGet$4(this, _BoardWatcher_onWheel, "f"), { passive: false });
+    container.addEventListener("click", __classPrivateFieldGet$4(this, _BoardWatcher_onClick, "f"));
+    container.addEventListener("contextmenu", __classPrivateFieldGet$4(this, _BoardWatcher_onContextMenu, "f"));
+  }, _BoardWatcher_isInTarget = function _BoardWatcher_isInTarget2(e) {
+    return e.target === __classPrivateFieldGet$4(this, _BoardWatcher_opts, "f").boardContent.boardContext.canvas;
+  }, _BoardWatcher_getPoint = function _BoardWatcher_getPoint2(e) {
+    const boardCanvas = __classPrivateFieldGet$4(this, _BoardWatcher_opts, "f").boardContent.boardContext.canvas;
+    const rect = boardCanvas.getBoundingClientRect();
+    const p = {
+      x: e.clientX - rect.left,
+      y: e.clientY - rect.top,
+      t: Date.now()
+    };
+    return p;
+  }, _BoardWatcher_isVaildPoint = function _BoardWatcher_isVaildPoint2(p) {
+    const viewSize = __classPrivateFieldGet$4(this, _BoardWatcher_opts, "f").sharer.getActiveViewSizeInfo();
+    const { width, height } = viewSize;
+    if (isBoardAvailableNum(p.x) && isBoardAvailableNum(p.y) && p.x <= width && p.y <= height) {
+      return true;
+    }
+    return false;
+  };
+  var __classPrivateFieldSet$3 = function(receiver, state, value, kind, f) {
+    if (kind === "m")
+      throw new TypeError("Private method is not writable");
+    if (kind === "a" && !f)
+      throw new TypeError("Private accessor was defined without a setter");
+    if (typeof state === "function" ? receiver !== state || !f : !state.has(receiver))
+      throw new TypeError("Cannot write private member to an object whose class did not declare it");
+    return kind === "a" ? f.call(receiver, value) : f ? f.value = value : state.set(receiver, value), value;
+  };
+  var __classPrivateFieldGet$3 = function(receiver, state, kind, f) {
+    if (kind === "a" && !f)
+      throw new TypeError("Private accessor was defined without a getter");
+    if (typeof state === "function" ? receiver !== state || !f : !state.has(receiver))
+      throw new TypeError("Cannot read private member from an object whose class did not declare it");
+    return kind === "m" ? f : kind === "a" ? f.call(receiver) : f ? f.value : state.get(receiver);
+  };
+  var _Sharer_activeStore, _Sharer_sharedStore;
   const defaultActiveStorage = {
     width: 0,
     height: 0,
@@ -3947,139 +4477,113 @@ var __privateMethod = (obj, member, method) => {
   };
   class Sharer {
     constructor() {
+      _Sharer_activeStore.set(this, void 0);
+      _Sharer_sharedStore.set(this, void 0);
       const activeStore = new Store({
         defaultStorage: defaultActiveStorage
       });
       const sharedStore = new Store({
         defaultStorage: {}
       });
-      this._activeStore = activeStore;
-      this._sharedStore = sharedStore;
+      __classPrivateFieldSet$3(this, _Sharer_activeStore, activeStore, "f");
+      __classPrivateFieldSet$3(this, _Sharer_sharedStore, sharedStore, "f");
     }
     getActiveStorage(key2) {
-      return this._activeStore.get(key2);
+      return __classPrivateFieldGet$3(this, _Sharer_activeStore, "f").get(key2);
     }
     setActiveStorage(key2, storage) {
-      return this._activeStore.set(key2, storage);
+      return __classPrivateFieldGet$3(this, _Sharer_activeStore, "f").set(key2, storage);
     }
     getActiveStoreSnapshot() {
-      return this._activeStore.getSnapshot();
+      return __classPrivateFieldGet$3(this, _Sharer_activeStore, "f").getSnapshot();
     }
     getSharedStorage(key2) {
-      return this._sharedStore.get(key2);
+      return __classPrivateFieldGet$3(this, _Sharer_sharedStore, "f").get(key2);
     }
     setSharedStorage(key2, storage) {
-      return this._sharedStore.set(key2, storage);
+      return __classPrivateFieldGet$3(this, _Sharer_sharedStore, "f").set(key2, storage);
     }
     getSharedStoreSnapshot() {
-      return this._sharedStore.getSnapshot();
+      return __classPrivateFieldGet$3(this, _Sharer_sharedStore, "f").getSnapshot();
     }
     getActiveViewScaleInfo() {
       const viewScaleInfo = {
-        scale: this._activeStore.get("scale"),
-        offsetTop: this._activeStore.get("offsetTop"),
-        offsetBottom: this._activeStore.get("offsetBottom"),
-        offsetLeft: this._activeStore.get("offsetLeft"),
-        offsetRight: this._activeStore.get("offsetRight")
+        scale: __classPrivateFieldGet$3(this, _Sharer_activeStore, "f").get("scale"),
+        offsetTop: __classPrivateFieldGet$3(this, _Sharer_activeStore, "f").get("offsetTop"),
+        offsetBottom: __classPrivateFieldGet$3(this, _Sharer_activeStore, "f").get("offsetBottom"),
+        offsetLeft: __classPrivateFieldGet$3(this, _Sharer_activeStore, "f").get("offsetLeft"),
+        offsetRight: __classPrivateFieldGet$3(this, _Sharer_activeStore, "f").get("offsetRight")
       };
       return viewScaleInfo;
     }
     setActiveViewScaleInfo(viewScaleInfo) {
       const { scale, offsetTop, offsetBottom, offsetLeft, offsetRight } = viewScaleInfo;
-      this._activeStore.set("scale", scale);
-      this._activeStore.set("offsetTop", offsetTop);
-      this._activeStore.set("offsetBottom", offsetBottom);
-      this._activeStore.set("offsetLeft", offsetLeft);
-      this._activeStore.set("offsetRight", offsetRight);
+      __classPrivateFieldGet$3(this, _Sharer_activeStore, "f").set("scale", scale);
+      __classPrivateFieldGet$3(this, _Sharer_activeStore, "f").set("offsetTop", offsetTop);
+      __classPrivateFieldGet$3(this, _Sharer_activeStore, "f").set("offsetBottom", offsetBottom);
+      __classPrivateFieldGet$3(this, _Sharer_activeStore, "f").set("offsetLeft", offsetLeft);
+      __classPrivateFieldGet$3(this, _Sharer_activeStore, "f").set("offsetRight", offsetRight);
     }
     setActiveViewSizeInfo(size) {
-      this._activeStore.set("width", size.width);
-      this._activeStore.set("height", size.height);
-      this._activeStore.set("devicePixelRatio", size.devicePixelRatio);
-      this._activeStore.set("contextWidth", size.contextWidth);
-      this._activeStore.set("contextHeight", size.contextHeight);
+      __classPrivateFieldGet$3(this, _Sharer_activeStore, "f").set("width", size.width);
+      __classPrivateFieldGet$3(this, _Sharer_activeStore, "f").set("height", size.height);
+      __classPrivateFieldGet$3(this, _Sharer_activeStore, "f").set("devicePixelRatio", size.devicePixelRatio);
+      __classPrivateFieldGet$3(this, _Sharer_activeStore, "f").set("contextWidth", size.contextWidth);
+      __classPrivateFieldGet$3(this, _Sharer_activeStore, "f").set("contextHeight", size.contextHeight);
     }
     getActiveViewSizeInfo() {
       const sizeInfo = {
-        width: this._activeStore.get("width"),
-        height: this._activeStore.get("height"),
-        devicePixelRatio: this._activeStore.get("devicePixelRatio"),
-        contextWidth: this._activeStore.get("contextWidth"),
-        contextHeight: this._activeStore.get("contextHeight")
+        width: __classPrivateFieldGet$3(this, _Sharer_activeStore, "f").get("width"),
+        height: __classPrivateFieldGet$3(this, _Sharer_activeStore, "f").get("height"),
+        devicePixelRatio: __classPrivateFieldGet$3(this, _Sharer_activeStore, "f").get("devicePixelRatio"),
+        contextWidth: __classPrivateFieldGet$3(this, _Sharer_activeStore, "f").get("contextWidth"),
+        contextHeight: __classPrivateFieldGet$3(this, _Sharer_activeStore, "f").get("contextHeight")
       };
       return sizeInfo;
     }
   }
+  _Sharer_activeStore = /* @__PURE__ */ new WeakMap(), _Sharer_sharedStore = /* @__PURE__ */ new WeakMap();
+  var __classPrivateFieldSet$2 = function(receiver, state, value, kind, f) {
+    if (kind === "m")
+      throw new TypeError("Private method is not writable");
+    if (kind === "a" && !f)
+      throw new TypeError("Private accessor was defined without a setter");
+    if (typeof state === "function" ? receiver !== state || !f : !state.has(receiver))
+      throw new TypeError("Cannot write private member to an object whose class did not declare it");
+    return kind === "a" ? f.call(receiver, value) : f ? f.value = value : state.set(receiver, value), value;
+  };
+  var __classPrivateFieldGet$2 = function(receiver, state, kind, f) {
+    if (kind === "a" && !f)
+      throw new TypeError("Private accessor was defined without a getter");
+    if (typeof state === "function" ? receiver !== state || !f : !state.has(receiver))
+      throw new TypeError("Cannot read private member from an object whose class did not declare it");
+    return kind === "m" ? f : kind === "a" ? f.call(receiver) : f ? f.value : state.get(receiver);
+  };
+  var _Viewer_instances, _Viewer_opts, _Viewer_drawFrameSnapshotQueue, _Viewer_drawFrameStatus, _Viewer_init, _Viewer_drawAnimationFrame;
   const { requestAnimationFrame } = window;
   class Viewer extends EventEmitter {
     constructor(opts) {
       super();
-      this._drawFrameSnapshotQueue = [];
-      this._drawFrameStatus = "FREE";
-      this._opts = opts;
-      this._init();
-    }
-    _init() {
-      const { renderer } = this._opts;
-      renderer.on("load", () => {
-        this.drawFrame();
-      });
-    }
-    _drawAnimationFrame() {
-      if (this._drawFrameStatus === "DRAWING" || this._drawFrameSnapshotQueue.length === 0) {
-        return;
-      } else {
-        this._drawFrameStatus = "DRAWING";
-      }
-      const snapshot = this._drawFrameSnapshotQueue.shift();
-      const { renderer, boardContent, beforeDrawFrame, afterDrawFrame } = this._opts;
-      if (snapshot) {
-        const { scale, offsetTop, offsetBottom, offsetLeft, offsetRight, width, height, contextHeight, contextWidth, devicePixelRatio } = snapshot.activeStore;
-        if (snapshot === null || snapshot === void 0 ? void 0 : snapshot.activeStore.data) {
-          renderer.drawData(snapshot.activeStore.data, {
-            viewScaleInfo: {
-              scale,
-              offsetTop,
-              offsetBottom,
-              offsetLeft,
-              offsetRight
-            },
-            viewSizeInfo: {
-              width,
-              height,
-              contextHeight,
-              contextWidth,
-              devicePixelRatio
-            }
-          });
-        }
-        beforeDrawFrame({ snapshot });
-        boardContent.drawView();
-        afterDrawFrame({ snapshot });
-      }
-      if (this._drawFrameSnapshotQueue.length === 0) {
-        this._drawFrameStatus = "COMPLETE";
-        return;
-      }
-      if (this._drawFrameStatus = "DRAWING") {
-        requestAnimationFrame(() => {
-          this._drawAnimationFrame();
-        });
-      }
+      _Viewer_instances.add(this);
+      _Viewer_opts.set(this, void 0);
+      _Viewer_drawFrameSnapshotQueue.set(this, []);
+      _Viewer_drawFrameStatus.set(this, "FREE");
+      __classPrivateFieldSet$2(this, _Viewer_opts, opts, "f");
+      __classPrivateFieldGet$2(this, _Viewer_instances, "m", _Viewer_init).call(this);
     }
     drawFrame() {
-      const { sharer } = this._opts;
+      const { sharer } = __classPrivateFieldGet$2(this, _Viewer_opts, "f");
       const activeStore = sharer.getActiveStoreSnapshot();
       const sharedStore = sharer.getSharedStoreSnapshot();
-      this._drawFrameSnapshotQueue.push({
+      __classPrivateFieldGet$2(this, _Viewer_drawFrameSnapshotQueue, "f").push({
         activeStore,
         sharedStore
       });
-      this._drawAnimationFrame();
+      __classPrivateFieldGet$2(this, _Viewer_instances, "m", _Viewer_drawAnimationFrame).call(this);
     }
     scale(opts) {
       const { scale, point } = opts;
-      const { sharer } = this._opts;
+      const { sharer } = __classPrivateFieldGet$2(this, _Viewer_opts, "f");
       const { moveX, moveY } = viewScale({
         scale,
         point,
@@ -4090,7 +4594,7 @@ var __privateMethod = (obj, member, method) => {
       return { moveX, moveY };
     }
     scroll(opts) {
-      const { sharer } = this._opts;
+      const { sharer } = __classPrivateFieldGet$2(this, _Viewer_opts, "f");
       const prevViewScaleInfo = sharer.getActiveViewScaleInfo();
       const { moveX, moveY } = opts;
       const viewSizeInfo = sharer.getActiveViewSizeInfo();
@@ -4104,7 +4608,7 @@ var __privateMethod = (obj, member, method) => {
       return viewScaleInfo;
     }
     updateViewScaleInfo(opts) {
-      const { sharer } = this._opts;
+      const { sharer } = __classPrivateFieldGet$2(this, _Viewer_opts, "f");
       const viewScaleInfo = calcViewScaleInfo(opts, {
         viewSizeInfo: sharer.getActiveViewSizeInfo()
       });
@@ -4112,11 +4616,11 @@ var __privateMethod = (obj, member, method) => {
       return viewScaleInfo;
     }
     resize(viewSize = {}) {
-      const { sharer } = this._opts;
+      const { sharer } = __classPrivateFieldGet$2(this, _Viewer_opts, "f");
       const originViewSize = sharer.getActiveViewSizeInfo();
       const newViewSize = Object.assign(Object.assign({}, originViewSize), viewSize);
       const { width, height, devicePixelRatio } = newViewSize;
-      const { underContext, boardContext, helperContext, viewContext } = this._opts.boardContent;
+      const { underContext, boardContext, helperContext, viewContext } = __classPrivateFieldGet$2(this, _Viewer_opts, "f").boardContent;
       boardContext.canvas.width = width * devicePixelRatio;
       boardContext.canvas.height = height * devicePixelRatio;
       boardContext.canvas.style.width = `${width}px`;
@@ -4131,6 +4635,55 @@ var __privateMethod = (obj, member, method) => {
       return newViewSize;
     }
   }
+  _Viewer_opts = /* @__PURE__ */ new WeakMap(), _Viewer_drawFrameSnapshotQueue = /* @__PURE__ */ new WeakMap(), _Viewer_drawFrameStatus = /* @__PURE__ */ new WeakMap(), _Viewer_instances = /* @__PURE__ */ new WeakSet(), _Viewer_init = function _Viewer_init2() {
+    const { renderer } = __classPrivateFieldGet$2(this, _Viewer_opts, "f");
+    renderer.on("load", () => {
+      this.drawFrame();
+    });
+  }, _Viewer_drawAnimationFrame = function _Viewer_drawAnimationFrame2() {
+    if (__classPrivateFieldGet$2(this, _Viewer_drawFrameStatus, "f") === "DRAWING" || __classPrivateFieldGet$2(this, _Viewer_drawFrameSnapshotQueue, "f").length === 0) {
+      return;
+    } else {
+      __classPrivateFieldSet$2(this, _Viewer_drawFrameStatus, "DRAWING", "f");
+    }
+    const snapshot = __classPrivateFieldGet$2(this, _Viewer_drawFrameSnapshotQueue, "f").shift();
+    const { renderer, boardContent, beforeDrawFrame, afterDrawFrame } = __classPrivateFieldGet$2(this, _Viewer_opts, "f");
+    if (snapshot) {
+      const { scale, offsetTop, offsetBottom, offsetLeft, offsetRight, width, height, contextHeight, contextWidth, devicePixelRatio } = snapshot.activeStore;
+      const viewScaleInfo = {
+        scale,
+        offsetTop,
+        offsetBottom,
+        offsetLeft,
+        offsetRight
+      };
+      const viewSizeInfo = {
+        width,
+        height,
+        contextHeight,
+        contextWidth,
+        devicePixelRatio
+      };
+      if (snapshot === null || snapshot === void 0 ? void 0 : snapshot.activeStore.data) {
+        renderer.drawData(snapshot.activeStore.data, {
+          viewScaleInfo,
+          viewSizeInfo
+        });
+      }
+      beforeDrawFrame({ snapshot });
+      boardContent.drawView();
+      afterDrawFrame({ snapshot });
+    }
+    if (__classPrivateFieldGet$2(this, _Viewer_drawFrameSnapshotQueue, "f").length === 0) {
+      __classPrivateFieldSet$2(this, _Viewer_drawFrameStatus, "COMPLETE", "f");
+      return;
+    }
+    if (__classPrivateFieldSet$2(this, _Viewer_drawFrameStatus, "DRAWING", "f")) {
+      requestAnimationFrame(() => {
+        __classPrivateFieldGet$2(this, _Viewer_instances, "m", _Viewer_drawAnimationFrame2).call(this);
+      });
+    }
+  };
   var __classPrivateFieldSet$1 = function(receiver, state, value, kind, f) {
     if (kind === "m")
       throw new TypeError("Private method is not writable");
@@ -4147,7 +4700,7 @@ var __privateMethod = (obj, member, method) => {
       throw new TypeError("Cannot read private member from an object whose class did not declare it");
     return kind === "m" ? f : kind === "a" ? f.call(receiver) : f ? f.value : state.get(receiver);
   };
-  var _Board_instances, _Board_opts, _Board_middlewareMap, _Board_middlewares, _Board_activeMiddlewareObjs, _Board_watcher, _Board_sharer, _Board_viewer, _Board_calculator, _Board_eventHub, _Board_init, _Board_handlePointStart, _Board_handlePointEnd, _Board_handlePointMove, _Board_handleHover, _Board_handleDoubleClick, _Board_handleWheel, _Board_handleWheelScale, _Board_handleScrollX, _Board_handleScrollY, _Board_handleResize, _Board_handleClear, _Board_handleBeforeDrawFrame, _Board_handleAfterDrawFrame, _Board_resetActiveMiddlewareObjs;
+  var _Board_instances, _Board_opts, _Board_middlewareMap, _Board_middlewares, _Board_activeMiddlewareObjs, _Board_watcher, _Board_renderer, _Board_sharer, _Board_viewer, _Board_calculator, _Board_eventHub, _Board_init, _Board_handlePointStart, _Board_handlePointEnd, _Board_handlePointMove, _Board_handleHover, _Board_handleDoubleClick, _Board_handleWheel, _Board_handleWheelScale, _Board_handleScrollX, _Board_handleScrollY, _Board_handleResize, _Board_handleClear, _Board_handleBeforeDrawFrame, _Board_handleAfterDrawFrame, _Board_resetActiveMiddlewareObjs;
   const throttleTime = 10;
   class Board {
     constructor(opts) {
@@ -4157,6 +4710,7 @@ var __privateMethod = (obj, member, method) => {
       _Board_middlewares.set(this, []);
       _Board_activeMiddlewareObjs.set(this, []);
       _Board_watcher.set(this, void 0);
+      _Board_renderer.set(this, void 0);
       _Board_sharer.set(this, void 0);
       _Board_viewer.set(this, void 0);
       _Board_calculator.set(this, void 0);
@@ -4176,6 +4730,7 @@ var __privateMethod = (obj, member, method) => {
       __classPrivateFieldSet$1(this, _Board_opts, opts, "f");
       __classPrivateFieldSet$1(this, _Board_sharer, sharer, "f");
       __classPrivateFieldSet$1(this, _Board_watcher, watcher, "f");
+      __classPrivateFieldSet$1(this, _Board_renderer, renderer, "f");
       __classPrivateFieldSet$1(this, _Board_calculator, calculator, "f");
       __classPrivateFieldSet$1(this, _Board_viewer, new Viewer({
         boardContent: opts.boardContent,
@@ -4192,11 +4747,20 @@ var __privateMethod = (obj, member, method) => {
       __classPrivateFieldGet$1(this, _Board_instances, "m", _Board_init).call(this);
       __classPrivateFieldGet$1(this, _Board_instances, "m", _Board_resetActiveMiddlewareObjs).call(this);
     }
+    destroy() {
+      __classPrivateFieldGet$1(this, _Board_watcher, "f").destroy();
+      __classPrivateFieldGet$1(this, _Board_renderer, "f").destroy();
+      __classPrivateFieldGet$1(this, _Board_calculator, "f").destroy();
+      __classPrivateFieldGet$1(this, _Board_eventHub, "f").destroy();
+    }
     getSharer() {
       return __classPrivateFieldGet$1(this, _Board_sharer, "f");
     }
     getViewer() {
       return __classPrivateFieldGet$1(this, _Board_viewer, "f");
+    }
+    getRenderer() {
+      return __classPrivateFieldGet$1(this, _Board_renderer, "f");
     }
     setData(data) {
       const sharer = __classPrivateFieldGet$1(this, _Board_sharer, "f");
@@ -4271,6 +4835,7 @@ var __privateMethod = (obj, member, method) => {
       boardContent.viewContext.$resize({ width, height, devicePixelRatio });
       boardContent.helperContext.$resize({ width, height, devicePixelRatio });
       boardContent.boardContext.$resize({ width, height, devicePixelRatio });
+      boardContent.underContext.$resize({ width, height, devicePixelRatio });
       __classPrivateFieldGet$1(this, _Board_viewer, "f").drawFrame();
       __classPrivateFieldGet$1(this, _Board_watcher, "f").trigger("resize", viewSize);
       __classPrivateFieldGet$1(this, _Board_sharer, "f").setActiveViewSizeInfo(newViewSize);
@@ -4288,7 +4853,7 @@ var __privateMethod = (obj, member, method) => {
       return __classPrivateFieldGet$1(this, _Board_eventHub, "f");
     }
   }
-  _Board_opts = /* @__PURE__ */ new WeakMap(), _Board_middlewareMap = /* @__PURE__ */ new WeakMap(), _Board_middlewares = /* @__PURE__ */ new WeakMap(), _Board_activeMiddlewareObjs = /* @__PURE__ */ new WeakMap(), _Board_watcher = /* @__PURE__ */ new WeakMap(), _Board_sharer = /* @__PURE__ */ new WeakMap(), _Board_viewer = /* @__PURE__ */ new WeakMap(), _Board_calculator = /* @__PURE__ */ new WeakMap(), _Board_eventHub = /* @__PURE__ */ new WeakMap(), _Board_instances = /* @__PURE__ */ new WeakSet(), _Board_init = function _Board_init2() {
+  _Board_opts = /* @__PURE__ */ new WeakMap(), _Board_middlewareMap = /* @__PURE__ */ new WeakMap(), _Board_middlewares = /* @__PURE__ */ new WeakMap(), _Board_activeMiddlewareObjs = /* @__PURE__ */ new WeakMap(), _Board_watcher = /* @__PURE__ */ new WeakMap(), _Board_renderer = /* @__PURE__ */ new WeakMap(), _Board_sharer = /* @__PURE__ */ new WeakMap(), _Board_viewer = /* @__PURE__ */ new WeakMap(), _Board_calculator = /* @__PURE__ */ new WeakMap(), _Board_eventHub = /* @__PURE__ */ new WeakMap(), _Board_instances = /* @__PURE__ */ new WeakSet(), _Board_init = function _Board_init2() {
     __classPrivateFieldGet$1(this, _Board_watcher, "f").on("pointStart", __classPrivateFieldGet$1(this, _Board_instances, "m", _Board_handlePointStart).bind(this));
     __classPrivateFieldGet$1(this, _Board_watcher, "f").on("pointEnd", __classPrivateFieldGet$1(this, _Board_instances, "m", _Board_handlePointEnd).bind(this));
     __classPrivateFieldGet$1(this, _Board_watcher, "f").on("pointMove", throttle((e) => {
@@ -4569,6 +5134,7 @@ var __privateMethod = (obj, member, method) => {
   const resizeControllerBorderWidth = 4;
   const areaBorderWidth = 1;
   const wrapperColor = "#1973ba";
+  const lockColor = "#5b5959b5";
   function drawVertexes(ctx, vertexes, opts) {
     const { borderColor: borderColor2, borderWidth: borderWidth2, background: background2, lineDash } = opts;
     ctx.setLineDash([]);
@@ -4592,6 +5158,44 @@ var __privateMethod = (obj, member, method) => {
     }
     const wrapperOpts = { borderColor: wrapperColor, borderWidth: 1, background: "transparent", lineDash: [] };
     drawVertexes(ctx, calcViewVertexes(vertexes, opts), wrapperOpts);
+  }
+  function drawCrossVertexes(ctx, vertexes, opts) {
+    const { borderColor: borderColor2, borderWidth: borderWidth2, background: background2, lineDash } = opts;
+    ctx.setLineDash([]);
+    ctx.lineWidth = borderWidth2;
+    ctx.strokeStyle = borderColor2;
+    ctx.fillStyle = background2;
+    ctx.setLineDash(lineDash);
+    ctx.beginPath();
+    ctx.moveTo(vertexes[0].x, vertexes[0].y);
+    ctx.lineTo(vertexes[2].x, vertexes[2].y);
+    ctx.closePath();
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(vertexes[1].x, vertexes[1].y);
+    ctx.lineTo(vertexes[3].x, vertexes[3].y);
+    ctx.closePath();
+    ctx.stroke();
+  }
+  function drawLockVertexesWrapper(ctx, vertexes, opts) {
+    if (!vertexes) {
+      return;
+    }
+    const wrapperOpts = { borderColor: lockColor, borderWidth: 1, background: "transparent", lineDash: [] };
+    drawVertexes(ctx, calcViewVertexes(vertexes, opts), wrapperOpts);
+    const { controller } = opts;
+    if (controller) {
+      const { topLeft, topRight, bottomLeft, bottomRight, topMiddle, bottomMiddle, leftMiddle, rightMiddle } = controller;
+      const ctrlOpts = Object.assign(Object.assign({}, wrapperOpts), { borderWidth: 1, background: lockColor });
+      drawCrossVertexes(ctx, calcViewVertexes(topMiddle.vertexes, opts), ctrlOpts);
+      drawCrossVertexes(ctx, calcViewVertexes(bottomMiddle.vertexes, opts), ctrlOpts);
+      drawCrossVertexes(ctx, calcViewVertexes(leftMiddle.vertexes, opts), ctrlOpts);
+      drawCrossVertexes(ctx, calcViewVertexes(rightMiddle.vertexes, opts), ctrlOpts);
+      drawCrossVertexes(ctx, calcViewVertexes(topLeft.vertexes, opts), ctrlOpts);
+      drawCrossVertexes(ctx, calcViewVertexes(topRight.vertexes, opts), ctrlOpts);
+      drawCrossVertexes(ctx, calcViewVertexes(bottomLeft.vertexes, opts), ctrlOpts);
+      drawCrossVertexes(ctx, calcViewVertexes(bottomRight.vertexes, opts), ctrlOpts);
+    }
   }
   function drawSelectedElementControllersVertexes(ctx, controller, opts) {
     if (!controller) {
@@ -5276,6 +5880,7 @@ var __privateMethod = (obj, member, method) => {
     return { x: x2, y: y2, w: w2, h: h2, angle: elem.angle };
   }
   function getSelectedListArea(data, opts) {
+    var _a;
     const indexes = [];
     const uuids = [];
     const elements = [];
@@ -5287,7 +5892,11 @@ var __privateMethod = (obj, member, method) => {
     const endX = Math.max(start.x, end.x);
     const startY = Math.min(start.y, end.y);
     const endY = Math.max(start.y, end.y);
-    data.elements.forEach((elem, idx) => {
+    for (let idx = 0; idx < data.elements.length; idx++) {
+      const elem = data.elements[idx];
+      if (((_a = elem === null || elem === void 0 ? void 0 : elem.operations) === null || _a === void 0 ? void 0 : _a.lock) === true) {
+        continue;
+      }
       const elemSize = calculator.elementSize(elem, viewScaleInfo, viewSizeInfo);
       const center = calcElementCenter(elemSize);
       if (center.x >= startX && center.x <= endX && center.y >= startY && center.y <= endY) {
@@ -5306,7 +5915,7 @@ var __privateMethod = (obj, member, method) => {
           }
         }
       }
-    });
+    }
     return { indexes, uuids, elements };
   }
   function calcSelectedElementsArea(elements, opts) {
@@ -5527,6 +6136,7 @@ var __privateMethod = (obj, member, method) => {
       showTextArea(e);
     };
     return {
+      name: "@middleware/text-editor",
       use() {
         eventHub.on(middlewareEventTextEdit, textEditCallback);
       },
@@ -5536,6 +6146,7 @@ var __privateMethod = (obj, member, method) => {
     };
   };
   const middlewareEventSelect = "@middleware/select";
+  const middlewareEventSelectClear = "@middleware/select-clear";
   const MiddlewareSelector = (opts) => {
     const { viewer, sharer, boardContent, calculator, eventHub } = opts;
     const { helperContext } = boardContent;
@@ -5641,15 +6252,22 @@ var __privateMethod = (obj, member, method) => {
         viewer.drawFrame();
       }
     };
+    const selectClearCallback = () => {
+      clear();
+      viewer.drawFrame();
+    };
     return {
+      name: "@middleware/selector",
       use() {
         eventHub.on(middlewareEventSelect, selectCallback);
+        eventHub.on(middlewareEventSelectClear, selectClearCallback);
       },
       disuse() {
         eventHub.off(middlewareEventSelect, selectCallback);
+        eventHub.off(middlewareEventSelectClear, selectClearCallback);
       },
       hover: (e) => {
-        var _a, _b;
+        var _a, _b, _c, _d, _e;
         const resizeType = sharer.getSharedStorage(keyResizeType);
         const actionType = sharer.getSharedStorage(keyActionType);
         const groupQueue = sharer.getSharedStorage(keyGroupQueue);
@@ -5708,8 +6326,16 @@ var __privateMethod = (obj, member, method) => {
           calculator
         }) }));
         triggerCursor(target);
-        if (target.type === "over-element" && ((_b = target === null || target === void 0 ? void 0 : target.elements) === null || _b === void 0 ? void 0 : _b.length) === 1) {
-          sharer.setSharedStorage(keyHoverElement, target.elements[0]);
+        if (target.type === null) {
+          return;
+        }
+        if (target.type === "over-element" && sharer.getSharedStorage(keyActionType) === "select" && target.elements.length === 1 && target.elements[0].uuid === ((_c = (_b = getActiveElements()) === null || _b === void 0 ? void 0 : _b[0]) === null || _c === void 0 ? void 0 : _c.uuid)) {
+          return;
+        }
+        if (target.type === "over-element" && sharer.getSharedStorage(keyActionType) === null && target.elements.length === 1 && target.elements[0].uuid === ((_d = sharer.getSharedStorage(keyHoverElement)) === null || _d === void 0 ? void 0 : _d.uuid)) {
+          return;
+        }
+        if (target.type === "over-element" && ((_e = target === null || target === void 0 ? void 0 : target.elements) === null || _e === void 0 ? void 0 : _e.length) === 1) {
           updateHoverElement(target.elements[0]);
           viewer.drawFrame();
           return;
@@ -5721,9 +6347,8 @@ var __privateMethod = (obj, member, method) => {
         }
       },
       pointStart: (e) => {
-        var _a, _b, _c, _d;
+        var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k;
         prevPoint = e.point;
-        updateHoverElement(null);
         const groupQueue = sharer.getSharedStorage(keyGroupQueue);
         if ((groupQueue === null || groupQueue === void 0 ? void 0 : groupQueue.length) > 0) {
           if (isPointInViewActiveGroup(e.point, {
@@ -5733,11 +6358,15 @@ var __privateMethod = (obj, member, method) => {
             groupQueue
           })) {
             const target2 = getPointTarget(e.point, pointTargetBaseOptions());
-            updateHoverElement(null);
-            if (target2.type === "over-element" && ((_a = target2 === null || target2 === void 0 ? void 0 : target2.elements) === null || _a === void 0 ? void 0 : _a.length) === 1) {
+            if (((_a = target2 === null || target2 === void 0 ? void 0 : target2.elements) === null || _a === void 0 ? void 0 : _a.length) === 1 && ((_c = (_b = target2.elements[0]) === null || _b === void 0 ? void 0 : _b.operations) === null || _c === void 0 ? void 0 : _c.lock) === true) {
+              return;
+            } else {
+              updateHoverElement(null);
+            }
+            if (target2.type === "over-element" && ((_d = target2 === null || target2 === void 0 ? void 0 : target2.elements) === null || _d === void 0 ? void 0 : _d.length) === 1) {
               updateSelectedElementList([target2.elements[0]], { triggerEvent: true });
               sharer.setSharedStorage(keyActionType, "drag");
-            } else if ((_b = target2.type) === null || _b === void 0 ? void 0 : _b.startsWith("resize-")) {
+            } else if ((_e = target2.type) === null || _e === void 0 ? void 0 : _e.startsWith("resize-")) {
               sharer.setSharedStorage(keyResizeType, target2.type);
               sharer.setSharedStorage(keyActionType, "resize");
             } else {
@@ -5755,12 +6384,17 @@ var __privateMethod = (obj, member, method) => {
           calculator
         });
         const target = getPointTarget(e.point, Object.assign(Object.assign({}, pointTargetBaseOptions()), { areaSize: listAreaSize, groupQueue: [] }));
+        if (((_f = target === null || target === void 0 ? void 0 : target.elements) === null || _f === void 0 ? void 0 : _f.length) === 1 && ((_h = (_g = target.elements[0]) === null || _g === void 0 ? void 0 : _g.operations) === null || _h === void 0 ? void 0 : _h.lock) === true) {
+          return;
+        } else {
+          updateHoverElement(null);
+        }
         if (target.type === "list-area") {
           sharer.setSharedStorage(keyActionType, "drag-list");
-        } else if (target.type === "over-element" && ((_c = target === null || target === void 0 ? void 0 : target.elements) === null || _c === void 0 ? void 0 : _c.length) === 1) {
+        } else if (target.type === "over-element" && ((_j = target === null || target === void 0 ? void 0 : target.elements) === null || _j === void 0 ? void 0 : _j.length) === 1) {
           updateSelectedElementList([target.elements[0]], { triggerEvent: true });
           sharer.setSharedStorage(keyActionType, "drag");
-        } else if ((_d = target.type) === null || _d === void 0 ? void 0 : _d.startsWith("resize-")) {
+        } else if ((_k = target.type) === null || _k === void 0 ? void 0 : _k.startsWith("resize-")) {
           sharer.setSharedStorage(keyResizeType, target.type);
           sharer.setSharedStorage(keyActionType, "resize");
         } else {
@@ -5772,6 +6406,7 @@ var __privateMethod = (obj, member, method) => {
         viewer.drawFrame();
       },
       pointMove: (e) => {
+        var _a, _b, _c;
         const data = sharer.getActiveStorage("data");
         const elems = getActiveElements();
         const scale = sharer.getActiveStorage("scale") || 1;
@@ -5782,7 +6417,7 @@ var __privateMethod = (obj, member, method) => {
         const groupQueue = sharer.getSharedStorage(keyGroupQueue);
         if (actionType === "drag") {
           inBusyMode = "drag";
-          if (data && (elems === null || elems === void 0 ? void 0 : elems.length) === 1 && start && end) {
+          if (data && (elems === null || elems === void 0 ? void 0 : elems.length) === 1 && start && end && ((_b = (_a = elems[0]) === null || _a === void 0 ? void 0 : _a.operations) === null || _b === void 0 ? void 0 : _b.lock) !== true) {
             const { moveX, moveY } = calcMoveInGroup(start, end, groupQueue);
             elems[0].x += moveX / scale;
             elems[0].y += moveY / scale;
@@ -5795,7 +6430,8 @@ var __privateMethod = (obj, member, method) => {
             const moveX = (end.x - start.x) / scale;
             const moveY = (end.y - start.y) / scale;
             elems.forEach((elem) => {
-              if (elem) {
+              var _a2;
+              if (elem && ((_a2 = elem === null || elem === void 0 ? void 0 : elem.operations) === null || _a2 === void 0 ? void 0 : _a2.lock) !== true) {
                 elem.x += moveX;
                 elem.y += moveY;
               }
@@ -5826,8 +6462,15 @@ var __privateMethod = (obj, member, method) => {
             const resizedElemSize = resizeElement(elems[0], { scale, start: resizeStart, end: resizeEnd, resizeType, sharer });
             elems[0].x = resizedElemSize.x;
             elems[0].y = resizedElemSize.y;
-            elems[0].w = resizedElemSize.w;
-            elems[0].h = resizedElemSize.h;
+            if (elems[0].type === "group" && ((_c = elems[0].operations) === null || _c === void 0 ? void 0 : _c.deepResize) === true) {
+              deepResizeGroupElement(elems[0], {
+                w: resizedElemSize.w,
+                h: resizedElemSize.h
+              });
+            } else {
+              elems[0].w = resizedElemSize.w;
+              elems[0].h = resizedElemSize.h;
+            }
             updateSelectedElementList([elems[0]]);
             viewer.drawFrame();
           }
@@ -5899,7 +6542,8 @@ var __privateMethod = (obj, member, method) => {
             sharer.setActiveStorage("contextWidth", viewInfo.contextSize.contextWidth);
           }
           if (data && ["drag", "drag-list", "drag-list-end", "resize"].includes(actionType)) {
-            eventHub.trigger("change", { data });
+            let type = "drag-element";
+            eventHub.trigger("change", { data, type });
           }
           viewer.drawFrame();
         };
@@ -5911,16 +6555,21 @@ var __privateMethod = (obj, member, method) => {
         viewer.drawFrame();
       },
       doubleClick(e) {
-        var _a, _b;
+        var _a, _b, _c, _d;
         const target = getPointTarget(e.point, pointTargetBaseOptions());
-        if (target.elements.length === 1 && ((_a = target.elements[0]) === null || _a === void 0 ? void 0 : _a.type) === "group") {
+        sharer.setSharedStorage(keySelectedElementController, null);
+        sharer.setSharedStorage(keySelectedElementList, []);
+        if (target.elements.length === 1 && ((_b = (_a = target.elements[0]) === null || _a === void 0 ? void 0 : _a.operations) === null || _b === void 0 ? void 0 : _b.lock) === true) {
+          return;
+        }
+        if (target.elements.length === 1 && ((_c = target.elements[0]) === null || _c === void 0 ? void 0 : _c.type) === "group") {
           const pushResult = pushGroupQueue(target.elements[0]);
           if (pushResult === true) {
             sharer.setSharedStorage(keyActionType, null);
             viewer.drawFrame();
             return;
           }
-        } else if (target.elements.length === 1 && ((_b = target.elements[0]) === null || _b === void 0 ? void 0 : _b.type) === "text") {
+        } else if (target.elements.length === 1 && ((_d = target.elements[0]) === null || _d === void 0 ? void 0 : _d.type) === "text") {
           eventHub.trigger(middlewareEventTextEdit, {
             element: target.elements[0],
             groupQueue: sharer.getSharedStorage(keyGroupQueue) || [],
@@ -5930,6 +6579,7 @@ var __privateMethod = (obj, member, method) => {
         sharer.setSharedStorage(keyActionType, null);
       },
       beforeDrawFrame({ snapshot }) {
+        var _a;
         const { activeStore, sharedStore } = snapshot;
         const { scale, offsetLeft, offsetTop, offsetRight, offsetBottom, width, height, contextHeight, contextWidth, devicePixelRatio } = activeStore;
         const sharer2 = opts.sharer;
@@ -5950,19 +6600,36 @@ var __privateMethod = (obj, member, method) => {
           controllerSize: 10,
           viewScaleInfo
         }) : null;
+        const isLock = !!((_a = hoverElement === null || hoverElement === void 0 ? void 0 : hoverElement.operations) === null || _a === void 0 ? void 0 : _a.lock);
         if ((groupQueue === null || groupQueue === void 0 ? void 0 : groupQueue.length) > 0) {
           drawGroupQueueVertexesWrappers(helperContext, groupQueueVertexesList, drawBaseOpts);
           if (hoverElement && actionType !== "drag") {
-            drawHoverVertexesWrapper(helperContext, hoverElementVertexes, drawBaseOpts);
+            if (isLock) {
+              drawLockVertexesWrapper(helperContext, hoverElementVertexes, Object.assign(Object.assign({}, drawBaseOpts), { controller: calcElementSizeController(hoverElement, {
+                groupQueue,
+                controllerSize: 10,
+                viewScaleInfo
+              }) }));
+            } else {
+              drawHoverVertexesWrapper(helperContext, hoverElementVertexes, drawBaseOpts);
+            }
           }
-          if (elem && ["select", "drag", "resize"].includes(actionType)) {
+          if (!isLock && elem && ["select", "drag", "resize"].includes(actionType)) {
             drawSelectedElementControllersVertexes(helperContext, selectedElementController, Object.assign({}, drawBaseOpts));
           }
         } else {
           if (hoverElement && actionType !== "drag") {
-            drawHoverVertexesWrapper(helperContext, hoverElementVertexes, drawBaseOpts);
+            if (isLock) {
+              drawLockVertexesWrapper(helperContext, hoverElementVertexes, Object.assign(Object.assign({}, drawBaseOpts), { controller: calcElementSizeController(hoverElement, {
+                groupQueue,
+                controllerSize: 10,
+                viewScaleInfo
+              }) }));
+            } else {
+              drawHoverVertexesWrapper(helperContext, hoverElementVertexes, drawBaseOpts);
+            }
           }
-          if (elem && ["select", "drag", "resize"].includes(actionType)) {
+          if (!isLock && elem && ["select", "drag", "resize"].includes(actionType)) {
             drawSelectedElementControllersVertexes(helperContext, selectedElementController, Object.assign({}, drawBaseOpts));
           } else if (actionType === "area" && areaStart && areaEnd) {
             drawArea(helperContext, { start: areaStart, end: areaEnd });
@@ -6209,6 +6876,7 @@ var __privateMethod = (obj, member, method) => {
       });
     };
     return {
+      name: "@middleware/scroller",
       wheel: (e) => {
         viewer.scroll({
           moveX: 0 - e.deltaX,
@@ -6261,6 +6929,7 @@ var __privateMethod = (obj, member, method) => {
     const maxScale = 50;
     const minScale = 0.05;
     return {
+      name: "@middleware/scaler",
       wheelScale(e) {
         const { deltaY, point } = e;
         const { scale } = sharer.getActiveViewScaleInfo();
@@ -6483,6 +7152,7 @@ var __privateMethod = (obj, member, method) => {
       }
     };
     return {
+      name: "@middleware/ruler",
       use() {
         eventHub.on(middlewareEventRuler, rulerCallback);
       },
@@ -6516,6 +7186,7 @@ var __privateMethod = (obj, member, method) => {
     const { eventHub, sharer, viewer } = opts;
     let isDragging = false;
     return {
+      name: "@middleware/dragger",
       hover() {
         if (isDragging === true) {
           return;
@@ -6568,18 +7239,20 @@ var __privateMethod = (obj, member, method) => {
       throw new TypeError("Cannot read private member from an object whose class did not declare it");
     return kind === "m" ? f : kind === "a" ? f.call(receiver) : f ? f.value : state.get(receiver);
   };
-  var _Core_instances, _Core_board, _Core_container, _Core_initContainer;
+  var _Core_instances, _Core_board, _Core_canvas, _Core_container, _Core_initContainer;
   class Core {
     constructor(container, opts) {
       _Core_instances.add(this);
       _Core_board.set(this, void 0);
+      _Core_canvas.set(this, void 0);
       _Core_container.set(this, void 0);
-      const { devicePixelRatio = 1, width, height } = opts;
+      const { devicePixelRatio = 1, width, height, createCustomContext2D } = opts;
       __classPrivateFieldSet(this, _Core_container, container, "f");
       const canvas = document.createElement("canvas");
+      __classPrivateFieldSet(this, _Core_canvas, canvas, "f");
       __classPrivateFieldGet(this, _Core_instances, "m", _Core_initContainer).call(this);
       container.appendChild(canvas);
-      const boardContent = createBoardContent(canvas, { width, height, devicePixelRatio, offscreen: true });
+      const boardContent = createBoardContent(canvas, { width, height, devicePixelRatio, offscreen: true, createCustomContext2D });
       const board = new Board({ boardContent, container });
       const sharer = board.getSharer();
       sharer.setActiveViewSizeInfo({
@@ -6595,6 +7268,10 @@ var __privateMethod = (obj, member, method) => {
       new Cursor(container, {
         eventHub
       });
+    }
+    destroy() {
+      __classPrivateFieldGet(this, _Core_board, "f").destroy();
+      __classPrivateFieldGet(this, _Core_canvas, "f").remove();
     }
     use(middleware) {
       __classPrivateFieldGet(this, _Core_board, "f").use(middleware);
@@ -6651,8 +7328,11 @@ var __privateMethod = (obj, member, method) => {
     setViewScale(opts) {
       __classPrivateFieldGet(this, _Core_board, "f").updateViewScaleInfo(opts);
     }
+    getLoadItemMap() {
+      return __classPrivateFieldGet(this, _Core_board, "f").getRenderer().getLoadItemMap();
+    }
   }
-  _Core_board = /* @__PURE__ */ new WeakMap(), _Core_container = /* @__PURE__ */ new WeakMap(), _Core_instances = /* @__PURE__ */ new WeakSet(), _Core_initContainer = function _Core_initContainer2() {
+  _Core_board = /* @__PURE__ */ new WeakMap(), _Core_canvas = /* @__PURE__ */ new WeakMap(), _Core_container = /* @__PURE__ */ new WeakMap(), _Core_instances = /* @__PURE__ */ new WeakSet(), _Core_initContainer = function _Core_initContainer2() {
     const container = __classPrivateFieldGet(this, _Core_container, "f");
     container.style.position = "relative";
   };
@@ -6664,14 +7344,45 @@ var __privateMethod = (obj, member, method) => {
     enableTextEdit: true,
     enableDrag: false
   };
+  async function exportImageFileBlobURL(opts) {
+    const { data, width, height, devicePixelRatio, viewScaleInfo, viewSizeInfo, loadItemMap } = opts;
+    let viewContext = createOffscreenContext2D({ width, height, devicePixelRatio });
+    let calculator = new Calculator({ viewContext });
+    let renderer = new Renderer({
+      viewContext,
+      calculator
+    });
+    renderer.setLoadItemMap(loadItemMap);
+    renderer.drawData(data, {
+      viewScaleInfo,
+      viewSizeInfo,
+      forceDrawAll: true
+    });
+    let blobURL = null;
+    let offScreenCanvas = viewContext.$getOffscreenCanvas();
+    if (offScreenCanvas) {
+      const blob = await offScreenCanvas.convertToBlob();
+      blobURL = window.URL.createObjectURL(blob);
+    }
+    offScreenCanvas = null;
+    viewContext = null;
+    calculator = null;
+    renderer = null;
+    return {
+      blobURL,
+      width,
+      height,
+      devicePixelRatio
+    };
+  }
   class iDraw2 {
     constructor(mount, options) {
       __privateAdd(this, _init);
       __privateAdd(this, _core, void 0);
       __privateAdd(this, _opts, void 0);
       const opts = { ...defaultSettings, ...options };
-      const { width, height, devicePixelRatio } = opts;
-      const core = new Core(mount, { width, height, devicePixelRatio });
+      const { width, height, devicePixelRatio, createCustomContext2D } = opts;
+      const core = new Core(mount, { width, height, devicePixelRatio, createCustomContext2D });
       __privateSet(this, _core, core);
       __privateSet(this, _opts, opts);
       __privateMethod(this, _init, init_fn).call(this);
@@ -6720,8 +7431,14 @@ var __privateMethod = (obj, member, method) => {
       core.setData(data);
       core.trigger("change", { data, type: "set-data" });
     }
-    getData() {
-      return __privateGet(this, _core).getData();
+    getData(opts) {
+      const data = __privateGet(this, _core).getData();
+      if (data && (opts == null ? void 0 : opts.compact) === true) {
+        return filterCompactData(data, {
+          loadItemMap: __privateGet(this, _core).getLoadItemMap()
+        });
+      }
+      return data;
     }
     getViewInfo() {
       return __privateGet(this, _core).getViewInfo();
@@ -6733,6 +7450,14 @@ var __privateMethod = (obj, member, method) => {
       const core = __privateGet(this, _core);
       core.setViewScale(opts);
       core.refresh();
+    }
+    centerContent(opts) {
+      const data = (opts == null ? void 0 : opts.data) || __privateGet(this, _core).getData();
+      const { viewSizeInfo } = this.getViewInfo();
+      if (data) {
+        const result = calcViewCenterContent(data, { viewSizeInfo });
+        this.setViewScale(result);
+      }
     }
     resize(opts) {
       __privateGet(this, _core).resize(opts);
@@ -6781,12 +7506,14 @@ var __privateMethod = (obj, member, method) => {
       core.trigger("change", { data, type: "update-element" });
     }
     addElement(element, opts) {
+      var _a;
       const core = __privateGet(this, _core);
       const data = core.getData() || { elements: [] };
-      if (!opts) {
+      if (!opts || !((_a = opts == null ? void 0 : opts.position) == null ? void 0 : _a.length)) {
         data.elements.push(element);
       } else if (opts == null ? void 0 : opts.position) {
-        insertElementToListByPosition(element, opts == null ? void 0 : opts.position, data.elements);
+        const position = [...opts == null ? void 0 : opts.position];
+        insertElementToListByPosition(element, position, data.elements);
       }
       core.setData(data);
       core.refresh();
@@ -6810,6 +7537,28 @@ var __privateMethod = (obj, member, method) => {
       core.setData(data);
       core.refresh();
       core.trigger("change", { data, type: "move-element" });
+    }
+    async getImageBlobURL(opts) {
+      const data = this.getData() || { elements: [] };
+      const { devicePixelRatio } = opts;
+      const outputSize = calcElementListSize(data.elements);
+      const { viewSizeInfo } = this.getViewInfo();
+      return await exportImageFileBlobURL({
+        width: outputSize.w,
+        height: outputSize.h,
+        devicePixelRatio,
+        data,
+        viewScaleInfo: { scale: 1, offsetLeft: -outputSize.x, offsetTop: -outputSize.y, offsetBottom: 0, offsetRight: 0 },
+        viewSizeInfo: {
+          ...viewSizeInfo,
+          ...{ devicePixelRatio }
+        },
+        loadItemMap: __privateGet(this, _core).getLoadItemMap()
+      });
+    }
+    destroy() {
+      const core = __privateGet(this, _core);
+      core.destroy();
     }
   }
   _core = new WeakMap();
@@ -6849,6 +7598,7 @@ var __privateMethod = (obj, member, method) => {
   exports.calcElementsViewInfo = calcElementsViewInfo;
   exports.calcSpeed = calcSpeed;
   exports.calcViewBoxSize = calcViewBoxSize;
+  exports.calcViewCenterContent = calcViewCenterContent;
   exports.calcViewElementSize = calcViewElementSize;
   exports.calcViewPointSize = calcViewPointSize;
   exports.calcViewVertexes = calcViewVertexes;
@@ -6865,10 +7615,14 @@ var __privateMethod = (obj, member, method) => {
   exports.createElement = createElement;
   exports.createOffscreenContext2D = createOffscreenContext2D;
   exports.createUUID = createUUID;
+  exports.debounce = debounce;
   exports.deepClone = deepClone;
+  exports.deepCloneElement = deepCloneElement;
+  exports.deepResizeGroupElement = deepResizeGroupElement;
   exports.delay = delay;
   exports.deleteElementInList = deleteElementInList;
   exports.deleteElementInListByPosition = deleteElementInListByPosition;
+  exports.downloadFileFromText = downloadFileFromText;
   exports.downloadImageFromCanvas = downloadImageFromCanvas;
   exports.equalPoint = equalPoint;
   exports.equalTouchPoint = equalTouchPoint;
@@ -6913,6 +7667,7 @@ var __privateMethod = (obj, member, method) => {
   exports.middlewareEventRuler = middlewareEventRuler;
   exports.middlewareEventScale = middlewareEventScale;
   exports.middlewareEventSelect = middlewareEventSelect;
+  exports.middlewareEventSelectClear = middlewareEventSelectClear;
   exports.moveElementPosition = moveElementPosition;
   exports.parseAngleToRadian = parseAngleToRadian;
   exports.parseFileToBase64 = parseFileToBase64;
