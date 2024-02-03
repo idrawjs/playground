@@ -525,7 +525,7 @@ var __privateMethod = (obj, member, method) => {
               type: "image",
               value: loadItemMap[src].source
             };
-          } else {
+          } else if (!assets[src]) {
             const assetUUID = createAssetId(src);
             if (!assets[assetUUID]) {
               assets[assetUUID] = {
@@ -537,34 +537,38 @@ var __privateMethod = (obj, member, method) => {
           }
         } else if (elem.type === "svg") {
           const svg2 = elem.detail.svg;
-          const assetUUID = createAssetId(svg2);
           if (isAssetId(svg2) && !assets[svg2] && loadItemMap[svg2] && typeof ((_b = loadItemMap[svg2]) === null || _b === void 0 ? void 0 : _b.source) === "string") {
             assets[svg2] = {
               type: "svg",
               value: loadItemMap[svg2].source
             };
-          } else if (!assets[assetUUID]) {
-            assets[assetUUID] = {
-              type: "svg",
-              value: svg2
-            };
+          } else if (!assets[svg2]) {
+            const assetUUID = createAssetId(svg2);
+            if (!assets[assetUUID]) {
+              assets[assetUUID] = {
+                type: "svg",
+                value: svg2
+              };
+            }
+            elem.detail.svg = assetUUID;
           }
-          elem.detail.svg = assetUUID;
         } else if (elem.type === "html") {
           const html2 = elem.detail.html;
-          const assetUUID = createAssetId(html2);
           if (isAssetId(html2) && !assets[html2] && loadItemMap[html2] && typeof ((_c = loadItemMap[html2]) === null || _c === void 0 ? void 0 : _c.source) === "string") {
             assets[html2] = {
               type: "html",
               value: loadItemMap[html2].source
             };
-          } else if (!assets[assetUUID]) {
-            assets[assetUUID] = {
-              type: "html",
-              value: html2
-            };
+          } else if (!assets[html2]) {
+            const assetUUID = createAssetId(html2);
+            if (!assets[assetUUID]) {
+              assets[assetUUID] = {
+                type: "html",
+                value: html2
+              };
+            }
+            elem.detail.html = assetUUID;
           }
-          elem.detail.html = assetUUID;
         } else if (elem.type === "group" && Array.isArray(elem.detail.children)) {
           const groupAssets = elem.detail.assets || {};
           Object.keys(groupAssets).forEach((assetId) => {
@@ -933,7 +937,7 @@ var __privateMethod = (obj, member, method) => {
     svgDesc,
     htmlDesc
   };
-  var __classPrivateFieldSet$a = function(receiver, state, value, kind, f) {
+  var __classPrivateFieldSet$b = function(receiver, state, value, kind, f) {
     if (kind === "m")
       throw new TypeError("Private method is not writable");
     if (kind === "a" && !f)
@@ -942,7 +946,7 @@ var __privateMethod = (obj, member, method) => {
       throw new TypeError("Cannot write private member to an object whose class did not declare it");
     return kind === "a" ? f.call(receiver, value) : f ? f.value = value : state.set(receiver, value), value;
   };
-  var __classPrivateFieldGet$a = function(receiver, state, kind, f) {
+  var __classPrivateFieldGet$b = function(receiver, state, kind, f) {
     if (kind === "a" && !f)
       throw new TypeError("Private accessor was defined without a getter");
     if (typeof state === "function" ? receiver !== state || !f : !state.has(receiver))
@@ -954,20 +958,20 @@ var __privateMethod = (obj, member, method) => {
     constructor(ctx, opts) {
       _Context2D_ctx.set(this, void 0);
       _Context2D_opts.set(this, void 0);
-      __classPrivateFieldSet$a(this, _Context2D_ctx, ctx, "f");
-      __classPrivateFieldSet$a(this, _Context2D_opts, Object.assign({ devicePixelRatio: 1, offscreenCanvas: null }, opts), "f");
+      __classPrivateFieldSet$b(this, _Context2D_ctx, ctx, "f");
+      __classPrivateFieldSet$b(this, _Context2D_opts, Object.assign({ devicePixelRatio: 1, offscreenCanvas: null }, opts), "f");
     }
     $undoPixelRatio(num) {
-      return num / __classPrivateFieldGet$a(this, _Context2D_opts, "f").devicePixelRatio;
+      return num / __classPrivateFieldGet$b(this, _Context2D_opts, "f").devicePixelRatio;
     }
     $doPixelRatio(num) {
-      return __classPrivateFieldGet$a(this, _Context2D_opts, "f").devicePixelRatio * num;
+      return __classPrivateFieldGet$b(this, _Context2D_opts, "f").devicePixelRatio * num;
     }
     $getContext() {
-      return __classPrivateFieldGet$a(this, _Context2D_ctx, "f");
+      return __classPrivateFieldGet$b(this, _Context2D_ctx, "f");
     }
     $setContext(ctx) {
-      __classPrivateFieldSet$a(this, _Context2D_ctx, ctx, "f");
+      __classPrivateFieldSet$b(this, _Context2D_ctx, ctx, "f");
     }
     $setFont(opts) {
       const strList = [];
@@ -976,17 +980,17 @@ var __privateMethod = (obj, member, method) => {
       }
       strList.push(`${this.$doPixelRatio(opts.fontSize || 12)}px`);
       strList.push(`${opts.fontFamily || "sans-serif"}`);
-      __classPrivateFieldGet$a(this, _Context2D_ctx, "f").font = `${strList.join(" ")}`;
+      __classPrivateFieldGet$b(this, _Context2D_ctx, "f").font = `${strList.join(" ")}`;
     }
     $getOffscreenCanvas() {
-      return __classPrivateFieldGet$a(this, _Context2D_opts, "f").offscreenCanvas;
+      return __classPrivateFieldGet$b(this, _Context2D_opts, "f").offscreenCanvas;
     }
     $resize(opts) {
       const { width, height, devicePixelRatio, resetStyle } = opts;
-      const { canvas } = __classPrivateFieldGet$a(this, _Context2D_ctx, "f");
+      const { canvas } = __classPrivateFieldGet$b(this, _Context2D_ctx, "f");
       canvas.width = width * devicePixelRatio;
       canvas.height = height * devicePixelRatio;
-      __classPrivateFieldSet$a(this, _Context2D_opts, Object.assign(Object.assign({}, __classPrivateFieldGet$a(this, _Context2D_opts, "f")), {
+      __classPrivateFieldSet$b(this, _Context2D_opts, Object.assign(Object.assign({}, __classPrivateFieldGet$b(this, _Context2D_opts, "f")), {
         devicePixelRatio
       }), "f");
       if (resetStyle === true) {
@@ -995,8 +999,8 @@ var __privateMethod = (obj, member, method) => {
       }
     }
     $getSize() {
-      const { devicePixelRatio } = __classPrivateFieldGet$a(this, _Context2D_opts, "f");
-      const { width, height } = __classPrivateFieldGet$a(this, _Context2D_ctx, "f").canvas;
+      const { devicePixelRatio } = __classPrivateFieldGet$b(this, _Context2D_opts, "f");
+      const { width, height } = __classPrivateFieldGet$b(this, _Context2D_ctx, "f").canvas;
       return {
         width: width / devicePixelRatio,
         height: height / devicePixelRatio,
@@ -1004,125 +1008,125 @@ var __privateMethod = (obj, member, method) => {
       };
     }
     get canvas() {
-      return __classPrivateFieldGet$a(this, _Context2D_ctx, "f").canvas;
+      return __classPrivateFieldGet$b(this, _Context2D_ctx, "f").canvas;
     }
     get fillStyle() {
-      return __classPrivateFieldGet$a(this, _Context2D_ctx, "f").fillStyle;
+      return __classPrivateFieldGet$b(this, _Context2D_ctx, "f").fillStyle;
     }
     set fillStyle(value) {
-      __classPrivateFieldGet$a(this, _Context2D_ctx, "f").fillStyle = value;
+      __classPrivateFieldGet$b(this, _Context2D_ctx, "f").fillStyle = value;
     }
     get strokeStyle() {
-      return __classPrivateFieldGet$a(this, _Context2D_ctx, "f").strokeStyle;
+      return __classPrivateFieldGet$b(this, _Context2D_ctx, "f").strokeStyle;
     }
     set strokeStyle(color2) {
-      __classPrivateFieldGet$a(this, _Context2D_ctx, "f").strokeStyle = color2;
+      __classPrivateFieldGet$b(this, _Context2D_ctx, "f").strokeStyle = color2;
     }
     get lineWidth() {
-      return this.$undoPixelRatio(__classPrivateFieldGet$a(this, _Context2D_ctx, "f").lineWidth);
+      return this.$undoPixelRatio(__classPrivateFieldGet$b(this, _Context2D_ctx, "f").lineWidth);
     }
     set lineWidth(w2) {
-      __classPrivateFieldGet$a(this, _Context2D_ctx, "f").lineWidth = this.$doPixelRatio(w2);
+      __classPrivateFieldGet$b(this, _Context2D_ctx, "f").lineWidth = this.$doPixelRatio(w2);
     }
     get textAlign() {
-      return __classPrivateFieldGet$a(this, _Context2D_ctx, "f").textAlign;
+      return __classPrivateFieldGet$b(this, _Context2D_ctx, "f").textAlign;
     }
     set textAlign(align) {
-      __classPrivateFieldGet$a(this, _Context2D_ctx, "f").textAlign = align;
+      __classPrivateFieldGet$b(this, _Context2D_ctx, "f").textAlign = align;
     }
     get textBaseline() {
-      return __classPrivateFieldGet$a(this, _Context2D_ctx, "f").textBaseline;
+      return __classPrivateFieldGet$b(this, _Context2D_ctx, "f").textBaseline;
     }
     set textBaseline(baseline) {
-      __classPrivateFieldGet$a(this, _Context2D_ctx, "f").textBaseline = baseline;
+      __classPrivateFieldGet$b(this, _Context2D_ctx, "f").textBaseline = baseline;
     }
     get globalAlpha() {
-      return __classPrivateFieldGet$a(this, _Context2D_ctx, "f").globalAlpha;
+      return __classPrivateFieldGet$b(this, _Context2D_ctx, "f").globalAlpha;
     }
     set globalAlpha(alpha) {
-      __classPrivateFieldGet$a(this, _Context2D_ctx, "f").globalAlpha = alpha;
+      __classPrivateFieldGet$b(this, _Context2D_ctx, "f").globalAlpha = alpha;
     }
     get shadowColor() {
-      return __classPrivateFieldGet$a(this, _Context2D_ctx, "f").shadowColor;
+      return __classPrivateFieldGet$b(this, _Context2D_ctx, "f").shadowColor;
     }
     set shadowColor(color2) {
-      __classPrivateFieldGet$a(this, _Context2D_ctx, "f").shadowColor = color2;
+      __classPrivateFieldGet$b(this, _Context2D_ctx, "f").shadowColor = color2;
     }
     get shadowOffsetX() {
-      return this.$undoPixelRatio(__classPrivateFieldGet$a(this, _Context2D_ctx, "f").shadowOffsetX);
+      return this.$undoPixelRatio(__classPrivateFieldGet$b(this, _Context2D_ctx, "f").shadowOffsetX);
     }
     set shadowOffsetX(offsetX) {
-      __classPrivateFieldGet$a(this, _Context2D_ctx, "f").shadowOffsetX = this.$doPixelRatio(offsetX);
+      __classPrivateFieldGet$b(this, _Context2D_ctx, "f").shadowOffsetX = this.$doPixelRatio(offsetX);
     }
     get shadowOffsetY() {
-      return this.$undoPixelRatio(__classPrivateFieldGet$a(this, _Context2D_ctx, "f").shadowOffsetY);
+      return this.$undoPixelRatio(__classPrivateFieldGet$b(this, _Context2D_ctx, "f").shadowOffsetY);
     }
     set shadowOffsetY(offsetY) {
-      __classPrivateFieldGet$a(this, _Context2D_ctx, "f").shadowOffsetY = this.$doPixelRatio(offsetY);
+      __classPrivateFieldGet$b(this, _Context2D_ctx, "f").shadowOffsetY = this.$doPixelRatio(offsetY);
     }
     get shadowBlur() {
-      return this.$undoPixelRatio(__classPrivateFieldGet$a(this, _Context2D_ctx, "f").shadowBlur);
+      return this.$undoPixelRatio(__classPrivateFieldGet$b(this, _Context2D_ctx, "f").shadowBlur);
     }
     set shadowBlur(blur) {
-      __classPrivateFieldGet$a(this, _Context2D_ctx, "f").shadowBlur = this.$doPixelRatio(blur);
+      __classPrivateFieldGet$b(this, _Context2D_ctx, "f").shadowBlur = this.$doPixelRatio(blur);
     }
     get lineCap() {
-      return __classPrivateFieldGet$a(this, _Context2D_ctx, "f").lineCap;
+      return __classPrivateFieldGet$b(this, _Context2D_ctx, "f").lineCap;
     }
     set lineCap(lineCap) {
-      __classPrivateFieldGet$a(this, _Context2D_ctx, "f").lineCap = lineCap;
+      __classPrivateFieldGet$b(this, _Context2D_ctx, "f").lineCap = lineCap;
     }
     get globalCompositeOperation() {
-      return __classPrivateFieldGet$a(this, _Context2D_ctx, "f").globalCompositeOperation;
+      return __classPrivateFieldGet$b(this, _Context2D_ctx, "f").globalCompositeOperation;
     }
     set globalCompositeOperation(operations) {
-      __classPrivateFieldGet$a(this, _Context2D_ctx, "f").globalCompositeOperation = operations;
+      __classPrivateFieldGet$b(this, _Context2D_ctx, "f").globalCompositeOperation = operations;
     }
     fill(...args) {
-      return __classPrivateFieldGet$a(this, _Context2D_ctx, "f").fill(...args);
+      return __classPrivateFieldGet$b(this, _Context2D_ctx, "f").fill(...args);
     }
     arc(x2, y2, radius, startAngle, endAngle, anticlockwise) {
-      return __classPrivateFieldGet$a(this, _Context2D_ctx, "f").arc(this.$doPixelRatio(x2), this.$doPixelRatio(y2), this.$doPixelRatio(radius), startAngle, endAngle, anticlockwise);
+      return __classPrivateFieldGet$b(this, _Context2D_ctx, "f").arc(this.$doPixelRatio(x2), this.$doPixelRatio(y2), this.$doPixelRatio(radius), startAngle, endAngle, anticlockwise);
     }
     rect(x2, y2, w2, h2) {
-      return __classPrivateFieldGet$a(this, _Context2D_ctx, "f").rect(this.$doPixelRatio(x2), this.$doPixelRatio(y2), this.$doPixelRatio(w2), this.$doPixelRatio(h2));
+      return __classPrivateFieldGet$b(this, _Context2D_ctx, "f").rect(this.$doPixelRatio(x2), this.$doPixelRatio(y2), this.$doPixelRatio(w2), this.$doPixelRatio(h2));
     }
     fillRect(x2, y2, w2, h2) {
-      return __classPrivateFieldGet$a(this, _Context2D_ctx, "f").fillRect(this.$doPixelRatio(x2), this.$doPixelRatio(y2), this.$doPixelRatio(w2), this.$doPixelRatio(h2));
+      return __classPrivateFieldGet$b(this, _Context2D_ctx, "f").fillRect(this.$doPixelRatio(x2), this.$doPixelRatio(y2), this.$doPixelRatio(w2), this.$doPixelRatio(h2));
     }
     clearRect(x2, y2, w2, h2) {
-      return __classPrivateFieldGet$a(this, _Context2D_ctx, "f").clearRect(this.$doPixelRatio(x2), this.$doPixelRatio(y2), this.$doPixelRatio(w2), this.$doPixelRatio(h2));
+      return __classPrivateFieldGet$b(this, _Context2D_ctx, "f").clearRect(this.$doPixelRatio(x2), this.$doPixelRatio(y2), this.$doPixelRatio(w2), this.$doPixelRatio(h2));
     }
     beginPath() {
-      return __classPrivateFieldGet$a(this, _Context2D_ctx, "f").beginPath();
+      return __classPrivateFieldGet$b(this, _Context2D_ctx, "f").beginPath();
     }
     closePath() {
-      return __classPrivateFieldGet$a(this, _Context2D_ctx, "f").closePath();
+      return __classPrivateFieldGet$b(this, _Context2D_ctx, "f").closePath();
     }
     lineTo(x2, y2) {
-      return __classPrivateFieldGet$a(this, _Context2D_ctx, "f").lineTo(this.$doPixelRatio(x2), this.$doPixelRatio(y2));
+      return __classPrivateFieldGet$b(this, _Context2D_ctx, "f").lineTo(this.$doPixelRatio(x2), this.$doPixelRatio(y2));
     }
     moveTo(x2, y2) {
-      return __classPrivateFieldGet$a(this, _Context2D_ctx, "f").moveTo(this.$doPixelRatio(x2), this.$doPixelRatio(y2));
+      return __classPrivateFieldGet$b(this, _Context2D_ctx, "f").moveTo(this.$doPixelRatio(x2), this.$doPixelRatio(y2));
     }
     arcTo(x1, y1, x2, y2, radius) {
-      return __classPrivateFieldGet$a(this, _Context2D_ctx, "f").arcTo(this.$doPixelRatio(x1), this.$doPixelRatio(y1), this.$doPixelRatio(x2), this.$doPixelRatio(y2), this.$doPixelRatio(radius));
+      return __classPrivateFieldGet$b(this, _Context2D_ctx, "f").arcTo(this.$doPixelRatio(x1), this.$doPixelRatio(y1), this.$doPixelRatio(x2), this.$doPixelRatio(y2), this.$doPixelRatio(radius));
     }
     getLineDash() {
-      return __classPrivateFieldGet$a(this, _Context2D_ctx, "f").getLineDash();
+      return __classPrivateFieldGet$b(this, _Context2D_ctx, "f").getLineDash();
     }
     setLineDash(nums) {
       const dash = nums.map((n) => this.$doPixelRatio(n));
-      return __classPrivateFieldGet$a(this, _Context2D_ctx, "f").setLineDash(dash);
+      return __classPrivateFieldGet$b(this, _Context2D_ctx, "f").setLineDash(dash);
     }
     stroke(path) {
-      return path ? __classPrivateFieldGet$a(this, _Context2D_ctx, "f").stroke(path) : __classPrivateFieldGet$a(this, _Context2D_ctx, "f").stroke();
+      return path ? __classPrivateFieldGet$b(this, _Context2D_ctx, "f").stroke(path) : __classPrivateFieldGet$b(this, _Context2D_ctx, "f").stroke();
     }
     translate(x2, y2) {
-      return __classPrivateFieldGet$a(this, _Context2D_ctx, "f").translate(this.$doPixelRatio(x2), this.$doPixelRatio(y2));
+      return __classPrivateFieldGet$b(this, _Context2D_ctx, "f").translate(this.$doPixelRatio(x2), this.$doPixelRatio(y2));
     }
     rotate(angle2) {
-      return __classPrivateFieldGet$a(this, _Context2D_ctx, "f").rotate(angle2);
+      return __classPrivateFieldGet$b(this, _Context2D_ctx, "f").rotate(angle2);
     }
     drawImage(...args) {
       const image = args[0];
@@ -1135,64 +1139,64 @@ var __privateMethod = (obj, member, method) => {
       const dw = args[args.length - 2];
       const dh = args[args.length - 1];
       if (args.length === 9) {
-        return __classPrivateFieldGet$a(this, _Context2D_ctx, "f").drawImage(image, this.$doPixelRatio(sx), this.$doPixelRatio(sy), this.$doPixelRatio(sw), this.$doPixelRatio(sh), this.$doPixelRatio(dx), this.$doPixelRatio(dy), this.$doPixelRatio(dw), this.$doPixelRatio(dh));
+        return __classPrivateFieldGet$b(this, _Context2D_ctx, "f").drawImage(image, this.$doPixelRatio(sx), this.$doPixelRatio(sy), this.$doPixelRatio(sw), this.$doPixelRatio(sh), this.$doPixelRatio(dx), this.$doPixelRatio(dy), this.$doPixelRatio(dw), this.$doPixelRatio(dh));
       } else {
-        return __classPrivateFieldGet$a(this, _Context2D_ctx, "f").drawImage(image, this.$doPixelRatio(dx), this.$doPixelRatio(dy), this.$doPixelRatio(dw), this.$doPixelRatio(dh));
+        return __classPrivateFieldGet$b(this, _Context2D_ctx, "f").drawImage(image, this.$doPixelRatio(dx), this.$doPixelRatio(dy), this.$doPixelRatio(dw), this.$doPixelRatio(dh));
       }
     }
     createPattern(image, repetition) {
-      return __classPrivateFieldGet$a(this, _Context2D_ctx, "f").createPattern(image, repetition);
+      return __classPrivateFieldGet$b(this, _Context2D_ctx, "f").createPattern(image, repetition);
     }
     measureText(text2) {
-      const textMetrics = __classPrivateFieldGet$a(this, _Context2D_ctx, "f").measureText(text2);
+      const textMetrics = __classPrivateFieldGet$b(this, _Context2D_ctx, "f").measureText(text2);
       return textMetrics;
     }
     fillText(text2, x2, y2, maxWidth) {
       if (maxWidth !== void 0) {
-        return __classPrivateFieldGet$a(this, _Context2D_ctx, "f").fillText(text2, this.$doPixelRatio(x2), this.$doPixelRatio(y2), this.$doPixelRatio(maxWidth));
+        return __classPrivateFieldGet$b(this, _Context2D_ctx, "f").fillText(text2, this.$doPixelRatio(x2), this.$doPixelRatio(y2), this.$doPixelRatio(maxWidth));
       } else {
-        return __classPrivateFieldGet$a(this, _Context2D_ctx, "f").fillText(text2, this.$doPixelRatio(x2), this.$doPixelRatio(y2));
+        return __classPrivateFieldGet$b(this, _Context2D_ctx, "f").fillText(text2, this.$doPixelRatio(x2), this.$doPixelRatio(y2));
       }
     }
     strokeText(text2, x2, y2, maxWidth) {
       if (maxWidth !== void 0) {
-        return __classPrivateFieldGet$a(this, _Context2D_ctx, "f").strokeText(text2, this.$doPixelRatio(x2), this.$doPixelRatio(y2), this.$doPixelRatio(maxWidth));
+        return __classPrivateFieldGet$b(this, _Context2D_ctx, "f").strokeText(text2, this.$doPixelRatio(x2), this.$doPixelRatio(y2), this.$doPixelRatio(maxWidth));
       } else {
-        return __classPrivateFieldGet$a(this, _Context2D_ctx, "f").strokeText(text2, this.$doPixelRatio(x2), this.$doPixelRatio(y2));
+        return __classPrivateFieldGet$b(this, _Context2D_ctx, "f").strokeText(text2, this.$doPixelRatio(x2), this.$doPixelRatio(y2));
       }
     }
     save() {
-      __classPrivateFieldGet$a(this, _Context2D_ctx, "f").save();
+      __classPrivateFieldGet$b(this, _Context2D_ctx, "f").save();
     }
     restore() {
-      __classPrivateFieldGet$a(this, _Context2D_ctx, "f").restore();
+      __classPrivateFieldGet$b(this, _Context2D_ctx, "f").restore();
     }
     scale(ratioX, ratioY) {
-      __classPrivateFieldGet$a(this, _Context2D_ctx, "f").scale(ratioX, ratioY);
+      __classPrivateFieldGet$b(this, _Context2D_ctx, "f").scale(ratioX, ratioY);
     }
     circle(x2, y2, radiusX, radiusY, rotation, startAngle, endAngle, counterclockwise) {
-      __classPrivateFieldGet$a(this, _Context2D_ctx, "f").ellipse(this.$doPixelRatio(x2), this.$doPixelRatio(y2), this.$doPixelRatio(radiusX), this.$doPixelRatio(radiusY), rotation, startAngle, endAngle, counterclockwise);
+      __classPrivateFieldGet$b(this, _Context2D_ctx, "f").ellipse(this.$doPixelRatio(x2), this.$doPixelRatio(y2), this.$doPixelRatio(radiusX), this.$doPixelRatio(radiusY), rotation, startAngle, endAngle, counterclockwise);
     }
     isPointInPath(x2, y2) {
-      return __classPrivateFieldGet$a(this, _Context2D_ctx, "f").isPointInPath(this.$doPixelRatio(x2), this.$doPixelRatio(y2));
+      return __classPrivateFieldGet$b(this, _Context2D_ctx, "f").isPointInPath(this.$doPixelRatio(x2), this.$doPixelRatio(y2));
     }
     clip(...args) {
-      return __classPrivateFieldGet$a(this, _Context2D_ctx, "f").clip(...args);
+      return __classPrivateFieldGet$b(this, _Context2D_ctx, "f").clip(...args);
     }
     setTransform(a, b, c, d, e, f) {
-      return __classPrivateFieldGet$a(this, _Context2D_ctx, "f").setTransform(a, b, c, d, e, f);
+      return __classPrivateFieldGet$b(this, _Context2D_ctx, "f").setTransform(a, b, c, d, e, f);
     }
     getTransform() {
-      return __classPrivateFieldGet$a(this, _Context2D_ctx, "f").getTransform();
+      return __classPrivateFieldGet$b(this, _Context2D_ctx, "f").getTransform();
     }
     createLinearGradient(x0, y0, x1, y1) {
-      return __classPrivateFieldGet$a(this, _Context2D_ctx, "f").createLinearGradient(this.$doPixelRatio(x0), this.$doPixelRatio(y0), this.$doPixelRatio(x1), this.$doPixelRatio(y1));
+      return __classPrivateFieldGet$b(this, _Context2D_ctx, "f").createLinearGradient(this.$doPixelRatio(x0), this.$doPixelRatio(y0), this.$doPixelRatio(x1), this.$doPixelRatio(y1));
     }
     createRadialGradient(x0, y0, r0, x1, y1, r1) {
-      return __classPrivateFieldGet$a(this, _Context2D_ctx, "f").createRadialGradient(this.$doPixelRatio(x0), this.$doPixelRatio(y0), this.$doPixelRatio(r0), this.$doPixelRatio(x1), this.$doPixelRatio(y1), this.$doPixelRatio(r1));
+      return __classPrivateFieldGet$b(this, _Context2D_ctx, "f").createRadialGradient(this.$doPixelRatio(x0), this.$doPixelRatio(y0), this.$doPixelRatio(r0), this.$doPixelRatio(x1), this.$doPixelRatio(y1), this.$doPixelRatio(r1));
     }
     createConicGradient(startAngle, x2, y2) {
-      return __classPrivateFieldGet$a(this, _Context2D_ctx, "f").createConicGradient(startAngle, this.$doPixelRatio(x2), this.$doPixelRatio(y2));
+      return __classPrivateFieldGet$b(this, _Context2D_ctx, "f").createConicGradient(startAngle, this.$doPixelRatio(x2), this.$doPixelRatio(y2));
     }
   }
   _Context2D_ctx = /* @__PURE__ */ new WeakMap(), _Context2D_opts = /* @__PURE__ */ new WeakMap();
@@ -1298,7 +1302,7 @@ var __privateMethod = (obj, member, method) => {
       return content;
     }
   }
-  var __classPrivateFieldSet$9 = function(receiver, state, value, kind, f) {
+  var __classPrivateFieldSet$a = function(receiver, state, value, kind, f) {
     if (kind === "m")
       throw new TypeError("Private method is not writable");
     if (kind === "a" && !f)
@@ -1307,7 +1311,7 @@ var __privateMethod = (obj, member, method) => {
       throw new TypeError("Cannot write private member to an object whose class did not declare it");
     return kind === "a" ? f.call(receiver, value) : f ? f.value = value : state.set(receiver, value), value;
   };
-  var __classPrivateFieldGet$9 = function(receiver, state, kind, f) {
+  var __classPrivateFieldGet$a = function(receiver, state, kind, f) {
     if (kind === "a" && !f)
       throw new TypeError("Private accessor was defined without a getter");
     if (typeof state === "function" ? receiver !== state || !f : !state.has(receiver))
@@ -1318,20 +1322,20 @@ var __privateMethod = (obj, member, method) => {
   class EventEmitter {
     constructor() {
       _EventEmitter_listeners.set(this, void 0);
-      __classPrivateFieldSet$9(this, _EventEmitter_listeners, /* @__PURE__ */ new Map(), "f");
+      __classPrivateFieldSet$a(this, _EventEmitter_listeners, /* @__PURE__ */ new Map(), "f");
     }
     on(eventKey, callback) {
-      if (__classPrivateFieldGet$9(this, _EventEmitter_listeners, "f").has(eventKey)) {
-        const callbacks = __classPrivateFieldGet$9(this, _EventEmitter_listeners, "f").get(eventKey) || [];
+      if (__classPrivateFieldGet$a(this, _EventEmitter_listeners, "f").has(eventKey)) {
+        const callbacks = __classPrivateFieldGet$a(this, _EventEmitter_listeners, "f").get(eventKey) || [];
         callbacks === null || callbacks === void 0 ? void 0 : callbacks.push(callback);
-        __classPrivateFieldGet$9(this, _EventEmitter_listeners, "f").set(eventKey, callbacks);
+        __classPrivateFieldGet$a(this, _EventEmitter_listeners, "f").set(eventKey, callbacks);
       } else {
-        __classPrivateFieldGet$9(this, _EventEmitter_listeners, "f").set(eventKey, [callback]);
+        __classPrivateFieldGet$a(this, _EventEmitter_listeners, "f").set(eventKey, [callback]);
       }
     }
     off(eventKey, callback) {
-      if (__classPrivateFieldGet$9(this, _EventEmitter_listeners, "f").has(eventKey)) {
-        const callbacks = __classPrivateFieldGet$9(this, _EventEmitter_listeners, "f").get(eventKey);
+      if (__classPrivateFieldGet$a(this, _EventEmitter_listeners, "f").has(eventKey)) {
+        const callbacks = __classPrivateFieldGet$a(this, _EventEmitter_listeners, "f").get(eventKey);
         if (Array.isArray(callbacks)) {
           for (let i = 0; i < (callbacks === null || callbacks === void 0 ? void 0 : callbacks.length); i++) {
             if (callbacks[i] === callback) {
@@ -1340,11 +1344,11 @@ var __privateMethod = (obj, member, method) => {
             }
           }
         }
-        __classPrivateFieldGet$9(this, _EventEmitter_listeners, "f").set(eventKey, callbacks || []);
+        __classPrivateFieldGet$a(this, _EventEmitter_listeners, "f").set(eventKey, callbacks || []);
       }
     }
     trigger(eventKey, e) {
-      const callbacks = __classPrivateFieldGet$9(this, _EventEmitter_listeners, "f").get(eventKey);
+      const callbacks = __classPrivateFieldGet$a(this, _EventEmitter_listeners, "f").get(eventKey);
       if (Array.isArray(callbacks)) {
         callbacks.forEach((cb) => {
           cb(e);
@@ -1355,8 +1359,8 @@ var __privateMethod = (obj, member, method) => {
       }
     }
     has(name) {
-      if (__classPrivateFieldGet$9(this, _EventEmitter_listeners, "f").has(name)) {
-        const list = __classPrivateFieldGet$9(this, _EventEmitter_listeners, "f").get(name);
+      if (__classPrivateFieldGet$a(this, _EventEmitter_listeners, "f").has(name)) {
+        const list = __classPrivateFieldGet$a(this, _EventEmitter_listeners, "f").get(name);
         if (Array.isArray(list) && list.length > 0) {
           return true;
         }
@@ -1364,7 +1368,10 @@ var __privateMethod = (obj, member, method) => {
       return false;
     }
     destroy() {
-      __classPrivateFieldGet$9(this, _EventEmitter_listeners, "f").clear();
+      this.clear();
+    }
+    clear() {
+      __classPrivateFieldGet$a(this, _EventEmitter_listeners, "f").clear();
     }
   }
   _EventEmitter_listeners = /* @__PURE__ */ new WeakMap();
@@ -1398,7 +1405,7 @@ var __privateMethod = (obj, member, method) => {
       y: p1.y + (p2.y - p1.y) / 2
     };
   }
-  var __classPrivateFieldSet$8 = function(receiver, state, value, kind, f) {
+  var __classPrivateFieldSet$9 = function(receiver, state, value, kind, f) {
     if (kind === "m")
       throw new TypeError("Private method is not writable");
     if (kind === "a" && !f)
@@ -1407,7 +1414,7 @@ var __privateMethod = (obj, member, method) => {
       throw new TypeError("Cannot write private member to an object whose class did not declare it");
     return kind === "a" ? f.call(receiver, value) : f ? f.value = value : state.set(receiver, value), value;
   };
-  var __classPrivateFieldGet$8 = function(receiver, state, kind, f) {
+  var __classPrivateFieldGet$9 = function(receiver, state, kind, f) {
     if (kind === "a" && !f)
       throw new TypeError("Private accessor was defined without a getter");
     if (typeof state === "function" ? receiver !== state || !f : !state.has(receiver))
@@ -1420,27 +1427,27 @@ var __privateMethod = (obj, member, method) => {
       _Store_instances.add(this);
       _Store_temp.set(this, void 0);
       _Store_backUpDefaultStorage.set(this, void 0);
-      __classPrivateFieldSet$8(this, _Store_backUpDefaultStorage, deepClone(opts.defaultStorage), "f");
-      __classPrivateFieldSet$8(this, _Store_temp, __classPrivateFieldGet$8(this, _Store_instances, "m", _Store_createTempStorage).call(this), "f");
+      __classPrivateFieldSet$9(this, _Store_backUpDefaultStorage, deepClone(opts.defaultStorage), "f");
+      __classPrivateFieldSet$9(this, _Store_temp, __classPrivateFieldGet$9(this, _Store_instances, "m", _Store_createTempStorage).call(this), "f");
     }
     set(name, value) {
-      __classPrivateFieldGet$8(this, _Store_temp, "f")[name] = value;
+      __classPrivateFieldGet$9(this, _Store_temp, "f")[name] = value;
     }
     get(name) {
-      return __classPrivateFieldGet$8(this, _Store_temp, "f")[name];
+      return __classPrivateFieldGet$9(this, _Store_temp, "f")[name];
     }
     getSnapshot() {
-      return deepClone(__classPrivateFieldGet$8(this, _Store_temp, "f"));
+      return deepClone(__classPrivateFieldGet$9(this, _Store_temp, "f"));
     }
     clear() {
-      __classPrivateFieldSet$8(this, _Store_temp, __classPrivateFieldGet$8(this, _Store_instances, "m", _Store_createTempStorage).call(this), "f");
+      __classPrivateFieldSet$9(this, _Store_temp, __classPrivateFieldGet$9(this, _Store_instances, "m", _Store_createTempStorage).call(this), "f");
     }
     destroy() {
-      __classPrivateFieldSet$8(this, _Store_temp, null, "f");
+      __classPrivateFieldSet$9(this, _Store_temp, null, "f");
     }
   }
   _Store_temp = /* @__PURE__ */ new WeakMap(), _Store_backUpDefaultStorage = /* @__PURE__ */ new WeakMap(), _Store_instances = /* @__PURE__ */ new WeakSet(), _Store_createTempStorage = function _Store_createTempStorage2() {
-    return deepClone(__classPrivateFieldGet$8(this, _Store_backUpDefaultStorage, "f"));
+    return deepClone(__classPrivateFieldGet$9(this, _Store_backUpDefaultStorage, "f"));
   };
   function getViewScaleInfoFromSnapshot(snapshot) {
     const { activeStore } = snapshot;
@@ -3075,13 +3082,14 @@ var __privateMethod = (obj, member, method) => {
     return targetElement;
   }
   function calcViewCenterContent(data, opts) {
+    var _a, _b, _c, _d, _e, _f, _g, _h;
     let offsetX = 0;
     let offsetY = 0;
-    let scale = 0;
-    let contentX = 0;
-    let contentY = 0;
-    let contentW = 0;
-    let contentH = 0;
+    let scale = 1;
+    let contentX = ((_b = (_a = data === null || data === void 0 ? void 0 : data.elements) === null || _a === void 0 ? void 0 : _a[0]) === null || _b === void 0 ? void 0 : _b.x) || 0;
+    let contentY = ((_d = (_c = data === null || data === void 0 ? void 0 : data.elements) === null || _c === void 0 ? void 0 : _c[0]) === null || _d === void 0 ? void 0 : _d.y) || 0;
+    let contentW = ((_f = (_e = data === null || data === void 0 ? void 0 : data.elements) === null || _e === void 0 ? void 0 : _e[0]) === null || _f === void 0 ? void 0 : _f.w) || 0;
+    let contentH = ((_h = (_g = data === null || data === void 0 ? void 0 : data.elements) === null || _g === void 0 ? void 0 : _g[0]) === null || _h === void 0 ? void 0 : _h.h) || 0;
     const { width, height } = opts.viewSizeInfo;
     data.elements.forEach((elem) => {
       const elemSize = {
@@ -3115,8 +3123,8 @@ var __privateMethod = (obj, member, method) => {
       const scaleW = formatNumber(width / contentW, { decimalPlaces: 4 });
       const scaleH = formatNumber(height / contentH, { decimalPlaces: 4 });
       scale = Math.min(scaleW, scaleH, 1);
-      offsetX = (contentW * scale - width) / 2 / scale;
-      offsetY = (contentH * scale - height) / 2 / scale;
+      offsetX = (contentW * scale - width) / 2 / scale + contentX;
+      offsetY = (contentH * scale - height) / 2 / scale + contentY;
     }
     const result = {
       offsetX: formatNumber(offsetX, { decimalPlaces: 0 }),
@@ -3124,6 +3132,22 @@ var __privateMethod = (obj, member, method) => {
       scale
     };
     return result;
+  }
+  function calcViewCenter(opts) {
+    let x2 = 0;
+    let y2 = 0;
+    if (opts) {
+      const { viewScaleInfo, viewSizeInfo } = opts;
+      const { offsetLeft, offsetTop, scale } = viewScaleInfo;
+      const { width, height } = viewSizeInfo;
+      x2 = 0 - offsetLeft + width / scale / 2;
+      y2 = 0 - offsetTop + height / scale / 2;
+    }
+    const p = {
+      x: x2,
+      y: y2
+    };
+    return p;
   }
   function createColorStyle(ctx, color2, opts) {
     if (typeof color2 === "string") {
@@ -3529,7 +3553,7 @@ var __privateMethod = (obj, member, method) => {
             viewSizeInfo,
             parentOpacity,
             renderContent: () => {
-              if (!content) {
+              if (!content && !opts.loader.isDestroyed()) {
                 opts.loader.load(elem, opts.elementAssets || {});
               }
               if (elem.type === "image" && content) {
@@ -3564,7 +3588,7 @@ var __privateMethod = (obj, member, method) => {
     const { calculator, viewScaleInfo, viewSizeInfo, parentOpacity } = opts;
     const { x: x2, y: y2, w: w2, h: h2, angle: angle2 } = (calculator === null || calculator === void 0 ? void 0 : calculator.elementSize(elem, viewScaleInfo, viewSizeInfo)) || elem;
     rotateElement(ctx, { x: x2, y: y2, w: w2, h: h2, angle: angle2 }, () => {
-      if (!content) {
+      if (!content && !opts.loader.isDestroyed()) {
         opts.loader.load(elem, opts.elementAssets || {});
       }
       if (elem.type === "svg" && content) {
@@ -3579,7 +3603,7 @@ var __privateMethod = (obj, member, method) => {
     const { calculator, viewScaleInfo, viewSizeInfo, parentOpacity } = opts;
     const { x: x2, y: y2, w: w2, h: h2, angle: angle2 } = (calculator === null || calculator === void 0 ? void 0 : calculator.elementSize(elem, viewScaleInfo, viewSizeInfo)) || elem;
     rotateElement(ctx, { x: x2, y: y2, w: w2, h: h2, angle: angle2 }, () => {
-      if (!content) {
+      if (!content && !opts.loader.isDestroyed()) {
         opts.loader.load(elem, opts.elementAssets || {});
       }
       if (elem.type === "html" && content) {
@@ -3938,14 +3962,14 @@ var __privateMethod = (obj, member, method) => {
       step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
   };
-  var __classPrivateFieldGet$7 = function(receiver, state, kind, f) {
+  var __classPrivateFieldGet$8 = function(receiver, state, kind, f) {
     if (kind === "a" && !f)
       throw new TypeError("Private accessor was defined without a getter");
     if (typeof state === "function" ? receiver !== state || !f : !state.has(receiver))
       throw new TypeError("Cannot read private member from an object whose class did not declare it");
     return kind === "m" ? f : kind === "a" ? f.call(receiver) : f ? f.value : state.get(receiver);
   };
-  var __classPrivateFieldSet$7 = function(receiver, state, value, kind, f) {
+  var __classPrivateFieldSet$8 = function(receiver, state, value, kind, f) {
     if (kind === "m")
       throw new TypeError("Private method is not writable");
     if (kind === "a" && !f)
@@ -3954,7 +3978,7 @@ var __privateMethod = (obj, member, method) => {
       throw new TypeError("Cannot write private member to an object whose class did not declare it");
     return kind === "a" ? f.call(receiver, value) : f ? f.value = value : state.set(receiver, value), value;
   };
-  var _Loader_instances, _Loader_loadFuncMap, _Loader_currentLoadItemMap, _Loader_storageLoadItemMap, _Loader_registerLoadFunc, _Loader_getLoadElementSource, _Loader_createLoadItem, _Loader_emitLoad, _Loader_emitError, _Loader_loadResource, _Loader_isExistingErrorStorage;
+  var _Loader_instances, _Loader_loadFuncMap, _Loader_currentLoadItemMap, _Loader_storageLoadItemMap, _Loader_hasDestroyed, _Loader_registerLoadFunc, _Loader_getLoadElementSource, _Loader_createLoadItem, _Loader_emitLoad, _Loader_emitError, _Loader_loadResource, _Loader_isExistingErrorStorage;
   const supportElementTypes = ["image", "svg", "html"];
   const getAssetIdFromElement = (element) => {
     var _a, _b, _c;
@@ -3981,7 +4005,8 @@ var __privateMethod = (obj, member, method) => {
       _Loader_loadFuncMap.set(this, {});
       _Loader_currentLoadItemMap.set(this, {});
       _Loader_storageLoadItemMap.set(this, {});
-      __classPrivateFieldGet$7(this, _Loader_instances, "m", _Loader_registerLoadFunc).call(this, "image", (elem, assets) => __awaiter(this, void 0, void 0, function* () {
+      _Loader_hasDestroyed.set(this, false);
+      __classPrivateFieldGet$8(this, _Loader_instances, "m", _Loader_registerLoadFunc).call(this, "image", (elem, assets) => __awaiter(this, void 0, void 0, function* () {
         var _a;
         const src = ((_a = assets[elem.detail.src]) === null || _a === void 0 ? void 0 : _a.value) || elem.detail.src;
         const content = yield loadImage(src);
@@ -3991,7 +4016,7 @@ var __privateMethod = (obj, member, method) => {
           content
         };
       }));
-      __classPrivateFieldGet$7(this, _Loader_instances, "m", _Loader_registerLoadFunc).call(this, "html", (elem, assets) => __awaiter(this, void 0, void 0, function* () {
+      __classPrivateFieldGet$8(this, _Loader_instances, "m", _Loader_registerLoadFunc).call(this, "html", (elem, assets) => __awaiter(this, void 0, void 0, function* () {
         var _b;
         const html2 = ((_b = assets[elem.detail.html]) === null || _b === void 0 ? void 0 : _b.value) || elem.detail.html;
         const content = yield loadHTML(html2, {
@@ -4004,7 +4029,7 @@ var __privateMethod = (obj, member, method) => {
           content
         };
       }));
-      __classPrivateFieldGet$7(this, _Loader_instances, "m", _Loader_registerLoadFunc).call(this, "svg", (elem, assets) => __awaiter(this, void 0, void 0, function* () {
+      __classPrivateFieldGet$8(this, _Loader_instances, "m", _Loader_registerLoadFunc).call(this, "svg", (elem, assets) => __awaiter(this, void 0, void 0, function* () {
         var _c;
         const svg2 = ((_c = assets[elem.detail.svg]) === null || _c === void 0 ? void 0 : _c.value) || elem.detail.svg;
         const content = yield loadSVG(svg2);
@@ -4015,33 +4040,41 @@ var __privateMethod = (obj, member, method) => {
         };
       }));
     }
+    isDestroyed() {
+      return __classPrivateFieldGet$8(this, _Loader_hasDestroyed, "f");
+    }
     destroy() {
-      __classPrivateFieldSet$7(this, _Loader_loadFuncMap, null, "f");
-      __classPrivateFieldSet$7(this, _Loader_currentLoadItemMap, null, "f");
-      __classPrivateFieldSet$7(this, _Loader_storageLoadItemMap, null, "f");
+      __classPrivateFieldSet$8(this, _Loader_hasDestroyed, true, "f");
+      this.clear();
+      __classPrivateFieldSet$8(this, _Loader_loadFuncMap, null, "f");
+      __classPrivateFieldSet$8(this, _Loader_currentLoadItemMap, null, "f");
+      __classPrivateFieldSet$8(this, _Loader_storageLoadItemMap, null, "f");
     }
     load(element, assets) {
-      if (__classPrivateFieldGet$7(this, _Loader_instances, "m", _Loader_isExistingErrorStorage).call(this, element)) {
+      if (__classPrivateFieldGet$8(this, _Loader_hasDestroyed, "f") === true) {
+        return;
+      }
+      if (__classPrivateFieldGet$8(this, _Loader_instances, "m", _Loader_isExistingErrorStorage).call(this, element)) {
         return;
       }
       if (supportElementTypes.includes(element.type)) {
-        __classPrivateFieldGet$7(this, _Loader_instances, "m", _Loader_loadResource).call(this, element, assets);
+        __classPrivateFieldGet$8(this, _Loader_instances, "m", _Loader_loadResource).call(this, element, assets);
       }
     }
     getContent(element) {
       var _a, _b;
       const assetId = getAssetIdFromElement(element);
-      return ((_b = (_a = __classPrivateFieldGet$7(this, _Loader_storageLoadItemMap, "f")) === null || _a === void 0 ? void 0 : _a[assetId]) === null || _b === void 0 ? void 0 : _b.content) || null;
+      return ((_b = (_a = __classPrivateFieldGet$8(this, _Loader_storageLoadItemMap, "f")) === null || _a === void 0 ? void 0 : _a[assetId]) === null || _b === void 0 ? void 0 : _b.content) || null;
     }
     getLoadItemMap() {
-      return __classPrivateFieldGet$7(this, _Loader_storageLoadItemMap, "f");
+      return __classPrivateFieldGet$8(this, _Loader_storageLoadItemMap, "f");
     }
     setLoadItemMap(itemMap) {
-      __classPrivateFieldSet$7(this, _Loader_storageLoadItemMap, itemMap, "f");
+      __classPrivateFieldSet$8(this, _Loader_storageLoadItemMap, itemMap, "f");
     }
   }
-  _Loader_loadFuncMap = /* @__PURE__ */ new WeakMap(), _Loader_currentLoadItemMap = /* @__PURE__ */ new WeakMap(), _Loader_storageLoadItemMap = /* @__PURE__ */ new WeakMap(), _Loader_instances = /* @__PURE__ */ new WeakSet(), _Loader_registerLoadFunc = function _Loader_registerLoadFunc2(type, func) {
-    __classPrivateFieldGet$7(this, _Loader_loadFuncMap, "f")[type] = func;
+  _Loader_loadFuncMap = /* @__PURE__ */ new WeakMap(), _Loader_currentLoadItemMap = /* @__PURE__ */ new WeakMap(), _Loader_storageLoadItemMap = /* @__PURE__ */ new WeakMap(), _Loader_hasDestroyed = /* @__PURE__ */ new WeakMap(), _Loader_instances = /* @__PURE__ */ new WeakSet(), _Loader_registerLoadFunc = function _Loader_registerLoadFunc2(type, func) {
+    __classPrivateFieldGet$8(this, _Loader_loadFuncMap, "f")[type] = func;
   }, _Loader_getLoadElementSource = function _Loader_getLoadElementSource2(element) {
     var _a, _b, _c;
     let source = null;
@@ -4061,63 +4094,69 @@ var __privateMethod = (obj, member, method) => {
       error: null,
       startTime: -1,
       endTime: -1,
-      source: __classPrivateFieldGet$7(this, _Loader_instances, "m", _Loader_getLoadElementSource).call(this, element)
+      source: __classPrivateFieldGet$8(this, _Loader_instances, "m", _Loader_getLoadElementSource).call(this, element)
     };
   }, _Loader_emitLoad = function _Loader_emitLoad2(item) {
     const assetId = getAssetIdFromElement(item.element);
-    const storageItem = __classPrivateFieldGet$7(this, _Loader_storageLoadItemMap, "f")[assetId];
-    if (storageItem) {
-      if (storageItem.startTime < item.startTime) {
-        __classPrivateFieldGet$7(this, _Loader_storageLoadItemMap, "f")[assetId] = item;
+    const storageItem = __classPrivateFieldGet$8(this, _Loader_storageLoadItemMap, "f")[assetId];
+    if (!__classPrivateFieldGet$8(this, _Loader_hasDestroyed, "f")) {
+      if (storageItem) {
+        if (storageItem.startTime < item.startTime) {
+          __classPrivateFieldGet$8(this, _Loader_storageLoadItemMap, "f")[assetId] = item;
+          this.trigger("load", Object.assign(Object.assign({}, item), { countTime: item.endTime - item.startTime }));
+        }
+      } else {
+        __classPrivateFieldGet$8(this, _Loader_storageLoadItemMap, "f")[assetId] = item;
         this.trigger("load", Object.assign(Object.assign({}, item), { countTime: item.endTime - item.startTime }));
       }
-    } else {
-      __classPrivateFieldGet$7(this, _Loader_storageLoadItemMap, "f")[assetId] = item;
-      this.trigger("load", Object.assign(Object.assign({}, item), { countTime: item.endTime - item.startTime }));
     }
   }, _Loader_emitError = function _Loader_emitError2(item) {
     var _a;
     const assetId = getAssetIdFromElement(item.element);
-    const storageItem = (_a = __classPrivateFieldGet$7(this, _Loader_storageLoadItemMap, "f")) === null || _a === void 0 ? void 0 : _a[assetId];
-    if (storageItem) {
-      if (storageItem.startTime < item.startTime) {
-        __classPrivateFieldGet$7(this, _Loader_storageLoadItemMap, "f")[assetId] = item;
+    const storageItem = (_a = __classPrivateFieldGet$8(this, _Loader_storageLoadItemMap, "f")) === null || _a === void 0 ? void 0 : _a[assetId];
+    if (!__classPrivateFieldGet$8(this, _Loader_hasDestroyed, "f")) {
+      if (storageItem) {
+        if (storageItem.startTime < item.startTime) {
+          __classPrivateFieldGet$8(this, _Loader_storageLoadItemMap, "f")[assetId] = item;
+          this.trigger("error", Object.assign(Object.assign({}, item), { countTime: item.endTime - item.startTime }));
+        }
+      } else {
+        __classPrivateFieldGet$8(this, _Loader_storageLoadItemMap, "f")[assetId] = item;
         this.trigger("error", Object.assign(Object.assign({}, item), { countTime: item.endTime - item.startTime }));
       }
-    } else {
-      __classPrivateFieldGet$7(this, _Loader_storageLoadItemMap, "f")[assetId] = item;
-      this.trigger("error", Object.assign(Object.assign({}, item), { countTime: item.endTime - item.startTime }));
     }
   }, _Loader_loadResource = function _Loader_loadResource2(element, assets) {
-    const item = __classPrivateFieldGet$7(this, _Loader_instances, "m", _Loader_createLoadItem).call(this, element);
+    const item = __classPrivateFieldGet$8(this, _Loader_instances, "m", _Loader_createLoadItem).call(this, element);
     const assetId = getAssetIdFromElement(element);
-    __classPrivateFieldGet$7(this, _Loader_currentLoadItemMap, "f")[assetId] = item;
-    const loadFunc = __classPrivateFieldGet$7(this, _Loader_loadFuncMap, "f")[element.type];
-    if (typeof loadFunc === "function") {
+    __classPrivateFieldGet$8(this, _Loader_currentLoadItemMap, "f")[assetId] = item;
+    const loadFunc = __classPrivateFieldGet$8(this, _Loader_loadFuncMap, "f")[element.type];
+    if (typeof loadFunc === "function" && !__classPrivateFieldGet$8(this, _Loader_hasDestroyed, "f")) {
       item.startTime = Date.now();
       loadFunc(element, assets).then((result) => {
-        item.content = result.content;
-        item.endTime = Date.now();
-        item.status = "load";
-        __classPrivateFieldGet$7(this, _Loader_instances, "m", _Loader_emitLoad).call(this, item);
+        if (!__classPrivateFieldGet$8(this, _Loader_hasDestroyed, "f")) {
+          item.content = result.content;
+          item.endTime = Date.now();
+          item.status = "load";
+          __classPrivateFieldGet$8(this, _Loader_instances, "m", _Loader_emitLoad).call(this, item);
+        }
       }).catch((err) => {
         console.warn(`Load element source "${item.source}" fail`, err, element);
         item.endTime = Date.now();
         item.status = "error";
         item.error = err;
-        __classPrivateFieldGet$7(this, _Loader_instances, "m", _Loader_emitError).call(this, item);
+        __classPrivateFieldGet$8(this, _Loader_instances, "m", _Loader_emitError).call(this, item);
       });
     }
   }, _Loader_isExistingErrorStorage = function _Loader_isExistingErrorStorage2(element) {
     var _a;
     const assetId = getAssetIdFromElement(element);
-    const existItem = (_a = __classPrivateFieldGet$7(this, _Loader_currentLoadItemMap, "f")) === null || _a === void 0 ? void 0 : _a[assetId];
-    if (existItem && existItem.status === "error" && existItem.source && existItem.source === __classPrivateFieldGet$7(this, _Loader_instances, "m", _Loader_getLoadElementSource).call(this, element)) {
+    const existItem = (_a = __classPrivateFieldGet$8(this, _Loader_currentLoadItemMap, "f")) === null || _a === void 0 ? void 0 : _a[assetId];
+    if (existItem && existItem.status === "error" && existItem.source && existItem.source === __classPrivateFieldGet$8(this, _Loader_instances, "m", _Loader_getLoadElementSource).call(this, element)) {
       return true;
     }
     return false;
   };
-  var __classPrivateFieldSet$6 = function(receiver, state, value, kind, f) {
+  var __classPrivateFieldSet$7 = function(receiver, state, value, kind, f) {
     if (kind === "m")
       throw new TypeError("Private method is not writable");
     if (kind === "a" && !f)
@@ -4126,35 +4165,41 @@ var __privateMethod = (obj, member, method) => {
       throw new TypeError("Cannot write private member to an object whose class did not declare it");
     return kind === "a" ? f.call(receiver, value) : f ? f.value = value : state.set(receiver, value), value;
   };
-  var __classPrivateFieldGet$6 = function(receiver, state, kind, f) {
+  var __classPrivateFieldGet$7 = function(receiver, state, kind, f) {
     if (kind === "a" && !f)
       throw new TypeError("Private accessor was defined without a getter");
     if (typeof state === "function" ? receiver !== state || !f : !state.has(receiver))
       throw new TypeError("Cannot read private member from an object whose class did not declare it");
     return kind === "m" ? f : kind === "a" ? f.call(receiver) : f ? f.value : state.get(receiver);
   };
-  var _Renderer_instances, _Renderer_opts, _Renderer_loader, _Renderer_init;
+  var _Renderer_instances, _Renderer_opts, _Renderer_loader, _Renderer_hasDestroyed, _Renderer_init;
   class Renderer extends EventEmitter {
     constructor(opts) {
       super();
       _Renderer_instances.add(this);
       _Renderer_opts.set(this, void 0);
       _Renderer_loader.set(this, new Loader());
-      __classPrivateFieldSet$6(this, _Renderer_opts, opts, "f");
-      __classPrivateFieldGet$6(this, _Renderer_instances, "m", _Renderer_init).call(this);
+      _Renderer_hasDestroyed.set(this, false);
+      __classPrivateFieldSet$7(this, _Renderer_opts, opts, "f");
+      __classPrivateFieldGet$7(this, _Renderer_instances, "m", _Renderer_init).call(this);
+    }
+    isDestroyed() {
+      return __classPrivateFieldGet$7(this, _Renderer_hasDestroyed, "f");
     }
     destroy() {
-      __classPrivateFieldSet$6(this, _Renderer_opts, null, "f");
-      __classPrivateFieldGet$6(this, _Renderer_loader, "f").destroy();
-      __classPrivateFieldSet$6(this, _Renderer_loader, null, "f");
+      this.clear();
+      __classPrivateFieldSet$7(this, _Renderer_opts, null, "f");
+      __classPrivateFieldGet$7(this, _Renderer_loader, "f").destroy();
+      __classPrivateFieldSet$7(this, _Renderer_loader, null, "f");
+      __classPrivateFieldSet$7(this, _Renderer_hasDestroyed, true, "f");
     }
     updateOptions(opts) {
-      __classPrivateFieldSet$6(this, _Renderer_opts, opts, "f");
+      __classPrivateFieldSet$7(this, _Renderer_opts, opts, "f");
     }
     drawData(data, opts) {
-      const loader = __classPrivateFieldGet$6(this, _Renderer_loader, "f");
-      const { calculator } = __classPrivateFieldGet$6(this, _Renderer_opts, "f");
-      const viewContext = __classPrivateFieldGet$6(this, _Renderer_opts, "f").viewContext;
+      const loader = __classPrivateFieldGet$7(this, _Renderer_loader, "f");
+      const { calculator } = __classPrivateFieldGet$7(this, _Renderer_opts, "f");
+      const viewContext = __classPrivateFieldGet$7(this, _Renderer_opts, "f").viewContext;
       viewContext.clearRect(0, 0, viewContext.canvas.width, viewContext.canvas.height);
       const parentElementSize = {
         x: 0,
@@ -4179,7 +4224,7 @@ var __privateMethod = (obj, member, method) => {
       }, opts));
     }
     scale(num) {
-      const { sharer } = __classPrivateFieldGet$6(this, _Renderer_opts, "f");
+      const { sharer } = __classPrivateFieldGet$7(this, _Renderer_opts, "f");
       if (!sharer) {
         return;
       }
@@ -4204,23 +4249,69 @@ var __privateMethod = (obj, member, method) => {
       }
     }
     setLoadItemMap(itemMap) {
-      __classPrivateFieldGet$6(this, _Renderer_loader, "f").setLoadItemMap(itemMap);
+      __classPrivateFieldGet$7(this, _Renderer_loader, "f").setLoadItemMap(itemMap);
     }
     getLoadItemMap() {
-      return __classPrivateFieldGet$6(this, _Renderer_loader, "f").getLoadItemMap();
+      return __classPrivateFieldGet$7(this, _Renderer_loader, "f").getLoadItemMap();
     }
     getLoader() {
-      return __classPrivateFieldGet$6(this, _Renderer_loader, "f");
+      return __classPrivateFieldGet$7(this, _Renderer_loader, "f");
     }
   }
-  _Renderer_opts = /* @__PURE__ */ new WeakMap(), _Renderer_loader = /* @__PURE__ */ new WeakMap(), _Renderer_instances = /* @__PURE__ */ new WeakSet(), _Renderer_init = function _Renderer_init2() {
-    const loader = __classPrivateFieldGet$6(this, _Renderer_loader, "f");
+  _Renderer_opts = /* @__PURE__ */ new WeakMap(), _Renderer_loader = /* @__PURE__ */ new WeakMap(), _Renderer_hasDestroyed = /* @__PURE__ */ new WeakMap(), _Renderer_instances = /* @__PURE__ */ new WeakSet(), _Renderer_init = function _Renderer_init2() {
+    const loader = __classPrivateFieldGet$7(this, _Renderer_loader, "f");
     loader.on("load", (e) => {
       this.trigger("load", e);
     });
     loader.on("error", () => {
     });
   };
+  var __classPrivateFieldSet$6 = function(receiver, state, value, kind, f) {
+    if (kind === "m")
+      throw new TypeError("Private method is not writable");
+    if (kind === "a" && !f)
+      throw new TypeError("Private accessor was defined without a setter");
+    if (typeof state === "function" ? receiver !== state || !f : !state.has(receiver))
+      throw new TypeError("Cannot write private member to an object whose class did not declare it");
+    return kind === "a" ? f.call(receiver, value) : f ? f.value = value : state.set(receiver, value), value;
+  };
+  var __classPrivateFieldGet$6 = function(receiver, state, kind, f) {
+    if (kind === "a" && !f)
+      throw new TypeError("Private accessor was defined without a getter");
+    if (typeof state === "function" ? receiver !== state || !f : !state.has(receiver))
+      throw new TypeError("Cannot read private member from an object whose class did not declare it");
+    return kind === "m" ? f : kind === "a" ? f.call(receiver) : f ? f.value : state.get(receiver);
+  };
+  var _Calculator_opts;
+  class Calculator {
+    constructor(opts) {
+      _Calculator_opts.set(this, void 0);
+      __classPrivateFieldSet$6(this, _Calculator_opts, opts, "f");
+    }
+    destroy() {
+      __classPrivateFieldSet$6(this, _Calculator_opts, null, "f");
+    }
+    elementSize(size, viewScaleInfo, viewSizeInfo) {
+      return calcViewElementSize(size, { viewScaleInfo, viewSizeInfo });
+    }
+    isElementInView(elem, viewScaleInfo, viewSizeInfo) {
+      return isElementInView(elem, { viewScaleInfo, viewSizeInfo });
+    }
+    isPointInElement(p, elem, viewScaleInfo, viewSizeInfo) {
+      const context2d = __classPrivateFieldGet$6(this, _Calculator_opts, "f").viewContext;
+      return isViewPointInElement(p, {
+        context2d,
+        element: elem,
+        viewScaleInfo,
+        viewSizeInfo
+      });
+    }
+    getPointElement(p, opts) {
+      const context2d = __classPrivateFieldGet$6(this, _Calculator_opts, "f").viewContext;
+      return getViewPointAtElement(p, Object.assign(Object.assign({}, opts), { context2d }));
+    }
+  }
+  _Calculator_opts = /* @__PURE__ */ new WeakMap();
   var __classPrivateFieldSet$5 = function(receiver, state, value, kind, f) {
     if (kind === "m")
       throw new TypeError("Private method is not writable");
@@ -4237,53 +4328,7 @@ var __privateMethod = (obj, member, method) => {
       throw new TypeError("Cannot read private member from an object whose class did not declare it");
     return kind === "m" ? f : kind === "a" ? f.call(receiver) : f ? f.value : state.get(receiver);
   };
-  var _Calculator_opts;
-  class Calculator {
-    constructor(opts) {
-      _Calculator_opts.set(this, void 0);
-      __classPrivateFieldSet$5(this, _Calculator_opts, opts, "f");
-    }
-    destroy() {
-      __classPrivateFieldSet$5(this, _Calculator_opts, null, "f");
-    }
-    elementSize(size, viewScaleInfo, viewSizeInfo) {
-      return calcViewElementSize(size, { viewScaleInfo, viewSizeInfo });
-    }
-    isElementInView(elem, viewScaleInfo, viewSizeInfo) {
-      return isElementInView(elem, { viewScaleInfo, viewSizeInfo });
-    }
-    isPointInElement(p, elem, viewScaleInfo, viewSizeInfo) {
-      const context2d = __classPrivateFieldGet$5(this, _Calculator_opts, "f").viewContext;
-      return isViewPointInElement(p, {
-        context2d,
-        element: elem,
-        viewScaleInfo,
-        viewSizeInfo
-      });
-    }
-    getPointElement(p, opts) {
-      const context2d = __classPrivateFieldGet$5(this, _Calculator_opts, "f").viewContext;
-      return getViewPointAtElement(p, Object.assign(Object.assign({}, opts), { context2d }));
-    }
-  }
-  _Calculator_opts = /* @__PURE__ */ new WeakMap();
-  var __classPrivateFieldSet$4 = function(receiver, state, value, kind, f) {
-    if (kind === "m")
-      throw new TypeError("Private method is not writable");
-    if (kind === "a" && !f)
-      throw new TypeError("Private accessor was defined without a setter");
-    if (typeof state === "function" ? receiver !== state || !f : !state.has(receiver))
-      throw new TypeError("Cannot write private member to an object whose class did not declare it");
-    return kind === "a" ? f.call(receiver, value) : f ? f.value = value : state.set(receiver, value), value;
-  };
-  var __classPrivateFieldGet$4 = function(receiver, state, kind, f) {
-    if (kind === "a" && !f)
-      throw new TypeError("Private accessor was defined without a getter");
-    if (typeof state === "function" ? receiver !== state || !f : !state.has(receiver))
-      throw new TypeError("Cannot read private member from an object whose class did not declare it");
-    return kind === "m" ? f : kind === "a" ? f.call(receiver) : f ? f.value : state.get(receiver);
-  };
-  var _BoardWatcher_instances, _BoardWatcher_opts, _BoardWatcher_store, _BoardWatcher_init, _BoardWatcher_onWheel, _BoardWatcher_onContextMenu, _BoardWatcher_onClick, _BoardWatcher_onPointLeave, _BoardWatcher_onPointEnd, _BoardWatcher_onPointMove, _BoardWatcher_onPointStart, _BoardWatcher_onHover, _BoardWatcher_isInTarget, _BoardWatcher_getPoint, _BoardWatcher_isVaildPoint;
+  var _BoardWatcher_instances, _BoardWatcher_opts, _BoardWatcher_store, _BoardWatcher_hasDestroyed, _BoardWatcher_init, _BoardWatcher_onWheel, _BoardWatcher_onContextMenu, _BoardWatcher_onClick, _BoardWatcher_onPointLeave, _BoardWatcher_onPointEnd, _BoardWatcher_onPointMove, _BoardWatcher_onPointStart, _BoardWatcher_onHover, _BoardWatcher_isInTarget, _BoardWatcher_getPoint, _BoardWatcher_isVaildPoint;
   function isBoardAvailableNum(num) {
     return num > 0 || num < 0 || num === 0;
   }
@@ -4293,12 +4338,13 @@ var __privateMethod = (obj, member, method) => {
       _BoardWatcher_instances.add(this);
       _BoardWatcher_opts.set(this, void 0);
       _BoardWatcher_store.set(this, void 0);
+      _BoardWatcher_hasDestroyed.set(this, false);
       _BoardWatcher_onWheel.set(this, (e) => {
-        if (!__classPrivateFieldGet$4(this, _BoardWatcher_instances, "m", _BoardWatcher_isInTarget).call(this, e)) {
+        if (!__classPrivateFieldGet$5(this, _BoardWatcher_instances, "m", _BoardWatcher_isInTarget).call(this, e)) {
           return;
         }
-        const point = __classPrivateFieldGet$4(this, _BoardWatcher_instances, "m", _BoardWatcher_getPoint).call(this, e);
-        if (!__classPrivateFieldGet$4(this, _BoardWatcher_instances, "m", _BoardWatcher_isVaildPoint).call(this, point)) {
+        const point = __classPrivateFieldGet$5(this, _BoardWatcher_instances, "m", _BoardWatcher_getPoint).call(this, e);
+        if (!__classPrivateFieldGet$5(this, _BoardWatcher_instances, "m", _BoardWatcher_isVaildPoint).call(this, point)) {
           return;
         }
         e.preventDefault();
@@ -4312,124 +4358,135 @@ var __privateMethod = (obj, member, method) => {
         }
       });
       _BoardWatcher_onContextMenu.set(this, (e) => {
-        if (!__classPrivateFieldGet$4(this, _BoardWatcher_instances, "m", _BoardWatcher_isInTarget).call(this, e)) {
+        if (!__classPrivateFieldGet$5(this, _BoardWatcher_instances, "m", _BoardWatcher_isInTarget).call(this, e)) {
           return;
         }
         e.preventDefault();
-        const point = __classPrivateFieldGet$4(this, _BoardWatcher_instances, "m", _BoardWatcher_getPoint).call(this, e);
-        if (!__classPrivateFieldGet$4(this, _BoardWatcher_instances, "m", _BoardWatcher_isVaildPoint).call(this, point)) {
+        const point = __classPrivateFieldGet$5(this, _BoardWatcher_instances, "m", _BoardWatcher_getPoint).call(this, e);
+        if (!__classPrivateFieldGet$5(this, _BoardWatcher_instances, "m", _BoardWatcher_isVaildPoint).call(this, point)) {
           return;
         }
       });
       _BoardWatcher_onClick.set(this, (e) => {
-        if (!__classPrivateFieldGet$4(this, _BoardWatcher_instances, "m", _BoardWatcher_isInTarget).call(this, e)) {
+        if (!__classPrivateFieldGet$5(this, _BoardWatcher_instances, "m", _BoardWatcher_isInTarget).call(this, e)) {
           return;
         }
         e.preventDefault();
-        const point = __classPrivateFieldGet$4(this, _BoardWatcher_instances, "m", _BoardWatcher_getPoint).call(this, e);
-        if (!__classPrivateFieldGet$4(this, _BoardWatcher_instances, "m", _BoardWatcher_isVaildPoint).call(this, point)) {
+        const point = __classPrivateFieldGet$5(this, _BoardWatcher_instances, "m", _BoardWatcher_getPoint).call(this, e);
+        if (!__classPrivateFieldGet$5(this, _BoardWatcher_instances, "m", _BoardWatcher_isVaildPoint).call(this, point)) {
           return;
         }
         const maxLimitTime = 500;
         const t = Date.now();
-        const preClickPoint = __classPrivateFieldGet$4(this, _BoardWatcher_store, "f").get("prevClickPoint");
+        const preClickPoint = __classPrivateFieldGet$5(this, _BoardWatcher_store, "f").get("prevClickPoint");
         if (preClickPoint && t - preClickPoint.t <= maxLimitTime && Math.abs(preClickPoint.x - point.x) <= 5 && Math.abs(preClickPoint.y - point.y) <= 5) {
           this.trigger("doubleClick", { point });
         } else {
-          __classPrivateFieldGet$4(this, _BoardWatcher_store, "f").set("prevClickPoint", point);
+          __classPrivateFieldGet$5(this, _BoardWatcher_store, "f").set("prevClickPoint", point);
         }
       });
       _BoardWatcher_onPointLeave.set(this, (e) => {
-        __classPrivateFieldGet$4(this, _BoardWatcher_store, "f").set("hasPointDown", false);
-        if (!__classPrivateFieldGet$4(this, _BoardWatcher_instances, "m", _BoardWatcher_isInTarget).call(this, e)) {
+        __classPrivateFieldGet$5(this, _BoardWatcher_store, "f").set("hasPointDown", false);
+        if (!__classPrivateFieldGet$5(this, _BoardWatcher_instances, "m", _BoardWatcher_isInTarget).call(this, e)) {
           return;
         }
         e.preventDefault();
-        const point = __classPrivateFieldGet$4(this, _BoardWatcher_instances, "m", _BoardWatcher_getPoint).call(this, e);
+        const point = __classPrivateFieldGet$5(this, _BoardWatcher_instances, "m", _BoardWatcher_getPoint).call(this, e);
         this.trigger("pointLeave", { point });
       });
       _BoardWatcher_onPointEnd.set(this, (e) => {
-        __classPrivateFieldGet$4(this, _BoardWatcher_store, "f").set("hasPointDown", false);
-        if (!__classPrivateFieldGet$4(this, _BoardWatcher_instances, "m", _BoardWatcher_isInTarget).call(this, e)) {
+        __classPrivateFieldGet$5(this, _BoardWatcher_store, "f").set("hasPointDown", false);
+        if (!__classPrivateFieldGet$5(this, _BoardWatcher_instances, "m", _BoardWatcher_isInTarget).call(this, e)) {
           return;
         }
         e.preventDefault();
-        const point = __classPrivateFieldGet$4(this, _BoardWatcher_instances, "m", _BoardWatcher_getPoint).call(this, e);
+        const point = __classPrivateFieldGet$5(this, _BoardWatcher_instances, "m", _BoardWatcher_getPoint).call(this, e);
         this.trigger("pointEnd", { point });
       });
       _BoardWatcher_onPointMove.set(this, (e) => {
-        if (!__classPrivateFieldGet$4(this, _BoardWatcher_instances, "m", _BoardWatcher_isInTarget).call(this, e)) {
+        if (!__classPrivateFieldGet$5(this, _BoardWatcher_instances, "m", _BoardWatcher_isInTarget).call(this, e)) {
           return;
         }
         e.preventDefault();
         e.stopPropagation();
-        const point = __classPrivateFieldGet$4(this, _BoardWatcher_instances, "m", _BoardWatcher_getPoint).call(this, e);
-        if (!__classPrivateFieldGet$4(this, _BoardWatcher_instances, "m", _BoardWatcher_isVaildPoint).call(this, point)) {
-          if (__classPrivateFieldGet$4(this, _BoardWatcher_store, "f").get("hasPointDown")) {
+        const point = __classPrivateFieldGet$5(this, _BoardWatcher_instances, "m", _BoardWatcher_getPoint).call(this, e);
+        if (!__classPrivateFieldGet$5(this, _BoardWatcher_instances, "m", _BoardWatcher_isVaildPoint).call(this, point)) {
+          if (__classPrivateFieldGet$5(this, _BoardWatcher_store, "f").get("hasPointDown")) {
             this.trigger("pointLeave", { point });
-            __classPrivateFieldGet$4(this, _BoardWatcher_store, "f").set("hasPointDown", false);
+            __classPrivateFieldGet$5(this, _BoardWatcher_store, "f").set("hasPointDown", false);
           }
           return;
         }
-        if (__classPrivateFieldGet$4(this, _BoardWatcher_store, "f").get("hasPointDown") !== true) {
+        if (__classPrivateFieldGet$5(this, _BoardWatcher_store, "f").get("hasPointDown") !== true) {
           return;
         }
         this.trigger("pointMove", { point });
       });
       _BoardWatcher_onPointStart.set(this, (e) => {
-        if (!__classPrivateFieldGet$4(this, _BoardWatcher_instances, "m", _BoardWatcher_isInTarget).call(this, e)) {
+        if (!__classPrivateFieldGet$5(this, _BoardWatcher_instances, "m", _BoardWatcher_isInTarget).call(this, e)) {
           return;
         }
         e.preventDefault();
-        const point = __classPrivateFieldGet$4(this, _BoardWatcher_instances, "m", _BoardWatcher_getPoint).call(this, e);
-        if (!__classPrivateFieldGet$4(this, _BoardWatcher_instances, "m", _BoardWatcher_isVaildPoint).call(this, point)) {
+        const point = __classPrivateFieldGet$5(this, _BoardWatcher_instances, "m", _BoardWatcher_getPoint).call(this, e);
+        if (!__classPrivateFieldGet$5(this, _BoardWatcher_instances, "m", _BoardWatcher_isVaildPoint).call(this, point)) {
           return;
         }
-        __classPrivateFieldGet$4(this, _BoardWatcher_store, "f").set("hasPointDown", true);
+        __classPrivateFieldGet$5(this, _BoardWatcher_store, "f").set("hasPointDown", true);
         this.trigger("pointStart", { point });
       });
       _BoardWatcher_onHover.set(this, (e) => {
-        if (!__classPrivateFieldGet$4(this, _BoardWatcher_instances, "m", _BoardWatcher_isInTarget).call(this, e)) {
+        if (!__classPrivateFieldGet$5(this, _BoardWatcher_instances, "m", _BoardWatcher_isInTarget).call(this, e)) {
           return;
         }
         e.preventDefault();
-        const point = __classPrivateFieldGet$4(this, _BoardWatcher_instances, "m", _BoardWatcher_getPoint).call(this, e);
-        if (!__classPrivateFieldGet$4(this, _BoardWatcher_instances, "m", _BoardWatcher_isVaildPoint).call(this, point)) {
+        const point = __classPrivateFieldGet$5(this, _BoardWatcher_instances, "m", _BoardWatcher_getPoint).call(this, e);
+        if (!__classPrivateFieldGet$5(this, _BoardWatcher_instances, "m", _BoardWatcher_isVaildPoint).call(this, point)) {
           return;
         }
         this.trigger("hover", { point });
       });
       const store = new Store({ defaultStorage: { hasPointDown: false, prevClickPoint: null } });
-      __classPrivateFieldSet$4(this, _BoardWatcher_store, store, "f");
-      __classPrivateFieldSet$4(this, _BoardWatcher_opts, opts, "f");
-      __classPrivateFieldGet$4(this, _BoardWatcher_instances, "m", _BoardWatcher_init).call(this);
+      __classPrivateFieldSet$5(this, _BoardWatcher_store, store, "f");
+      __classPrivateFieldSet$5(this, _BoardWatcher_opts, opts, "f");
+      __classPrivateFieldGet$5(this, _BoardWatcher_instances, "m", _BoardWatcher_init).call(this);
+    }
+    onEvents() {
+      if (__classPrivateFieldGet$5(this, _BoardWatcher_hasDestroyed, "f")) {
+        return;
+      }
+      const container = window;
+      container.addEventListener("mousemove", __classPrivateFieldGet$5(this, _BoardWatcher_onHover, "f"));
+      container.addEventListener("mousedown", __classPrivateFieldGet$5(this, _BoardWatcher_onPointStart, "f"));
+      container.addEventListener("mousemove", __classPrivateFieldGet$5(this, _BoardWatcher_onPointMove, "f"));
+      container.addEventListener("mouseup", __classPrivateFieldGet$5(this, _BoardWatcher_onPointEnd, "f"));
+      container.addEventListener("mouseleave", __classPrivateFieldGet$5(this, _BoardWatcher_onPointLeave, "f"));
+      container.addEventListener("wheel", __classPrivateFieldGet$5(this, _BoardWatcher_onWheel, "f"), { passive: false });
+      container.addEventListener("click", __classPrivateFieldGet$5(this, _BoardWatcher_onClick, "f"));
+      container.addEventListener("contextmenu", __classPrivateFieldGet$5(this, _BoardWatcher_onContextMenu, "f"));
+    }
+    offEvents() {
+      const container = window;
+      container.removeEventListener("mousemove", __classPrivateFieldGet$5(this, _BoardWatcher_onHover, "f"));
+      container.removeEventListener("mousedown", __classPrivateFieldGet$5(this, _BoardWatcher_onPointStart, "f"));
+      container.removeEventListener("mousemove", __classPrivateFieldGet$5(this, _BoardWatcher_onPointMove, "f"));
+      container.removeEventListener("mouseup", __classPrivateFieldGet$5(this, _BoardWatcher_onPointEnd, "f"));
+      container.removeEventListener("mouseleave", __classPrivateFieldGet$5(this, _BoardWatcher_onPointLeave, "f"));
+      container.removeEventListener("wheel", __classPrivateFieldGet$5(this, _BoardWatcher_onWheel, "f"));
+      container.removeEventListener("click", __classPrivateFieldGet$5(this, _BoardWatcher_onClick, "f"));
+      container.removeEventListener("contextmenu", __classPrivateFieldGet$5(this, _BoardWatcher_onContextMenu, "f"));
     }
     destroy() {
-      const container = window;
-      container.removeEventListener("mousemove", __classPrivateFieldGet$4(this, _BoardWatcher_onHover, "f"));
-      container.removeEventListener("mousedown", __classPrivateFieldGet$4(this, _BoardWatcher_onPointStart, "f"));
-      container.removeEventListener("mousemove", __classPrivateFieldGet$4(this, _BoardWatcher_onPointMove, "f"));
-      container.removeEventListener("mouseup", __classPrivateFieldGet$4(this, _BoardWatcher_onPointEnd, "f"));
-      container.removeEventListener("mouseleave", __classPrivateFieldGet$4(this, _BoardWatcher_onPointLeave, "f"));
-      container.removeEventListener("wheel", __classPrivateFieldGet$4(this, _BoardWatcher_onWheel, "f"));
-      container.removeEventListener("click", __classPrivateFieldGet$4(this, _BoardWatcher_onClick, "f"));
-      container.removeEventListener("contextmenu", __classPrivateFieldGet$4(this, _BoardWatcher_onContextMenu, "f"));
+      this.offEvents();
+      __classPrivateFieldGet$5(this, _BoardWatcher_store, "f").destroy();
+      __classPrivateFieldSet$5(this, _BoardWatcher_hasDestroyed, true, "f");
     }
   }
-  _BoardWatcher_opts = /* @__PURE__ */ new WeakMap(), _BoardWatcher_store = /* @__PURE__ */ new WeakMap(), _BoardWatcher_onWheel = /* @__PURE__ */ new WeakMap(), _BoardWatcher_onContextMenu = /* @__PURE__ */ new WeakMap(), _BoardWatcher_onClick = /* @__PURE__ */ new WeakMap(), _BoardWatcher_onPointLeave = /* @__PURE__ */ new WeakMap(), _BoardWatcher_onPointEnd = /* @__PURE__ */ new WeakMap(), _BoardWatcher_onPointMove = /* @__PURE__ */ new WeakMap(), _BoardWatcher_onPointStart = /* @__PURE__ */ new WeakMap(), _BoardWatcher_onHover = /* @__PURE__ */ new WeakMap(), _BoardWatcher_instances = /* @__PURE__ */ new WeakSet(), _BoardWatcher_init = function _BoardWatcher_init2() {
-    const container = window;
-    container.addEventListener("mousemove", __classPrivateFieldGet$4(this, _BoardWatcher_onHover, "f"));
-    container.addEventListener("mousedown", __classPrivateFieldGet$4(this, _BoardWatcher_onPointStart, "f"));
-    container.addEventListener("mousemove", __classPrivateFieldGet$4(this, _BoardWatcher_onPointMove, "f"));
-    container.addEventListener("mouseup", __classPrivateFieldGet$4(this, _BoardWatcher_onPointEnd, "f"));
-    container.addEventListener("mouseleave", __classPrivateFieldGet$4(this, _BoardWatcher_onPointLeave, "f"));
-    container.addEventListener("wheel", __classPrivateFieldGet$4(this, _BoardWatcher_onWheel, "f"), { passive: false });
-    container.addEventListener("click", __classPrivateFieldGet$4(this, _BoardWatcher_onClick, "f"));
-    container.addEventListener("contextmenu", __classPrivateFieldGet$4(this, _BoardWatcher_onContextMenu, "f"));
+  _BoardWatcher_opts = /* @__PURE__ */ new WeakMap(), _BoardWatcher_store = /* @__PURE__ */ new WeakMap(), _BoardWatcher_hasDestroyed = /* @__PURE__ */ new WeakMap(), _BoardWatcher_onWheel = /* @__PURE__ */ new WeakMap(), _BoardWatcher_onContextMenu = /* @__PURE__ */ new WeakMap(), _BoardWatcher_onClick = /* @__PURE__ */ new WeakMap(), _BoardWatcher_onPointLeave = /* @__PURE__ */ new WeakMap(), _BoardWatcher_onPointEnd = /* @__PURE__ */ new WeakMap(), _BoardWatcher_onPointMove = /* @__PURE__ */ new WeakMap(), _BoardWatcher_onPointStart = /* @__PURE__ */ new WeakMap(), _BoardWatcher_onHover = /* @__PURE__ */ new WeakMap(), _BoardWatcher_instances = /* @__PURE__ */ new WeakSet(), _BoardWatcher_init = function _BoardWatcher_init2() {
+    this.onEvents();
   }, _BoardWatcher_isInTarget = function _BoardWatcher_isInTarget2(e) {
-    return e.target === __classPrivateFieldGet$4(this, _BoardWatcher_opts, "f").boardContent.boardContext.canvas;
+    return e.target === __classPrivateFieldGet$5(this, _BoardWatcher_opts, "f").boardContent.boardContext.canvas;
   }, _BoardWatcher_getPoint = function _BoardWatcher_getPoint2(e) {
-    const boardCanvas = __classPrivateFieldGet$4(this, _BoardWatcher_opts, "f").boardContent.boardContext.canvas;
+    const boardCanvas = __classPrivateFieldGet$5(this, _BoardWatcher_opts, "f").boardContent.boardContext.canvas;
     const rect = boardCanvas.getBoundingClientRect();
     const p = {
       x: e.clientX - rect.left,
@@ -4438,14 +4495,14 @@ var __privateMethod = (obj, member, method) => {
     };
     return p;
   }, _BoardWatcher_isVaildPoint = function _BoardWatcher_isVaildPoint2(p) {
-    const viewSize = __classPrivateFieldGet$4(this, _BoardWatcher_opts, "f").sharer.getActiveViewSizeInfo();
+    const viewSize = __classPrivateFieldGet$5(this, _BoardWatcher_opts, "f").sharer.getActiveViewSizeInfo();
     const { width, height } = viewSize;
     if (isBoardAvailableNum(p.x) && isBoardAvailableNum(p.y) && p.x <= width && p.y <= height) {
       return true;
     }
     return false;
   };
-  var __classPrivateFieldSet$3 = function(receiver, state, value, kind, f) {
+  var __classPrivateFieldSet$4 = function(receiver, state, value, kind, f) {
     if (kind === "m")
       throw new TypeError("Private method is not writable");
     if (kind === "a" && !f)
@@ -4454,7 +4511,7 @@ var __privateMethod = (obj, member, method) => {
       throw new TypeError("Cannot write private member to an object whose class did not declare it");
     return kind === "a" ? f.call(receiver, value) : f ? f.value = value : state.set(receiver, value), value;
   };
-  var __classPrivateFieldGet$3 = function(receiver, state, kind, f) {
+  var __classPrivateFieldGet$4 = function(receiver, state, kind, f) {
     if (kind === "a" && !f)
       throw new TypeError("Private accessor was defined without a getter");
     if (typeof state === "function" ? receiver !== state || !f : !state.has(receiver))
@@ -4485,65 +4542,65 @@ var __privateMethod = (obj, member, method) => {
       const sharedStore = new Store({
         defaultStorage: {}
       });
-      __classPrivateFieldSet$3(this, _Sharer_activeStore, activeStore, "f");
-      __classPrivateFieldSet$3(this, _Sharer_sharedStore, sharedStore, "f");
+      __classPrivateFieldSet$4(this, _Sharer_activeStore, activeStore, "f");
+      __classPrivateFieldSet$4(this, _Sharer_sharedStore, sharedStore, "f");
     }
     getActiveStorage(key2) {
-      return __classPrivateFieldGet$3(this, _Sharer_activeStore, "f").get(key2);
+      return __classPrivateFieldGet$4(this, _Sharer_activeStore, "f").get(key2);
     }
     setActiveStorage(key2, storage) {
-      return __classPrivateFieldGet$3(this, _Sharer_activeStore, "f").set(key2, storage);
+      return __classPrivateFieldGet$4(this, _Sharer_activeStore, "f").set(key2, storage);
     }
     getActiveStoreSnapshot() {
-      return __classPrivateFieldGet$3(this, _Sharer_activeStore, "f").getSnapshot();
+      return __classPrivateFieldGet$4(this, _Sharer_activeStore, "f").getSnapshot();
     }
     getSharedStorage(key2) {
-      return __classPrivateFieldGet$3(this, _Sharer_sharedStore, "f").get(key2);
+      return __classPrivateFieldGet$4(this, _Sharer_sharedStore, "f").get(key2);
     }
     setSharedStorage(key2, storage) {
-      return __classPrivateFieldGet$3(this, _Sharer_sharedStore, "f").set(key2, storage);
+      return __classPrivateFieldGet$4(this, _Sharer_sharedStore, "f").set(key2, storage);
     }
     getSharedStoreSnapshot() {
-      return __classPrivateFieldGet$3(this, _Sharer_sharedStore, "f").getSnapshot();
+      return __classPrivateFieldGet$4(this, _Sharer_sharedStore, "f").getSnapshot();
     }
     getActiveViewScaleInfo() {
       const viewScaleInfo = {
-        scale: __classPrivateFieldGet$3(this, _Sharer_activeStore, "f").get("scale"),
-        offsetTop: __classPrivateFieldGet$3(this, _Sharer_activeStore, "f").get("offsetTop"),
-        offsetBottom: __classPrivateFieldGet$3(this, _Sharer_activeStore, "f").get("offsetBottom"),
-        offsetLeft: __classPrivateFieldGet$3(this, _Sharer_activeStore, "f").get("offsetLeft"),
-        offsetRight: __classPrivateFieldGet$3(this, _Sharer_activeStore, "f").get("offsetRight")
+        scale: __classPrivateFieldGet$4(this, _Sharer_activeStore, "f").get("scale"),
+        offsetTop: __classPrivateFieldGet$4(this, _Sharer_activeStore, "f").get("offsetTop"),
+        offsetBottom: __classPrivateFieldGet$4(this, _Sharer_activeStore, "f").get("offsetBottom"),
+        offsetLeft: __classPrivateFieldGet$4(this, _Sharer_activeStore, "f").get("offsetLeft"),
+        offsetRight: __classPrivateFieldGet$4(this, _Sharer_activeStore, "f").get("offsetRight")
       };
       return viewScaleInfo;
     }
     setActiveViewScaleInfo(viewScaleInfo) {
       const { scale, offsetTop, offsetBottom, offsetLeft, offsetRight } = viewScaleInfo;
-      __classPrivateFieldGet$3(this, _Sharer_activeStore, "f").set("scale", scale);
-      __classPrivateFieldGet$3(this, _Sharer_activeStore, "f").set("offsetTop", offsetTop);
-      __classPrivateFieldGet$3(this, _Sharer_activeStore, "f").set("offsetBottom", offsetBottom);
-      __classPrivateFieldGet$3(this, _Sharer_activeStore, "f").set("offsetLeft", offsetLeft);
-      __classPrivateFieldGet$3(this, _Sharer_activeStore, "f").set("offsetRight", offsetRight);
+      __classPrivateFieldGet$4(this, _Sharer_activeStore, "f").set("scale", scale);
+      __classPrivateFieldGet$4(this, _Sharer_activeStore, "f").set("offsetTop", offsetTop);
+      __classPrivateFieldGet$4(this, _Sharer_activeStore, "f").set("offsetBottom", offsetBottom);
+      __classPrivateFieldGet$4(this, _Sharer_activeStore, "f").set("offsetLeft", offsetLeft);
+      __classPrivateFieldGet$4(this, _Sharer_activeStore, "f").set("offsetRight", offsetRight);
     }
     setActiveViewSizeInfo(size) {
-      __classPrivateFieldGet$3(this, _Sharer_activeStore, "f").set("width", size.width);
-      __classPrivateFieldGet$3(this, _Sharer_activeStore, "f").set("height", size.height);
-      __classPrivateFieldGet$3(this, _Sharer_activeStore, "f").set("devicePixelRatio", size.devicePixelRatio);
-      __classPrivateFieldGet$3(this, _Sharer_activeStore, "f").set("contextWidth", size.contextWidth);
-      __classPrivateFieldGet$3(this, _Sharer_activeStore, "f").set("contextHeight", size.contextHeight);
+      __classPrivateFieldGet$4(this, _Sharer_activeStore, "f").set("width", size.width);
+      __classPrivateFieldGet$4(this, _Sharer_activeStore, "f").set("height", size.height);
+      __classPrivateFieldGet$4(this, _Sharer_activeStore, "f").set("devicePixelRatio", size.devicePixelRatio);
+      __classPrivateFieldGet$4(this, _Sharer_activeStore, "f").set("contextWidth", size.contextWidth);
+      __classPrivateFieldGet$4(this, _Sharer_activeStore, "f").set("contextHeight", size.contextHeight);
     }
     getActiveViewSizeInfo() {
       const sizeInfo = {
-        width: __classPrivateFieldGet$3(this, _Sharer_activeStore, "f").get("width"),
-        height: __classPrivateFieldGet$3(this, _Sharer_activeStore, "f").get("height"),
-        devicePixelRatio: __classPrivateFieldGet$3(this, _Sharer_activeStore, "f").get("devicePixelRatio"),
-        contextWidth: __classPrivateFieldGet$3(this, _Sharer_activeStore, "f").get("contextWidth"),
-        contextHeight: __classPrivateFieldGet$3(this, _Sharer_activeStore, "f").get("contextHeight")
+        width: __classPrivateFieldGet$4(this, _Sharer_activeStore, "f").get("width"),
+        height: __classPrivateFieldGet$4(this, _Sharer_activeStore, "f").get("height"),
+        devicePixelRatio: __classPrivateFieldGet$4(this, _Sharer_activeStore, "f").get("devicePixelRatio"),
+        contextWidth: __classPrivateFieldGet$4(this, _Sharer_activeStore, "f").get("contextWidth"),
+        contextHeight: __classPrivateFieldGet$4(this, _Sharer_activeStore, "f").get("contextHeight")
       };
       return sizeInfo;
     }
   }
   _Sharer_activeStore = /* @__PURE__ */ new WeakMap(), _Sharer_sharedStore = /* @__PURE__ */ new WeakMap();
-  var __classPrivateFieldSet$2 = function(receiver, state, value, kind, f) {
+  var __classPrivateFieldSet$3 = function(receiver, state, value, kind, f) {
     if (kind === "m")
       throw new TypeError("Private method is not writable");
     if (kind === "a" && !f)
@@ -4552,7 +4609,7 @@ var __privateMethod = (obj, member, method) => {
       throw new TypeError("Cannot write private member to an object whose class did not declare it");
     return kind === "a" ? f.call(receiver, value) : f ? f.value = value : state.set(receiver, value), value;
   };
-  var __classPrivateFieldGet$2 = function(receiver, state, kind, f) {
+  var __classPrivateFieldGet$3 = function(receiver, state, kind, f) {
     if (kind === "a" && !f)
       throw new TypeError("Private accessor was defined without a getter");
     if (typeof state === "function" ? receiver !== state || !f : !state.has(receiver))
@@ -4568,22 +4625,22 @@ var __privateMethod = (obj, member, method) => {
       _Viewer_opts.set(this, void 0);
       _Viewer_drawFrameSnapshotQueue.set(this, []);
       _Viewer_drawFrameStatus.set(this, "FREE");
-      __classPrivateFieldSet$2(this, _Viewer_opts, opts, "f");
-      __classPrivateFieldGet$2(this, _Viewer_instances, "m", _Viewer_init).call(this);
+      __classPrivateFieldSet$3(this, _Viewer_opts, opts, "f");
+      __classPrivateFieldGet$3(this, _Viewer_instances, "m", _Viewer_init).call(this);
     }
     drawFrame() {
-      const { sharer } = __classPrivateFieldGet$2(this, _Viewer_opts, "f");
+      const { sharer } = __classPrivateFieldGet$3(this, _Viewer_opts, "f");
       const activeStore = sharer.getActiveStoreSnapshot();
       const sharedStore = sharer.getSharedStoreSnapshot();
-      __classPrivateFieldGet$2(this, _Viewer_drawFrameSnapshotQueue, "f").push({
+      __classPrivateFieldGet$3(this, _Viewer_drawFrameSnapshotQueue, "f").push({
         activeStore,
         sharedStore
       });
-      __classPrivateFieldGet$2(this, _Viewer_instances, "m", _Viewer_drawAnimationFrame).call(this);
+      __classPrivateFieldGet$3(this, _Viewer_instances, "m", _Viewer_drawAnimationFrame).call(this);
     }
     scale(opts) {
       const { scale, point } = opts;
-      const { sharer } = __classPrivateFieldGet$2(this, _Viewer_opts, "f");
+      const { sharer } = __classPrivateFieldGet$3(this, _Viewer_opts, "f");
       const { moveX, moveY } = viewScale({
         scale,
         point,
@@ -4594,7 +4651,7 @@ var __privateMethod = (obj, member, method) => {
       return { moveX, moveY };
     }
     scroll(opts) {
-      const { sharer } = __classPrivateFieldGet$2(this, _Viewer_opts, "f");
+      const { sharer } = __classPrivateFieldGet$3(this, _Viewer_opts, "f");
       const prevViewScaleInfo = sharer.getActiveViewScaleInfo();
       const { moveX, moveY } = opts;
       const viewSizeInfo = sharer.getActiveViewSizeInfo();
@@ -4608,7 +4665,7 @@ var __privateMethod = (obj, member, method) => {
       return viewScaleInfo;
     }
     updateViewScaleInfo(opts) {
-      const { sharer } = __classPrivateFieldGet$2(this, _Viewer_opts, "f");
+      const { sharer } = __classPrivateFieldGet$3(this, _Viewer_opts, "f");
       const viewScaleInfo = calcViewScaleInfo(opts, {
         viewSizeInfo: sharer.getActiveViewSizeInfo()
       });
@@ -4616,11 +4673,11 @@ var __privateMethod = (obj, member, method) => {
       return viewScaleInfo;
     }
     resize(viewSize = {}) {
-      const { sharer } = __classPrivateFieldGet$2(this, _Viewer_opts, "f");
+      const { sharer } = __classPrivateFieldGet$3(this, _Viewer_opts, "f");
       const originViewSize = sharer.getActiveViewSizeInfo();
       const newViewSize = Object.assign(Object.assign({}, originViewSize), viewSize);
       const { width, height, devicePixelRatio } = newViewSize;
-      const { underContext, boardContext, helperContext, viewContext } = __classPrivateFieldGet$2(this, _Viewer_opts, "f").boardContent;
+      const { underContext, boardContext, helperContext, viewContext } = __classPrivateFieldGet$3(this, _Viewer_opts, "f").boardContent;
       boardContext.canvas.width = width * devicePixelRatio;
       boardContext.canvas.height = height * devicePixelRatio;
       boardContext.canvas.style.width = `${width}px`;
@@ -4636,18 +4693,18 @@ var __privateMethod = (obj, member, method) => {
     }
   }
   _Viewer_opts = /* @__PURE__ */ new WeakMap(), _Viewer_drawFrameSnapshotQueue = /* @__PURE__ */ new WeakMap(), _Viewer_drawFrameStatus = /* @__PURE__ */ new WeakMap(), _Viewer_instances = /* @__PURE__ */ new WeakSet(), _Viewer_init = function _Viewer_init2() {
-    const { renderer } = __classPrivateFieldGet$2(this, _Viewer_opts, "f");
+    const { renderer } = __classPrivateFieldGet$3(this, _Viewer_opts, "f");
     renderer.on("load", () => {
       this.drawFrame();
     });
   }, _Viewer_drawAnimationFrame = function _Viewer_drawAnimationFrame2() {
-    if (__classPrivateFieldGet$2(this, _Viewer_drawFrameStatus, "f") === "DRAWING" || __classPrivateFieldGet$2(this, _Viewer_drawFrameSnapshotQueue, "f").length === 0) {
+    if (__classPrivateFieldGet$3(this, _Viewer_drawFrameStatus, "f") === "DRAWING" || __classPrivateFieldGet$3(this, _Viewer_drawFrameSnapshotQueue, "f").length === 0) {
       return;
     } else {
-      __classPrivateFieldSet$2(this, _Viewer_drawFrameStatus, "DRAWING", "f");
+      __classPrivateFieldSet$3(this, _Viewer_drawFrameStatus, "DRAWING", "f");
     }
-    const snapshot = __classPrivateFieldGet$2(this, _Viewer_drawFrameSnapshotQueue, "f").shift();
-    const { renderer, boardContent, beforeDrawFrame, afterDrawFrame } = __classPrivateFieldGet$2(this, _Viewer_opts, "f");
+    const snapshot = __classPrivateFieldGet$3(this, _Viewer_drawFrameSnapshotQueue, "f").shift();
+    const { renderer, boardContent, beforeDrawFrame, afterDrawFrame } = __classPrivateFieldGet$3(this, _Viewer_opts, "f");
     if (snapshot) {
       const { scale, offsetTop, offsetBottom, offsetLeft, offsetRight, width, height, contextHeight, contextWidth, devicePixelRatio } = snapshot.activeStore;
       const viewScaleInfo = {
@@ -4674,16 +4731,347 @@ var __privateMethod = (obj, member, method) => {
       boardContent.drawView();
       afterDrawFrame({ snapshot });
     }
-    if (__classPrivateFieldGet$2(this, _Viewer_drawFrameSnapshotQueue, "f").length === 0) {
-      __classPrivateFieldSet$2(this, _Viewer_drawFrameStatus, "COMPLETE", "f");
+    if (__classPrivateFieldGet$3(this, _Viewer_drawFrameSnapshotQueue, "f").length === 0) {
+      __classPrivateFieldSet$3(this, _Viewer_drawFrameStatus, "COMPLETE", "f");
       return;
     }
-    if (__classPrivateFieldSet$2(this, _Viewer_drawFrameStatus, "DRAWING", "f")) {
+    if (__classPrivateFieldSet$3(this, _Viewer_drawFrameStatus, "DRAWING", "f")) {
       requestAnimationFrame(() => {
-        __classPrivateFieldGet$2(this, _Viewer_instances, "m", _Viewer_drawAnimationFrame2).call(this);
+        __classPrivateFieldGet$3(this, _Viewer_instances, "m", _Viewer_drawAnimationFrame2).call(this);
       });
     }
   };
+  var __classPrivateFieldSet$2 = function(receiver, state, value, kind, f) {
+    if (kind === "m")
+      throw new TypeError("Private method is not writable");
+    if (kind === "a" && !f)
+      throw new TypeError("Private accessor was defined without a setter");
+    if (typeof state === "function" ? receiver !== state || !f : !state.has(receiver))
+      throw new TypeError("Cannot write private member to an object whose class did not declare it");
+    return kind === "a" ? f.call(receiver, value) : f ? f.value = value : state.set(receiver, value), value;
+  };
+  var __classPrivateFieldGet$2 = function(receiver, state, kind, f) {
+    if (kind === "a" && !f)
+      throw new TypeError("Private accessor was defined without a getter");
+    if (typeof state === "function" ? receiver !== state || !f : !state.has(receiver))
+      throw new TypeError("Cannot read private member from an object whose class did not declare it");
+    return kind === "m" ? f : kind === "a" ? f.call(receiver) : f ? f.value : state.get(receiver);
+  };
+  var _Board_instances, _Board_opts, _Board_middlewareMap, _Board_middlewares, _Board_activeMiddlewareObjs, _Board_watcher, _Board_renderer, _Board_sharer, _Board_viewer, _Board_calculator, _Board_eventHub, _Board_hasDestroyed, _Board_init, _Board_handlePointStart, _Board_handlePointEnd, _Board_handlePointMove, _Board_handleHover, _Board_handleDoubleClick, _Board_handleWheel, _Board_handleWheelScale, _Board_handleScrollX, _Board_handleScrollY, _Board_handleResize, _Board_handleClear, _Board_handleBeforeDrawFrame, _Board_handleAfterDrawFrame, _Board_resetActiveMiddlewareObjs;
+  const throttleTime = 10;
+  class Board {
+    constructor(opts) {
+      _Board_instances.add(this);
+      _Board_opts.set(this, void 0);
+      _Board_middlewareMap.set(this, /* @__PURE__ */ new WeakMap());
+      _Board_middlewares.set(this, []);
+      _Board_activeMiddlewareObjs.set(this, []);
+      _Board_watcher.set(this, void 0);
+      _Board_renderer.set(this, void 0);
+      _Board_sharer.set(this, void 0);
+      _Board_viewer.set(this, void 0);
+      _Board_calculator.set(this, void 0);
+      _Board_eventHub.set(this, new EventEmitter());
+      _Board_hasDestroyed.set(this, false);
+      const { boardContent } = opts;
+      const sharer = new Sharer();
+      const calculator = new Calculator({ viewContext: boardContent.viewContext });
+      const watcher = new BoardWatcher({
+        boardContent,
+        sharer
+      });
+      const renderer = new Renderer({
+        viewContext: boardContent.viewContext,
+        sharer,
+        calculator
+      });
+      __classPrivateFieldSet$2(this, _Board_opts, opts, "f");
+      __classPrivateFieldSet$2(this, _Board_sharer, sharer, "f");
+      __classPrivateFieldSet$2(this, _Board_watcher, watcher, "f");
+      __classPrivateFieldSet$2(this, _Board_renderer, renderer, "f");
+      __classPrivateFieldSet$2(this, _Board_calculator, calculator, "f");
+      __classPrivateFieldSet$2(this, _Board_viewer, new Viewer({
+        boardContent: opts.boardContent,
+        sharer,
+        renderer,
+        calculator: __classPrivateFieldGet$2(this, _Board_calculator, "f"),
+        beforeDrawFrame: (e) => {
+          __classPrivateFieldGet$2(this, _Board_instances, "m", _Board_handleBeforeDrawFrame).call(this, e);
+        },
+        afterDrawFrame: (e) => {
+          __classPrivateFieldGet$2(this, _Board_instances, "m", _Board_handleAfterDrawFrame).call(this, e);
+        }
+      }), "f");
+      __classPrivateFieldGet$2(this, _Board_instances, "m", _Board_init).call(this);
+      __classPrivateFieldGet$2(this, _Board_instances, "m", _Board_resetActiveMiddlewareObjs).call(this);
+    }
+    isDestroyed() {
+      return __classPrivateFieldGet$2(this, _Board_hasDestroyed, "f");
+    }
+    destroy() {
+      __classPrivateFieldGet$2(this, _Board_watcher, "f").destroy();
+      __classPrivateFieldGet$2(this, _Board_renderer, "f").destroy();
+      __classPrivateFieldGet$2(this, _Board_calculator, "f").destroy();
+      __classPrivateFieldGet$2(this, _Board_eventHub, "f").destroy();
+      __classPrivateFieldSet$2(this, _Board_hasDestroyed, true, "f");
+    }
+    getSharer() {
+      return __classPrivateFieldGet$2(this, _Board_sharer, "f");
+    }
+    getViewer() {
+      return __classPrivateFieldGet$2(this, _Board_viewer, "f");
+    }
+    getRenderer() {
+      return __classPrivateFieldGet$2(this, _Board_renderer, "f");
+    }
+    setData(data) {
+      const sharer = __classPrivateFieldGet$2(this, _Board_sharer, "f");
+      __classPrivateFieldGet$2(this, _Board_sharer, "f").setActiveStorage("data", data);
+      const viewSizeInfo = sharer.getActiveViewSizeInfo();
+      const newViewContextSize = calcElementsContextSize(data.elements, {
+        viewWidth: viewSizeInfo.width,
+        viewHeight: viewSizeInfo.height,
+        extend: true
+      });
+      __classPrivateFieldGet$2(this, _Board_viewer, "f").drawFrame();
+      const newViewSizeInfo = Object.assign(Object.assign({}, viewSizeInfo), newViewContextSize);
+      __classPrivateFieldGet$2(this, _Board_sharer, "f").setActiveViewSizeInfo(newViewSizeInfo);
+      return { viewSizeInfo: newViewSizeInfo };
+    }
+    getData() {
+      const { data } = __classPrivateFieldGet$2(this, _Board_sharer, "f").getActiveStoreSnapshot();
+      return data;
+    }
+    use(middleware) {
+      var _a, _b, _c;
+      if (__classPrivateFieldGet$2(this, _Board_middlewareMap, "f").has(middleware)) {
+        const item = __classPrivateFieldGet$2(this, _Board_middlewareMap, "f").get(middleware);
+        if (item) {
+          (_b = (_a = item.middlewareObject).use) === null || _b === void 0 ? void 0 : _b.call(_a);
+          item.status = "enable";
+          __classPrivateFieldGet$2(this, _Board_middlewareMap, "f").set(middleware, item);
+          __classPrivateFieldGet$2(this, _Board_instances, "m", _Board_resetActiveMiddlewareObjs).call(this);
+          return;
+        }
+      }
+      const { boardContent, container } = __classPrivateFieldGet$2(this, _Board_opts, "f");
+      const sharer = __classPrivateFieldGet$2(this, _Board_sharer, "f");
+      const viewer = __classPrivateFieldGet$2(this, _Board_viewer, "f");
+      const calculator = __classPrivateFieldGet$2(this, _Board_calculator, "f");
+      const eventHub = __classPrivateFieldGet$2(this, _Board_eventHub, "f");
+      const obj = middleware({ boardContent, sharer, viewer, calculator, eventHub, container });
+      (_c = obj.use) === null || _c === void 0 ? void 0 : _c.call(obj);
+      __classPrivateFieldGet$2(this, _Board_middlewares, "f").push(middleware);
+      __classPrivateFieldGet$2(this, _Board_activeMiddlewareObjs, "f").push(obj);
+      __classPrivateFieldGet$2(this, _Board_middlewareMap, "f").set(middleware, {
+        status: "enable",
+        middlewareObject: obj
+      });
+      __classPrivateFieldGet$2(this, _Board_instances, "m", _Board_resetActiveMiddlewareObjs).call(this);
+    }
+    disuse(middleware) {
+      var _a, _b;
+      const item = __classPrivateFieldGet$2(this, _Board_middlewareMap, "f").get(middleware);
+      if (item) {
+        (_b = (_a = item.middlewareObject).disuse) === null || _b === void 0 ? void 0 : _b.call(_a);
+        item.status = "disable";
+        __classPrivateFieldGet$2(this, _Board_middlewareMap, "f").set(middleware, item);
+        __classPrivateFieldGet$2(this, _Board_instances, "m", _Board_resetActiveMiddlewareObjs).call(this);
+      }
+    }
+    scale(opts) {
+      const viewer = __classPrivateFieldGet$2(this, _Board_viewer, "f");
+      const { moveX, moveY } = viewer.scale(opts);
+      viewer.scroll({ moveX, moveY });
+    }
+    scroll(opts) {
+      return __classPrivateFieldGet$2(this, _Board_viewer, "f").scroll(opts);
+    }
+    updateViewScaleInfo(opts) {
+      return __classPrivateFieldGet$2(this, _Board_viewer, "f").updateViewScaleInfo(opts);
+    }
+    resize(newViewSize) {
+      const viewSize = __classPrivateFieldGet$2(this, _Board_viewer, "f").resize(newViewSize);
+      const { width, height, devicePixelRatio } = newViewSize;
+      const { boardContent } = __classPrivateFieldGet$2(this, _Board_opts, "f");
+      boardContent.viewContext.$resize({ width, height, devicePixelRatio });
+      boardContent.helperContext.$resize({ width, height, devicePixelRatio });
+      boardContent.boardContext.$resize({ width, height, devicePixelRatio });
+      boardContent.underContext.$resize({ width, height, devicePixelRatio });
+      __classPrivateFieldGet$2(this, _Board_viewer, "f").drawFrame();
+      __classPrivateFieldGet$2(this, _Board_watcher, "f").trigger("resize", viewSize);
+      __classPrivateFieldGet$2(this, _Board_sharer, "f").setActiveViewSizeInfo(newViewSize);
+    }
+    clear() {
+      const { boardContent } = __classPrivateFieldGet$2(this, _Board_opts, "f");
+      const { underContext, helperContext, viewContext, boardContext } = boardContent;
+      underContext.clearRect(0, 0, underContext.canvas.width, underContext.canvas.height);
+      helperContext.clearRect(0, 0, helperContext.canvas.width, helperContext.canvas.height);
+      viewContext.clearRect(0, 0, viewContext.canvas.width, viewContext.canvas.height);
+      boardContext.clearRect(0, 0, boardContext.canvas.width, boardContext.canvas.height);
+      __classPrivateFieldGet$2(this, _Board_instances, "m", _Board_handleClear).call(this);
+    }
+    getEventHub() {
+      return __classPrivateFieldGet$2(this, _Board_eventHub, "f");
+    }
+    onWatcherEvents() {
+      __classPrivateFieldGet$2(this, _Board_watcher, "f").onEvents();
+    }
+    offWatcherEvents() {
+      __classPrivateFieldGet$2(this, _Board_watcher, "f").offEvents();
+    }
+  }
+  _Board_opts = /* @__PURE__ */ new WeakMap(), _Board_middlewareMap = /* @__PURE__ */ new WeakMap(), _Board_middlewares = /* @__PURE__ */ new WeakMap(), _Board_activeMiddlewareObjs = /* @__PURE__ */ new WeakMap(), _Board_watcher = /* @__PURE__ */ new WeakMap(), _Board_renderer = /* @__PURE__ */ new WeakMap(), _Board_sharer = /* @__PURE__ */ new WeakMap(), _Board_viewer = /* @__PURE__ */ new WeakMap(), _Board_calculator = /* @__PURE__ */ new WeakMap(), _Board_eventHub = /* @__PURE__ */ new WeakMap(), _Board_hasDestroyed = /* @__PURE__ */ new WeakMap(), _Board_instances = /* @__PURE__ */ new WeakSet(), _Board_init = function _Board_init2() {
+    __classPrivateFieldGet$2(this, _Board_watcher, "f").on("pointStart", __classPrivateFieldGet$2(this, _Board_instances, "m", _Board_handlePointStart).bind(this));
+    __classPrivateFieldGet$2(this, _Board_watcher, "f").on("pointEnd", __classPrivateFieldGet$2(this, _Board_instances, "m", _Board_handlePointEnd).bind(this));
+    __classPrivateFieldGet$2(this, _Board_watcher, "f").on("pointMove", throttle((e) => {
+      __classPrivateFieldGet$2(this, _Board_instances, "m", _Board_handlePointMove).call(this, e);
+    }, throttleTime));
+    __classPrivateFieldGet$2(this, _Board_watcher, "f").on("hover", throttle((e) => {
+      __classPrivateFieldGet$2(this, _Board_instances, "m", _Board_handleHover).call(this, e);
+    }, throttleTime));
+    __classPrivateFieldGet$2(this, _Board_watcher, "f").on("wheel", throttle((e) => {
+      __classPrivateFieldGet$2(this, _Board_instances, "m", _Board_handleWheel).call(this, e);
+    }, throttleTime));
+    __classPrivateFieldGet$2(this, _Board_watcher, "f").on("wheelScale", throttle((e) => {
+      __classPrivateFieldGet$2(this, _Board_instances, "m", _Board_handleWheelScale).call(this, e);
+    }, throttleTime));
+    __classPrivateFieldGet$2(this, _Board_watcher, "f").on("scrollX", __classPrivateFieldGet$2(this, _Board_instances, "m", _Board_handleScrollX).bind(this));
+    __classPrivateFieldGet$2(this, _Board_watcher, "f").on("scrollY", __classPrivateFieldGet$2(this, _Board_instances, "m", _Board_handleScrollY).bind(this));
+    __classPrivateFieldGet$2(this, _Board_watcher, "f").on("resize", __classPrivateFieldGet$2(this, _Board_instances, "m", _Board_handleResize).bind(this));
+    __classPrivateFieldGet$2(this, _Board_watcher, "f").on("doubleClick", __classPrivateFieldGet$2(this, _Board_instances, "m", _Board_handleDoubleClick).bind(this));
+  }, _Board_handlePointStart = function _Board_handlePointStart2(e) {
+    var _a;
+    for (let i = 0; i < __classPrivateFieldGet$2(this, _Board_activeMiddlewareObjs, "f").length; i++) {
+      const obj = __classPrivateFieldGet$2(this, _Board_activeMiddlewareObjs, "f")[i];
+      const result = (_a = obj === null || obj === void 0 ? void 0 : obj.pointStart) === null || _a === void 0 ? void 0 : _a.call(obj, e);
+      if (result === false) {
+        return;
+      }
+    }
+  }, _Board_handlePointEnd = function _Board_handlePointEnd2(e) {
+    var _a;
+    for (let i = 0; i < __classPrivateFieldGet$2(this, _Board_activeMiddlewareObjs, "f").length; i++) {
+      const obj = __classPrivateFieldGet$2(this, _Board_activeMiddlewareObjs, "f")[i];
+      const result = (_a = obj === null || obj === void 0 ? void 0 : obj.pointEnd) === null || _a === void 0 ? void 0 : _a.call(obj, e);
+      if (result === false) {
+        return;
+      }
+    }
+  }, _Board_handlePointMove = function _Board_handlePointMove2(e) {
+    var _a;
+    for (let i = 0; i < __classPrivateFieldGet$2(this, _Board_activeMiddlewareObjs, "f").length; i++) {
+      const obj = __classPrivateFieldGet$2(this, _Board_activeMiddlewareObjs, "f")[i];
+      const result = (_a = obj === null || obj === void 0 ? void 0 : obj.pointMove) === null || _a === void 0 ? void 0 : _a.call(obj, e);
+      if (result === false) {
+        return;
+      }
+    }
+  }, _Board_handleHover = function _Board_handleHover2(e) {
+    var _a;
+    for (let i = 0; i < __classPrivateFieldGet$2(this, _Board_activeMiddlewareObjs, "f").length; i++) {
+      const obj = __classPrivateFieldGet$2(this, _Board_activeMiddlewareObjs, "f")[i];
+      const result = (_a = obj === null || obj === void 0 ? void 0 : obj.hover) === null || _a === void 0 ? void 0 : _a.call(obj, e);
+      if (result === false) {
+        return;
+      }
+    }
+  }, _Board_handleDoubleClick = function _Board_handleDoubleClick2(e) {
+    var _a;
+    for (let i = 0; i < __classPrivateFieldGet$2(this, _Board_activeMiddlewareObjs, "f").length; i++) {
+      const obj = __classPrivateFieldGet$2(this, _Board_activeMiddlewareObjs, "f")[i];
+      const result = (_a = obj === null || obj === void 0 ? void 0 : obj.doubleClick) === null || _a === void 0 ? void 0 : _a.call(obj, e);
+      if (result === false) {
+        return;
+      }
+    }
+  }, _Board_handleWheel = function _Board_handleWheel2(e) {
+    var _a;
+    for (let i = 0; i < __classPrivateFieldGet$2(this, _Board_activeMiddlewareObjs, "f").length; i++) {
+      const obj = __classPrivateFieldGet$2(this, _Board_activeMiddlewareObjs, "f")[i];
+      const result = (_a = obj === null || obj === void 0 ? void 0 : obj.wheel) === null || _a === void 0 ? void 0 : _a.call(obj, e);
+      if (result === false) {
+        return;
+      }
+    }
+  }, _Board_handleWheelScale = function _Board_handleWheelScale2(e) {
+    var _a;
+    for (let i = 0; i < __classPrivateFieldGet$2(this, _Board_activeMiddlewareObjs, "f").length; i++) {
+      const obj = __classPrivateFieldGet$2(this, _Board_activeMiddlewareObjs, "f")[i];
+      const result = (_a = obj === null || obj === void 0 ? void 0 : obj.wheelScale) === null || _a === void 0 ? void 0 : _a.call(obj, e);
+      if (result === false) {
+        return;
+      }
+    }
+  }, _Board_handleScrollX = function _Board_handleScrollX2(e) {
+    var _a;
+    for (let i = 0; i < __classPrivateFieldGet$2(this, _Board_activeMiddlewareObjs, "f").length; i++) {
+      const obj = __classPrivateFieldGet$2(this, _Board_activeMiddlewareObjs, "f")[i];
+      const result = (_a = obj === null || obj === void 0 ? void 0 : obj.scrollX) === null || _a === void 0 ? void 0 : _a.call(obj, e);
+      if (result === false) {
+        return;
+      }
+    }
+  }, _Board_handleScrollY = function _Board_handleScrollY2(e) {
+    var _a;
+    for (let i = 0; i < __classPrivateFieldGet$2(this, _Board_activeMiddlewareObjs, "f").length; i++) {
+      const obj = __classPrivateFieldGet$2(this, _Board_activeMiddlewareObjs, "f")[i];
+      const result = (_a = obj === null || obj === void 0 ? void 0 : obj.scrollY) === null || _a === void 0 ? void 0 : _a.call(obj, e);
+      if (result === false) {
+        return;
+      }
+    }
+  }, _Board_handleResize = function _Board_handleResize2(e) {
+    var _a;
+    for (let i = 0; i < __classPrivateFieldGet$2(this, _Board_activeMiddlewareObjs, "f").length; i++) {
+      const obj = __classPrivateFieldGet$2(this, _Board_activeMiddlewareObjs, "f")[i];
+      const result = (_a = obj === null || obj === void 0 ? void 0 : obj.resize) === null || _a === void 0 ? void 0 : _a.call(obj, e);
+      if (result === false) {
+        return;
+      }
+    }
+  }, _Board_handleClear = function _Board_handleClear2(e) {
+    var _a;
+    for (let i = 0; i < __classPrivateFieldGet$2(this, _Board_activeMiddlewareObjs, "f").length; i++) {
+      const obj = __classPrivateFieldGet$2(this, _Board_activeMiddlewareObjs, "f")[i];
+      const result = (_a = obj === null || obj === void 0 ? void 0 : obj.clear) === null || _a === void 0 ? void 0 : _a.call(obj, e);
+      if (result === false) {
+        return;
+      }
+    }
+  }, _Board_handleBeforeDrawFrame = function _Board_handleBeforeDrawFrame2(e) {
+    var _a;
+    for (let i = 0; i < __classPrivateFieldGet$2(this, _Board_activeMiddlewareObjs, "f").length; i++) {
+      const obj = __classPrivateFieldGet$2(this, _Board_activeMiddlewareObjs, "f")[i];
+      const result = (_a = obj === null || obj === void 0 ? void 0 : obj.beforeDrawFrame) === null || _a === void 0 ? void 0 : _a.call(obj, e);
+      if (result === false) {
+        return;
+      }
+    }
+  }, _Board_handleAfterDrawFrame = function _Board_handleAfterDrawFrame2(e) {
+    var _a;
+    for (let i = 0; i < __classPrivateFieldGet$2(this, _Board_activeMiddlewareObjs, "f").length; i++) {
+      const obj = __classPrivateFieldGet$2(this, _Board_activeMiddlewareObjs, "f")[i];
+      const result = (_a = obj === null || obj === void 0 ? void 0 : obj.afterDrawFrame) === null || _a === void 0 ? void 0 : _a.call(obj, e);
+      if (result === false) {
+        return;
+      }
+    }
+  }, _Board_resetActiveMiddlewareObjs = function _Board_resetActiveMiddlewareObjs2() {
+    const activeMiddlewareObjs = [];
+    const middlewareMap = __classPrivateFieldGet$2(this, _Board_middlewareMap, "f");
+    __classPrivateFieldGet$2(this, _Board_middlewares, "f").forEach((middleware) => {
+      const item = middlewareMap.get(middleware);
+      if ((item === null || item === void 0 ? void 0 : item.status) === "enable" && (item === null || item === void 0 ? void 0 : item.middlewareObject)) {
+        activeMiddlewareObjs.push(item.middlewareObject);
+      }
+    });
+    __classPrivateFieldSet$2(this, _Board_activeMiddlewareObjs, activeMiddlewareObjs, "f");
+  };
+  const CURSOR = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACgAAAAoCAYAAACM/rhtAAAACXBIWXMAAAsTAAALEwEAmpwYAAAF92lUWHRYTUw6Y29tLmFkb2JlLnhtcAAAAAAAPD94cGFja2V0IGJlZ2luPSLvu78iIGlkPSJXNU0wTXBDZWhpSHpyZVN6TlRjemtjOWQiPz4gPHg6eG1wbWV0YSB4bWxuczp4PSJhZG9iZTpuczptZXRhLyIgeDp4bXB0az0iQWRvYmUgWE1QIENvcmUgNi4wLWMwMDYgNzkuMTY0NzUzLCAyMDIxLzAyLzE1LTExOjUyOjEzICAgICAgICAiPiA8cmRmOlJERiB4bWxuczpyZGY9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkvMDIvMjItcmRmLXN5bnRheC1ucyMiPiA8cmRmOkRlc2NyaXB0aW9uIHJkZjphYm91dD0iIiB4bWxuczp4bXA9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC8iIHhtbG5zOmRjPSJodHRwOi8vcHVybC5vcmcvZGMvZWxlbWVudHMvMS4xLyIgeG1sbnM6cGhvdG9zaG9wPSJodHRwOi8vbnMuYWRvYmUuY29tL3Bob3Rvc2hvcC8xLjAvIiB4bWxuczp4bXBNTT0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wL21tLyIgeG1sbnM6c3RFdnQ9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9zVHlwZS9SZXNvdXJjZUV2ZW50IyIgeG1wOkNyZWF0b3JUb29sPSJBZG9iZSBQaG90b3Nob3AgMjIuMyAoTWFjaW50b3NoKSIgeG1wOkNyZWF0ZURhdGU9IjIwMjMtMDktMTdUMTY6MDc6MjYrMDg6MDAiIHhtcDpNb2RpZnlEYXRlPSIyMDIzLTA5LTE3VDE2OjEyOjUwKzA4OjAwIiB4bXA6TWV0YWRhdGFEYXRlPSIyMDIzLTA5LTE3VDE2OjEyOjUwKzA4OjAwIiBkYzpmb3JtYXQ9ImltYWdlL3BuZyIgcGhvdG9zaG9wOkNvbG9yTW9kZT0iMyIgcGhvdG9zaG9wOklDQ1Byb2ZpbGU9InNSR0IgSUVDNjE5NjYtMi4xIiB4bXBNTTpJbnN0YW5jZUlEPSJ4bXAuaWlkOjliMGM0MzI2LWU4ZTQtNDlkNy04MmUzLTgxODkwYTE2ZmU1YSIgeG1wTU06RG9jdW1lbnRJRD0iYWRvYmU6ZG9jaWQ6cGhvdG9zaG9wOjMzOGFhZDBmLWZkZjMtODE0MS1iMTZmLWNiZWIzNTQyYTJhMCIgeG1wTU06T3JpZ2luYWxEb2N1bWVudElEPSJ4bXAuZGlkOjUwODAxNzc1LWZlNGEtNDQyMy05NDQ3LThkYWRhNzZhYTllOSI+IDx4bXBNTTpIaXN0b3J5PiA8cmRmOlNlcT4gPHJkZjpsaSBzdEV2dDphY3Rpb249ImNyZWF0ZWQiIHN0RXZ0Omluc3RhbmNlSUQ9InhtcC5paWQ6NTA4MDE3NzUtZmU0YS00NDIzLTk0NDctOGRhZGE3NmFhOWU5IiBzdEV2dDp3aGVuPSIyMDIzLTA5LTE3VDE2OjA3OjI2KzA4OjAwIiBzdEV2dDpzb2Z0d2FyZUFnZW50PSJBZG9iZSBQaG90b3Nob3AgMjIuMyAoTWFjaW50b3NoKSIvPiA8cmRmOmxpIHN0RXZ0OmFjdGlvbj0ic2F2ZWQiIHN0RXZ0Omluc3RhbmNlSUQ9InhtcC5paWQ6OWIwYzQzMjYtZThlNC00OWQ3LTgyZTMtODE4OTBhMTZmZTVhIiBzdEV2dDp3aGVuPSIyMDIzLTA5LTE3VDE2OjEyOjUwKzA4OjAwIiBzdEV2dDpzb2Z0d2FyZUFnZW50PSJBZG9iZSBQaG90b3Nob3AgMjIuMyAoTWFjaW50b3NoKSIgc3RFdnQ6Y2hhbmdlZD0iLyIvPiA8L3JkZjpTZXE+IDwveG1wTU06SGlzdG9yeT4gPC9yZGY6RGVzY3JpcHRpb24+IDwvcmRmOlJERj4gPC94OnhtcG1ldGE+IDw/eHBhY2tldCBlbmQ9InIiPz7W6XrzAAAGLklEQVRYhb2Xf2iUdRzHX/txtfXLplZ6Wblm6fzRmG6r7Uou1AxKRjQKYUqgaLBACFogppcK1h8aLRkMSYaJIA5hYMomZpskEfPOufCaDpZ6t7rbre263U3vzn3643meu+eu3XNzvz7w4bbdc/e89nl/Pu/v50HUCAQCx1tbW0uAx4CHgSwggxkKERkziUQif2mQ0WjU53a7vwSeBB4BTEDmTICmBBwYGDivVlDjlFAo9KvT6dwIPAHkANkq6MwDXr169bCISENDg9TX14s+BgcHf2hubi5mBmRPCXj06NFPREQ6OjoEkPLycrl06VIMMhKJeFwu1xdMs+wpAYuLi9eIiIyOjkpeXp4AAsj27dvF7/fHQIPB4C9dXV0fME2ypwQEXvX7/bdFRNauXRsDBMRkMsnhw4cTZB8YGGhsamp6hSmW3Qhw1Y0bN86LiNTW1iYAallWViZtbW162ftcLtdO/i/7tAAWtba2ficicvLkyTEBtdy6dasMDg7GQIeHh9s7OzvfBx5nkrIbAS7du3fvxyIiPT09hoBa1tXVJcv+fWNj4zLgUeAhJiC7EeDLwOsiMioisnDhwnFBrlixQi5evKiX/c6tW7c+R5E9lweU3QjwReDV/v7+bhGRqqqqcQFquWnTJvH5fHrZLzocjkoSZU9bTSPA54GV165daxYROXDgwAMBannw4MFk2RsaGhqWME7ZjQDNwIrTp09/JSLS0tIyIUBACgoK5MKFCzHIcDj85+3btz8FZpFGdiPAZ4DCmpqaTSIiPp9vwoBaVlVVidfr1ct+/sqVK+9iILsR4FzgJcASDoeHRUSKioomDQnI/v37E2T3+Xz1hw4dWjSW7EaAeUA+UNbX12cXEdmyZcuUAAJiNpvlzJkzetl73G53rVrN2EmUCjATuA9EgYjL5eoGKCkpGatNHijmz5/Pxo0b2blzJ2azOfZ3k8lUYDabv45Go/Y7d+6sIY0VZQOjGqDT6bxeWlrKqlWrJgRlsVhYv349FRUVWCwWcnJyEt4PBoOuoaEhu9frvdzR0fHTtm3buolvRpLqe3OBp4EllZWV74mIRKNRyc3NTSvf7Nmzpbq6Wk6cOCFut1uSY2RkJOB0Ou3Nzc3Ha2trPwPWAGXAEuBZFFPPAbKMevBhYA6wCKgIBoP9IiKrV682hLPZbP8DEpH7vb29N1paWn602WwHFyxYsAX4EKgE3gIsQBFQgOIeT6j3z0wFqEkc60OPx9Odn58/t6SkhPb29jFLbrVa2bNnDwBer7fv5s2bPQ6Ho7upqcnZ1tbmASJq3gPC6utdYESXYfWeo6mkBaUHRQ/odrv/yM/Pt5SWlqb8kAbncDh+W7lyZYN683u6DOvAwipsOOnniA4wZf9lqhdoVYzY7fbrQMpBsdlsWK1WRkZGAtXV1d8D/wA+wKNLr5o+YEC9ZggIAEHiFbyfDhCUCcoFngIWFxYWrtMaat68eQl9V15eHmu2+vr6OuAd4A2gGFgMLERp/mdQ+noWyuadi9Jr2aQ4k42GBPXDs1Ga97WhoaFbIiIbNmxIANTWq87Ozp9VuApgGfACihPkoRjwI+p3mlSgtA9ZRkYNYwwKJBr2rl27sFqthEKhwZqamqOAX5f/AsPE5btLvM/GJWO6yFb/82eBonPnztWJiJw9e1YAWb58eUzaI0eOfAO8CbwCPIfiZZN+eEoncSaKLPOApbt3794uIuL1ehOktdvtF4C3gRKURXcOSn9lTRRsvIAZKI4+l/gjQFREZMeOHSIiEggE+tetW/cRitkuRhmERxnnxjxZQFDWnzzURwCv1+vUHxHHjh37lri0C1Am9KGpgDMC1G8SQnxxCHs8Hqf2RldX10+bN28+i+JjwyT62KSaP13oAfWTHO7t7f0dIBQK/b1v375GlEnVjPYuyoQaHlNTDahVMALca29vdwBcvnz5+KlTp26OATft1UuODBS7yEOxj0K/329HOSWWopjxlE1tchhtM7FriPfgXSDDbrfXo0gbJr4QzIi0WiRPYBbKZJrUV23b0dYn7XSYcsBkS9EiO/k6lApq1cwiPjzaAM1Y9cYC1G6uAWrPCtrvMwoHqU02Q5caIEzj1KaS+D+vIjxtLug31gAAAABJRU5ErkJggg==";
+  const CURSOR_RESIZE = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACgAAAApCAYAAABHomvIAAAACXBIWXMAAAsTAAALEwEAmpwYAAAF92lUWHRYTUw6Y29tLmFkb2JlLnhtcAAAAAAAPD94cGFja2V0IGJlZ2luPSLvu78iIGlkPSJXNU0wTXBDZWhpSHpyZVN6TlRjemtjOWQiPz4gPHg6eG1wbWV0YSB4bWxuczp4PSJhZG9iZTpuczptZXRhLyIgeDp4bXB0az0iQWRvYmUgWE1QIENvcmUgNi4wLWMwMDYgNzkuMTY0NzUzLCAyMDIxLzAyLzE1LTExOjUyOjEzICAgICAgICAiPiA8cmRmOlJERiB4bWxuczpyZGY9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkvMDIvMjItcmRmLXN5bnRheC1ucyMiPiA8cmRmOkRlc2NyaXB0aW9uIHJkZjphYm91dD0iIiB4bWxuczp4bXA9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC8iIHhtbG5zOmRjPSJodHRwOi8vcHVybC5vcmcvZGMvZWxlbWVudHMvMS4xLyIgeG1sbnM6cGhvdG9zaG9wPSJodHRwOi8vbnMuYWRvYmUuY29tL3Bob3Rvc2hvcC8xLjAvIiB4bWxuczp4bXBNTT0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wL21tLyIgeG1sbnM6c3RFdnQ9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9zVHlwZS9SZXNvdXJjZUV2ZW50IyIgeG1wOkNyZWF0b3JUb29sPSJBZG9iZSBQaG90b3Nob3AgMjIuMyAoTWFjaW50b3NoKSIgeG1wOkNyZWF0ZURhdGU9IjIwMjMtMDktMTdUMTY6MzE6MjMrMDg6MDAiIHhtcDpNb2RpZnlEYXRlPSIyMDIzLTA5LTE3VDE2OjQ0OjIyKzA4OjAwIiB4bXA6TWV0YWRhdGFEYXRlPSIyMDIzLTA5LTE3VDE2OjQ0OjIyKzA4OjAwIiBkYzpmb3JtYXQ9ImltYWdlL3BuZyIgcGhvdG9zaG9wOkNvbG9yTW9kZT0iMyIgcGhvdG9zaG9wOklDQ1Byb2ZpbGU9InNSR0IgSUVDNjE5NjYtMi4xIiB4bXBNTTpJbnN0YW5jZUlEPSJ4bXAuaWlkOjY0MTBhYjUzLWM0ZjEtNDVhNS04MjhkLTIxOTczOWFjOTk3MSIgeG1wTU06RG9jdW1lbnRJRD0iYWRvYmU6ZG9jaWQ6cGhvdG9zaG9wOjBkMDNmNjM5LTE5MzctY2Y0MC1hMTg0LTIyMjg0NzczNWNmYSIgeG1wTU06T3JpZ2luYWxEb2N1bWVudElEPSJ4bXAuZGlkOjgyYjQwZGRmLWE0ZGEtNDY3MC1iYzc2LTBhYjY3ZmI5M2I0ZSI+IDx4bXBNTTpIaXN0b3J5PiA8cmRmOlNlcT4gPHJkZjpsaSBzdEV2dDphY3Rpb249ImNyZWF0ZWQiIHN0RXZ0Omluc3RhbmNlSUQ9InhtcC5paWQ6ODJiNDBkZGYtYTRkYS00NjcwLWJjNzYtMGFiNjdmYjkzYjRlIiBzdEV2dDp3aGVuPSIyMDIzLTA5LTE3VDE2OjMxOjIzKzA4OjAwIiBzdEV2dDpzb2Z0d2FyZUFnZW50PSJBZG9iZSBQaG90b3Nob3AgMjIuMyAoTWFjaW50b3NoKSIvPiA8cmRmOmxpIHN0RXZ0OmFjdGlvbj0ic2F2ZWQiIHN0RXZ0Omluc3RhbmNlSUQ9InhtcC5paWQ6NjQxMGFiNTMtYzRmMS00NWE1LTgyOGQtMjE5NzM5YWM5OTcxIiBzdEV2dDp3aGVuPSIyMDIzLTA5LTE3VDE2OjQ0OjIyKzA4OjAwIiBzdEV2dDpzb2Z0d2FyZUFnZW50PSJBZG9iZSBQaG90b3Nob3AgMjIuMyAoTWFjaW50b3NoKSIgc3RFdnQ6Y2hhbmdlZD0iLyIvPiA8L3JkZjpTZXE+IDwveG1wTU06SGlzdG9yeT4gPC9yZGY6RGVzY3JpcHRpb24+IDwvcmRmOlJERj4gPC94OnhtcG1ldGE+IDw/eHBhY2tldCBlbmQ9InIiPz57vRudAAAEk0lEQVRYhe3ZW0jbVxzA8e8/MX+NYnG9uI4xE3bvoLt0FzradRfGBtsYo32YdAhb6WQyBqV7KOylpYjzZShDGfjmyxgbgjjwyRm16SYMhgiNKDhbL3VtNF4xJOnf3x7+59i/Wf4aTbInf3AwJMdzPjnnf/n9/jFEhGzDMIxMb3uAIsDs6ek5urS05Dtz5syE+uwekAQS6u89YD19gC0NIpJ1c8GZQHlXV9fJRCIxGo/HxxoaGj4CngWOAEGgEihXfT07MeQC3MB1dna+lkgkRkXF6urq3xcuXPgUOAE8DzwGPOiGLARwEy4ej4+JiITD4elr167NiIgsLi7eqq2trQPeBI4Bj7sh8w10xZmmeds0zdn+/v5/RERisdjUuXPnvgLeAl50Q+YTaAA+oKy7u/uE3laNAwSQ4uLiu6FQ6G4G5DG13YeAMjWWkU+gBygJhULHNe769etTTpwDGXUiz58//yXwujp5qoAHgBLAk0+gNxKJHEulUiMKN2ma5gwgPp/vjhOXjlxYWJisq6urBV5RW30IKAW8eQPGYrGjlmXdEBEZHBy8aZrmFCCmac729fVtAHt7e6MO5N2+vr47IiJLS0s3L126dBZ4Sh2LZUBRwVdwYGBgVuwOYh/zsoF0bnPBVzDTMRgOh6dFhROokSIi8/Pz0+pEeaPQx+DGWdzV1XVSX2LcgCIic3NzMzU1NV8D7wIvq9WrLNRZvOk62NHRccqJTAdGo9Hb1dXV3wAfYt9VjgAPFfI66EQWAxU9PT0fuwEvXrzYBJwF3gFeAAJAhfrfrO4k/7lxZxnr2JlJqry8POnWyePx6H4JR0vhktVkHGOXQI20SkpKLLcOhmGsA5YCaZiVLS5XoADi9XpdkznDMERhnE0fCgUHZhvOW+CO4/8A5hR7wFxjD5hr7AFzjZyBlmVlrOYdYaS1HUUuQA/gWV9fd51URDyqn1c1j6MVFGjoidfW1oq2ABrYj0V82OmVzwHNajVdB88C5wOKTdM87NaxsrKyQsFKHC2BnTDo+/TWt8Bd5INeVC44NDT0xXYZdXNz8w/AaeyS8yjwCPdzQu92ht2m/OUjIyOfS1pkAoqItLS0fA+8D7wKPA0cxs6qC1O4T0xMfKYnb21tnXEDNjc3z+nXbW1t3wFvYz9dCAL7KUThHovFPtGTNjU1jQFSX18/lg68cuXKLUAaGxs3vkB7e/u3wHHgCQpUdnpTqdQvesJgMDisUVevXh3Xry9fvnxTv66qqprQ/cfHx/vVNj/J/couv0DAv7q6+pMDeYPNSalkwkUikX7s4ukl4FHgAODPN1CXnPsWFxd/dCAjW+GGhoZCwAfYpeczwMPAPjVW3gv3IvXN98disZ8dyBGNCwQC4/r94eHhfuy6+JS6zATUCeJXY+W9cNfIUuDAwsLCr05kIBDYeBQ8Ojr6h8Lpx25BtbWlGpfv62BG5PLy8m+SFpOTk38C76mVe84NVyhgOvLgysrK7xoXjUb/Uqt2XG1rEDiYCbcd0MgwsWtk+J1EI03An0wmw5Zlefx+/2n1eRKIO5r+rWTTpFsZ/gWFrGMmeObuqwAAAABJRU5ErkJggg==";
+  const CURSOR_DRAG_DEFAULT = `data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACgAAAApCAYAAABHomvIAAAEvUlEQVRYhc2Y20/cVRDHP8v+uKzAWkpDCtZq8BYhJkq8PBoJxgj7I2m0ryaSyFN9IT74pI8+8WJiggRj/APApFkSTGRJ+qKGUiyxbGPEWsUSuVhYC12Wy8+HmeMeYPe3d3WSye/k/M7le+bMzJkZ+J9ToEJreGVYN+vihcytstjQocUlAw0WCSoIVCv3Ae8CXwIt+u8XHVeOG8qLqgAHqAFCQCNwGugCthBJGd7S/tM6LqTzHI5KuqzgaoAHgEvAtwrkG2AG8FzXvep5nue67lX9N6P/PR1/SefXlBtkFXKNDUA/RyX1D9uUbYzOb9D1ygbSQU7eDMxhSSsSiVz3AxiJRK57nuf19/fPad8coqONFCBJPyUOIKc1OvcbgiY9ICDT8+0DHge2gR0gBeyTtviM5HeKAGlrrfMZVwhdAVaAr4F3KNF4gkA9cBbowOc68+3LwDn1Mhdy4/OcYk54nPr6+m54nofruvPa9SFQ6wfQTweNgTwInAGuQWk6mEUvHwb+Au4Dexx7ffK9+0q+CHWIBIOZ9skHYKWfK9tQ8gZoLDjIyWCg3ORY+2T8aYOyg4EaRIFrkCs4QU1NTSvabC20zyIDzuyfkYzEahHX8jHwE/LwXwHeJ4P7KIVIu5ouxFDC+HgLAy4MfEF2v1UpgOezATSiNVf6EvAWsD01NXVtdnb2bk9Pz81sp/q3KIi8t83Ae4DX0tJy0z7t8PDwD4FAYIX/WILVwKMAzc3Nu/agoaGhzmg0ugcsV0hIvlSNoH8IuIiebHJycrls4sotwaxGYvueAPAjEg3jum79yMjIr5WUjFLOxMpBIopWoBN4GfhOJ+4NDg4ulVt6i4uLm7r+BvAscA4fCXrAAfJQJ5Fg8gPgMuCMjo62d3V1LW1sbKRKlpXSxMTEmjZ/5qQrOwHwUAGmkIjiHhJdfKrM/Pz8Y+3t7RvT09Ob5QAYi8X2tbmke2cEZwAaCdoAt5QvIzEbiUSitbe3tyoej++UCnBhYSGkzdu6d1aQxkgOkfwgieQMCeCu8iwSnpNKpcIdHR3BZDJ5UCy4SCSyvL6+/giiSou67wE+eYmhAKKkIaAJUdynkdflNcQF3dFTpooxjmg0aozDAz4DXkB8bxPy1OYM7QzIOuAU0AY8pQu9CrwJ3AK8UCj0RyHgZmZmli1w3wOvAM/oHo1kiZiygbSDh7PAE8DzQA/wBqKnnuM4a2NjY7dygbtw4cICRy31deBFJA09o7eWsU7kJ1KTLJmyRyOSn5zS70fAkwBtbW2/DwwMHHR3d9d3dnY2rK6u7o2Pj2/GYrH9eDzurK2tndM1vwI+QXT7T2BTD5skQz6SCyAcLRoZkGEFGQbeRqpbubK+BPA5MI14h00L3I6Cy2h4+eQbJsKuRa6iQcGFFfB5oBt4DpFsI+Ky7iDBxW3gBhBH/GtC+R7i1lKk3UxRAG2QpvxWr0AbtB3SA5jkx36djH/dVlDbyibN3M8GDvJPyI2PSulixm/u6kZ1OQCaJ/S+tndJX6tvsFBIxcCUdA3vW5ubxMrObc0hDMhd/Rqp5QQHxeW8dubnHGM7tzVv/IECMlxQ/bpcRfRMqaNRheNcUGG9XFWDACfzWs/6Fl3t/xtO//8gpbCORQAAAABJRU5ErkJggg==`;
+  const CURSOR_DRAG_ACTIVE = `data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACgAAAAoCAYAAACM/rhtAAAER0lEQVRYhe2YT2hjRRjAf8lL22xsNsm6EWKrSKvuIkIh+O9QRFxEW18KUsoe7FHoRaWCN1FPetOrIHgVKS0q9P5OxaJbodkalgVrtVZjS7Ntd02z6abPw3yzmaT585q+elj2g2HmvZn35jffN/PNNwP35R6XgM/fuif4n+dO2klQvgsaZRc4NJJvoJbHdhrIAkJAN2ADHwFfAw9J3ZoB/b9I0AA6A0SBc0Aa2EVpSqddeZ+QdmfkO+u0gIPSQQR4HfhRQH4AHMDNZDJXXNd1M5nMFalzdB3wJTAOPAD0yEB9066G6wXepVZTd5MpTdporZ6jVqsatmMJoTR3HvgJQ1u2bS+3ArRte9l1XXdsbGyJo1pdBN6Wf3d3ChlAmSQO9LeC8fquQRpDWaerHWSjSr1iu4BkJyOsF9u2s67rkslkluTVxygltAVsJBZqdCngEj5osIlW+4EYytRNF04jeu3vulCT+7QkLH20dEOhumft97pQI4s3+iiRSPwtxVSbd39J8eEGvzFXc1NAs8KSFAZeBt4AHgNeBFDWObkEAne7HAK2gT2gCFQatdca1GbtBj4E3veFprVYVLXXcg4GqM6588BbAMlkcm1qamqzr6/v6ikBet5RgiizJoDPAXdgYGDZXHkzMzPrrk9CdRWngUeAsxxdCzVwpgZ/BigWiz1mo4mJif7jqMajeJrU5hywgGvAej6fvzA0NLThN1Eul9uT4g5VTbYFNKUIfAbsZ7PZvuHh4Wt+As7Ozu5IcY2j219TQB0NV4A7qODgO4CFhYWLg4ODOb8AHccpG4A68m6pRQ1YAQ6A28A+8BXwBcDq6upTqVTquh+AuVyuW4q/opRRaQdZD1gCbgE3ge+BT4HdfD7/ZDwe/z2bzRY6hRsfH1/e3Nx8FDX/sgbgoZfvg6jo4ixqW7oIPA+8CrwHrAJuJBLJd+JaHMf5k6qmPgGeQe1SCenXk0/U21xcIC8AzwGvAJPAEuAmEon1xcXFba9w8/Pz5oqdB14CnpY+oij35km0qwmjwqAU8ISM9hIwBeQA17KsG9PT07+1gxsZGdmgdqW+BjwLDAAPoo4ALU+W9arVwWoIpXp9kouKZpPAO8AwQCwW+2d0dLQ0OTkZSafT0UKhUJ6bm9t2HKeysrIS3tra0g7+KvABUJC0g5rrJdRcbLpImtleRzYashc1P2OSXwbebDVykX3gW+Ab1AHqhuQ3pe6AJlFMO0CoPROHDcio5I8DL1A9C8dQbmod+APYAK4DvwjQnsDdErgyVTfTEaCG1GFYGHXG7TVSo2OkdvhlAflXoHSuNdfStFqaRhEi2kfdprrj6M5LAt0I8EDaaMdflPal48CB95hMr3Bt8h4jD0kyL5E0pN6dysZzW7N2AqjbmhdIZjJvufTOpE19x3g+9s1XJ/ck5tVbfdhu+rxDfLiSO+lFToCjZwrXyH2/0Lwv95z8B1jAqXmDnj4YAAAAAElFTkSuQmCC`;
   var __classPrivateFieldSet$1 = function(receiver, state, value, kind, f) {
     if (kind === "m")
       throw new TypeError("Private method is not writable");
@@ -4700,424 +5088,124 @@ var __privateMethod = (obj, member, method) => {
       throw new TypeError("Cannot read private member from an object whose class did not declare it");
     return kind === "m" ? f : kind === "a" ? f.call(receiver) : f ? f.value : state.get(receiver);
   };
-  var _Board_instances, _Board_opts, _Board_middlewareMap, _Board_middlewares, _Board_activeMiddlewareObjs, _Board_watcher, _Board_renderer, _Board_sharer, _Board_viewer, _Board_calculator, _Board_eventHub, _Board_init, _Board_handlePointStart, _Board_handlePointEnd, _Board_handlePointMove, _Board_handleHover, _Board_handleDoubleClick, _Board_handleWheel, _Board_handleWheelScale, _Board_handleScrollX, _Board_handleScrollY, _Board_handleResize, _Board_handleClear, _Board_handleBeforeDrawFrame, _Board_handleAfterDrawFrame, _Board_resetActiveMiddlewareObjs;
-  const throttleTime = 10;
-  class Board {
-    constructor(opts) {
-      _Board_instances.add(this);
-      _Board_opts.set(this, void 0);
-      _Board_middlewareMap.set(this, /* @__PURE__ */ new WeakMap());
-      _Board_middlewares.set(this, []);
-      _Board_activeMiddlewareObjs.set(this, []);
-      _Board_watcher.set(this, void 0);
-      _Board_renderer.set(this, void 0);
-      _Board_sharer.set(this, void 0);
-      _Board_viewer.set(this, void 0);
-      _Board_calculator.set(this, void 0);
-      _Board_eventHub.set(this, new EventEmitter());
-      const { boardContent } = opts;
-      const sharer = new Sharer();
-      const calculator = new Calculator({ viewContext: boardContent.viewContext });
-      const watcher = new BoardWatcher({
-        boardContent,
-        sharer
-      });
-      const renderer = new Renderer({
-        viewContext: boardContent.viewContext,
-        sharer,
-        calculator
-      });
-      __classPrivateFieldSet$1(this, _Board_opts, opts, "f");
-      __classPrivateFieldSet$1(this, _Board_sharer, sharer, "f");
-      __classPrivateFieldSet$1(this, _Board_watcher, watcher, "f");
-      __classPrivateFieldSet$1(this, _Board_renderer, renderer, "f");
-      __classPrivateFieldSet$1(this, _Board_calculator, calculator, "f");
-      __classPrivateFieldSet$1(this, _Board_viewer, new Viewer({
-        boardContent: opts.boardContent,
-        sharer,
-        renderer,
-        calculator: __classPrivateFieldGet$1(this, _Board_calculator, "f"),
-        beforeDrawFrame: (e) => {
-          __classPrivateFieldGet$1(this, _Board_instances, "m", _Board_handleBeforeDrawFrame).call(this, e);
-        },
-        afterDrawFrame: (e) => {
-          __classPrivateFieldGet$1(this, _Board_instances, "m", _Board_handleAfterDrawFrame).call(this, e);
-        }
-      }), "f");
-      __classPrivateFieldGet$1(this, _Board_instances, "m", _Board_init).call(this);
-      __classPrivateFieldGet$1(this, _Board_instances, "m", _Board_resetActiveMiddlewareObjs).call(this);
-    }
-    destroy() {
-      __classPrivateFieldGet$1(this, _Board_watcher, "f").destroy();
-      __classPrivateFieldGet$1(this, _Board_renderer, "f").destroy();
-      __classPrivateFieldGet$1(this, _Board_calculator, "f").destroy();
-      __classPrivateFieldGet$1(this, _Board_eventHub, "f").destroy();
-    }
-    getSharer() {
-      return __classPrivateFieldGet$1(this, _Board_sharer, "f");
-    }
-    getViewer() {
-      return __classPrivateFieldGet$1(this, _Board_viewer, "f");
-    }
-    getRenderer() {
-      return __classPrivateFieldGet$1(this, _Board_renderer, "f");
-    }
-    setData(data) {
-      const sharer = __classPrivateFieldGet$1(this, _Board_sharer, "f");
-      __classPrivateFieldGet$1(this, _Board_sharer, "f").setActiveStorage("data", data);
-      const viewSizeInfo = sharer.getActiveViewSizeInfo();
-      const newViewContextSize = calcElementsContextSize(data.elements, {
-        viewWidth: viewSizeInfo.width,
-        viewHeight: viewSizeInfo.height,
-        extend: true
-      });
-      __classPrivateFieldGet$1(this, _Board_viewer, "f").drawFrame();
-      const newViewSizeInfo = Object.assign(Object.assign({}, viewSizeInfo), newViewContextSize);
-      __classPrivateFieldGet$1(this, _Board_sharer, "f").setActiveViewSizeInfo(newViewSizeInfo);
-      return { viewSizeInfo: newViewSizeInfo };
-    }
-    getData() {
-      const { data } = __classPrivateFieldGet$1(this, _Board_sharer, "f").getActiveStoreSnapshot();
-      return data;
-    }
-    use(middleware) {
-      var _a, _b, _c;
-      if (__classPrivateFieldGet$1(this, _Board_middlewareMap, "f").has(middleware)) {
-        const item = __classPrivateFieldGet$1(this, _Board_middlewareMap, "f").get(middleware);
-        if (item) {
-          (_b = (_a = item.middlewareObject).use) === null || _b === void 0 ? void 0 : _b.call(_a);
-          item.status = "enable";
-          __classPrivateFieldGet$1(this, _Board_middlewareMap, "f").set(middleware, item);
-          __classPrivateFieldGet$1(this, _Board_instances, "m", _Board_resetActiveMiddlewareObjs).call(this);
-          return;
-        }
-      }
-      const { boardContent, container } = __classPrivateFieldGet$1(this, _Board_opts, "f");
-      const sharer = __classPrivateFieldGet$1(this, _Board_sharer, "f");
-      const viewer = __classPrivateFieldGet$1(this, _Board_viewer, "f");
-      const calculator = __classPrivateFieldGet$1(this, _Board_calculator, "f");
-      const eventHub = __classPrivateFieldGet$1(this, _Board_eventHub, "f");
-      const obj = middleware({ boardContent, sharer, viewer, calculator, eventHub, container });
-      (_c = obj.use) === null || _c === void 0 ? void 0 : _c.call(obj);
-      __classPrivateFieldGet$1(this, _Board_middlewares, "f").push(middleware);
-      __classPrivateFieldGet$1(this, _Board_activeMiddlewareObjs, "f").push(obj);
-      __classPrivateFieldGet$1(this, _Board_middlewareMap, "f").set(middleware, {
-        status: "enable",
-        middlewareObject: obj
-      });
-      __classPrivateFieldGet$1(this, _Board_instances, "m", _Board_resetActiveMiddlewareObjs).call(this);
-    }
-    disuse(middleware) {
-      var _a, _b;
-      const item = __classPrivateFieldGet$1(this, _Board_middlewareMap, "f").get(middleware);
-      if (item) {
-        (_b = (_a = item.middlewareObject).disuse) === null || _b === void 0 ? void 0 : _b.call(_a);
-        item.status = "disable";
-        __classPrivateFieldGet$1(this, _Board_middlewareMap, "f").set(middleware, item);
-        __classPrivateFieldGet$1(this, _Board_instances, "m", _Board_resetActiveMiddlewareObjs).call(this);
-      }
-    }
-    scale(opts) {
-      const viewer = __classPrivateFieldGet$1(this, _Board_viewer, "f");
-      const { moveX, moveY } = viewer.scale(opts);
-      viewer.scroll({ moveX, moveY });
-    }
-    scroll(opts) {
-      return __classPrivateFieldGet$1(this, _Board_viewer, "f").scroll(opts);
-    }
-    updateViewScaleInfo(opts) {
-      return __classPrivateFieldGet$1(this, _Board_viewer, "f").updateViewScaleInfo(opts);
-    }
-    resize(newViewSize) {
-      const viewSize = __classPrivateFieldGet$1(this, _Board_viewer, "f").resize(newViewSize);
-      const { width, height, devicePixelRatio } = newViewSize;
-      const { boardContent } = __classPrivateFieldGet$1(this, _Board_opts, "f");
-      boardContent.viewContext.$resize({ width, height, devicePixelRatio });
-      boardContent.helperContext.$resize({ width, height, devicePixelRatio });
-      boardContent.boardContext.$resize({ width, height, devicePixelRatio });
-      boardContent.underContext.$resize({ width, height, devicePixelRatio });
-      __classPrivateFieldGet$1(this, _Board_viewer, "f").drawFrame();
-      __classPrivateFieldGet$1(this, _Board_watcher, "f").trigger("resize", viewSize);
-      __classPrivateFieldGet$1(this, _Board_sharer, "f").setActiveViewSizeInfo(newViewSize);
-    }
-    clear() {
-      const { boardContent } = __classPrivateFieldGet$1(this, _Board_opts, "f");
-      const { underContext, helperContext, viewContext, boardContext } = boardContent;
-      underContext.clearRect(0, 0, underContext.canvas.width, underContext.canvas.height);
-      helperContext.clearRect(0, 0, helperContext.canvas.width, helperContext.canvas.height);
-      viewContext.clearRect(0, 0, viewContext.canvas.width, viewContext.canvas.height);
-      boardContext.clearRect(0, 0, boardContext.canvas.width, boardContext.canvas.height);
-      __classPrivateFieldGet$1(this, _Board_instances, "m", _Board_handleClear).call(this);
-    }
-    getEventHub() {
-      return __classPrivateFieldGet$1(this, _Board_eventHub, "f");
-    }
-  }
-  _Board_opts = /* @__PURE__ */ new WeakMap(), _Board_middlewareMap = /* @__PURE__ */ new WeakMap(), _Board_middlewares = /* @__PURE__ */ new WeakMap(), _Board_activeMiddlewareObjs = /* @__PURE__ */ new WeakMap(), _Board_watcher = /* @__PURE__ */ new WeakMap(), _Board_renderer = /* @__PURE__ */ new WeakMap(), _Board_sharer = /* @__PURE__ */ new WeakMap(), _Board_viewer = /* @__PURE__ */ new WeakMap(), _Board_calculator = /* @__PURE__ */ new WeakMap(), _Board_eventHub = /* @__PURE__ */ new WeakMap(), _Board_instances = /* @__PURE__ */ new WeakSet(), _Board_init = function _Board_init2() {
-    __classPrivateFieldGet$1(this, _Board_watcher, "f").on("pointStart", __classPrivateFieldGet$1(this, _Board_instances, "m", _Board_handlePointStart).bind(this));
-    __classPrivateFieldGet$1(this, _Board_watcher, "f").on("pointEnd", __classPrivateFieldGet$1(this, _Board_instances, "m", _Board_handlePointEnd).bind(this));
-    __classPrivateFieldGet$1(this, _Board_watcher, "f").on("pointMove", throttle((e) => {
-      __classPrivateFieldGet$1(this, _Board_instances, "m", _Board_handlePointMove).call(this, e);
-    }, throttleTime));
-    __classPrivateFieldGet$1(this, _Board_watcher, "f").on("hover", throttle((e) => {
-      __classPrivateFieldGet$1(this, _Board_instances, "m", _Board_handleHover).call(this, e);
-    }, throttleTime));
-    __classPrivateFieldGet$1(this, _Board_watcher, "f").on("wheel", throttle((e) => {
-      __classPrivateFieldGet$1(this, _Board_instances, "m", _Board_handleWheel).call(this, e);
-    }, throttleTime));
-    __classPrivateFieldGet$1(this, _Board_watcher, "f").on("wheelScale", throttle((e) => {
-      __classPrivateFieldGet$1(this, _Board_instances, "m", _Board_handleWheelScale).call(this, e);
-    }, throttleTime));
-    __classPrivateFieldGet$1(this, _Board_watcher, "f").on("scrollX", __classPrivateFieldGet$1(this, _Board_instances, "m", _Board_handleScrollX).bind(this));
-    __classPrivateFieldGet$1(this, _Board_watcher, "f").on("scrollY", __classPrivateFieldGet$1(this, _Board_instances, "m", _Board_handleScrollY).bind(this));
-    __classPrivateFieldGet$1(this, _Board_watcher, "f").on("resize", __classPrivateFieldGet$1(this, _Board_instances, "m", _Board_handleResize).bind(this));
-    __classPrivateFieldGet$1(this, _Board_watcher, "f").on("doubleClick", __classPrivateFieldGet$1(this, _Board_instances, "m", _Board_handleDoubleClick).bind(this));
-  }, _Board_handlePointStart = function _Board_handlePointStart2(e) {
-    var _a;
-    for (let i = 0; i < __classPrivateFieldGet$1(this, _Board_activeMiddlewareObjs, "f").length; i++) {
-      const obj = __classPrivateFieldGet$1(this, _Board_activeMiddlewareObjs, "f")[i];
-      const result = (_a = obj === null || obj === void 0 ? void 0 : obj.pointStart) === null || _a === void 0 ? void 0 : _a.call(obj, e);
-      if (result === false) {
-        return;
-      }
-    }
-  }, _Board_handlePointEnd = function _Board_handlePointEnd2(e) {
-    var _a;
-    for (let i = 0; i < __classPrivateFieldGet$1(this, _Board_activeMiddlewareObjs, "f").length; i++) {
-      const obj = __classPrivateFieldGet$1(this, _Board_activeMiddlewareObjs, "f")[i];
-      const result = (_a = obj === null || obj === void 0 ? void 0 : obj.pointEnd) === null || _a === void 0 ? void 0 : _a.call(obj, e);
-      if (result === false) {
-        return;
-      }
-    }
-  }, _Board_handlePointMove = function _Board_handlePointMove2(e) {
-    var _a;
-    for (let i = 0; i < __classPrivateFieldGet$1(this, _Board_activeMiddlewareObjs, "f").length; i++) {
-      const obj = __classPrivateFieldGet$1(this, _Board_activeMiddlewareObjs, "f")[i];
-      const result = (_a = obj === null || obj === void 0 ? void 0 : obj.pointMove) === null || _a === void 0 ? void 0 : _a.call(obj, e);
-      if (result === false) {
-        return;
-      }
-    }
-  }, _Board_handleHover = function _Board_handleHover2(e) {
-    var _a;
-    for (let i = 0; i < __classPrivateFieldGet$1(this, _Board_activeMiddlewareObjs, "f").length; i++) {
-      const obj = __classPrivateFieldGet$1(this, _Board_activeMiddlewareObjs, "f")[i];
-      const result = (_a = obj === null || obj === void 0 ? void 0 : obj.hover) === null || _a === void 0 ? void 0 : _a.call(obj, e);
-      if (result === false) {
-        return;
-      }
-    }
-  }, _Board_handleDoubleClick = function _Board_handleDoubleClick2(e) {
-    var _a;
-    for (let i = 0; i < __classPrivateFieldGet$1(this, _Board_activeMiddlewareObjs, "f").length; i++) {
-      const obj = __classPrivateFieldGet$1(this, _Board_activeMiddlewareObjs, "f")[i];
-      const result = (_a = obj === null || obj === void 0 ? void 0 : obj.doubleClick) === null || _a === void 0 ? void 0 : _a.call(obj, e);
-      if (result === false) {
-        return;
-      }
-    }
-  }, _Board_handleWheel = function _Board_handleWheel2(e) {
-    var _a;
-    for (let i = 0; i < __classPrivateFieldGet$1(this, _Board_activeMiddlewareObjs, "f").length; i++) {
-      const obj = __classPrivateFieldGet$1(this, _Board_activeMiddlewareObjs, "f")[i];
-      const result = (_a = obj === null || obj === void 0 ? void 0 : obj.wheel) === null || _a === void 0 ? void 0 : _a.call(obj, e);
-      if (result === false) {
-        return;
-      }
-    }
-  }, _Board_handleWheelScale = function _Board_handleWheelScale2(e) {
-    var _a;
-    for (let i = 0; i < __classPrivateFieldGet$1(this, _Board_activeMiddlewareObjs, "f").length; i++) {
-      const obj = __classPrivateFieldGet$1(this, _Board_activeMiddlewareObjs, "f")[i];
-      const result = (_a = obj === null || obj === void 0 ? void 0 : obj.wheelScale) === null || _a === void 0 ? void 0 : _a.call(obj, e);
-      if (result === false) {
-        return;
-      }
-    }
-  }, _Board_handleScrollX = function _Board_handleScrollX2(e) {
-    var _a;
-    for (let i = 0; i < __classPrivateFieldGet$1(this, _Board_activeMiddlewareObjs, "f").length; i++) {
-      const obj = __classPrivateFieldGet$1(this, _Board_activeMiddlewareObjs, "f")[i];
-      const result = (_a = obj === null || obj === void 0 ? void 0 : obj.scrollX) === null || _a === void 0 ? void 0 : _a.call(obj, e);
-      if (result === false) {
-        return;
-      }
-    }
-  }, _Board_handleScrollY = function _Board_handleScrollY2(e) {
-    var _a;
-    for (let i = 0; i < __classPrivateFieldGet$1(this, _Board_activeMiddlewareObjs, "f").length; i++) {
-      const obj = __classPrivateFieldGet$1(this, _Board_activeMiddlewareObjs, "f")[i];
-      const result = (_a = obj === null || obj === void 0 ? void 0 : obj.scrollY) === null || _a === void 0 ? void 0 : _a.call(obj, e);
-      if (result === false) {
-        return;
-      }
-    }
-  }, _Board_handleResize = function _Board_handleResize2(e) {
-    var _a;
-    for (let i = 0; i < __classPrivateFieldGet$1(this, _Board_activeMiddlewareObjs, "f").length; i++) {
-      const obj = __classPrivateFieldGet$1(this, _Board_activeMiddlewareObjs, "f")[i];
-      const result = (_a = obj === null || obj === void 0 ? void 0 : obj.resize) === null || _a === void 0 ? void 0 : _a.call(obj, e);
-      if (result === false) {
-        return;
-      }
-    }
-  }, _Board_handleClear = function _Board_handleClear2(e) {
-    var _a;
-    for (let i = 0; i < __classPrivateFieldGet$1(this, _Board_activeMiddlewareObjs, "f").length; i++) {
-      const obj = __classPrivateFieldGet$1(this, _Board_activeMiddlewareObjs, "f")[i];
-      const result = (_a = obj === null || obj === void 0 ? void 0 : obj.clear) === null || _a === void 0 ? void 0 : _a.call(obj, e);
-      if (result === false) {
-        return;
-      }
-    }
-  }, _Board_handleBeforeDrawFrame = function _Board_handleBeforeDrawFrame2(e) {
-    var _a;
-    for (let i = 0; i < __classPrivateFieldGet$1(this, _Board_activeMiddlewareObjs, "f").length; i++) {
-      const obj = __classPrivateFieldGet$1(this, _Board_activeMiddlewareObjs, "f")[i];
-      const result = (_a = obj === null || obj === void 0 ? void 0 : obj.beforeDrawFrame) === null || _a === void 0 ? void 0 : _a.call(obj, e);
-      if (result === false) {
-        return;
-      }
-    }
-  }, _Board_handleAfterDrawFrame = function _Board_handleAfterDrawFrame2(e) {
-    var _a;
-    for (let i = 0; i < __classPrivateFieldGet$1(this, _Board_activeMiddlewareObjs, "f").length; i++) {
-      const obj = __classPrivateFieldGet$1(this, _Board_activeMiddlewareObjs, "f")[i];
-      const result = (_a = obj === null || obj === void 0 ? void 0 : obj.afterDrawFrame) === null || _a === void 0 ? void 0 : _a.call(obj, e);
-      if (result === false) {
-        return;
-      }
-    }
-  }, _Board_resetActiveMiddlewareObjs = function _Board_resetActiveMiddlewareObjs2() {
-    const activeMiddlewareObjs = [];
-    const middlewareMap = __classPrivateFieldGet$1(this, _Board_middlewareMap, "f");
-    __classPrivateFieldGet$1(this, _Board_middlewares, "f").forEach((middleware) => {
-      const item = middlewareMap.get(middleware);
-      if ((item === null || item === void 0 ? void 0 : item.status) === "enable" && (item === null || item === void 0 ? void 0 : item.middlewareObject)) {
-        activeMiddlewareObjs.push(item.middlewareObject);
-      }
-    });
-    __classPrivateFieldSet$1(this, _Board_activeMiddlewareObjs, activeMiddlewareObjs, "f");
-  };
-  const CURSOR = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACgAAAAoCAYAAACM/rhtAAAACXBIWXMAAAsTAAALEwEAmpwYAAAF92lUWHRYTUw6Y29tLmFkb2JlLnhtcAAAAAAAPD94cGFja2V0IGJlZ2luPSLvu78iIGlkPSJXNU0wTXBDZWhpSHpyZVN6TlRjemtjOWQiPz4gPHg6eG1wbWV0YSB4bWxuczp4PSJhZG9iZTpuczptZXRhLyIgeDp4bXB0az0iQWRvYmUgWE1QIENvcmUgNi4wLWMwMDYgNzkuMTY0NzUzLCAyMDIxLzAyLzE1LTExOjUyOjEzICAgICAgICAiPiA8cmRmOlJERiB4bWxuczpyZGY9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkvMDIvMjItcmRmLXN5bnRheC1ucyMiPiA8cmRmOkRlc2NyaXB0aW9uIHJkZjphYm91dD0iIiB4bWxuczp4bXA9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC8iIHhtbG5zOmRjPSJodHRwOi8vcHVybC5vcmcvZGMvZWxlbWVudHMvMS4xLyIgeG1sbnM6cGhvdG9zaG9wPSJodHRwOi8vbnMuYWRvYmUuY29tL3Bob3Rvc2hvcC8xLjAvIiB4bWxuczp4bXBNTT0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wL21tLyIgeG1sbnM6c3RFdnQ9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9zVHlwZS9SZXNvdXJjZUV2ZW50IyIgeG1wOkNyZWF0b3JUb29sPSJBZG9iZSBQaG90b3Nob3AgMjIuMyAoTWFjaW50b3NoKSIgeG1wOkNyZWF0ZURhdGU9IjIwMjMtMDktMTdUMTY6MDc6MjYrMDg6MDAiIHhtcDpNb2RpZnlEYXRlPSIyMDIzLTA5LTE3VDE2OjEyOjUwKzA4OjAwIiB4bXA6TWV0YWRhdGFEYXRlPSIyMDIzLTA5LTE3VDE2OjEyOjUwKzA4OjAwIiBkYzpmb3JtYXQ9ImltYWdlL3BuZyIgcGhvdG9zaG9wOkNvbG9yTW9kZT0iMyIgcGhvdG9zaG9wOklDQ1Byb2ZpbGU9InNSR0IgSUVDNjE5NjYtMi4xIiB4bXBNTTpJbnN0YW5jZUlEPSJ4bXAuaWlkOjliMGM0MzI2LWU4ZTQtNDlkNy04MmUzLTgxODkwYTE2ZmU1YSIgeG1wTU06RG9jdW1lbnRJRD0iYWRvYmU6ZG9jaWQ6cGhvdG9zaG9wOjMzOGFhZDBmLWZkZjMtODE0MS1iMTZmLWNiZWIzNTQyYTJhMCIgeG1wTU06T3JpZ2luYWxEb2N1bWVudElEPSJ4bXAuZGlkOjUwODAxNzc1LWZlNGEtNDQyMy05NDQ3LThkYWRhNzZhYTllOSI+IDx4bXBNTTpIaXN0b3J5PiA8cmRmOlNlcT4gPHJkZjpsaSBzdEV2dDphY3Rpb249ImNyZWF0ZWQiIHN0RXZ0Omluc3RhbmNlSUQ9InhtcC5paWQ6NTA4MDE3NzUtZmU0YS00NDIzLTk0NDctOGRhZGE3NmFhOWU5IiBzdEV2dDp3aGVuPSIyMDIzLTA5LTE3VDE2OjA3OjI2KzA4OjAwIiBzdEV2dDpzb2Z0d2FyZUFnZW50PSJBZG9iZSBQaG90b3Nob3AgMjIuMyAoTWFjaW50b3NoKSIvPiA8cmRmOmxpIHN0RXZ0OmFjdGlvbj0ic2F2ZWQiIHN0RXZ0Omluc3RhbmNlSUQ9InhtcC5paWQ6OWIwYzQzMjYtZThlNC00OWQ3LTgyZTMtODE4OTBhMTZmZTVhIiBzdEV2dDp3aGVuPSIyMDIzLTA5LTE3VDE2OjEyOjUwKzA4OjAwIiBzdEV2dDpzb2Z0d2FyZUFnZW50PSJBZG9iZSBQaG90b3Nob3AgMjIuMyAoTWFjaW50b3NoKSIgc3RFdnQ6Y2hhbmdlZD0iLyIvPiA8L3JkZjpTZXE+IDwveG1wTU06SGlzdG9yeT4gPC9yZGY6RGVzY3JpcHRpb24+IDwvcmRmOlJERj4gPC94OnhtcG1ldGE+IDw/eHBhY2tldCBlbmQ9InIiPz7W6XrzAAAGLklEQVRYhb2Xf2iUdRzHX/txtfXLplZ6Wblm6fzRmG6r7Uou1AxKRjQKYUqgaLBACFogppcK1h8aLRkMSYaJIA5hYMomZpskEfPOufCaDpZ6t7rbre263U3vzn3643meu+eu3XNzvz7w4bbdc/e89nl/Pu/v50HUCAQCx1tbW0uAx4CHgSwggxkKERkziUQif2mQ0WjU53a7vwSeBB4BTEDmTICmBBwYGDivVlDjlFAo9KvT6dwIPAHkANkq6MwDXr169bCISENDg9TX14s+BgcHf2hubi5mBmRPCXj06NFPREQ6OjoEkPLycrl06VIMMhKJeFwu1xdMs+wpAYuLi9eIiIyOjkpeXp4AAsj27dvF7/fHQIPB4C9dXV0fME2ypwQEXvX7/bdFRNauXRsDBMRkMsnhw4cTZB8YGGhsamp6hSmW3Qhw1Y0bN86LiNTW1iYAallWViZtbW162ftcLtdO/i/7tAAWtba2ficicvLkyTEBtdy6dasMDg7GQIeHh9s7OzvfBx5nkrIbAS7du3fvxyIiPT09hoBa1tXVJcv+fWNj4zLgUeAhJiC7EeDLwOsiMioisnDhwnFBrlixQi5evKiX/c6tW7c+R5E9lweU3QjwReDV/v7+bhGRqqqqcQFquWnTJvH5fHrZLzocjkoSZU9bTSPA54GV165daxYROXDgwAMBannw4MFk2RsaGhqWME7ZjQDNwIrTp09/JSLS0tIyIUBACgoK5MKFCzHIcDj85+3btz8FZpFGdiPAZ4DCmpqaTSIiPp9vwoBaVlVVidfr1ct+/sqVK+9iILsR4FzgJcASDoeHRUSKioomDQnI/v37E2T3+Xz1hw4dWjSW7EaAeUA+UNbX12cXEdmyZcuUAAJiNpvlzJkzetl73G53rVrN2EmUCjATuA9EgYjL5eoGKCkpGatNHijmz5/Pxo0b2blzJ2azOfZ3k8lUYDabv45Go/Y7d+6sIY0VZQOjGqDT6bxeWlrKqlWrJgRlsVhYv349FRUVWCwWcnJyEt4PBoOuoaEhu9frvdzR0fHTtm3buolvRpLqe3OBp4EllZWV74mIRKNRyc3NTSvf7Nmzpbq6Wk6cOCFut1uSY2RkJOB0Ou3Nzc3Ha2trPwPWAGXAEuBZFFPPAbKMevBhYA6wCKgIBoP9IiKrV682hLPZbP8DEpH7vb29N1paWn602WwHFyxYsAX4EKgE3gIsQBFQgOIeT6j3z0wFqEkc60OPx9Odn58/t6SkhPb29jFLbrVa2bNnDwBer7fv5s2bPQ6Ho7upqcnZ1tbmASJq3gPC6utdYESXYfWeo6mkBaUHRQ/odrv/yM/Pt5SWlqb8kAbncDh+W7lyZYN683u6DOvAwipsOOnniA4wZf9lqhdoVYzY7fbrQMpBsdlsWK1WRkZGAtXV1d8D/wA+wKNLr5o+YEC9ZggIAEHiFbyfDhCUCcoFngIWFxYWrtMaat68eQl9V15eHmu2+vr6OuAd4A2gGFgMLERp/mdQ+noWyuadi9Jr2aQ4k42GBPXDs1Ga97WhoaFbIiIbNmxIANTWq87Ozp9VuApgGfACihPkoRjwI+p3mlSgtA9ZRkYNYwwKJBr2rl27sFqthEKhwZqamqOAX5f/AsPE5btLvM/GJWO6yFb/82eBonPnztWJiJw9e1YAWb58eUzaI0eOfAO8CbwCPIfiZZN+eEoncSaKLPOApbt3794uIuL1ehOktdvtF4C3gRKURXcOSn9lTRRsvIAZKI4+l/gjQFREZMeOHSIiEggE+tetW/cRitkuRhmERxnnxjxZQFDWnzzURwCv1+vUHxHHjh37lri0C1Am9KGpgDMC1G8SQnxxCHs8Hqf2RldX10+bN28+i+JjwyT62KSaP13oAfWTHO7t7f0dIBQK/b1v375GlEnVjPYuyoQaHlNTDahVMALca29vdwBcvnz5+KlTp26OATft1UuODBS7yEOxj0K/329HOSWWopjxlE1tchhtM7FriPfgXSDDbrfXo0gbJr4QzIi0WiRPYBbKZJrUV23b0dYn7XSYcsBkS9EiO/k6lApq1cwiPjzaAM1Y9cYC1G6uAWrPCtrvMwoHqU02Q5caIEzj1KaS+D+vIjxtLug31gAAAABJRU5ErkJggg==";
-  const CURSOR_RESIZE = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACgAAAApCAYAAABHomvIAAAACXBIWXMAAAsTAAALEwEAmpwYAAAF92lUWHRYTUw6Y29tLmFkb2JlLnhtcAAAAAAAPD94cGFja2V0IGJlZ2luPSLvu78iIGlkPSJXNU0wTXBDZWhpSHpyZVN6TlRjemtjOWQiPz4gPHg6eG1wbWV0YSB4bWxuczp4PSJhZG9iZTpuczptZXRhLyIgeDp4bXB0az0iQWRvYmUgWE1QIENvcmUgNi4wLWMwMDYgNzkuMTY0NzUzLCAyMDIxLzAyLzE1LTExOjUyOjEzICAgICAgICAiPiA8cmRmOlJERiB4bWxuczpyZGY9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkvMDIvMjItcmRmLXN5bnRheC1ucyMiPiA8cmRmOkRlc2NyaXB0aW9uIHJkZjphYm91dD0iIiB4bWxuczp4bXA9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC8iIHhtbG5zOmRjPSJodHRwOi8vcHVybC5vcmcvZGMvZWxlbWVudHMvMS4xLyIgeG1sbnM6cGhvdG9zaG9wPSJodHRwOi8vbnMuYWRvYmUuY29tL3Bob3Rvc2hvcC8xLjAvIiB4bWxuczp4bXBNTT0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wL21tLyIgeG1sbnM6c3RFdnQ9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9zVHlwZS9SZXNvdXJjZUV2ZW50IyIgeG1wOkNyZWF0b3JUb29sPSJBZG9iZSBQaG90b3Nob3AgMjIuMyAoTWFjaW50b3NoKSIgeG1wOkNyZWF0ZURhdGU9IjIwMjMtMDktMTdUMTY6MzE6MjMrMDg6MDAiIHhtcDpNb2RpZnlEYXRlPSIyMDIzLTA5LTE3VDE2OjQ0OjIyKzA4OjAwIiB4bXA6TWV0YWRhdGFEYXRlPSIyMDIzLTA5LTE3VDE2OjQ0OjIyKzA4OjAwIiBkYzpmb3JtYXQ9ImltYWdlL3BuZyIgcGhvdG9zaG9wOkNvbG9yTW9kZT0iMyIgcGhvdG9zaG9wOklDQ1Byb2ZpbGU9InNSR0IgSUVDNjE5NjYtMi4xIiB4bXBNTTpJbnN0YW5jZUlEPSJ4bXAuaWlkOjY0MTBhYjUzLWM0ZjEtNDVhNS04MjhkLTIxOTczOWFjOTk3MSIgeG1wTU06RG9jdW1lbnRJRD0iYWRvYmU6ZG9jaWQ6cGhvdG9zaG9wOjBkMDNmNjM5LTE5MzctY2Y0MC1hMTg0LTIyMjg0NzczNWNmYSIgeG1wTU06T3JpZ2luYWxEb2N1bWVudElEPSJ4bXAuZGlkOjgyYjQwZGRmLWE0ZGEtNDY3MC1iYzc2LTBhYjY3ZmI5M2I0ZSI+IDx4bXBNTTpIaXN0b3J5PiA8cmRmOlNlcT4gPHJkZjpsaSBzdEV2dDphY3Rpb249ImNyZWF0ZWQiIHN0RXZ0Omluc3RhbmNlSUQ9InhtcC5paWQ6ODJiNDBkZGYtYTRkYS00NjcwLWJjNzYtMGFiNjdmYjkzYjRlIiBzdEV2dDp3aGVuPSIyMDIzLTA5LTE3VDE2OjMxOjIzKzA4OjAwIiBzdEV2dDpzb2Z0d2FyZUFnZW50PSJBZG9iZSBQaG90b3Nob3AgMjIuMyAoTWFjaW50b3NoKSIvPiA8cmRmOmxpIHN0RXZ0OmFjdGlvbj0ic2F2ZWQiIHN0RXZ0Omluc3RhbmNlSUQ9InhtcC5paWQ6NjQxMGFiNTMtYzRmMS00NWE1LTgyOGQtMjE5NzM5YWM5OTcxIiBzdEV2dDp3aGVuPSIyMDIzLTA5LTE3VDE2OjQ0OjIyKzA4OjAwIiBzdEV2dDpzb2Z0d2FyZUFnZW50PSJBZG9iZSBQaG90b3Nob3AgMjIuMyAoTWFjaW50b3NoKSIgc3RFdnQ6Y2hhbmdlZD0iLyIvPiA8L3JkZjpTZXE+IDwveG1wTU06SGlzdG9yeT4gPC9yZGY6RGVzY3JpcHRpb24+IDwvcmRmOlJERj4gPC94OnhtcG1ldGE+IDw/eHBhY2tldCBlbmQ9InIiPz57vRudAAAEk0lEQVRYhe3ZW0jbVxzA8e8/MX+NYnG9uI4xE3bvoLt0FzradRfGBtsYo32YdAhb6WQyBqV7KOylpYjzZShDGfjmyxgbgjjwyRm16SYMhgiNKDhbL3VtNF4xJOnf3x7+59i/Wf4aTbInf3AwJMdzPjnnf/n9/jFEhGzDMIxMb3uAIsDs6ek5urS05Dtz5syE+uwekAQS6u89YD19gC0NIpJ1c8GZQHlXV9fJRCIxGo/HxxoaGj4CngWOAEGgEihXfT07MeQC3MB1dna+lkgkRkXF6urq3xcuXPgUOAE8DzwGPOiGLARwEy4ej4+JiITD4elr167NiIgsLi7eqq2trQPeBI4Bj7sh8w10xZmmeds0zdn+/v5/RERisdjUuXPnvgLeAl50Q+YTaAA+oKy7u/uE3laNAwSQ4uLiu6FQ6G4G5DG13YeAMjWWkU+gBygJhULHNe769etTTpwDGXUiz58//yXwujp5qoAHgBLAk0+gNxKJHEulUiMKN2ma5gwgPp/vjhOXjlxYWJisq6urBV5RW30IKAW8eQPGYrGjlmXdEBEZHBy8aZrmFCCmac729fVtAHt7e6MO5N2+vr47IiJLS0s3L126dBZ4Sh2LZUBRwVdwYGBgVuwOYh/zsoF0bnPBVzDTMRgOh6dFhROokSIi8/Pz0+pEeaPQx+DGWdzV1XVSX2LcgCIic3NzMzU1NV8D7wIvq9WrLNRZvOk62NHRccqJTAdGo9Hb1dXV3wAfYt9VjgAPFfI66EQWAxU9PT0fuwEvXrzYBJwF3gFeAAJAhfrfrO4k/7lxZxnr2JlJqry8POnWyePx6H4JR0vhktVkHGOXQI20SkpKLLcOhmGsA5YCaZiVLS5XoADi9XpdkznDMERhnE0fCgUHZhvOW+CO4/8A5hR7wFxjD5hr7AFzjZyBlmVlrOYdYaS1HUUuQA/gWV9fd51URDyqn1c1j6MVFGjoidfW1oq2ABrYj0V82OmVzwHNajVdB88C5wOKTdM87NaxsrKyQsFKHC2BnTDo+/TWt8Bd5INeVC44NDT0xXYZdXNz8w/AaeyS8yjwCPdzQu92ht2m/OUjIyOfS1pkAoqItLS0fA+8D7wKPA0cxs6qC1O4T0xMfKYnb21tnXEDNjc3z+nXbW1t3wFvYz9dCAL7KUThHovFPtGTNjU1jQFSX18/lg68cuXKLUAaGxs3vkB7e/u3wHHgCQpUdnpTqdQvesJgMDisUVevXh3Xry9fvnxTv66qqprQ/cfHx/vVNj/J/couv0DAv7q6+pMDeYPNSalkwkUikX7s4ukl4FHgAODPN1CXnPsWFxd/dCAjW+GGhoZCwAfYpeczwMPAPjVW3gv3IvXN98disZ8dyBGNCwQC4/r94eHhfuy6+JS6zATUCeJXY+W9cNfIUuDAwsLCr05kIBDYeBQ8Ojr6h8Lpx25BtbWlGpfv62BG5PLy8m+SFpOTk38C76mVe84NVyhgOvLgysrK7xoXjUb/Uqt2XG1rEDiYCbcd0MgwsWtk+J1EI03An0wmw5Zlefx+/2n1eRKIO5r+rWTTpFsZ/gWFrGMmeObuqwAAAABJRU5ErkJggg==";
-  const CURSOR_DRAG_DEFAULT = `data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACgAAAApCAYAAABHomvIAAAEvUlEQVRYhc2Y20/cVRDHP8v+uKzAWkpDCtZq8BYhJkq8PBoJxgj7I2m0ryaSyFN9IT74pI8+8WJiggRj/APApFkSTGRJ+qKGUiyxbGPEWsUSuVhYC12Wy8+HmeMeYPe3d3WSye/k/M7le+bMzJkZ+J9ToEJreGVYN+vihcytstjQocUlAw0WCSoIVCv3Ae8CXwIt+u8XHVeOG8qLqgAHqAFCQCNwGugCthBJGd7S/tM6LqTzHI5KuqzgaoAHgEvAtwrkG2AG8FzXvep5nue67lX9N6P/PR1/SefXlBtkFXKNDUA/RyX1D9uUbYzOb9D1ygbSQU7eDMxhSSsSiVz3AxiJRK57nuf19/fPad8coqONFCBJPyUOIKc1OvcbgiY9ICDT8+0DHge2gR0gBeyTtviM5HeKAGlrrfMZVwhdAVaAr4F3KNF4gkA9cBbowOc68+3LwDn1Mhdy4/OcYk54nPr6+m54nofruvPa9SFQ6wfQTweNgTwInAGuQWk6mEUvHwb+Au4Dexx7ffK9+0q+CHWIBIOZ9skHYKWfK9tQ8gZoLDjIyWCg3ORY+2T8aYOyg4EaRIFrkCs4QU1NTSvabC20zyIDzuyfkYzEahHX8jHwE/LwXwHeJ4P7KIVIu5ouxFDC+HgLAy4MfEF2v1UpgOezATSiNVf6EvAWsD01NXVtdnb2bk9Pz81sp/q3KIi8t83Ae4DX0tJy0z7t8PDwD4FAYIX/WILVwKMAzc3Nu/agoaGhzmg0ugcsV0hIvlSNoH8IuIiebHJycrls4sotwaxGYvueAPAjEg3jum79yMjIr5WUjFLOxMpBIopWoBN4GfhOJ+4NDg4ulVt6i4uLm7r+BvAscA4fCXrAAfJQJ5Fg8gPgMuCMjo62d3V1LW1sbKRKlpXSxMTEmjZ/5qQrOwHwUAGmkIjiHhJdfKrM/Pz8Y+3t7RvT09Ob5QAYi8X2tbmke2cEZwAaCdoAt5QvIzEbiUSitbe3tyoej++UCnBhYSGkzdu6d1aQxkgOkfwgieQMCeCu8iwSnpNKpcIdHR3BZDJ5UCy4SCSyvL6+/giiSou67wE+eYmhAKKkIaAJUdynkdflNcQF3dFTpooxjmg0aozDAz4DXkB8bxPy1OYM7QzIOuAU0AY8pQu9CrwJ3AK8UCj0RyHgZmZmli1w3wOvAM/oHo1kiZiygbSDh7PAE8DzQA/wBqKnnuM4a2NjY7dygbtw4cICRy31deBFJA09o7eWsU7kJ1KTLJmyRyOSn5zS70fAkwBtbW2/DwwMHHR3d9d3dnY2rK6u7o2Pj2/GYrH9eDzurK2tndM1vwI+QXT7T2BTD5skQz6SCyAcLRoZkGEFGQbeRqpbubK+BPA5MI14h00L3I6Cy2h4+eQbJsKuRa6iQcGFFfB5oBt4DpFsI+Ky7iDBxW3gBhBH/GtC+R7i1lKk3UxRAG2QpvxWr0AbtB3SA5jkx36djH/dVlDbyibN3M8GDvJPyI2PSulixm/u6kZ1OQCaJ/S+tndJX6tvsFBIxcCUdA3vW5ubxMrObc0hDMhd/Rqp5QQHxeW8dubnHGM7tzVv/IECMlxQ/bpcRfRMqaNRheNcUGG9XFWDACfzWs/6Fl3t/xtO//8gpbCORQAAAABJRU5ErkJggg==`;
-  const CURSOR_DRAG_ACTIVE = `data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACgAAAAoCAYAAACM/rhtAAAER0lEQVRYhe2YT2hjRRjAf8lL22xsNsm6EWKrSKvuIkIh+O9QRFxEW18KUsoe7FHoRaWCN1FPetOrIHgVKS0q9P5OxaJbodkalgVrtVZjS7Ntd02z6abPw3yzmaT585q+elj2g2HmvZn35jffN/PNNwP35R6XgM/fuif4n+dO2klQvgsaZRc4NJJvoJbHdhrIAkJAN2ADHwFfAw9J3ZoB/b9I0AA6A0SBc0Aa2EVpSqddeZ+QdmfkO+u0gIPSQQR4HfhRQH4AHMDNZDJXXNd1M5nMFalzdB3wJTAOPAD0yEB9066G6wXepVZTd5MpTdporZ6jVqsatmMJoTR3HvgJQ1u2bS+3ArRte9l1XXdsbGyJo1pdBN6Wf3d3ChlAmSQO9LeC8fquQRpDWaerHWSjSr1iu4BkJyOsF9u2s67rkslkluTVxygltAVsJBZqdCngEj5osIlW+4EYytRNF04jeu3vulCT+7QkLH20dEOhumft97pQI4s3+iiRSPwtxVSbd39J8eEGvzFXc1NAs8KSFAZeBt4AHgNeBFDWObkEAne7HAK2gT2gCFQatdca1GbtBj4E3veFprVYVLXXcg4GqM6588BbAMlkcm1qamqzr6/v6ikBet5RgiizJoDPAXdgYGDZXHkzMzPrrk9CdRWngUeAsxxdCzVwpgZ/BigWiz1mo4mJif7jqMajeJrU5hywgGvAej6fvzA0NLThN1Eul9uT4g5VTbYFNKUIfAbsZ7PZvuHh4Wt+As7Ozu5IcY2j219TQB0NV4A7qODgO4CFhYWLg4ODOb8AHccpG4A68m6pRQ1YAQ6A28A+8BXwBcDq6upTqVTquh+AuVyuW4q/opRRaQdZD1gCbgE3ge+BT4HdfD7/ZDwe/z2bzRY6hRsfH1/e3Nx8FDX/sgbgoZfvg6jo4ixqW7oIPA+8CrwHrAJuJBLJd+JaHMf5k6qmPgGeQe1SCenXk0/U21xcIC8AzwGvAJPAEuAmEon1xcXFba9w8/Pz5oqdB14CnpY+oij35km0qwmjwqAU8ISM9hIwBeQA17KsG9PT07+1gxsZGdmgdqW+BjwLDAAPoo4ALU+W9arVwWoIpXp9kouKZpPAO8AwQCwW+2d0dLQ0OTkZSafT0UKhUJ6bm9t2HKeysrIS3tra0g7+KvABUJC0g5rrJdRcbLpImtleRzYashc1P2OSXwbebDVykX3gW+Ab1AHqhuQ3pe6AJlFMO0CoPROHDcio5I8DL1A9C8dQbmod+APYAK4DvwjQnsDdErgyVTfTEaCG1GFYGHXG7TVSo2OkdvhlAflXoHSuNdfStFqaRhEi2kfdprrj6M5LAt0I8EDaaMdflPal48CB95hMr3Bt8h4jD0kyL5E0pN6dysZzW7N2AqjbmhdIZjJvufTOpE19x3g+9s1XJ/ck5tVbfdhu+rxDfLiSO+lFToCjZwrXyH2/0Lwv95z8B1jAqXmDnj4YAAAAAElFTkSuQmCC`;
+  var _Cursor_instances, _Cursor_eventHub, _Cursor_container, _Cursor_cursorType, _Cursor_resizeCursorBaseImage, _Cursor_cursorImageMap, _Cursor_init, _Cursor_loadResizeCursorBaseImage, _Cursor_resetCursor, _Cursor_setCursorResize, _Cursor_appendRotateResizeImage;
   class Cursor {
     constructor(container, opts) {
-      this._cursorType = null;
-      this._resizeCursorBaseImage = null;
-      this._cursorImageMap = {
+      _Cursor_instances.add(this);
+      _Cursor_eventHub.set(this, void 0);
+      _Cursor_container.set(this, void 0);
+      _Cursor_cursorType.set(this, null);
+      _Cursor_resizeCursorBaseImage.set(this, null);
+      _Cursor_cursorImageMap.set(this, {
         auto: CURSOR,
         "drag-default": CURSOR_DRAG_DEFAULT,
         "drag-active": CURSOR_DRAG_ACTIVE,
         "rotate-0": CURSOR_RESIZE
-      };
-      this._container = container;
-      this._eventHub = opts.eventHub;
-      this._init();
-      this._loadResizeCursorBaseImage();
-    }
-    _init() {
-      const { _eventHub: eventHub } = this;
-      this._resetCursor("auto");
-      eventHub.on("cursor", (e) => {
-        var _a;
-        if (e.type === "over-element" || !e.type) {
-          this._resetCursor("auto");
-        } else if (typeof e.type === "string" && ((_a = e.type) === null || _a === void 0 ? void 0 : _a.startsWith("resize-"))) {
-          this._setCursorResize(e);
-        } else if (e.type === "drag-default") {
-          this._resetCursor("drag-default");
-        } else if (e.type === "drag-active") {
-          this._resetCursor("drag-active");
-        } else {
-          this._resetCursor("auto");
-        }
       });
-    }
-    _loadResizeCursorBaseImage() {
-      loadImage(CURSOR_RESIZE).then((img) => {
-        this._resizeCursorBaseImage = img;
-      }).catch((err) => {
-        console.error(err);
-      });
-    }
-    _resetCursor(cursorKey) {
-      if (this._cursorType === cursorKey) {
-        return;
-      }
-      this._cursorType = cursorKey;
-      const image = this._cursorImageMap[this._cursorType] || this._cursorImageMap["auto"];
-      let offsetX = 0;
-      let offsetY = 0;
-      if (cursorKey.startsWith("rotate-") && this._cursorImageMap[this._cursorType]) {
-        offsetX = 10;
-        offsetY = 10;
-      }
-      this._container.style.cursor = `image-set(url(${image})2x) ${offsetX} ${offsetY}, auto`;
-    }
-    _setCursorResize(e) {
-      var _a;
-      let totalAngle = 0;
-      if (e.type === "resize-top") {
-        totalAngle += 0;
-      } else if (e.type === "resize-top-right") {
-        totalAngle += 45;
-      } else if (e.type === "resize-right") {
-        totalAngle += 90;
-      } else if (e.type === "resize-bottom-right") {
-        totalAngle += 135;
-      } else if (e.type === "resize-bottom") {
-        totalAngle += 180;
-      } else if (e.type === "resize-bottom-left") {
-        totalAngle += 225;
-      } else if (e.type === "resize-left") {
-        totalAngle += 270;
-      } else if (e.type === "resize-top-left") {
-        totalAngle += 315;
-      }
-      totalAngle += limitAngle(((_a = e === null || e === void 0 ? void 0 : e.element) === null || _a === void 0 ? void 0 : _a.angle) || 0);
-      if (Array.isArray(e.groupQueue) && e.groupQueue.length > 0) {
-        e.groupQueue.forEach((group) => {
-          totalAngle += limitAngle(group.angle || 0);
-        });
-      }
-      totalAngle = limitAngle(totalAngle);
-      const cursorKey = this._appendRotateResizeImage(totalAngle);
-      this._resetCursor(cursorKey);
-    }
-    _appendRotateResizeImage(angle2) {
-      const key2 = `rotate-${angle2}`;
-      if (!this._cursorImageMap[key2]) {
-        const baseImage = this._resizeCursorBaseImage;
-        if (baseImage) {
-          const canvas = document.createElement("canvas");
-          const w2 = baseImage.width;
-          const h2 = baseImage.height;
-          const center = {
-            x: w2 / 2,
-            y: h2 / 2
-          };
-          canvas.width = w2;
-          canvas.height = h2;
-          const ctx = canvas.getContext("2d");
-          const radian = parseAngleToRadian(angle2);
-          ctx.translate(center.x, center.y);
-          ctx.rotate(radian);
-          ctx.translate(-center.x, -center.y);
-          ctx.drawImage(baseImage, 0, 0, w2, h2);
-          ctx.translate(center.x, center.y);
-          ctx.rotate(-radian);
-          ctx.translate(-center.x, -center.y);
-          const base = canvas.toDataURL("image/png");
-          this._cursorImageMap[key2] = base;
-        }
-      }
-      return key2;
+      __classPrivateFieldSet$1(this, _Cursor_container, container, "f");
+      __classPrivateFieldSet$1(this, _Cursor_eventHub, opts.eventHub, "f");
+      __classPrivateFieldGet$1(this, _Cursor_instances, "m", _Cursor_init).call(this);
+      __classPrivateFieldGet$1(this, _Cursor_instances, "m", _Cursor_loadResizeCursorBaseImage).call(this);
     }
   }
+  _Cursor_eventHub = /* @__PURE__ */ new WeakMap(), _Cursor_container = /* @__PURE__ */ new WeakMap(), _Cursor_cursorType = /* @__PURE__ */ new WeakMap(), _Cursor_resizeCursorBaseImage = /* @__PURE__ */ new WeakMap(), _Cursor_cursorImageMap = /* @__PURE__ */ new WeakMap(), _Cursor_instances = /* @__PURE__ */ new WeakSet(), _Cursor_init = function _Cursor_init2() {
+    const eventHub = __classPrivateFieldGet$1(this, _Cursor_eventHub, "f");
+    __classPrivateFieldGet$1(this, _Cursor_instances, "m", _Cursor_resetCursor).call(this, "default");
+    eventHub.on("cursor", (e) => {
+      var _a;
+      if (e.type === "over-element" || !e.type) {
+        __classPrivateFieldGet$1(this, _Cursor_instances, "m", _Cursor_resetCursor).call(this, "auto");
+      } else if (typeof e.type === "string" && ((_a = e.type) === null || _a === void 0 ? void 0 : _a.startsWith("resize-"))) {
+        __classPrivateFieldGet$1(this, _Cursor_instances, "m", _Cursor_setCursorResize).call(this, e);
+      } else if (e.type === "drag-default") {
+        __classPrivateFieldGet$1(this, _Cursor_instances, "m", _Cursor_resetCursor).call(this, "drag-default");
+      } else if (e.type === "drag-active") {
+        __classPrivateFieldGet$1(this, _Cursor_instances, "m", _Cursor_resetCursor).call(this, "drag-active");
+      } else {
+        __classPrivateFieldGet$1(this, _Cursor_instances, "m", _Cursor_resetCursor).call(this, "auto");
+      }
+    });
+  }, _Cursor_loadResizeCursorBaseImage = function _Cursor_loadResizeCursorBaseImage2() {
+    loadImage(CURSOR_RESIZE).then((img) => {
+      __classPrivateFieldSet$1(this, _Cursor_resizeCursorBaseImage, img, "f");
+    }).catch((err) => {
+      console.error(err);
+    });
+  }, _Cursor_resetCursor = function _Cursor_resetCursor2(cursorKey) {
+    if (__classPrivateFieldGet$1(this, _Cursor_cursorType, "f") === cursorKey) {
+      return;
+    }
+    __classPrivateFieldSet$1(this, _Cursor_cursorType, cursorKey, "f");
+    const image = __classPrivateFieldGet$1(this, _Cursor_cursorImageMap, "f")[__classPrivateFieldGet$1(this, _Cursor_cursorType, "f")] || __classPrivateFieldGet$1(this, _Cursor_cursorImageMap, "f")["auto"];
+    let offsetX = 0;
+    let offsetY = 0;
+    if (cursorKey.startsWith("rotate-") && __classPrivateFieldGet$1(this, _Cursor_cursorImageMap, "f")[__classPrivateFieldGet$1(this, _Cursor_cursorType, "f")]) {
+      offsetX = 10;
+      offsetY = 10;
+    }
+    if (cursorKey === "default") {
+      __classPrivateFieldGet$1(this, _Cursor_container, "f").style.cursor = "default";
+    } else {
+      __classPrivateFieldGet$1(this, _Cursor_container, "f").style.cursor = `image-set(url(${image})2x) ${offsetX} ${offsetY}, auto`;
+    }
+  }, _Cursor_setCursorResize = function _Cursor_setCursorResize2(e) {
+    var _a;
+    let totalAngle = 0;
+    if (e.type === "resize-top") {
+      totalAngle += 0;
+    } else if (e.type === "resize-top-right") {
+      totalAngle += 45;
+    } else if (e.type === "resize-right") {
+      totalAngle += 90;
+    } else if (e.type === "resize-bottom-right") {
+      totalAngle += 135;
+    } else if (e.type === "resize-bottom") {
+      totalAngle += 180;
+    } else if (e.type === "resize-bottom-left") {
+      totalAngle += 225;
+    } else if (e.type === "resize-left") {
+      totalAngle += 270;
+    } else if (e.type === "resize-top-left") {
+      totalAngle += 315;
+    }
+    totalAngle += limitAngle(((_a = e === null || e === void 0 ? void 0 : e.element) === null || _a === void 0 ? void 0 : _a.angle) || 0);
+    if (Array.isArray(e.groupQueue) && e.groupQueue.length > 0) {
+      e.groupQueue.forEach((group) => {
+        totalAngle += limitAngle(group.angle || 0);
+      });
+    }
+    totalAngle = limitAngle(totalAngle);
+    const cursorKey = __classPrivateFieldGet$1(this, _Cursor_instances, "m", _Cursor_appendRotateResizeImage).call(this, totalAngle);
+    __classPrivateFieldGet$1(this, _Cursor_instances, "m", _Cursor_resetCursor).call(this, cursorKey);
+  }, _Cursor_appendRotateResizeImage = function _Cursor_appendRotateResizeImage2(angle2) {
+    const key2 = `rotate-${angle2}`;
+    if (!__classPrivateFieldGet$1(this, _Cursor_cursorImageMap, "f")[key2]) {
+      const baseImage = __classPrivateFieldGet$1(this, _Cursor_resizeCursorBaseImage, "f");
+      if (baseImage) {
+        const canvas = document.createElement("canvas");
+        const w2 = baseImage.width;
+        const h2 = baseImage.height;
+        const center = {
+          x: w2 / 2,
+          y: h2 / 2
+        };
+        canvas.width = w2;
+        canvas.height = h2;
+        const ctx = canvas.getContext("2d");
+        const radian = parseAngleToRadian(angle2);
+        ctx.translate(center.x, center.y);
+        ctx.rotate(radian);
+        ctx.translate(-center.x, -center.y);
+        ctx.drawImage(baseImage, 0, 0, w2, h2);
+        ctx.translate(center.x, center.y);
+        ctx.rotate(-radian);
+        ctx.translate(-center.x, -center.y);
+        const base = canvas.toDataURL("image/png");
+        __classPrivateFieldGet$1(this, _Cursor_cursorImageMap, "f")[key2] = base;
+      }
+    }
+    return key2;
+  };
   const key$2 = "SELECT";
   const keyActionType = Symbol(`${key$2}_actionType`);
   const keyResizeType = Symbol(`${key$2}_resizeType`);
@@ -6085,10 +6173,10 @@ var __privateMethod = (obj, member, method) => {
         elemH = element.h * scale;
       }
       textarea.style.position = "absolute";
-      textarea.style.left = `${elemX}px`;
-      textarea.style.top = `${elemY}px`;
-      textarea.style.width = `${elemW}px`;
-      textarea.style.height = `${elemH}px`;
+      textarea.style.left = `${elemX - 1}px`;
+      textarea.style.top = `${elemY - 1}px`;
+      textarea.style.width = `${elemW + 2}px`;
+      textarea.style.height = `${elemH + 2}px`;
       textarea.style.transform = `rotate(${limitAngle(element.angle || 0)}deg)`;
       textarea.style.boxSizing = "border-box";
       textarea.style.border = "1px solid #1973ba";
@@ -6101,6 +6189,9 @@ var __privateMethod = (obj, member, method) => {
       textarea.style.lineHeight = `${detail.lineHeight * scale}px`;
       textarea.style.fontFamily = detail.fontFamily;
       textarea.style.fontWeight = `${detail.fontWeight}`;
+      textarea.style.padding = "0";
+      textarea.style.margin = "0";
+      textarea.style.outline = "none";
       textarea.value = detail.text || "";
       parent.appendChild(textarea);
     };
@@ -7269,6 +7360,9 @@ var __privateMethod = (obj, member, method) => {
         eventHub
       });
     }
+    isDestroyed() {
+      return __classPrivateFieldGet(this, _Core_board, "f").isDestroyed();
+    }
     destroy() {
       __classPrivateFieldGet(this, _Core_board, "f").destroy();
       __classPrivateFieldGet(this, _Core_canvas, "f").remove();
@@ -7330,6 +7424,12 @@ var __privateMethod = (obj, member, method) => {
     }
     getLoadItemMap() {
       return __classPrivateFieldGet(this, _Core_board, "f").getRenderer().getLoadItemMap();
+    }
+    onBoardWatcherEvents() {
+      __classPrivateFieldGet(this, _Core_board, "f").onWatcherEvents();
+    }
+    offBoardWatcherEvents() {
+      __classPrivateFieldGet(this, _Core_board, "f").offWatcherEvents();
     }
   }
   _Core_board = /* @__PURE__ */ new WeakMap(), _Core_canvas = /* @__PURE__ */ new WeakMap(), _Core_container = /* @__PURE__ */ new WeakMap(), _Core_instances = /* @__PURE__ */ new WeakSet(), _Core_initContainer = function _Core_initContainer2() {
@@ -7454,7 +7554,7 @@ var __privateMethod = (obj, member, method) => {
     centerContent(opts) {
       const data = (opts == null ? void 0 : opts.data) || __privateGet(this, _core).getData();
       const { viewSizeInfo } = this.getViewInfo();
-      if (data) {
+      if (Array.isArray(data == null ? void 0 : data.elements) && (data == null ? void 0 : data.elements.length) > 0) {
         const result = calcViewCenterContent(data, { viewSizeInfo });
         this.setViewScale(result);
       }
@@ -7556,9 +7656,22 @@ var __privateMethod = (obj, member, method) => {
         loadItemMap: __privateGet(this, _core).getLoadItemMap()
       });
     }
+    isDestroyed() {
+      return __privateGet(this, _core).isDestroyed();
+    }
     destroy() {
       const core = __privateGet(this, _core);
       core.destroy();
+    }
+    getViewCenter() {
+      const { viewScaleInfo, viewSizeInfo } = this.getViewInfo();
+      return calcViewCenter({ viewScaleInfo, viewSizeInfo });
+    }
+    $onBoardWatcherEvents() {
+      __privateGet(this, _core).onBoardWatcherEvents();
+    }
+    $offBoardWatcherEvents() {
+      __privateGet(this, _core).offBoardWatcherEvents();
     }
   }
   _core = new WeakMap();
@@ -7598,6 +7711,7 @@ var __privateMethod = (obj, member, method) => {
   exports.calcElementsViewInfo = calcElementsViewInfo;
   exports.calcSpeed = calcSpeed;
   exports.calcViewBoxSize = calcViewBoxSize;
+  exports.calcViewCenter = calcViewCenter;
   exports.calcViewCenterContent = calcViewCenterContent;
   exports.calcViewElementSize = calcViewElementSize;
   exports.calcViewPointSize = calcViewPointSize;
