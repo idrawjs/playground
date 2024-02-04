@@ -109,12 +109,16 @@ const demoList: TypeDemoList = [
       },
       {
         name: 'centerContent',
-        key: 'api-centerContent',
+        key: 'api-centerContent'
       },
       {
         name: 'destroy',
-        key: 'api-destroy',
+        key: 'api-destroy'
       },
+      {
+        name: 'getViewInfo',
+        key: 'api-getViewInfo'
+      }
       // {
       //   name: 'getSelectedElements',
       //   key: 'api-getSelectedElements',
