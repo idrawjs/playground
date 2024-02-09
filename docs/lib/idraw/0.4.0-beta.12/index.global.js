@@ -1491,7 +1491,7 @@ var __privateMethod = (obj, member, method) => {
       ctx.translate(-center.x, -center.y);
     }
   }
-  function rotateElement(ctx, elemSize, callback) {
+  function rotateElement$1(ctx, elemSize, callback) {
     const center = calcElementCenter(elemSize);
     rotateByCenter(ctx, elemSize.angle || 0, center, () => {
       callback(ctx);
@@ -1516,6 +1516,21 @@ var __privateMethod = (obj, member, method) => {
       h: endY - startY
     };
     return calcElementCenter(elemSize);
+  }
+  function calcRadian(center, start, end) {
+    const startAngle = calcLineRadian(center, start);
+    const endAngle = calcLineRadian(center, end);
+    if (endAngle !== null && startAngle !== null) {
+      if (startAngle > Math.PI * 3 / 2 && endAngle < Math.PI / 2) {
+        return endAngle + (Math.PI * 2 - startAngle);
+      } else if (endAngle > Math.PI * 3 / 2 && startAngle < Math.PI / 2) {
+        return startAngle + (Math.PI * 2 - endAngle);
+      } else {
+        return endAngle - startAngle;
+      }
+    } else {
+      return 0;
+    }
   }
   function calcLineRadian(center, p) {
     const x2 = p.x - center.x;
@@ -2308,8 +2323,8 @@ var __privateMethod = (obj, member, method) => {
     };
   }
   function calcElementSizeController(elemSize, opts) {
-    const { groupQueue, controllerSize, viewScaleInfo } = opts;
-    const ctrlSize = (controllerSize && controllerSize > 0 ? controllerSize : 8) / viewScaleInfo.scale;
+    const { groupQueue, controllerSize: controllerSize2, viewScaleInfo } = opts;
+    const ctrlSize = (controllerSize2 && controllerSize2 > 0 ? controllerSize2 : 8) / viewScaleInfo.scale;
     const { x: x2, y: y2, w: w2, h: h2, angle: angle2 = 0 } = elemSize;
     const ctrlGroupQueue = [
       ...[
@@ -2331,6 +2346,13 @@ var __privateMethod = (obj, member, method) => {
       totalAngle += angle3;
     });
     const vertexes = calcElementVertexesInGroup(elemSize, { groupQueue });
+    const rotateElemVertexes = calcElementVertexesInGroup({
+      x: x2 - ctrlSize * 2,
+      y: y2 - ctrlSize * 2,
+      h: h2 + ctrlSize * 4,
+      w: w2 + ctrlSize * 4,
+      angle: angle2
+    }, { groupQueue: [...groupQueue] });
     const topCenter = getCenterFromTwoPoints(vertexes[0], vertexes[1]);
     const rightCenter = getCenterFromTwoPoints(vertexes[1], vertexes[2]);
     const bottomCenter = getCenterFromTwoPoints(vertexes[2], vertexes[3]);
@@ -2359,6 +2381,9 @@ var __privateMethod = (obj, member, method) => {
     const rightMiddleVertexes = calcElementVertexes(rightMiddleSize);
     const bottomMiddleVertexes = calcElementVertexes(bottomMiddleSize);
     const leftMiddleVertexes = calcElementVertexes(leftMiddleSize);
+    const rotateCenter = getCenterFromTwoPoints(rotateElemVertexes[0], rotateElemVertexes[1]);
+    const rotateSize = createControllerElementSizeFromCenter(rotateCenter, { size: ctrlSize, angle: totalAngle });
+    const rotateVertexes2 = calcElementVertexes(rotateSize);
     const sizeController = {
       elementWrapper: vertexes,
       left: {
@@ -2420,6 +2445,11 @@ var __privateMethod = (obj, member, method) => {
         type: "bottom-middle",
         vertexes: bottomMiddleVertexes,
         center: bottomCenter
+      },
+      rotate: {
+        type: "rotate",
+        vertexes: rotateVertexes2,
+        center: rotateCenter
       }
     };
     return sizeController;
@@ -3240,7 +3270,7 @@ var __privateMethod = (obj, member, method) => {
       ctx.clip(path2d);
       ctx.translate(0 - internalX, 0 - internalY);
       ctx.setTransform(1, 0, 0, 1, 0, 0);
-      rotateElement(ctx, Object.assign({}, viewElem), () => {
+      rotateElement$1(ctx, Object.assign({}, viewElem), () => {
         renderContent === null || renderContent === void 0 ? void 0 : renderContent();
       });
       ctx.restore();
@@ -3464,7 +3494,7 @@ var __privateMethod = (obj, member, method) => {
     const { calculator, viewScaleInfo, viewSizeInfo, parentOpacity } = opts;
     const { x: x2, y: y2, w: w2, h: h2 } = (calculator === null || calculator === void 0 ? void 0 : calculator.elementSize({ x: elem.x, y: elem.y, w: elem.w, h: elem.h }, viewScaleInfo, viewSizeInfo)) || elem;
     const viewElem = Object.assign(Object.assign({}, elem), { x: x2, y: y2, w: w2, h: h2, angle: angle2 });
-    rotateElement(ctx, { x: x2, y: y2, w: w2, h: h2, angle: angle2 }, () => {
+    rotateElement$1(ctx, { x: x2, y: y2, w: w2, h: h2, angle: angle2 }, () => {
       drawBoxShadow(ctx, viewElem, {
         viewScaleInfo,
         viewSizeInfo,
@@ -3518,7 +3548,7 @@ var __privateMethod = (obj, member, method) => {
     const { calculator, viewScaleInfo, viewSizeInfo, parentOpacity } = opts;
     const { x: x2, y: y2, w: w2, h: h2, angle: angle2 } = (calculator === null || calculator === void 0 ? void 0 : calculator.elementSize(elem, viewScaleInfo, viewSizeInfo)) || elem;
     const viewElem = Object.assign(Object.assign({}, elem), { x: x2, y: y2, w: w2, h: h2, angle: angle2 });
-    rotateElement(ctx, { x: x2, y: y2, w: w2, h: h2, angle: angle2 }, () => {
+    rotateElement$1(ctx, { x: x2, y: y2, w: w2, h: h2, angle: angle2 }, () => {
       drawBoxShadow(ctx, viewElem, {
         viewScaleInfo,
         viewSizeInfo,
@@ -3541,7 +3571,7 @@ var __privateMethod = (obj, member, method) => {
     const { calculator, viewScaleInfo, viewSizeInfo, parentOpacity } = opts;
     const { x: x2, y: y2, w: w2, h: h2, angle: angle2 } = (calculator === null || calculator === void 0 ? void 0 : calculator.elementSize(elem, viewScaleInfo, viewSizeInfo)) || elem;
     const viewElem = Object.assign(Object.assign({}, elem), { x: x2, y: y2, w: w2, h: h2, angle: angle2 });
-    rotateElement(ctx, { x: x2, y: y2, w: w2, h: h2, angle: angle2 }, () => {
+    rotateElement$1(ctx, { x: x2, y: y2, w: w2, h: h2, angle: angle2 }, () => {
       drawBoxShadow(ctx, viewElem, {
         viewScaleInfo,
         viewSizeInfo,
@@ -3587,7 +3617,7 @@ var __privateMethod = (obj, member, method) => {
     const content = opts.loader.getContent(elem);
     const { calculator, viewScaleInfo, viewSizeInfo, parentOpacity } = opts;
     const { x: x2, y: y2, w: w2, h: h2, angle: angle2 } = (calculator === null || calculator === void 0 ? void 0 : calculator.elementSize(elem, viewScaleInfo, viewSizeInfo)) || elem;
-    rotateElement(ctx, { x: x2, y: y2, w: w2, h: h2, angle: angle2 }, () => {
+    rotateElement$1(ctx, { x: x2, y: y2, w: w2, h: h2, angle: angle2 }, () => {
       if (!content && !opts.loader.isDestroyed()) {
         opts.loader.load(elem, opts.elementAssets || {});
       }
@@ -3602,7 +3632,7 @@ var __privateMethod = (obj, member, method) => {
     const content = opts.loader.getContent(elem);
     const { calculator, viewScaleInfo, viewSizeInfo, parentOpacity } = opts;
     const { x: x2, y: y2, w: w2, h: h2, angle: angle2 } = (calculator === null || calculator === void 0 ? void 0 : calculator.elementSize(elem, viewScaleInfo, viewSizeInfo)) || elem;
-    rotateElement(ctx, { x: x2, y: y2, w: w2, h: h2, angle: angle2 }, () => {
+    rotateElement$1(ctx, { x: x2, y: y2, w: w2, h: h2, angle: angle2 }, () => {
       if (!content && !opts.loader.isDestroyed()) {
         opts.loader.load(elem, opts.elementAssets || {});
       }
@@ -3618,7 +3648,7 @@ var __privateMethod = (obj, member, method) => {
     const { calculator, viewScaleInfo, viewSizeInfo, parentOpacity } = opts;
     const { x: x2, y: y2, w: w2, h: h2, angle: angle2 } = (calculator === null || calculator === void 0 ? void 0 : calculator.elementSize(elem, viewScaleInfo, viewSizeInfo)) || elem;
     const viewElem = Object.assign(Object.assign({}, elem), { x: x2, y: y2, w: w2, h: h2, angle: angle2 });
-    rotateElement(ctx, { x: x2, y: y2, w: w2, h: h2, angle: angle2 }, () => {
+    rotateElement$1(ctx, { x: x2, y: y2, w: w2, h: h2, angle: angle2 }, () => {
       drawBox(ctx, viewElem, {
         originElem: elem,
         calcElemSize: { x: x2, y: y2, w: w2, h: h2, angle: angle2 },
@@ -3729,7 +3759,7 @@ var __privateMethod = (obj, member, method) => {
     const internalY = y2 - viewOriginY;
     const scaleNum = viewScaleInfo.scale * viewSizeInfo.devicePixelRatio;
     const viewElem = Object.assign(Object.assign({}, elem), { x: x2, y: y2, w: w2, h: h2, angle: angle2 });
-    rotateElement(ctx, { x: x2, y: y2, w: w2, h: h2, angle: angle2 }, () => {
+    rotateElement$1(ctx, { x: x2, y: y2, w: w2, h: h2, angle: angle2 }, () => {
       drawBox(ctx, viewElem, {
         originElem: elem,
         calcElemSize: { x: x2, y: y2, w: w2, h: h2, angle: angle2 },
@@ -3821,7 +3851,7 @@ var __privateMethod = (obj, member, method) => {
     const { calculator, viewScaleInfo, viewSizeInfo, parentOpacity } = opts;
     const { x: x2, y: y2, w: w2, h: h2, angle: angle2 } = (calculator === null || calculator === void 0 ? void 0 : calculator.elementSize({ x: elem.x, y: elem.y, w: elem.w, h: elem.h, angle: elem.angle }, viewScaleInfo, viewSizeInfo)) || elem;
     const viewElem = Object.assign(Object.assign({}, elem), { x: x2, y: y2, w: w2, h: h2, angle: angle2 });
-    rotateElement(ctx, { x: x2, y: y2, w: w2, h: h2, angle: angle2 }, () => {
+    rotateElement$1(ctx, { x: x2, y: y2, w: w2, h: h2, angle: angle2 }, () => {
       ctx.globalAlpha = getOpacity(elem) * parentOpacity;
       drawBoxShadow(ctx, viewElem, {
         viewScaleInfo,
@@ -5072,6 +5102,7 @@ var __privateMethod = (obj, member, method) => {
   const CURSOR_RESIZE = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACgAAAApCAYAAABHomvIAAAACXBIWXMAAAsTAAALEwEAmpwYAAAF92lUWHRYTUw6Y29tLmFkb2JlLnhtcAAAAAAAPD94cGFja2V0IGJlZ2luPSLvu78iIGlkPSJXNU0wTXBDZWhpSHpyZVN6TlRjemtjOWQiPz4gPHg6eG1wbWV0YSB4bWxuczp4PSJhZG9iZTpuczptZXRhLyIgeDp4bXB0az0iQWRvYmUgWE1QIENvcmUgNi4wLWMwMDYgNzkuMTY0NzUzLCAyMDIxLzAyLzE1LTExOjUyOjEzICAgICAgICAiPiA8cmRmOlJERiB4bWxuczpyZGY9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkvMDIvMjItcmRmLXN5bnRheC1ucyMiPiA8cmRmOkRlc2NyaXB0aW9uIHJkZjphYm91dD0iIiB4bWxuczp4bXA9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC8iIHhtbG5zOmRjPSJodHRwOi8vcHVybC5vcmcvZGMvZWxlbWVudHMvMS4xLyIgeG1sbnM6cGhvdG9zaG9wPSJodHRwOi8vbnMuYWRvYmUuY29tL3Bob3Rvc2hvcC8xLjAvIiB4bWxuczp4bXBNTT0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wL21tLyIgeG1sbnM6c3RFdnQ9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9zVHlwZS9SZXNvdXJjZUV2ZW50IyIgeG1wOkNyZWF0b3JUb29sPSJBZG9iZSBQaG90b3Nob3AgMjIuMyAoTWFjaW50b3NoKSIgeG1wOkNyZWF0ZURhdGU9IjIwMjMtMDktMTdUMTY6MzE6MjMrMDg6MDAiIHhtcDpNb2RpZnlEYXRlPSIyMDIzLTA5LTE3VDE2OjQ0OjIyKzA4OjAwIiB4bXA6TWV0YWRhdGFEYXRlPSIyMDIzLTA5LTE3VDE2OjQ0OjIyKzA4OjAwIiBkYzpmb3JtYXQ9ImltYWdlL3BuZyIgcGhvdG9zaG9wOkNvbG9yTW9kZT0iMyIgcGhvdG9zaG9wOklDQ1Byb2ZpbGU9InNSR0IgSUVDNjE5NjYtMi4xIiB4bXBNTTpJbnN0YW5jZUlEPSJ4bXAuaWlkOjY0MTBhYjUzLWM0ZjEtNDVhNS04MjhkLTIxOTczOWFjOTk3MSIgeG1wTU06RG9jdW1lbnRJRD0iYWRvYmU6ZG9jaWQ6cGhvdG9zaG9wOjBkMDNmNjM5LTE5MzctY2Y0MC1hMTg0LTIyMjg0NzczNWNmYSIgeG1wTU06T3JpZ2luYWxEb2N1bWVudElEPSJ4bXAuZGlkOjgyYjQwZGRmLWE0ZGEtNDY3MC1iYzc2LTBhYjY3ZmI5M2I0ZSI+IDx4bXBNTTpIaXN0b3J5PiA8cmRmOlNlcT4gPHJkZjpsaSBzdEV2dDphY3Rpb249ImNyZWF0ZWQiIHN0RXZ0Omluc3RhbmNlSUQ9InhtcC5paWQ6ODJiNDBkZGYtYTRkYS00NjcwLWJjNzYtMGFiNjdmYjkzYjRlIiBzdEV2dDp3aGVuPSIyMDIzLTA5LTE3VDE2OjMxOjIzKzA4OjAwIiBzdEV2dDpzb2Z0d2FyZUFnZW50PSJBZG9iZSBQaG90b3Nob3AgMjIuMyAoTWFjaW50b3NoKSIvPiA8cmRmOmxpIHN0RXZ0OmFjdGlvbj0ic2F2ZWQiIHN0RXZ0Omluc3RhbmNlSUQ9InhtcC5paWQ6NjQxMGFiNTMtYzRmMS00NWE1LTgyOGQtMjE5NzM5YWM5OTcxIiBzdEV2dDp3aGVuPSIyMDIzLTA5LTE3VDE2OjQ0OjIyKzA4OjAwIiBzdEV2dDpzb2Z0d2FyZUFnZW50PSJBZG9iZSBQaG90b3Nob3AgMjIuMyAoTWFjaW50b3NoKSIgc3RFdnQ6Y2hhbmdlZD0iLyIvPiA8L3JkZjpTZXE+IDwveG1wTU06SGlzdG9yeT4gPC9yZGY6RGVzY3JpcHRpb24+IDwvcmRmOlJERj4gPC94OnhtcG1ldGE+IDw/eHBhY2tldCBlbmQ9InIiPz57vRudAAAEk0lEQVRYhe3ZW0jbVxzA8e8/MX+NYnG9uI4xE3bvoLt0FzradRfGBtsYo32YdAhb6WQyBqV7KOylpYjzZShDGfjmyxgbgjjwyRm16SYMhgiNKDhbL3VtNF4xJOnf3x7+59i/Wf4aTbInf3AwJMdzPjnnf/n9/jFEhGzDMIxMb3uAIsDs6ek5urS05Dtz5syE+uwekAQS6u89YD19gC0NIpJ1c8GZQHlXV9fJRCIxGo/HxxoaGj4CngWOAEGgEihXfT07MeQC3MB1dna+lkgkRkXF6urq3xcuXPgUOAE8DzwGPOiGLARwEy4ej4+JiITD4elr167NiIgsLi7eqq2trQPeBI4Bj7sh8w10xZmmeds0zdn+/v5/RERisdjUuXPnvgLeAl50Q+YTaAA+oKy7u/uE3laNAwSQ4uLiu6FQ6G4G5DG13YeAMjWWkU+gBygJhULHNe769etTTpwDGXUiz58//yXwujp5qoAHgBLAk0+gNxKJHEulUiMKN2ma5gwgPp/vjhOXjlxYWJisq6urBV5RW30IKAW8eQPGYrGjlmXdEBEZHBy8aZrmFCCmac729fVtAHt7e6MO5N2+vr47IiJLS0s3L126dBZ4Sh2LZUBRwVdwYGBgVuwOYh/zsoF0bnPBVzDTMRgOh6dFhROokSIi8/Pz0+pEeaPQx+DGWdzV1XVSX2LcgCIic3NzMzU1NV8D7wIvq9WrLNRZvOk62NHRccqJTAdGo9Hb1dXV3wAfYt9VjgAPFfI66EQWAxU9PT0fuwEvXrzYBJwF3gFeAAJAhfrfrO4k/7lxZxnr2JlJqry8POnWyePx6H4JR0vhktVkHGOXQI20SkpKLLcOhmGsA5YCaZiVLS5XoADi9XpdkznDMERhnE0fCgUHZhvOW+CO4/8A5hR7wFxjD5hr7AFzjZyBlmVlrOYdYaS1HUUuQA/gWV9fd51URDyqn1c1j6MVFGjoidfW1oq2ABrYj0V82OmVzwHNajVdB88C5wOKTdM87NaxsrKyQsFKHC2BnTDo+/TWt8Bd5INeVC44NDT0xXYZdXNz8w/AaeyS8yjwCPdzQu92ht2m/OUjIyOfS1pkAoqItLS0fA+8D7wKPA0cxs6qC1O4T0xMfKYnb21tnXEDNjc3z+nXbW1t3wFvYz9dCAL7KUThHovFPtGTNjU1jQFSX18/lg68cuXKLUAaGxs3vkB7e/u3wHHgCQpUdnpTqdQvesJgMDisUVevXh3Xry9fvnxTv66qqprQ/cfHx/vVNj/J/couv0DAv7q6+pMDeYPNSalkwkUikX7s4ukl4FHgAODPN1CXnPsWFxd/dCAjW+GGhoZCwAfYpeczwMPAPjVW3gv3IvXN98disZ8dyBGNCwQC4/r94eHhfuy6+JS6zATUCeJXY+W9cNfIUuDAwsLCr05kIBDYeBQ8Ojr6h8Lpx25BtbWlGpfv62BG5PLy8m+SFpOTk38C76mVe84NVyhgOvLgysrK7xoXjUb/Uqt2XG1rEDiYCbcd0MgwsWtk+J1EI03An0wmw5Zlefx+/2n1eRKIO5r+rWTTpFsZ/gWFrGMmeObuqwAAAABJRU5ErkJggg==";
   const CURSOR_DRAG_DEFAULT = `data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACgAAAApCAYAAABHomvIAAAEvUlEQVRYhc2Y20/cVRDHP8v+uKzAWkpDCtZq8BYhJkq8PBoJxgj7I2m0ryaSyFN9IT74pI8+8WJiggRj/APApFkSTGRJ+qKGUiyxbGPEWsUSuVhYC12Wy8+HmeMeYPe3d3WSye/k/M7le+bMzJkZ+J9ToEJreGVYN+vihcytstjQocUlAw0WCSoIVCv3Ae8CXwIt+u8XHVeOG8qLqgAHqAFCQCNwGugCthBJGd7S/tM6LqTzHI5KuqzgaoAHgEvAtwrkG2AG8FzXvep5nue67lX9N6P/PR1/SefXlBtkFXKNDUA/RyX1D9uUbYzOb9D1ygbSQU7eDMxhSSsSiVz3AxiJRK57nuf19/fPad8coqONFCBJPyUOIKc1OvcbgiY9ICDT8+0DHge2gR0gBeyTtviM5HeKAGlrrfMZVwhdAVaAr4F3KNF4gkA9cBbowOc68+3LwDn1Mhdy4/OcYk54nPr6+m54nofruvPa9SFQ6wfQTweNgTwInAGuQWk6mEUvHwb+Au4Dexx7ffK9+0q+CHWIBIOZ9skHYKWfK9tQ8gZoLDjIyWCg3ORY+2T8aYOyg4EaRIFrkCs4QU1NTSvabC20zyIDzuyfkYzEahHX8jHwE/LwXwHeJ4P7KIVIu5ouxFDC+HgLAy4MfEF2v1UpgOezATSiNVf6EvAWsD01NXVtdnb2bk9Pz81sp/q3KIi8t83Ae4DX0tJy0z7t8PDwD4FAYIX/WILVwKMAzc3Nu/agoaGhzmg0ugcsV0hIvlSNoH8IuIiebHJycrls4sotwaxGYvueAPAjEg3jum79yMjIr5WUjFLOxMpBIopWoBN4GfhOJ+4NDg4ulVt6i4uLm7r+BvAscA4fCXrAAfJQJ5Fg8gPgMuCMjo62d3V1LW1sbKRKlpXSxMTEmjZ/5qQrOwHwUAGmkIjiHhJdfKrM/Pz8Y+3t7RvT09Ob5QAYi8X2tbmke2cEZwAaCdoAt5QvIzEbiUSitbe3tyoej++UCnBhYSGkzdu6d1aQxkgOkfwgieQMCeCu8iwSnpNKpcIdHR3BZDJ5UCy4SCSyvL6+/giiSou67wE+eYmhAKKkIaAJUdynkdflNcQF3dFTpooxjmg0aozDAz4DXkB8bxPy1OYM7QzIOuAU0AY8pQu9CrwJ3AK8UCj0RyHgZmZmli1w3wOvAM/oHo1kiZiygbSDh7PAE8DzQA/wBqKnnuM4a2NjY7dygbtw4cICRy31deBFJA09o7eWsU7kJ1KTLJmyRyOSn5zS70fAkwBtbW2/DwwMHHR3d9d3dnY2rK6u7o2Pj2/GYrH9eDzurK2tndM1vwI+QXT7T2BTD5skQz6SCyAcLRoZkGEFGQbeRqpbubK+BPA5MI14h00L3I6Cy2h4+eQbJsKuRa6iQcGFFfB5oBt4DpFsI+Ky7iDBxW3gBhBH/GtC+R7i1lKk3UxRAG2QpvxWr0AbtB3SA5jkx36djH/dVlDbyibN3M8GDvJPyI2PSulixm/u6kZ1OQCaJ/S+tndJX6tvsFBIxcCUdA3vW5ubxMrObc0hDMhd/Rqp5QQHxeW8dubnHGM7tzVv/IECMlxQ/bpcRfRMqaNRheNcUGG9XFWDACfzWs/6Fl3t/xtO//8gpbCORQAAAABJRU5ErkJggg==`;
   const CURSOR_DRAG_ACTIVE = `data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACgAAAAoCAYAAACM/rhtAAAER0lEQVRYhe2YT2hjRRjAf8lL22xsNsm6EWKrSKvuIkIh+O9QRFxEW18KUsoe7FHoRaWCN1FPetOrIHgVKS0q9P5OxaJbodkalgVrtVZjS7Ntd02z6abPw3yzmaT585q+elj2g2HmvZn35jffN/PNNwP35R6XgM/fuif4n+dO2klQvgsaZRc4NJJvoJbHdhrIAkJAN2ADHwFfAw9J3ZoB/b9I0AA6A0SBc0Aa2EVpSqddeZ+QdmfkO+u0gIPSQQR4HfhRQH4AHMDNZDJXXNd1M5nMFalzdB3wJTAOPAD0yEB9066G6wXepVZTd5MpTdporZ6jVqsatmMJoTR3HvgJQ1u2bS+3ArRte9l1XXdsbGyJo1pdBN6Wf3d3ChlAmSQO9LeC8fquQRpDWaerHWSjSr1iu4BkJyOsF9u2s67rkslkluTVxygltAVsJBZqdCngEj5osIlW+4EYytRNF04jeu3vulCT+7QkLH20dEOhumft97pQI4s3+iiRSPwtxVSbd39J8eEGvzFXc1NAs8KSFAZeBt4AHgNeBFDWObkEAne7HAK2gT2gCFQatdca1GbtBj4E3veFprVYVLXXcg4GqM6588BbAMlkcm1qamqzr6/v6ikBet5RgiizJoDPAXdgYGDZXHkzMzPrrk9CdRWngUeAsxxdCzVwpgZ/BigWiz1mo4mJif7jqMajeJrU5hywgGvAej6fvzA0NLThN1Eul9uT4g5VTbYFNKUIfAbsZ7PZvuHh4Wt+As7Ozu5IcY2j219TQB0NV4A7qODgO4CFhYWLg4ODOb8AHccpG4A68m6pRQ1YAQ6A28A+8BXwBcDq6upTqVTquh+AuVyuW4q/opRRaQdZD1gCbgE3ge+BT4HdfD7/ZDwe/z2bzRY6hRsfH1/e3Nx8FDX/sgbgoZfvg6jo4ixqW7oIPA+8CrwHrAJuJBLJd+JaHMf5k6qmPgGeQe1SCenXk0/U21xcIC8AzwGvAJPAEuAmEon1xcXFba9w8/Pz5oqdB14CnpY+oij35km0qwmjwqAU8ISM9hIwBeQA17KsG9PT07+1gxsZGdmgdqW+BjwLDAAPoo4ALU+W9arVwWoIpXp9kouKZpPAO8AwQCwW+2d0dLQ0OTkZSafT0UKhUJ6bm9t2HKeysrIS3tra0g7+KvABUJC0g5rrJdRcbLpImtleRzYashc1P2OSXwbebDVykX3gW+Ab1AHqhuQ3pe6AJlFMO0CoPROHDcio5I8DL1A9C8dQbmod+APYAK4DvwjQnsDdErgyVTfTEaCG1GFYGHXG7TVSo2OkdvhlAflXoHSuNdfStFqaRhEi2kfdprrj6M5LAt0I8EDaaMdflPal48CB95hMr3Bt8h4jD0kyL5E0pN6dysZzW7N2AqjbmhdIZjJvufTOpE19x3g+9s1XJ/ck5tVbfdhu+rxDfLiSO+lFToCjZwrXyH2/0Lwv95z8B1jAqXmDnj4YAAAAAElFTkSuQmCC`;
+  const CURSOR_RESIZE_ROTATE = `data:image/png;base64,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`;
   var __classPrivateFieldSet$1 = function(receiver, state, value, kind, f) {
     if (kind === "m")
       throw new TypeError("Private method is not writable");
@@ -5100,7 +5131,8 @@ var __privateMethod = (obj, member, method) => {
         auto: CURSOR,
         "drag-default": CURSOR_DRAG_DEFAULT,
         "drag-active": CURSOR_DRAG_ACTIVE,
-        "rotate-0": CURSOR_RESIZE
+        "rotate-0": CURSOR_RESIZE,
+        rotate: CURSOR_RESIZE_ROTATE
       });
       __classPrivateFieldSet$1(this, _Cursor_container, container, "f");
       __classPrivateFieldSet$1(this, _Cursor_eventHub, opts.eventHub, "f");
@@ -5115,6 +5147,8 @@ var __privateMethod = (obj, member, method) => {
       var _a;
       if (e.type === "over-element" || !e.type) {
         __classPrivateFieldGet$1(this, _Cursor_instances, "m", _Cursor_resetCursor).call(this, "auto");
+      } else if (e.type === "resize-rotate") {
+        __classPrivateFieldGet$1(this, _Cursor_instances, "m", _Cursor_resetCursor).call(this, "rotate");
       } else if (typeof e.type === "string" && ((_a = e.type) === null || _a === void 0 ? void 0 : _a.startsWith("resize-"))) {
         __classPrivateFieldGet$1(this, _Cursor_instances, "m", _Cursor_setCursorResize).call(this, e);
       } else if (e.type === "drag-default") {
@@ -5140,6 +5174,9 @@ var __privateMethod = (obj, member, method) => {
     let offsetX = 0;
     let offsetY = 0;
     if (cursorKey.startsWith("rotate-") && __classPrivateFieldGet$1(this, _Cursor_cursorImageMap, "f")[__classPrivateFieldGet$1(this, _Cursor_cursorType, "f")]) {
+      offsetX = 10;
+      offsetY = 10;
+    } else if (cursorKey === "rotate") {
       offsetX = 10;
       offsetY = 10;
     }
@@ -5223,6 +5260,7 @@ var __privateMethod = (obj, member, method) => {
   const areaBorderWidth = 1;
   const wrapperColor = "#1973ba";
   const lockColor = "#5b5959b5";
+  const controllerSize = 10;
   function drawVertexes(ctx, vertexes, opts) {
     const { borderColor: borderColor2, borderWidth: borderWidth2, background: background2, lineDash } = opts;
     ctx.setLineDash([]);
@@ -5239,6 +5277,42 @@ var __privateMethod = (obj, member, method) => {
     ctx.closePath();
     ctx.stroke();
     ctx.fill();
+  }
+  function drawLine(ctx, start, end, opts) {
+    const { borderColor: borderColor2, borderWidth: borderWidth2, lineDash } = opts;
+    ctx.setLineDash([]);
+    ctx.lineWidth = borderWidth2;
+    ctx.strokeStyle = borderColor2;
+    ctx.setLineDash(lineDash);
+    ctx.beginPath();
+    ctx.moveTo(start.x, start.y);
+    ctx.lineTo(end.x, end.y);
+    ctx.closePath();
+    ctx.stroke();
+  }
+  function drawCircleController(ctx, circleCenter, opts) {
+    const { size, borderColor: borderColor2, borderWidth: borderWidth2, background: background2 } = opts;
+    const center = circleCenter;
+    const r = size / 2;
+    const a = r;
+    const b = r;
+    if (a >= 0 && b >= 0) {
+      if (typeof borderWidth2 === "number" && borderWidth2 > 0) {
+        const ba = borderWidth2 / 2 + a;
+        const bb = borderWidth2 / 2 + b;
+        ctx.beginPath();
+        ctx.strokeStyle = borderColor2;
+        ctx.lineWidth = borderWidth2;
+        ctx.circle(center.x, center.y, ba, bb, 0, 0, 2 * Math.PI);
+        ctx.closePath();
+        ctx.stroke();
+      }
+      ctx.beginPath();
+      ctx.fillStyle = background2;
+      ctx.circle(center.x, center.y, a, b, 0, 0, 2 * Math.PI);
+      ctx.closePath();
+      ctx.fill();
+    }
   }
   function drawHoverVertexesWrapper(ctx, vertexes, opts) {
     if (!vertexes) {
@@ -5289,14 +5363,16 @@ var __privateMethod = (obj, member, method) => {
     if (!controller) {
       return;
     }
-    const { elementWrapper, topLeft, topRight, bottomLeft, bottomRight } = controller;
+    const { elementWrapper, topLeft, topRight, bottomLeft, bottomRight, top, rotate } = controller;
     const wrapperOpts = { borderColor: wrapperColor, borderWidth: selectWrapperBorderWidth, background: "transparent", lineDash: [] };
     const ctrlOpts = Object.assign(Object.assign({}, wrapperOpts), { borderWidth: resizeControllerBorderWidth, background: "#FFFFFF" });
+    drawLine(ctx, calcViewPointSize(top.center, opts), calcViewPointSize(rotate.center, opts), Object.assign(Object.assign({}, ctrlOpts), { borderWidth: 2 }));
     drawVertexes(ctx, calcViewVertexes(elementWrapper, opts), wrapperOpts);
     drawVertexes(ctx, calcViewVertexes(topLeft.vertexes, opts), ctrlOpts);
     drawVertexes(ctx, calcViewVertexes(topRight.vertexes, opts), ctrlOpts);
     drawVertexes(ctx, calcViewVertexes(bottomLeft.vertexes, opts), ctrlOpts);
     drawVertexes(ctx, calcViewVertexes(bottomRight.vertexes, opts), ctrlOpts);
+    drawCircleController(ctx, calcViewPointSize(rotate.center, opts), Object.assign(Object.assign({}, ctrlOpts), { size: controllerSize, borderWidth: 2 }));
   }
   function drawArea(ctx, opts) {
     const { start, end } = opts;
@@ -5386,8 +5462,8 @@ var __privateMethod = (obj, member, method) => {
     };
     const { ctx, data, calculator, selectedElements, viewScaleInfo, viewSizeInfo, areaSize, groupQueue, selectedElementController } = opts;
     if (selectedElementController) {
-      const { left, right, top, bottom, topLeft, topRight, bottomLeft, bottomRight } = selectedElementController;
-      const ctrls = [left, right, top, bottom, topLeft, topRight, bottomLeft, bottomRight];
+      const { left, right, top, bottom, topLeft, topRight, bottomLeft, bottomRight, rotate } = selectedElementController;
+      const ctrls = [left, right, top, bottom, topLeft, topRight, bottomLeft, bottomRight, rotate];
       for (let i = 0; i < ctrls.length; i++) {
         const ctrl = ctrls[i];
         if (isPointInViewActiveVertexes(p, { ctx, vertexes: ctrl.vertexes, viewSizeInfo, viewScaleInfo })) {
@@ -5967,6 +6043,24 @@ var __privateMethod = (obj, member, method) => {
     }
     return { x: x2, y: y2, w: w2, h: h2, angle: elem.angle };
   }
+  function rotateElement(elem, opts) {
+    const { x: x2, y: y2, w: w2, h: h2, angle: angle2 = 0 } = elem;
+    const { center, start, end, viewScaleInfo, viewSizeInfo } = opts;
+    const elemCenter = calcViewPointSize(center, {
+      viewScaleInfo,
+      viewSizeInfo
+    });
+    const startAngle = limitAngle(angle2);
+    const changedRadian = calcRadian(elemCenter, start, end);
+    const endAngle = startAngle + parseRadianToAngle(changedRadian);
+    return {
+      x: x2,
+      y: y2,
+      w: w2,
+      h: h2,
+      angle: endAngle
+    };
+  }
   function getSelectedListArea(data, opts) {
     var _a;
     const indexes = [];
@@ -6281,7 +6375,7 @@ var __privateMethod = (obj, member, method) => {
       if (list.length === 1) {
         const controller = calcElementSizeController(list[0], {
           groupQueue: sharer.getSharedStorage(keyGroupQueue),
-          controllerSize: 10,
+          controllerSize,
           viewScaleInfo: sharer.getActiveViewScaleInfo()
         });
         sharer.setSharedStorage(keySelectedElementController, controller);
@@ -6501,6 +6595,8 @@ var __privateMethod = (obj, member, method) => {
         const data = sharer.getActiveStorage("data");
         const elems = getActiveElements();
         const scale = sharer.getActiveStorage("scale") || 1;
+        const viewScaleInfo = sharer.getActiveViewScaleInfo();
+        const viewSizeInfo = sharer.getActiveViewSizeInfo();
         const start = prevPoint;
         const end = e.point;
         const resizeType = sharer.getSharedStorage(keyResizeType);
@@ -6550,17 +6646,38 @@ var __privateMethod = (obj, member, method) => {
               resizeStart = rotatePointInGroup(start, pointGroupQueue);
               resizeEnd = rotatePointInGroup(end, pointGroupQueue);
             }
-            const resizedElemSize = resizeElement(elems[0], { scale, start: resizeStart, end: resizeEnd, resizeType, sharer });
-            elems[0].x = resizedElemSize.x;
-            elems[0].y = resizedElemSize.y;
-            if (elems[0].type === "group" && ((_c = elems[0].operations) === null || _c === void 0 ? void 0 : _c.deepResize) === true) {
-              deepResizeGroupElement(elems[0], {
-                w: resizedElemSize.w,
-                h: resizedElemSize.h
+            if (resizeType === "resize-rotate") {
+              const controller = sharer.getSharedStorage(keySelectedElementController);
+              const viewVertexes = [
+                controller.topLeft.center,
+                controller.topRight.center,
+                controller.bottomLeft.center,
+                controller.bottomRight.center
+              ];
+              const viewCenter = calcElementCenterFromVertexes(viewVertexes);
+              const resizedElemSize = rotateElement(elems[0], {
+                center: viewCenter,
+                viewScaleInfo,
+                viewSizeInfo,
+                start,
+                end,
+                resizeType,
+                sharer
               });
+              elems[0].angle = resizedElemSize.angle;
             } else {
-              elems[0].w = resizedElemSize.w;
-              elems[0].h = resizedElemSize.h;
+              const resizedElemSize = resizeElement(elems[0], { scale, start: resizeStart, end: resizeEnd, resizeType, sharer });
+              elems[0].x = resizedElemSize.x;
+              elems[0].y = resizedElemSize.y;
+              if (elems[0].type === "group" && ((_c = elems[0].operations) === null || _c === void 0 ? void 0 : _c.deepResize) === true) {
+                deepResizeGroupElement(elems[0], {
+                  w: resizedElemSize.w,
+                  h: resizedElemSize.h
+                });
+              } else {
+                elems[0].w = resizedElemSize.w;
+                elems[0].h = resizedElemSize.h;
+              }
             }
             updateSelectedElementList([elems[0]]);
             viewer.drawFrame();
@@ -7790,7 +7907,7 @@ var __privateMethod = (obj, member, method) => {
   exports.parseRadianToAngle = parseRadianToAngle;
   exports.parseSVGPath = parseSVGPath;
   exports.pickFile = pickFile;
-  exports.rotateElement = rotateElement;
+  exports.rotateElement = rotateElement$1;
   exports.rotateElementVertexes = rotateElementVertexes;
   exports.rotatePoint = rotatePoint;
   exports.rotatePointInGroup = rotatePointInGroup;
