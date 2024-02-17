@@ -1,6 +1,6 @@
 # playground
 
-[idraw.js.org/playground/](https://idraw.js.org/playground/)
+[idrawjs.com/playground/](https://idrawjs.com/playground/)
 
 
 > Playground implementation from Vue.js
