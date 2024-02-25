@@ -607,6 +607,9 @@ var __privateMethod = (obj, member, method) => {
     asyncFunction(data) {
       return parsePrototype(data) === "AsyncFunction";
     },
+    boolean(data) {
+      return parsePrototype(data) === "Boolean";
+    },
     string(data) {
       return parsePrototype(data) === "String";
     },
@@ -3017,15 +3020,16 @@ var __privateMethod = (obj, member, method) => {
     return deleteElementInListByPosition(position, list);
   }
   function moveElementPosition(elements, opts) {
-    const { from, to } = opts;
+    const from = [...opts.from];
+    const to = [...opts.to];
     if (from.length === 0 || to.length === 0) {
-      return elements;
+      return { elements, from, to };
     }
     if (from.length <= to.length) {
       for (let i = 0; i < from.length; i++) {
         if (to[i] === from[i]) {
           if (i === from.length - 1) {
-            return elements;
+            return { elements, from, to };
           }
           continue;
         }
@@ -3035,7 +3039,7 @@ var __privateMethod = (obj, member, method) => {
     if (target) {
       const insterResult = insertElementToListByPosition(target, to, elements);
       if (!insterResult) {
-        return elements;
+        return { elements, from, to };
       }
       let trimDeletePosIndex = -1;
       for (let i = 0; i < from.length; i++) {
@@ -3056,7 +3060,7 @@ var __privateMethod = (obj, member, method) => {
       }
       deleteElementInListByPosition(from, elements);
     }
-    return elements;
+    return { elements, from, to };
   }
   function mergeElement(originElem, updateContent) {
     var _a;
@@ -3110,6 +3114,22 @@ var __privateMethod = (obj, member, method) => {
       }
     }
     return targetElement;
+  }
+  function updateElementInListByPosition(position, updateContent, elements) {
+    var _a;
+    const elem = findElementFromListByPosition(position, elements);
+    if (elem) {
+      if (elem.type === "group" && ((_a = elem.operations) === null || _a === void 0 ? void 0 : _a.deepResize) === true) {
+        if (updateContent.w && updateContent.w > 0 || updateContent.h && updateContent.h > 0) {
+          deepResizeGroupElement(elem, {
+            w: updateContent.w,
+            h: updateContent.h
+          });
+        }
+      }
+      mergeElement(elem, updateContent);
+    }
+    return elem;
   }
   function calcViewCenterContent(data, opts) {
     var _a, _b, _c, _d, _e, _f, _g, _h;
@@ -3178,6 +3198,35 @@ var __privateMethod = (obj, member, method) => {
       y: y2
     };
     return p;
+  }
+  function modifyElement(data, options) {
+    const { type } = options;
+    const content = Object.assign({}, options.content);
+    if (type === "addElement") {
+      const opts = options;
+      const { element, position } = opts.content;
+      if ((position === null || position === void 0 ? void 0 : position.length) > 0) {
+        insertElementToListByPosition(element, [...position], data.elements);
+      } else {
+        data.elements.push(element);
+      }
+    } else if (type === "deleteElement") {
+      const opts = options;
+      const { position } = opts.content;
+      deleteElementInListByPosition(position, data.elements);
+    } else if (type === "moveElement") {
+      const opts = options;
+      const { from, to } = opts.content;
+      const movedResult = moveElementPosition(data.elements, { from, to });
+      content.from = movedResult.from;
+      content.to = movedResult.to;
+      data.elements = movedResult.elements;
+    } else if (type === "updateElement") {
+      const opts = options;
+      const { position, afterModifiedElement } = opts.content;
+      updateElementInListByPosition(position, afterModifiedElement, data.elements);
+    }
+    return { data, content };
   }
   function createColorStyle(ctx, color2, opts) {
     if (typeof color2 === "string") {
@@ -6750,7 +6799,7 @@ var __privateMethod = (obj, member, method) => {
             sharer.setActiveStorage("contextWidth", viewInfo.contextSize.contextWidth);
           }
           if (data && ["drag", "drag-list", "drag-list-end", "resize"].includes(actionType)) {
-            let type = "drag-element";
+            let type = "dragElement";
             eventHub.trigger("change", { data, type });
           }
           viewer.drawFrame();
@@ -7646,7 +7695,7 @@ var __privateMethod = (obj, member, method) => {
     setData(data) {
       const core = __privateGet(this, _core);
       core.setData(data);
-      core.trigger("change", { data, type: "set-data" });
+      core.trigger("change", { data, type: "setData" });
     }
     getData(opts) {
       const data = __privateGet(this, _core).getData();
@@ -7720,7 +7769,7 @@ var __privateMethod = (obj, member, method) => {
       updateElementInList(element.uuid, element, data.elements);
       core.setData(data);
       core.refresh();
-      core.trigger("change", { data, type: "update-element" });
+      core.trigger("change", { data, type: "updateElement" });
     }
     addElement(element, opts) {
       var _a;
@@ -7734,7 +7783,7 @@ var __privateMethod = (obj, member, method) => {
       }
       core.setData(data);
       core.refresh();
-      core.trigger("change", { data, type: "add-element" });
+      core.trigger("change", { data, type: "addElement" });
       return data;
     }
     deleteElement(uuid) {
@@ -7743,17 +7792,17 @@ var __privateMethod = (obj, member, method) => {
       deleteElementInList(uuid, data.elements);
       core.setData(data);
       core.refresh();
-      core.trigger("change", { data, type: "delete-element" });
+      core.trigger("change", { data, type: "deleteElement" });
     }
     moveElement(uuid, to) {
       const core = __privateGet(this, _core);
       const data = core.getData() || { elements: [] };
       const from = getElementPositionFromList(uuid, data.elements);
-      const list = moveElementPosition(data.elements, { from, to });
+      const { elements: list } = moveElementPosition(data.elements, { from, to });
       data.elements = list;
       core.setData(data);
       core.refresh();
-      core.trigger("change", { data, type: "move-element" });
+      core.trigger("change", { data, type: "moveElement" });
     }
     async getImageBlobURL(opts) {
       const data = this.getData() || { elements: [] };
@@ -7802,7 +7851,7 @@ var __privateMethod = (obj, member, method) => {
     enableScale === true && core.use(MiddlewareScaler);
     enableRuler === true && core.use(MiddlewareRuler);
     enableTextEdit === true && core.use(MiddlewareTextEditor);
-    enableDrag === true && core.use(MiddlewareTextEditor);
+    enableDrag === true && core.use(MiddlewareDragger);
   };
   exports.Calculator = Calculator;
   exports.Context2D = Context2D;
@@ -7899,6 +7948,7 @@ var __privateMethod = (obj, member, method) => {
   exports.middlewareEventScale = middlewareEventScale;
   exports.middlewareEventSelect = middlewareEventSelect;
   exports.middlewareEventSelectClear = middlewareEventSelectClear;
+  exports.modifyElement = modifyElement;
   exports.moveElementPosition = moveElementPosition;
   exports.parseAngleToRadian = parseAngleToRadian;
   exports.parseFileToBase64 = parseFileToBase64;
