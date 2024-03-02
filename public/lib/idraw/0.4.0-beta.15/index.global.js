@@ -957,12 +957,16 @@ var __privateMethod = (obj, member, method) => {
     return kind === "m" ? f : kind === "a" ? f.call(receiver) : f ? f.value : state.get(receiver);
   };
   var _Context2D_ctx, _Context2D_opts;
+  const defaultFontSize = 12;
+  const defaultFontWeight = "400";
+  const defaultFontFamily = `-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans', sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji'`;
   class Context2D {
     constructor(ctx, opts) {
       _Context2D_ctx.set(this, void 0);
       _Context2D_opts.set(this, void 0);
       __classPrivateFieldSet$b(this, _Context2D_ctx, ctx, "f");
       __classPrivateFieldSet$b(this, _Context2D_opts, Object.assign({ devicePixelRatio: 1, offscreenCanvas: null }, opts), "f");
+      this.$resetFont();
     }
     $undoPixelRatio(num) {
       return num / __classPrivateFieldGet$b(this, _Context2D_opts, "f").devicePixelRatio;
@@ -984,6 +988,13 @@ var __privateMethod = (obj, member, method) => {
       strList.push(`${this.$doPixelRatio(opts.fontSize || 12)}px`);
       strList.push(`${opts.fontFamily || "sans-serif"}`);
       __classPrivateFieldGet$b(this, _Context2D_ctx, "f").font = `${strList.join(" ")}`;
+    }
+    $resetFont() {
+      this.$setFont({
+        fontSize: defaultFontSize,
+        fontFamily: defaultFontFamily,
+        fontWeight: defaultFontWeight
+      });
     }
     $getOffscreenCanvas() {
       return __classPrivateFieldGet$b(this, _Context2D_opts, "f").offscreenCanvas;
@@ -3528,11 +3539,18 @@ var __privateMethod = (obj, member, method) => {
       renderContent();
       ctx.restore();
     } else {
+      ctx.save();
+      ctx.shadowColor = "transparent";
+      ctx.shadowOffsetX = 0;
+      ctx.shadowOffsetY = 0;
+      ctx.shadowBlur = 0;
       renderContent();
+      ctx.restore();
     }
   }
   function drawCircle(ctx, elem, opts) {
     const { detail, angle: angle2 } = elem;
+    const { calculator, viewScaleInfo, viewSizeInfo, parentOpacity } = opts;
     const { background: background2 = "#000000", borderColor: borderColor2 = "#000000", boxSizing, borderWidth: borderWidth2 = 0 } = detail;
     let bw = 0;
     if (typeof borderWidth2 === "number" && borderWidth2 > 0) {
@@ -3540,7 +3558,7 @@ var __privateMethod = (obj, member, method) => {
     } else if (Array.isArray(borderWidth2) && typeof borderWidth2[0] === "number" && borderWidth2[0] > 0) {
       bw = borderWidth2[0];
     }
-    const { calculator, viewScaleInfo, viewSizeInfo, parentOpacity } = opts;
+    bw = bw * viewScaleInfo.scale;
     const { x: x2, y: y2, w: w2, h: h2 } = (calculator === null || calculator === void 0 ? void 0 : calculator.elementSize({ x: elem.x, y: elem.y, w: elem.w, h: elem.h }, viewScaleInfo, viewSizeInfo)) || elem;
     const viewElem = Object.assign(Object.assign({}, elem), { x: x2, y: y2, w: w2, h: h2, angle: angle2 });
     rotateElement$1(ctx, { x: x2, y: y2, w: w2, h: h2, angle: angle2 }, () => {
@@ -3567,12 +3585,12 @@ var __privateMethod = (obj, member, method) => {
           if (a >= 0 && b >= 0) {
             const opacity = getOpacity(viewElem) * parentOpacity;
             ctx.globalAlpha = opacity;
-            if (typeof borderWidth2 === "number" && borderWidth2 > 0) {
-              const ba = borderWidth2 / 2 + a;
-              const bb = borderWidth2 / 2 + b;
+            if (typeof bw === "number" && bw > 0) {
+              const ba = bw / 2 + a;
+              const bb = bw / 2 + b;
               ctx.beginPath();
               ctx.strokeStyle = borderColor2;
-              ctx.lineWidth = borderWidth2;
+              ctx.lineWidth = bw;
               ctx.circle(centerX, centerY, ba, bb, 0, 0, 2 * Math.PI);
               ctx.closePath();
               ctx.stroke();
@@ -4207,6 +4225,9 @@ var __privateMethod = (obj, member, method) => {
   }, _Loader_loadResource = function _Loader_loadResource2(element, assets) {
     const item = __classPrivateFieldGet$8(this, _Loader_instances, "m", _Loader_createLoadItem).call(this, element);
     const assetId = getAssetIdFromElement(element);
+    if (__classPrivateFieldGet$8(this, _Loader_currentLoadItemMap, "f")[assetId]) {
+      return;
+    }
     __classPrivateFieldGet$8(this, _Loader_currentLoadItemMap, "f")[assetId] = item;
     const loadFunc = __classPrivateFieldGet$8(this, _Loader_loadFuncMap, "f")[element.type];
     if (typeof loadFunc === "function" && !__classPrivateFieldGet$8(this, _Loader_hasDestroyed, "f")) {
@@ -4342,7 +4363,8 @@ var __privateMethod = (obj, member, method) => {
     loader.on("load", (e) => {
       this.trigger("load", e);
     });
-    loader.on("error", () => {
+    loader.on("error", (e) => {
+      console.error(e);
     });
   };
   var __classPrivateFieldSet$6 = function(receiver, state, value, kind, f) {
@@ -5019,6 +5041,9 @@ var __privateMethod = (obj, member, method) => {
     __classPrivateFieldGet$2(this, _Board_watcher, "f").on("scrollY", __classPrivateFieldGet$2(this, _Board_instances, "m", _Board_handleScrollY).bind(this));
     __classPrivateFieldGet$2(this, _Board_watcher, "f").on("resize", __classPrivateFieldGet$2(this, _Board_instances, "m", _Board_handleResize).bind(this));
     __classPrivateFieldGet$2(this, _Board_watcher, "f").on("doubleClick", __classPrivateFieldGet$2(this, _Board_instances, "m", _Board_handleDoubleClick).bind(this));
+    __classPrivateFieldGet$2(this, _Board_renderer, "f").on("load", () => {
+      __classPrivateFieldGet$2(this, _Board_eventHub, "f").trigger("loadResource");
+    });
   }, _Board_handlePointStart = function _Board_handlePointStart2(e) {
     var _a;
     for (let i = 0; i < __classPrivateFieldGet$2(this, _Board_activeMiddlewareObjs, "f").length; i++) {
@@ -5304,6 +5329,7 @@ var __privateMethod = (obj, member, method) => {
   const keySelectedElementController = Symbol(`${key$2}_selectedElementController`);
   const keyGroupQueue = Symbol(`${key$2}_groupQueue`);
   const keyGroupQueueVertexesList = Symbol(`${key$2}_groupQueueVertexesList`);
+  const keyIsMoving = Symbol(`${key$2}_isMoving`);
   const selectWrapperBorderWidth = 2;
   const resizeControllerBorderWidth = 4;
   const areaBorderWidth = 1;
@@ -5363,13 +5389,6 @@ var __privateMethod = (obj, member, method) => {
       ctx.fill();
     }
   }
-  function drawHoverVertexesWrapper(ctx, vertexes, opts) {
-    if (!vertexes) {
-      return;
-    }
-    const wrapperOpts = { borderColor: wrapperColor, borderWidth: 1, background: "transparent", lineDash: [] };
-    drawVertexes(ctx, calcViewVertexes(vertexes, opts), wrapperOpts);
-  }
   function drawCrossVertexes(ctx, vertexes, opts) {
     const { borderColor: borderColor2, borderWidth: borderWidth2, background: background2, lineDash } = opts;
     ctx.setLineDash([]);
@@ -5387,6 +5406,13 @@ var __privateMethod = (obj, member, method) => {
     ctx.lineTo(vertexes[3].x, vertexes[3].y);
     ctx.closePath();
     ctx.stroke();
+  }
+  function drawHoverVertexesWrapper(ctx, vertexes, opts) {
+    if (!vertexes) {
+      return;
+    }
+    const wrapperOpts = { borderColor: wrapperColor, borderWidth: 1, background: "transparent", lineDash: [] };
+    drawVertexes(ctx, calcViewVertexes(vertexes, opts), wrapperOpts);
   }
   function drawLockVertexesWrapper(ctx, vertexes, opts) {
     if (!vertexes) {
@@ -5412,16 +5438,19 @@ var __privateMethod = (obj, member, method) => {
     if (!controller) {
       return;
     }
+    const { hideControllers } = opts;
     const { elementWrapper, topLeft, topRight, bottomLeft, bottomRight, top, rotate } = controller;
     const wrapperOpts = { borderColor: wrapperColor, borderWidth: selectWrapperBorderWidth, background: "transparent", lineDash: [] };
     const ctrlOpts = Object.assign(Object.assign({}, wrapperOpts), { borderWidth: resizeControllerBorderWidth, background: "#FFFFFF" });
-    drawLine(ctx, calcViewPointSize(top.center, opts), calcViewPointSize(rotate.center, opts), Object.assign(Object.assign({}, ctrlOpts), { borderWidth: 2 }));
     drawVertexes(ctx, calcViewVertexes(elementWrapper, opts), wrapperOpts);
-    drawVertexes(ctx, calcViewVertexes(topLeft.vertexes, opts), ctrlOpts);
-    drawVertexes(ctx, calcViewVertexes(topRight.vertexes, opts), ctrlOpts);
-    drawVertexes(ctx, calcViewVertexes(bottomLeft.vertexes, opts), ctrlOpts);
-    drawVertexes(ctx, calcViewVertexes(bottomRight.vertexes, opts), ctrlOpts);
-    drawCircleController(ctx, calcViewPointSize(rotate.center, opts), Object.assign(Object.assign({}, ctrlOpts), { size: controllerSize, borderWidth: 2 }));
+    if (!hideControllers) {
+      drawLine(ctx, calcViewPointSize(top.center, opts), calcViewPointSize(rotate.center, opts), Object.assign(Object.assign({}, ctrlOpts), { borderWidth: 2 }));
+      drawVertexes(ctx, calcViewVertexes(topLeft.vertexes, opts), ctrlOpts);
+      drawVertexes(ctx, calcViewVertexes(topRight.vertexes, opts), ctrlOpts);
+      drawVertexes(ctx, calcViewVertexes(bottomLeft.vertexes, opts), ctrlOpts);
+      drawVertexes(ctx, calcViewVertexes(bottomRight.vertexes, opts), ctrlOpts);
+      drawCircleController(ctx, calcViewPointSize(rotate.center, opts), Object.assign(Object.assign({}, ctrlOpts), { size: controllerSize, borderWidth: 2 }));
+    }
   }
   function drawArea(ctx, opts) {
     const { start, end } = opts;
@@ -6231,15 +6260,18 @@ var __privateMethod = (obj, member, method) => {
     };
   }
   const middlewareEventTextEdit = "@middleware/text-edit";
+  const middlewareEventTextChange = "@middleware/text-change";
   const defaultElementDetail = getDefaultElementDetailConfig();
   const MiddlewareTextEditor = (opts) => {
     const { eventHub, boardContent, viewer } = opts;
     const canvas = boardContent.boardContext.canvas;
-    const textarea = document.createElement("textarea");
+    const textarea = document.createElement("div");
+    textarea.setAttribute("contenteditable", "true");
     const canvasWrapper = document.createElement("div");
     const container = opts.container || document.body;
     const mask = document.createElement("div");
     let activeElem = null;
+    let activePosition = [];
     canvasWrapper.appendChild(textarea);
     canvasWrapper.style.position = "absolute";
     mask.appendChild(canvasWrapper);
@@ -6258,6 +6290,7 @@ var __privateMethod = (obj, member, method) => {
     const hideTextArea = () => {
       mask.style.display = "none";
       activeElem = null;
+      activePosition = [];
     };
     const getCanvasRect = () => {
       const clientRect = canvas.getBoundingClientRect();
@@ -6315,6 +6348,21 @@ var __privateMethod = (obj, member, method) => {
         elemW = element.w * scale;
         elemH = element.h * scale;
       }
+      let justifyContent = "center";
+      let alignItems = "center";
+      if (detail.textAlign === "left") {
+        justifyContent = "start";
+      } else if (detail.textAlign === "right") {
+        justifyContent = "end";
+      }
+      if (detail.verticalAlign === "top") {
+        alignItems = "start";
+      } else if (detail.verticalAlign === "bottom") {
+        alignItems = "end";
+      }
+      textarea.style.display = "inline-flex";
+      textarea.style.justifyContent = justifyContent;
+      textarea.style.alignItems = alignItems;
       textarea.style.position = "absolute";
       textarea.style.left = `${elemX - 1}px`;
       textarea.style.top = `${elemY - 1}px`;
@@ -6335,7 +6383,7 @@ var __privateMethod = (obj, member, method) => {
       textarea.style.padding = "0";
       textarea.style.margin = "0";
       textarea.style.outline = "none";
-      textarea.value = detail.text || "";
+      textarea.innerText = detail.text || "";
       parent.appendChild(textarea);
     };
     const resetCanvasWrapper = () => {
@@ -6353,19 +6401,40 @@ var __privateMethod = (obj, member, method) => {
     textarea.addEventListener("click", (e) => {
       e.stopPropagation();
     });
-    textarea.addEventListener("input", (e) => {
-      if (activeElem) {
-        activeElem.detail.text = e.target.value || "";
+    textarea.addEventListener("input", () => {
+      if (activeElem && activePosition) {
+        activeElem.detail.text = textarea.innerText || "";
+        eventHub.trigger(middlewareEventTextChange, {
+          element: {
+            uuid: activeElem.uuid,
+            detail: {
+              text: activeElem.detail.text
+            }
+          },
+          position: [...activePosition || []]
+        });
         viewer.drawFrame();
       }
     });
     textarea.addEventListener("blur", () => {
+      if (activeElem && activePosition) {
+        eventHub.trigger(middlewareEventTextChange, {
+          element: {
+            uuid: activeElem.uuid,
+            detail: {
+              text: activeElem.detail.text
+            }
+          },
+          position: [...activePosition]
+        });
+      }
       hideTextArea();
     });
     const textEditCallback = (e) => {
       var _a;
-      if ((e === null || e === void 0 ? void 0 : e.element) && ((_a = e === null || e === void 0 ? void 0 : e.element) === null || _a === void 0 ? void 0 : _a.type) === "text") {
+      if ((e === null || e === void 0 ? void 0 : e.position) && (e === null || e === void 0 ? void 0 : e.element) && ((_a = e === null || e === void 0 ? void 0 : e.element) === null || _a === void 0 ? void 0 : _a.type) === "text") {
         activeElem = e.element;
+        activePosition = e.position;
       }
       showTextArea(e);
     };
@@ -6460,6 +6529,7 @@ var __privateMethod = (obj, member, method) => {
       sharer.setSharedStorage(keySelectedElementList, []);
       sharer.setSharedStorage(keySelectedElementListVertexes, null);
       sharer.setSharedStorage(keySelectedElementController, null);
+      sharer.setSharedStorage(keyIsMoving, null);
     };
     clear();
     const selectCallback = ({ uuids, positions }) => {
@@ -6641,6 +6711,7 @@ var __privateMethod = (obj, member, method) => {
       },
       pointMove: (e) => {
         var _a, _b, _c;
+        sharer.setSharedStorage(keyIsMoving, true);
         const data = sharer.getActiveStorage("data");
         const elems = getActiveElements();
         const scale = sharer.getActiveStorage("scale") || 1;
@@ -6740,6 +6811,7 @@ var __privateMethod = (obj, member, method) => {
       },
       pointEnd(e) {
         inBusyMode = null;
+        sharer.setSharedStorage(keyIsMoving, false);
         const data = sharer.getActiveStorage("data");
         const resizeType = sharer.getSharedStorage(keyResizeType);
         const actionType = sharer.getSharedStorage(keyActionType);
@@ -6812,7 +6884,7 @@ var __privateMethod = (obj, member, method) => {
         viewer.drawFrame();
       },
       doubleClick(e) {
-        var _a, _b, _c, _d;
+        var _a, _b, _c, _d, _e, _f;
         const target = getPointTarget(e.point, pointTargetBaseOptions());
         sharer.setSharedStorage(keySelectedElementController, null);
         sharer.setSharedStorage(keySelectedElementList, []);
@@ -6830,6 +6902,7 @@ var __privateMethod = (obj, member, method) => {
           eventHub.trigger(middlewareEventTextEdit, {
             element: target.elements[0],
             groupQueue: sharer.getSharedStorage(keyGroupQueue) || [],
+            position: getElementPositionFromList((_e = target.elements[0]) === null || _e === void 0 ? void 0 : _e.uuid, ((_f = sharer.getActiveStorage("data")) === null || _f === void 0 ? void 0 : _f.elements) || []),
             viewScaleInfo: sharer.getActiveViewScaleInfo()
           });
         }
@@ -6851,6 +6924,7 @@ var __privateMethod = (obj, member, method) => {
         const areaEnd = sharedStore[keyAreaEnd];
         const groupQueue = sharedStore[keyGroupQueue];
         const groupQueueVertexesList = sharedStore[keyGroupQueueVertexesList];
+        const isMoving = sharedStore[keyIsMoving];
         const drawBaseOpts = { calculator, viewScaleInfo, viewSizeInfo };
         const selectedElementController = elem ? calcElementSizeController(elem, {
           groupQueue,
@@ -6872,7 +6946,7 @@ var __privateMethod = (obj, member, method) => {
             }
           }
           if (!isLock && elem && ["select", "drag", "resize"].includes(actionType)) {
-            drawSelectedElementControllersVertexes(helperContext, selectedElementController, Object.assign({}, drawBaseOpts));
+            drawSelectedElementControllersVertexes(helperContext, selectedElementController, Object.assign(Object.assign({}, drawBaseOpts), { element: elem, groupQueue, hideControllers: !!isMoving && actionType === "drag" }));
           }
         } else {
           if (hoverElement && actionType !== "drag") {
@@ -6887,7 +6961,7 @@ var __privateMethod = (obj, member, method) => {
             }
           }
           if (!isLock && elem && ["select", "drag", "resize"].includes(actionType)) {
-            drawSelectedElementControllersVertexes(helperContext, selectedElementController, Object.assign({}, drawBaseOpts));
+            drawSelectedElementControllersVertexes(helperContext, selectedElementController, Object.assign(Object.assign({}, drawBaseOpts), { element: elem, groupQueue, hideControllers: !!isMoving && actionType === "drag" }));
           } else if (actionType === "area" && areaStart && areaEnd) {
             drawArea(helperContext, { start: areaStart, end: areaEnd });
           } else if (["drag-list", "drag-list-end"].includes(actionType)) {
@@ -7641,6 +7715,23 @@ var __privateMethod = (obj, member, method) => {
       devicePixelRatio
     };
   }
+  const idrawEventChange = "change";
+  const innerEventKeys = {
+    change: idrawEventChange,
+    ruler: middlewareEventRuler,
+    scale: middlewareEventScale,
+    select: middlewareEventSelect,
+    clearSelect: middlewareEventSelectClear,
+    textEdit: middlewareEventTextEdit,
+    textChange: middlewareEventTextChange
+  };
+  const eventKeys = {};
+  Object.keys(innerEventKeys).forEach((keyName) => {
+    Object.defineProperty(eventKeys, keyName, {
+      value: innerEventKeys[keyName],
+      writable: false
+    });
+  });
   class iDraw2 {
     constructor(mount, options) {
       __privateAdd(this, _init);
@@ -7695,7 +7786,7 @@ var __privateMethod = (obj, member, method) => {
     setData(data) {
       const core = __privateGet(this, _core);
       core.setData(data);
-      core.trigger("change", { data, type: "setData" });
+      core.trigger(eventKeys.change, { data, type: "setData" });
     }
     getData(opts) {
       const data = __privateGet(this, _core).getData();
@@ -7741,16 +7832,16 @@ var __privateMethod = (obj, member, method) => {
       this.selectElements([uuid]);
     }
     selectElements(uuids) {
-      this.trigger(middlewareEventSelect, { uuids });
+      this.trigger(eventKeys.select, { uuids });
     }
     selectElementByPosition(position) {
       this.selectElementsByPositions([position]);
     }
     selectElementsByPositions(positions) {
-      this.trigger(middlewareEventSelect, { positions });
+      this.trigger(eventKeys.select, { positions });
     }
     cancelElements() {
-      this.trigger(middlewareEventSelect, { uuids: [] });
+      this.trigger(eventKeys.select, { uuids: [] });
     }
     createElement(type, opts) {
       const { viewScaleInfo, viewSizeInfo } = __privateGet(this, _core).getViewInfo();
@@ -7769,7 +7860,7 @@ var __privateMethod = (obj, member, method) => {
       updateElementInList(element.uuid, element, data.elements);
       core.setData(data);
       core.refresh();
-      core.trigger("change", { data, type: "updateElement" });
+      core.trigger(eventKeys.change, { data, type: "updateElement" });
     }
     addElement(element, opts) {
       var _a;
@@ -7783,7 +7874,7 @@ var __privateMethod = (obj, member, method) => {
       }
       core.setData(data);
       core.refresh();
-      core.trigger("change", { data, type: "addElement" });
+      core.trigger(eventKeys.change, { data, type: "addElement" });
       return data;
     }
     deleteElement(uuid) {
@@ -7792,7 +7883,7 @@ var __privateMethod = (obj, member, method) => {
       deleteElementInList(uuid, data.elements);
       core.setData(data);
       core.refresh();
-      core.trigger("change", { data, type: "deleteElement" });
+      core.trigger(eventKeys.change, { data, type: "deleteElement" });
     }
     moveElement(uuid, to) {
       const core = __privateGet(this, _core);
@@ -7802,7 +7893,7 @@ var __privateMethod = (obj, member, method) => {
       data.elements = list;
       core.setData(data);
       core.refresh();
-      core.trigger("change", { data, type: "moveElement" });
+      core.trigger(eventKeys.change, { data, type: "moveElement" });
     }
     async getImageBlobURL(opts) {
       const data = this.getData() || { elements: [] };
@@ -7906,6 +7997,7 @@ var __privateMethod = (obj, member, method) => {
   exports.downloadImageFromCanvas = downloadImageFromCanvas;
   exports.equalPoint = equalPoint;
   exports.equalTouchPoint = equalTouchPoint;
+  exports.eventKeys = eventKeys;
   exports.filterElementAsset = filterElementAsset;
   exports.findElementFromList = findElementFromList;
   exports.findElementFromListByPosition = findElementFromListByPosition;
