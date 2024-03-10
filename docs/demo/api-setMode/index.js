@@ -8,5 +8,5 @@ const options = {
   devicePixelRatio: 2
 };
 const idraw = new iDraw(app, options);
+idraw.setMode('readOnly');
 idraw.setData(data);
-idraw.selectElements([data.elements[0].uuid]);

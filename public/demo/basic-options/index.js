@@ -5,12 +5,7 @@ const app = document.querySelector('#app');
 const options = {
   width: 320,
   height: 320,
-  devicePixelRatio: 2,
-  enableScroll: false,
-  enableSelect: false,
-  enableScale: false,
-  enableRuler: false,
-  enableTextEdit: false
+  devicePixelRatio: 2
 };
 const idraw = new iDraw(app, options);
 idraw.setData(data);

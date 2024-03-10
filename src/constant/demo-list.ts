@@ -84,6 +84,10 @@ const demoList: TypeDemoList = [
         key: 'api-getData'
       },
       {
+        name: 'setMode',
+        key: 'api-setMode'
+      },
+      {
         name: 'selectElement',
         key: 'api-selectElement'
       },
@@ -109,12 +113,20 @@ const demoList: TypeDemoList = [
       },
       {
         name: 'centerContent',
-        key: 'api-centerContent',
+        key: 'api-centerContent'
       },
       {
         name: 'destroy',
-        key: 'api-destroy',
+        key: 'api-destroy'
       },
+      {
+        name: 'disable',
+        key: 'api-disable'
+      },
+      {
+        name: 'enable',
+        key: 'api-enable'
+      }
       // {
       //   name: 'getSelectedElements',
       //   key: 'api-getSelectedElements',

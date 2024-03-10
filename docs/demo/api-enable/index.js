@@ -9,4 +9,8 @@ const options = {
 };
 const idraw = new iDraw(app, options);
 idraw.setData(data);
-idraw.selectElements([data.elements[0].uuid]);
+idraw.disable('ruler');
+
+setTimeout(() => {
+  idraw.enable('ruler');
+}, 1000);
