@@ -22,7 +22,7 @@ var __privateMethod = (obj, member, method) => {
   return method;
 };
 
-  var _core, _opts, _init, init_fn;
+  var _core, _opts, _store, _init, init_fn, _setFeature, setFeature_fn;
   function compose(middleware) {
     return function(context, next) {
       return dispatch(0);
@@ -957,12 +957,16 @@ var __privateMethod = (obj, member, method) => {
     return kind === "m" ? f : kind === "a" ? f.call(receiver) : f ? f.value : state.get(receiver);
   };
   var _Context2D_ctx, _Context2D_opts;
+  const defaultFontSize = 12;
+  const defaultFontWeight = "400";
+  const defaultFontFamily = `-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans', sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji'`;
   class Context2D {
     constructor(ctx, opts) {
       _Context2D_ctx.set(this, void 0);
       _Context2D_opts.set(this, void 0);
       __classPrivateFieldSet$b(this, _Context2D_ctx, ctx, "f");
       __classPrivateFieldSet$b(this, _Context2D_opts, Object.assign({ devicePixelRatio: 1, offscreenCanvas: null }, opts), "f");
+      this.$resetFont();
     }
     $undoPixelRatio(num) {
       return num / __classPrivateFieldGet$b(this, _Context2D_opts, "f").devicePixelRatio;
@@ -984,6 +988,13 @@ var __privateMethod = (obj, member, method) => {
       strList.push(`${this.$doPixelRatio(opts.fontSize || 12)}px`);
       strList.push(`${opts.fontFamily || "sans-serif"}`);
       __classPrivateFieldGet$b(this, _Context2D_ctx, "f").font = `${strList.join(" ")}`;
+    }
+    $resetFont() {
+      this.$setFont({
+        fontSize: defaultFontSize,
+        fontFamily: defaultFontFamily,
+        fontWeight: defaultFontWeight
+      });
     }
     $getOffscreenCanvas() {
       return __classPrivateFieldGet$b(this, _Context2D_opts, "f").offscreenCanvas;
@@ -1440,7 +1451,7 @@ var __privateMethod = (obj, member, method) => {
       return __classPrivateFieldGet$9(this, _Store_temp, "f")[name];
     }
     getSnapshot() {
-      return deepClone(__classPrivateFieldGet$9(this, _Store_temp, "f"));
+      return __classPrivateFieldGet$9(this, _Store_temp, "f");
     }
     clear() {
       __classPrivateFieldSet$9(this, _Store_temp, __classPrivateFieldGet$9(this, _Store_instances, "m", _Store_createTempStorage).call(this), "f");
@@ -1914,6 +1925,23 @@ var __privateMethod = (obj, member, method) => {
     _scan(uuid, elements);
     return groupQueue;
   }
+  function getGroupQueueByElementPosition(elements, position) {
+    var _a;
+    const groupQueue = [];
+    let currentElements = elements;
+    if (position.length > 1) {
+      for (let i = 0; i < position.length - 1; i++) {
+        const group = currentElements[i];
+        if ((group === null || group === void 0 ? void 0 : group.type) === "group" && Array.isArray((_a = group === null || group === void 0 ? void 0 : group.detail) === null || _a === void 0 ? void 0 : _a.children)) {
+          groupQueue.push(group);
+          currentElements = group.detail.children;
+        } else {
+          return null;
+        }
+      }
+    }
+    return groupQueue;
+  }
   function getElementSize(elem) {
     const { x: x2, y: y2, w: w2, h: h2, angle: angle2 } = elem;
     const size = { x: x2, y: y2, w: w2, h: h2, angle: angle2 };
@@ -2059,6 +2087,77 @@ var __privateMethod = (obj, member, method) => {
     const react2MaxX = rect2.x + rect2.w;
     const react2MaxY = rect2.y + rect2.h;
     return react1MinX <= react2MaxX && react1MaxX >= react2MinX && react1MinY <= react2MaxY && react1MaxY >= react2MinY;
+  }
+  function getElementVertexes(elemSize) {
+    const { x: x2, y: y2, h: h2, w: w2 } = elemSize;
+    return [
+      { x: x2, y: y2 },
+      { x: x2 + w2, y: y2 },
+      { x: x2 + w2, y: y2 + h2 },
+      { x: x2, y: y2 + h2 }
+    ];
+  }
+  function calcElementVertexes(elemSize) {
+    const { x: x2, y: y2, w: w2, h: h2, angle: angle2 = 0 } = elemSize;
+    if (angle2 === 0) {
+      return getElementVertexes(elemSize);
+    }
+    return getElementRotateVertexes(elemSize, calcElementCenter({ x: x2, y: y2, w: w2, h: h2, angle: angle2 }), angle2);
+  }
+  function calcElementQueueVertexesQueueInGroup(groupQueue) {
+    const vesList = [];
+    let totalX = 0;
+    let totalY = 0;
+    const rotateActionList = [];
+    const elemQueue = [...groupQueue];
+    for (let i = 0; i < elemQueue.length; i++) {
+      const { x: x2, y: y2, w: w2, h: h2, angle: angle2 = 0 } = elemQueue[i];
+      totalX += x2;
+      totalY += y2;
+      let ves;
+      if (i === 0) {
+        const elemSize = { x: totalX, y: totalY, w: w2, h: h2, angle: angle2 };
+        ves = calcElementVertexes({ x: x2, y: y2, w: w2, h: h2, angle: angle2 });
+        rotateActionList.push({
+          center: calcElementCenter(elemSize),
+          angle: angle2,
+          radian: parseAngleToRadian(angle2)
+        });
+      } else {
+        const elemSize = { x: totalX, y: totalY, w: w2, h: h2, angle: angle2 };
+        ves = getElementVertexes(elemSize);
+        for (let aIdx = 0; aIdx < rotateActionList.length; aIdx++) {
+          const { center, radian } = rotateActionList[aIdx];
+          ves = rotateVertexes(center, ves, radian);
+        }
+        const vesCenter = calcElementCenterFromVertexes(ves);
+        if (angle2 > 0 || angle2 < 0) {
+          const radian = parseAngleToRadian(angle2);
+          ves = rotateVertexes(vesCenter, ves, radian);
+        }
+        rotateActionList.push({
+          center: vesCenter,
+          angle: angle2,
+          radian: parseAngleToRadian(angle2)
+        });
+      }
+      vesList.push(ves);
+    }
+    return vesList;
+  }
+  function calcElementVertexesQueueInGroup(targetElem, opts) {
+    const { groupQueue } = opts;
+    if (!(groupQueue.length > 0)) {
+      return [calcElementVertexes(targetElem)];
+    }
+    const elemQueue = [...groupQueue, ...[targetElem]];
+    const vesList = calcElementQueueVertexesQueueInGroup(elemQueue);
+    return vesList;
+  }
+  function calcElementVertexesInGroup(targetElem, opts) {
+    const vesList = calcElementVertexesQueueInGroup(targetElem, opts);
+    const ves = vesList.pop();
+    return ves || null;
   }
   function calcViewScaleInfo(info, opts) {
     const { scale, offsetX, offsetY } = info;
@@ -2243,76 +2342,164 @@ var __privateMethod = (obj, member, method) => {
     const elemSize = { x: elemStartX, y: elemStartY, w: elemEndX - elemStartX, h: elemEndY - elemStartY };
     return checkRectIntersect(viewSize, elemSize);
   }
-  function getElementVertexes(elemSize) {
-    const { x: x2, y: y2, h: h2, w: w2 } = elemSize;
-    return [
-      { x: x2, y: y2 },
-      { x: x2 + w2, y: y2 },
-      { x: x2 + w2, y: y2 + h2 },
-      { x: x2, y: y2 + h2 }
-    ];
+  function calcElementOriginRectInfo(elemSize, opts) {
+    const { groupQueue } = opts;
+    const vertexes = calcElementVertexesInGroup(elemSize, { groupQueue });
+    const top = getCenterFromTwoPoints(vertexes[0], vertexes[1]);
+    const right = getCenterFromTwoPoints(vertexes[1], vertexes[2]);
+    const bottom = getCenterFromTwoPoints(vertexes[2], vertexes[3]);
+    const left = getCenterFromTwoPoints(vertexes[3], vertexes[0]);
+    const topLeft = vertexes[0];
+    const topRight = vertexes[1];
+    const bottomRight = vertexes[2];
+    const bottomLeft = vertexes[3];
+    const maxX = Math.max(topLeft.x, topRight.x, bottomRight.x, bottomLeft.x);
+    const maxY = Math.max(topLeft.y, topRight.y, bottomRight.y, bottomLeft.y);
+    const minX = Math.min(topLeft.x, topRight.x, bottomRight.x, bottomLeft.x);
+    const minY = Math.min(topLeft.y, topRight.y, bottomRight.y, bottomLeft.y);
+    const center = {
+      x: (maxX + minX) / 2,
+      y: (maxY + minY) / 2
+    };
+    const rectInfo = {
+      center,
+      topLeft,
+      topRight,
+      bottomLeft,
+      bottomRight,
+      top,
+      right,
+      left,
+      bottom
+    };
+    return rectInfo;
   }
-  function calcElementVertexes(elemSize) {
-    const { x: x2, y: y2, w: w2, h: h2, angle: angle2 = 0 } = elemSize;
-    if (angle2 === 0) {
-      return getElementVertexes(elemSize);
+  function calcElementViewRectInfo(elemSize, opts) {
+    const { groupQueue, viewScaleInfo, range } = opts;
+    const originRectInfo = calcElementOriginRectInfo(elemSize, { groupQueue });
+    const { center, top, bottom, left, right, topLeft, topRight, bottomLeft, bottomRight } = originRectInfo;
+    const viewRectInfo = {
+      center: calcViewPointSize(center, { viewScaleInfo }),
+      topLeft: calcViewPointSize(topLeft, { viewScaleInfo }),
+      topRight: calcViewPointSize(topRight, { viewScaleInfo }),
+      bottomLeft: calcViewPointSize(bottomLeft, { viewScaleInfo }),
+      bottomRight: calcViewPointSize(bottomRight, { viewScaleInfo }),
+      top: calcViewPointSize(top, { viewScaleInfo }),
+      right: calcViewPointSize(right, { viewScaleInfo }),
+      left: calcViewPointSize(left, { viewScaleInfo }),
+      bottom: calcViewPointSize(bottom, { viewScaleInfo })
+    };
+    if (range === true) {
+      const viewMaxX = Math.max(viewRectInfo.topLeft.x, viewRectInfo.topRight.x, viewRectInfo.bottomRight.x, viewRectInfo.bottomLeft.x);
+      const viewMaxY = Math.max(viewRectInfo.topLeft.y, viewRectInfo.topRight.y, viewRectInfo.bottomRight.y, viewRectInfo.bottomLeft.y);
+      const viewMinX = Math.min(viewRectInfo.topLeft.x, viewRectInfo.topRight.x, viewRectInfo.bottomRight.x, viewRectInfo.bottomLeft.x);
+      const viewMinY = Math.min(viewRectInfo.topLeft.y, viewRectInfo.topRight.y, viewRectInfo.bottomRight.y, viewRectInfo.bottomLeft.y);
+      const rangeCenter = { x: viewRectInfo.center.x, y: viewRectInfo.center.y };
+      const rangeTopLeft = { x: viewMinX, y: viewMinY };
+      const rangeTopRight = { x: viewMaxX, y: viewMinY };
+      const rangeBottomRight = { x: viewMaxX, y: viewMaxY };
+      const rangeBottomLeft = { x: viewMinX, y: viewMaxY };
+      const rangeTop = getCenterFromTwoPoints(rangeTopLeft, rangeTopRight);
+      const rangeBottom = getCenterFromTwoPoints(rangeBottomLeft, rangeBottomRight);
+      const rangeLeft = getCenterFromTwoPoints(rangeTopLeft, rangeBottomLeft);
+      const rangeRight = getCenterFromTwoPoints(rangeTopRight, rangeBottomRight);
+      const rangeRectInfo = {
+        center: rangeCenter,
+        topLeft: rangeTopLeft,
+        topRight: rangeTopRight,
+        bottomLeft: rangeBottomLeft,
+        bottomRight: rangeBottomRight,
+        top: rangeTop,
+        right: rangeRight,
+        left: rangeLeft,
+        bottom: rangeBottom
+      };
+      return rangeRectInfo;
     }
-    return getElementRotateVertexes(elemSize, calcElementCenter({ x: x2, y: y2, w: w2, h: h2, angle: angle2 }), angle2);
+    return viewRectInfo;
   }
-  function calcElementQueueVertexesQueueInGroup(groupQueue) {
-    const vesList = [];
-    let totalX = 0;
-    let totalY = 0;
-    const rotateActionList = [];
-    const elemQueue = [...groupQueue];
-    for (let i = 0; i < elemQueue.length; i++) {
-      const { x: x2, y: y2, w: w2, h: h2, angle: angle2 = 0 } = elemQueue[i];
-      totalX += x2;
-      totalY += y2;
-      let ves;
-      if (i === 0) {
-        const elemSize = { x: totalX, y: totalY, w: w2, h: h2, angle: angle2 };
-        ves = calcElementVertexes({ x: x2, y: y2, w: w2, h: h2, angle: angle2 });
-        rotateActionList.push({
-          center: calcElementCenter(elemSize),
-          angle: angle2,
-          radian: parseAngleToRadian(angle2)
-        });
-      } else {
-        const elemSize = { x: totalX, y: totalY, w: w2, h: h2, angle: angle2 };
-        ves = getElementVertexes(elemSize);
-        for (let aIdx = 0; aIdx < rotateActionList.length; aIdx++) {
-          const { center, radian } = rotateActionList[aIdx];
-          ves = rotateVertexes(center, ves, radian);
-        }
-        const vesCenter = calcElementCenterFromVertexes(ves);
-        if (angle2 > 0 || angle2 < 0) {
-          const radian = parseAngleToRadian(angle2);
-          ves = rotateVertexes(vesCenter, ves, radian);
-        }
-        rotateActionList.push({
-          center: vesCenter,
-          angle: angle2,
-          radian: parseAngleToRadian(angle2)
+  function calcElementViewRectInfoMap(elemSize, opts) {
+    const { groupQueue, viewScaleInfo } = opts;
+    const originRectInfo = calcElementOriginRectInfo(elemSize, { groupQueue });
+    const { center, top, bottom, left, right, topLeft, topRight, bottomLeft, bottomRight } = originRectInfo;
+    const viewRectInfo = {
+      center: calcViewPointSize(center, { viewScaleInfo }),
+      topLeft: calcViewPointSize(topLeft, { viewScaleInfo }),
+      topRight: calcViewPointSize(topRight, { viewScaleInfo }),
+      bottomLeft: calcViewPointSize(bottomLeft, { viewScaleInfo }),
+      bottomRight: calcViewPointSize(bottomRight, { viewScaleInfo }),
+      top: calcViewPointSize(top, { viewScaleInfo }),
+      right: calcViewPointSize(right, { viewScaleInfo }),
+      left: calcViewPointSize(left, { viewScaleInfo }),
+      bottom: calcViewPointSize(bottom, { viewScaleInfo })
+    };
+    const viewMaxX = Math.max(viewRectInfo.topLeft.x, viewRectInfo.topRight.x, viewRectInfo.bottomRight.x, viewRectInfo.bottomLeft.x);
+    const viewMaxY = Math.max(viewRectInfo.topLeft.y, viewRectInfo.topRight.y, viewRectInfo.bottomRight.y, viewRectInfo.bottomLeft.y);
+    const viewMinX = Math.min(viewRectInfo.topLeft.x, viewRectInfo.topRight.x, viewRectInfo.bottomRight.x, viewRectInfo.bottomLeft.x);
+    const viewMinY = Math.min(viewRectInfo.topLeft.y, viewRectInfo.topRight.y, viewRectInfo.bottomRight.y, viewRectInfo.bottomLeft.y);
+    const rangeCenter = { x: viewRectInfo.center.x, y: viewRectInfo.center.y };
+    const rangeTopLeft = { x: viewMinX, y: viewMinY };
+    const rangeTopRight = { x: viewMaxX, y: viewMinY };
+    const rangeBottomRight = { x: viewMaxX, y: viewMaxY };
+    const rangeBottomLeft = { x: viewMinX, y: viewMaxY };
+    const rangeTop = getCenterFromTwoPoints(rangeTopLeft, rangeTopRight);
+    const rangeBottom = getCenterFromTwoPoints(rangeBottomLeft, rangeBottomRight);
+    const rangeLeft = getCenterFromTwoPoints(rangeTopLeft, rangeBottomLeft);
+    const rangeRight = getCenterFromTwoPoints(rangeTopRight, rangeBottomRight);
+    const rangeRectInfo = {
+      center: rangeCenter,
+      topLeft: rangeTopLeft,
+      topRight: rangeTopRight,
+      bottomLeft: rangeBottomLeft,
+      bottomRight: rangeBottomRight,
+      top: rangeTop,
+      right: rangeRight,
+      left: rangeLeft,
+      bottom: rangeBottom
+    };
+    return {
+      originRectInfo,
+      viewRectInfo,
+      rangeRectInfo
+    };
+  }
+  function sortElementsViewVisiableInfoMap(elements) {
+    const visibleInfoMap = {};
+    const currentPosition = [];
+    const _walk = (elem) => {
+      const baseInfo = {
+        viewRectInfo: null,
+        rangeRectInfo: null,
+        isVisibleInView: true,
+        isGroup: elem.type === "group",
+        position: [...currentPosition]
+      };
+      let originRectInfo = null;
+      const groupQueue = getGroupQueueByElementPosition(elements, currentPosition);
+      originRectInfo = calcElementOriginRectInfo(elem, {
+        groupQueue: groupQueue || []
+      });
+      visibleInfoMap[elem.uuid] = Object.assign(Object.assign({}, baseInfo), {
+        originRectInfo
+      });
+      if (elem.type === "group") {
+        elem.detail.children.forEach((ele, i) => {
+          if (ele.type === "group") {
+            currentPosition.push(i);
+          }
+          _walk(ele);
+          if (ele.type === "group") {
+            currentPosition.pop();
+          }
         });
       }
-      vesList.push(ves);
-    }
-    return vesList;
-  }
-  function calcElementVertexesQueueInGroup(targetElem, opts) {
-    const { groupQueue } = opts;
-    if (!(groupQueue.length > 0)) {
-      return [calcElementVertexes(targetElem)];
-    }
-    const elemQueue = [...groupQueue, ...[targetElem]];
-    const vesList = calcElementQueueVertexesQueueInGroup(elemQueue);
-    return vesList;
-  }
-  function calcElementVertexesInGroup(targetElem, opts) {
-    const vesList = calcElementVertexesQueueInGroup(targetElem, opts);
-    const ves = vesList.pop();
-    return ves || null;
+    };
+    elements.forEach((elem, index) => {
+      currentPosition.push(index);
+      _walk(elem);
+      currentPosition.pop();
+    });
+    return visibleInfoMap;
   }
   function createControllerElementSizeFromCenter(center, opts) {
     const { x: x2, y: y2 } = center;
@@ -3528,11 +3715,18 @@ var __privateMethod = (obj, member, method) => {
       renderContent();
       ctx.restore();
     } else {
+      ctx.save();
+      ctx.shadowColor = "transparent";
+      ctx.shadowOffsetX = 0;
+      ctx.shadowOffsetY = 0;
+      ctx.shadowBlur = 0;
       renderContent();
+      ctx.restore();
     }
   }
   function drawCircle(ctx, elem, opts) {
     const { detail, angle: angle2 } = elem;
+    const { calculator, viewScaleInfo, viewSizeInfo, parentOpacity } = opts;
     const { background: background2 = "#000000", borderColor: borderColor2 = "#000000", boxSizing, borderWidth: borderWidth2 = 0 } = detail;
     let bw = 0;
     if (typeof borderWidth2 === "number" && borderWidth2 > 0) {
@@ -3540,7 +3734,7 @@ var __privateMethod = (obj, member, method) => {
     } else if (Array.isArray(borderWidth2) && typeof borderWidth2[0] === "number" && borderWidth2[0] > 0) {
       bw = borderWidth2[0];
     }
-    const { calculator, viewScaleInfo, viewSizeInfo, parentOpacity } = opts;
+    bw = bw * viewScaleInfo.scale;
     const { x: x2, y: y2, w: w2, h: h2 } = (calculator === null || calculator === void 0 ? void 0 : calculator.elementSize({ x: elem.x, y: elem.y, w: elem.w, h: elem.h }, viewScaleInfo, viewSizeInfo)) || elem;
     const viewElem = Object.assign(Object.assign({}, elem), { x: x2, y: y2, w: w2, h: h2, angle: angle2 });
     rotateElement$1(ctx, { x: x2, y: y2, w: w2, h: h2, angle: angle2 }, () => {
@@ -3567,12 +3761,12 @@ var __privateMethod = (obj, member, method) => {
           if (a >= 0 && b >= 0) {
             const opacity = getOpacity(viewElem) * parentOpacity;
             ctx.globalAlpha = opacity;
-            if (typeof borderWidth2 === "number" && borderWidth2 > 0) {
-              const ba = borderWidth2 / 2 + a;
-              const bb = borderWidth2 / 2 + b;
+            if (typeof bw === "number" && bw > 0) {
+              const ba = bw / 2 + a;
+              const bb = bw / 2 + b;
               ctx.beginPath();
               ctx.strokeStyle = borderColor2;
-              ctx.lineWidth = borderWidth2;
+              ctx.lineWidth = bw;
               ctx.circle(centerX, centerY, ba, bb, 0, 0, 2 * Math.PI);
               ctx.closePath();
               ctx.stroke();
@@ -4207,6 +4401,9 @@ var __privateMethod = (obj, member, method) => {
   }, _Loader_loadResource = function _Loader_loadResource2(element, assets) {
     const item = __classPrivateFieldGet$8(this, _Loader_instances, "m", _Loader_createLoadItem).call(this, element);
     const assetId = getAssetIdFromElement(element);
+    if (__classPrivateFieldGet$8(this, _Loader_currentLoadItemMap, "f")[assetId]) {
+      return;
+    }
     __classPrivateFieldGet$8(this, _Loader_currentLoadItemMap, "f")[assetId] = item;
     const loadFunc = __classPrivateFieldGet$8(this, _Loader_loadFuncMap, "f")[element.type];
     if (typeof loadFunc === "function" && !__classPrivateFieldGet$8(this, _Loader_hasDestroyed, "f")) {
@@ -4342,7 +4539,8 @@ var __privateMethod = (obj, member, method) => {
     loader.on("load", (e) => {
       this.trigger("load", e);
     });
-    loader.on("error", () => {
+    loader.on("error", (e) => {
+      console.error(e);
     });
   };
   var __classPrivateFieldSet$6 = function(receiver, state, value, kind, f) {
@@ -4837,7 +5035,6 @@ var __privateMethod = (obj, member, method) => {
     return kind === "m" ? f : kind === "a" ? f.call(receiver) : f ? f.value : state.get(receiver);
   };
   var _Board_instances, _Board_opts, _Board_middlewareMap, _Board_middlewares, _Board_activeMiddlewareObjs, _Board_watcher, _Board_renderer, _Board_sharer, _Board_viewer, _Board_calculator, _Board_eventHub, _Board_hasDestroyed, _Board_init, _Board_handlePointStart, _Board_handlePointEnd, _Board_handlePointMove, _Board_handleHover, _Board_handleDoubleClick, _Board_handleWheel, _Board_handleWheelScale, _Board_handleScrollX, _Board_handleScrollY, _Board_handleResize, _Board_handleClear, _Board_handleBeforeDrawFrame, _Board_handleAfterDrawFrame, _Board_resetActiveMiddlewareObjs;
-  const throttleTime = 10;
   class Board {
     constructor(opts) {
       _Board_instances.add(this);
@@ -5003,22 +5200,17 @@ var __privateMethod = (obj, member, method) => {
   _Board_opts = /* @__PURE__ */ new WeakMap(), _Board_middlewareMap = /* @__PURE__ */ new WeakMap(), _Board_middlewares = /* @__PURE__ */ new WeakMap(), _Board_activeMiddlewareObjs = /* @__PURE__ */ new WeakMap(), _Board_watcher = /* @__PURE__ */ new WeakMap(), _Board_renderer = /* @__PURE__ */ new WeakMap(), _Board_sharer = /* @__PURE__ */ new WeakMap(), _Board_viewer = /* @__PURE__ */ new WeakMap(), _Board_calculator = /* @__PURE__ */ new WeakMap(), _Board_eventHub = /* @__PURE__ */ new WeakMap(), _Board_hasDestroyed = /* @__PURE__ */ new WeakMap(), _Board_instances = /* @__PURE__ */ new WeakSet(), _Board_init = function _Board_init2() {
     __classPrivateFieldGet$2(this, _Board_watcher, "f").on("pointStart", __classPrivateFieldGet$2(this, _Board_instances, "m", _Board_handlePointStart).bind(this));
     __classPrivateFieldGet$2(this, _Board_watcher, "f").on("pointEnd", __classPrivateFieldGet$2(this, _Board_instances, "m", _Board_handlePointEnd).bind(this));
-    __classPrivateFieldGet$2(this, _Board_watcher, "f").on("pointMove", throttle((e) => {
-      __classPrivateFieldGet$2(this, _Board_instances, "m", _Board_handlePointMove).call(this, e);
-    }, throttleTime));
-    __classPrivateFieldGet$2(this, _Board_watcher, "f").on("hover", throttle((e) => {
-      __classPrivateFieldGet$2(this, _Board_instances, "m", _Board_handleHover).call(this, e);
-    }, throttleTime));
-    __classPrivateFieldGet$2(this, _Board_watcher, "f").on("wheel", throttle((e) => {
-      __classPrivateFieldGet$2(this, _Board_instances, "m", _Board_handleWheel).call(this, e);
-    }, throttleTime));
-    __classPrivateFieldGet$2(this, _Board_watcher, "f").on("wheelScale", throttle((e) => {
-      __classPrivateFieldGet$2(this, _Board_instances, "m", _Board_handleWheelScale).call(this, e);
-    }, throttleTime));
+    __classPrivateFieldGet$2(this, _Board_watcher, "f").on("pointMove", __classPrivateFieldGet$2(this, _Board_instances, "m", _Board_handlePointMove).bind(this));
+    __classPrivateFieldGet$2(this, _Board_watcher, "f").on("hover", __classPrivateFieldGet$2(this, _Board_instances, "m", _Board_handleHover).bind(this));
+    __classPrivateFieldGet$2(this, _Board_watcher, "f").on("wheel", __classPrivateFieldGet$2(this, _Board_instances, "m", _Board_handleWheel).bind(this));
+    __classPrivateFieldGet$2(this, _Board_watcher, "f").on("wheelScale", __classPrivateFieldGet$2(this, _Board_instances, "m", _Board_handleWheelScale).bind(this));
     __classPrivateFieldGet$2(this, _Board_watcher, "f").on("scrollX", __classPrivateFieldGet$2(this, _Board_instances, "m", _Board_handleScrollX).bind(this));
     __classPrivateFieldGet$2(this, _Board_watcher, "f").on("scrollY", __classPrivateFieldGet$2(this, _Board_instances, "m", _Board_handleScrollY).bind(this));
     __classPrivateFieldGet$2(this, _Board_watcher, "f").on("resize", __classPrivateFieldGet$2(this, _Board_instances, "m", _Board_handleResize).bind(this));
     __classPrivateFieldGet$2(this, _Board_watcher, "f").on("doubleClick", __classPrivateFieldGet$2(this, _Board_instances, "m", _Board_handleDoubleClick).bind(this));
+    __classPrivateFieldGet$2(this, _Board_renderer, "f").on("load", () => {
+      __classPrivateFieldGet$2(this, _Board_eventHub, "f").trigger("loadResource");
+    });
   }, _Board_handlePointStart = function _Board_handlePointStart2(e) {
     var _a;
     for (let i = 0; i < __classPrivateFieldGet$2(this, _Board_activeMiddlewareObjs, "f").length; i++) {
@@ -5304,6 +5496,7 @@ var __privateMethod = (obj, member, method) => {
   const keySelectedElementController = Symbol(`${key$2}_selectedElementController`);
   const keyGroupQueue = Symbol(`${key$2}_groupQueue`);
   const keyGroupQueueVertexesList = Symbol(`${key$2}_groupQueueVertexesList`);
+  const keyIsMoving = Symbol(`${key$2}_isMoving`);
   const selectWrapperBorderWidth = 2;
   const resizeControllerBorderWidth = 4;
   const areaBorderWidth = 1;
@@ -5363,19 +5556,11 @@ var __privateMethod = (obj, member, method) => {
       ctx.fill();
     }
   }
-  function drawHoverVertexesWrapper(ctx, vertexes, opts) {
-    if (!vertexes) {
-      return;
-    }
-    const wrapperOpts = { borderColor: wrapperColor, borderWidth: 1, background: "transparent", lineDash: [] };
-    drawVertexes(ctx, calcViewVertexes(vertexes, opts), wrapperOpts);
-  }
   function drawCrossVertexes(ctx, vertexes, opts) {
-    const { borderColor: borderColor2, borderWidth: borderWidth2, background: background2, lineDash } = opts;
+    const { borderColor: borderColor2, borderWidth: borderWidth2, lineDash } = opts;
     ctx.setLineDash([]);
     ctx.lineWidth = borderWidth2;
     ctx.strokeStyle = borderColor2;
-    ctx.fillStyle = background2;
     ctx.setLineDash(lineDash);
     ctx.beginPath();
     ctx.moveTo(vertexes[0].x, vertexes[0].y);
@@ -5387,6 +5572,13 @@ var __privateMethod = (obj, member, method) => {
     ctx.lineTo(vertexes[3].x, vertexes[3].y);
     ctx.closePath();
     ctx.stroke();
+  }
+  function drawHoverVertexesWrapper(ctx, vertexes, opts) {
+    if (!vertexes) {
+      return;
+    }
+    const wrapperOpts = { borderColor: wrapperColor, borderWidth: 1, background: "transparent", lineDash: [] };
+    drawVertexes(ctx, calcViewVertexes(vertexes, opts), wrapperOpts);
   }
   function drawLockVertexesWrapper(ctx, vertexes, opts) {
     if (!vertexes) {
@@ -5412,16 +5604,19 @@ var __privateMethod = (obj, member, method) => {
     if (!controller) {
       return;
     }
+    const { hideControllers } = opts;
     const { elementWrapper, topLeft, topRight, bottomLeft, bottomRight, top, rotate } = controller;
     const wrapperOpts = { borderColor: wrapperColor, borderWidth: selectWrapperBorderWidth, background: "transparent", lineDash: [] };
     const ctrlOpts = Object.assign(Object.assign({}, wrapperOpts), { borderWidth: resizeControllerBorderWidth, background: "#FFFFFF" });
-    drawLine(ctx, calcViewPointSize(top.center, opts), calcViewPointSize(rotate.center, opts), Object.assign(Object.assign({}, ctrlOpts), { borderWidth: 2 }));
     drawVertexes(ctx, calcViewVertexes(elementWrapper, opts), wrapperOpts);
-    drawVertexes(ctx, calcViewVertexes(topLeft.vertexes, opts), ctrlOpts);
-    drawVertexes(ctx, calcViewVertexes(topRight.vertexes, opts), ctrlOpts);
-    drawVertexes(ctx, calcViewVertexes(bottomLeft.vertexes, opts), ctrlOpts);
-    drawVertexes(ctx, calcViewVertexes(bottomRight.vertexes, opts), ctrlOpts);
-    drawCircleController(ctx, calcViewPointSize(rotate.center, opts), Object.assign(Object.assign({}, ctrlOpts), { size: controllerSize, borderWidth: 2 }));
+    if (!hideControllers) {
+      drawLine(ctx, calcViewPointSize(top.center, opts), calcViewPointSize(rotate.center, opts), Object.assign(Object.assign({}, ctrlOpts), { borderWidth: 2 }));
+      drawVertexes(ctx, calcViewVertexes(topLeft.vertexes, opts), ctrlOpts);
+      drawVertexes(ctx, calcViewVertexes(topRight.vertexes, opts), ctrlOpts);
+      drawVertexes(ctx, calcViewVertexes(bottomLeft.vertexes, opts), ctrlOpts);
+      drawVertexes(ctx, calcViewVertexes(bottomRight.vertexes, opts), ctrlOpts);
+      drawCircleController(ctx, calcViewPointSize(rotate.center, opts), Object.assign(Object.assign({}, ctrlOpts), { size: controllerSize, borderWidth: 2 }));
+    }
   }
   function drawArea(ctx, opts) {
     const { start, end } = opts;
@@ -6231,15 +6426,18 @@ var __privateMethod = (obj, member, method) => {
     };
   }
   const middlewareEventTextEdit = "@middleware/text-edit";
+  const middlewareEventTextChange = "@middleware/text-change";
   const defaultElementDetail = getDefaultElementDetailConfig();
   const MiddlewareTextEditor = (opts) => {
     const { eventHub, boardContent, viewer } = opts;
     const canvas = boardContent.boardContext.canvas;
-    const textarea = document.createElement("textarea");
+    const textarea = document.createElement("div");
+    textarea.setAttribute("contenteditable", "true");
     const canvasWrapper = document.createElement("div");
     const container = opts.container || document.body;
     const mask = document.createElement("div");
     let activeElem = null;
+    let activePosition = [];
     canvasWrapper.appendChild(textarea);
     canvasWrapper.style.position = "absolute";
     mask.appendChild(canvasWrapper);
@@ -6258,6 +6456,7 @@ var __privateMethod = (obj, member, method) => {
     const hideTextArea = () => {
       mask.style.display = "none";
       activeElem = null;
+      activePosition = [];
     };
     const getCanvasRect = () => {
       const clientRect = canvas.getBoundingClientRect();
@@ -6315,6 +6514,21 @@ var __privateMethod = (obj, member, method) => {
         elemW = element.w * scale;
         elemH = element.h * scale;
       }
+      let justifyContent = "center";
+      let alignItems = "center";
+      if (detail.textAlign === "left") {
+        justifyContent = "start";
+      } else if (detail.textAlign === "right") {
+        justifyContent = "end";
+      }
+      if (detail.verticalAlign === "top") {
+        alignItems = "start";
+      } else if (detail.verticalAlign === "bottom") {
+        alignItems = "end";
+      }
+      textarea.style.display = "inline-flex";
+      textarea.style.justifyContent = justifyContent;
+      textarea.style.alignItems = alignItems;
       textarea.style.position = "absolute";
       textarea.style.left = `${elemX - 1}px`;
       textarea.style.top = `${elemY - 1}px`;
@@ -6335,7 +6549,7 @@ var __privateMethod = (obj, member, method) => {
       textarea.style.padding = "0";
       textarea.style.margin = "0";
       textarea.style.outline = "none";
-      textarea.value = detail.text || "";
+      textarea.innerText = detail.text || "";
       parent.appendChild(textarea);
     };
     const resetCanvasWrapper = () => {
@@ -6353,19 +6567,53 @@ var __privateMethod = (obj, member, method) => {
     textarea.addEventListener("click", (e) => {
       e.stopPropagation();
     });
-    textarea.addEventListener("input", (e) => {
-      if (activeElem) {
-        activeElem.detail.text = e.target.value || "";
+    textarea.addEventListener("input", () => {
+      if (activeElem && activePosition) {
+        activeElem.detail.text = textarea.innerText || "";
+        eventHub.trigger(middlewareEventTextChange, {
+          element: {
+            uuid: activeElem.uuid,
+            detail: {
+              text: activeElem.detail.text
+            }
+          },
+          position: [...activePosition || []]
+        });
         viewer.drawFrame();
       }
     });
     textarea.addEventListener("blur", () => {
+      if (activeElem && activePosition) {
+        eventHub.trigger(middlewareEventTextChange, {
+          element: {
+            uuid: activeElem.uuid,
+            detail: {
+              text: activeElem.detail.text
+            }
+          },
+          position: [...activePosition]
+        });
+      }
       hideTextArea();
+    });
+    textarea.addEventListener("keydown", (e) => {
+      e.stopPropagation();
+    });
+    textarea.addEventListener("keypress", (e) => {
+      e.stopPropagation();
+    });
+    textarea.addEventListener("keyup", (e) => {
+      e.stopPropagation();
+    });
+    textarea.addEventListener("wheel", (e) => {
+      e.stopPropagation();
+      e.preventDefault();
     });
     const textEditCallback = (e) => {
       var _a;
-      if ((e === null || e === void 0 ? void 0 : e.element) && ((_a = e === null || e === void 0 ? void 0 : e.element) === null || _a === void 0 ? void 0 : _a.type) === "text") {
+      if ((e === null || e === void 0 ? void 0 : e.position) && (e === null || e === void 0 ? void 0 : e.element) && ((_a = e === null || e === void 0 ? void 0 : e.element) === null || _a === void 0 ? void 0 : _a.type) === "text") {
         activeElem = e.element;
+        activePosition = e.position;
       }
       showTextArea(e);
     };
@@ -6460,6 +6708,7 @@ var __privateMethod = (obj, member, method) => {
       sharer.setSharedStorage(keySelectedElementList, []);
       sharer.setSharedStorage(keySelectedElementListVertexes, null);
       sharer.setSharedStorage(keySelectedElementController, null);
+      sharer.setSharedStorage(keyIsMoving, null);
     };
     clear();
     const selectCallback = ({ uuids, positions }) => {
@@ -6641,6 +6890,7 @@ var __privateMethod = (obj, member, method) => {
       },
       pointMove: (e) => {
         var _a, _b, _c;
+        sharer.setSharedStorage(keyIsMoving, true);
         const data = sharer.getActiveStorage("data");
         const elems = getActiveElements();
         const scale = sharer.getActiveStorage("scale") || 1;
@@ -6740,6 +6990,7 @@ var __privateMethod = (obj, member, method) => {
       },
       pointEnd(e) {
         inBusyMode = null;
+        sharer.setSharedStorage(keyIsMoving, false);
         const data = sharer.getActiveStorage("data");
         const resizeType = sharer.getSharedStorage(keyResizeType);
         const actionType = sharer.getSharedStorage(keyActionType);
@@ -6812,7 +7063,7 @@ var __privateMethod = (obj, member, method) => {
         viewer.drawFrame();
       },
       doubleClick(e) {
-        var _a, _b, _c, _d;
+        var _a, _b, _c, _d, _e, _f;
         const target = getPointTarget(e.point, pointTargetBaseOptions());
         sharer.setSharedStorage(keySelectedElementController, null);
         sharer.setSharedStorage(keySelectedElementList, []);
@@ -6830,6 +7081,7 @@ var __privateMethod = (obj, member, method) => {
           eventHub.trigger(middlewareEventTextEdit, {
             element: target.elements[0],
             groupQueue: sharer.getSharedStorage(keyGroupQueue) || [],
+            position: getElementPositionFromList((_e = target.elements[0]) === null || _e === void 0 ? void 0 : _e.uuid, ((_f = sharer.getActiveStorage("data")) === null || _f === void 0 ? void 0 : _f.elements) || []),
             viewScaleInfo: sharer.getActiveViewScaleInfo()
           });
         }
@@ -6851,6 +7103,7 @@ var __privateMethod = (obj, member, method) => {
         const areaEnd = sharedStore[keyAreaEnd];
         const groupQueue = sharedStore[keyGroupQueue];
         const groupQueueVertexesList = sharedStore[keyGroupQueueVertexesList];
+        const isMoving = sharedStore[keyIsMoving];
         const drawBaseOpts = { calculator, viewScaleInfo, viewSizeInfo };
         const selectedElementController = elem ? calcElementSizeController(elem, {
           groupQueue,
@@ -6872,7 +7125,7 @@ var __privateMethod = (obj, member, method) => {
             }
           }
           if (!isLock && elem && ["select", "drag", "resize"].includes(actionType)) {
-            drawSelectedElementControllersVertexes(helperContext, selectedElementController, Object.assign({}, drawBaseOpts));
+            drawSelectedElementControllersVertexes(helperContext, selectedElementController, Object.assign(Object.assign({}, drawBaseOpts), { element: elem, groupQueue, hideControllers: !!isMoving && actionType === "drag" }));
           }
         } else {
           if (hoverElement && actionType !== "drag") {
@@ -6887,7 +7140,7 @@ var __privateMethod = (obj, member, method) => {
             }
           }
           if (!isLock && elem && ["select", "drag", "resize"].includes(actionType)) {
-            drawSelectedElementControllersVertexes(helperContext, selectedElementController, Object.assign({}, drawBaseOpts));
+            drawSelectedElementControllersVertexes(helperContext, selectedElementController, Object.assign(Object.assign({}, drawBaseOpts), { element: elem, groupQueue, hideControllers: !!isMoving && actionType === "drag" }));
           } else if (actionType === "area" && areaStart && areaEnd) {
             drawArea(helperContext, { start: areaStart, end: areaEnd });
           } else if (["drag-list", "drag-list-end"].includes(actionType)) {
@@ -7602,14 +7855,22 @@ var __privateMethod = (obj, member, method) => {
     const container = __classPrivateFieldGet(this, _Core_container, "f");
     container.style.position = "relative";
   };
+  const defaultMode = "select";
   const defaultSettings = {
-    enableScroll: true,
-    enableSelect: true,
-    enableScale: true,
-    enableRuler: true,
-    enableTextEdit: true,
-    enableDrag: false
+    mode: defaultMode
   };
+  function getDefaultStorage() {
+    const storage = {
+      mode: defaultMode,
+      enableRuler: false,
+      enableScale: false,
+      enableScroll: false,
+      enableSelect: false,
+      enableTextEdit: false,
+      enableDrag: false
+    };
+    return storage;
+  }
   async function exportImageFileBlobURL(opts) {
     const { data, width, height, devicePixelRatio, viewScaleInfo, viewSizeInfo, loadItemMap } = opts;
     let viewContext = createOffscreenContext2D({ width, height, devicePixelRatio });
@@ -7641,11 +7902,110 @@ var __privateMethod = (obj, member, method) => {
       devicePixelRatio
     };
   }
+  const idrawEventChange = "change";
+  const innerEventKeys = {
+    change: idrawEventChange,
+    ruler: middlewareEventRuler,
+    scale: middlewareEventScale,
+    select: middlewareEventSelect,
+    clearSelect: middlewareEventSelectClear,
+    textEdit: middlewareEventTextEdit,
+    textChange: middlewareEventTextChange
+  };
+  const eventKeys = {};
+  Object.keys(innerEventKeys).forEach((keyName) => {
+    Object.defineProperty(eventKeys, keyName, {
+      value: innerEventKeys[keyName],
+      writable: false
+    });
+  });
+  function isValidMode(mode) {
+    return ["select", "drag", "readOnly"].includes(mode);
+  }
+  function runMiddlewares(core, store) {
+    const { enableRuler, enableScale, enableScroll, enableSelect, enableTextEdit, enableDrag } = store.getSnapshot();
+    if (enableScroll === true) {
+      core.use(MiddlewareScroller);
+    } else if (enableScroll === false) {
+      core.disuse(MiddlewareScroller);
+    }
+    if (enableSelect === true) {
+      core.use(MiddlewareSelector);
+    } else if (enableSelect === false) {
+      core.disuse(MiddlewareSelector);
+    }
+    if (enableScale === true) {
+      core.use(MiddlewareScaler);
+    } else if (enableScale === false) {
+      core.disuse(MiddlewareScaler);
+    }
+    if (enableRuler === true) {
+      core.use(MiddlewareRuler);
+    } else if (enableRuler === false) {
+      core.disuse(MiddlewareRuler);
+    }
+    if (enableTextEdit === true) {
+      core.use(MiddlewareTextEditor);
+    } else if (enableTextEdit === false) {
+      core.disuse(MiddlewareTextEditor);
+    }
+    if (enableDrag === true) {
+      core.use(MiddlewareDragger);
+    } else if (enableDrag === false) {
+      core.disuse(MiddlewareDragger);
+    }
+  }
+  function changeMode(mode, core, store) {
+    let enableScale = false;
+    let enableScroll = false;
+    let enableSelect = false;
+    let enableTextEdit = false;
+    let enableDrag = false;
+    let enableRuler = store.get("enableRuler");
+    let innerMode = "select";
+    store.set("mode", innerMode);
+    if (isValidMode(mode)) {
+      innerMode = mode;
+    } else {
+      console.warn(`${mode} is invalid mode of iDraw.js`);
+    }
+    if (innerMode === "select") {
+      enableScale = true;
+      enableScroll = true;
+      enableSelect = true;
+      enableTextEdit = true;
+      enableDrag = false;
+    } else if (innerMode === "drag") {
+      enableScale = true;
+      enableScroll = true;
+      enableSelect = false;
+      enableTextEdit = false;
+      enableDrag = true;
+    } else if (innerMode === "readOnly") {
+      enableScale = false;
+      enableScroll = false;
+      enableSelect = false;
+      enableTextEdit = false;
+      enableDrag = false;
+      enableRuler = false;
+    }
+    store.set("enableScale", enableScale);
+    store.set("enableScroll", enableScroll);
+    store.set("enableSelect", enableSelect);
+    store.set("enableTextEdit", enableTextEdit);
+    store.set("enableDrag", enableDrag);
+    store.set("enableRuler", enableRuler);
+    runMiddlewares(core, store);
+  }
   class iDraw2 {
     constructor(mount, options) {
       __privateAdd(this, _init);
+      __privateAdd(this, _setFeature);
       __privateAdd(this, _core, void 0);
       __privateAdd(this, _opts, void 0);
+      __privateAdd(this, _store, new Store({
+        defaultStorage: getDefaultStorage()
+      }));
       const opts = { ...defaultSettings, ...options };
       const { width, height, devicePixelRatio, createCustomContext2D } = opts;
       const core = new Core(mount, { width, height, devicePixelRatio, createCustomContext2D });
@@ -7655,47 +8015,31 @@ var __privateMethod = (obj, member, method) => {
     }
     reset(opts) {
       const core = __privateGet(this, _core);
-      const { enableRuler, enableScale, enableScroll, enableSelect, enableTextEdit, enableDrag } = opts;
-      if (enableScroll === true) {
-        core.use(MiddlewareScroller);
-      } else if (enableScroll === false) {
-        core.disuse(MiddlewareScroller);
-      }
-      if (enableSelect === true) {
-        core.use(MiddlewareSelector);
-      } else if (enableSelect === false) {
-        core.disuse(MiddlewareSelector);
-      }
-      if (enableScale === true) {
-        core.use(MiddlewareScaler);
-      } else if (enableScale === false) {
-        core.disuse(MiddlewareScaler);
-      }
-      if (enableRuler === true) {
-        core.use(MiddlewareRuler);
-      } else if (enableRuler === false) {
-        core.disuse(MiddlewareRuler);
-      }
-      if (enableTextEdit === true) {
-        core.use(MiddlewareTextEditor);
-      } else if (enableTextEdit === false) {
-        core.disuse(MiddlewareTextEditor);
-      }
-      if (enableDrag === true) {
-        core.use(MiddlewareDragger);
-      } else if (enableDrag === false) {
-        core.disuse(MiddlewareDragger);
-      }
+      const store = __privateGet(this, _store);
+      store.clear();
+      changeMode(opts.mode || defaultMode, core, store);
       core.refresh();
       __privateSet(this, _opts, {
         ...__privateGet(this, _opts),
         ...opts
       });
     }
+    setMode(mode) {
+      const core = __privateGet(this, _core);
+      const store = __privateGet(this, _store);
+      changeMode(mode || defaultMode, core, store);
+      core.refresh();
+    }
+    enable(feat) {
+      __privateMethod(this, _setFeature, setFeature_fn).call(this, feat, true);
+    }
+    disable(feat) {
+      __privateMethod(this, _setFeature, setFeature_fn).call(this, feat, false);
+    }
     setData(data) {
       const core = __privateGet(this, _core);
       core.setData(data);
-      core.trigger("change", { data, type: "setData" });
+      core.trigger(eventKeys.change, { data, type: "setData" });
     }
     getData(opts) {
       const data = __privateGet(this, _core).getData();
@@ -7741,16 +8085,16 @@ var __privateMethod = (obj, member, method) => {
       this.selectElements([uuid]);
     }
     selectElements(uuids) {
-      this.trigger(middlewareEventSelect, { uuids });
+      this.trigger(eventKeys.select, { uuids });
     }
     selectElementByPosition(position) {
       this.selectElementsByPositions([position]);
     }
     selectElementsByPositions(positions) {
-      this.trigger(middlewareEventSelect, { positions });
+      this.trigger(eventKeys.select, { positions });
     }
     cancelElements() {
-      this.trigger(middlewareEventSelect, { uuids: [] });
+      this.trigger(eventKeys.select, { uuids: [] });
     }
     createElement(type, opts) {
       const { viewScaleInfo, viewSizeInfo } = __privateGet(this, _core).getViewInfo();
@@ -7769,7 +8113,7 @@ var __privateMethod = (obj, member, method) => {
       updateElementInList(element.uuid, element, data.elements);
       core.setData(data);
       core.refresh();
-      core.trigger("change", { data, type: "updateElement" });
+      core.trigger(eventKeys.change, { data, type: "updateElement" });
     }
     addElement(element, opts) {
       var _a;
@@ -7783,7 +8127,7 @@ var __privateMethod = (obj, member, method) => {
       }
       core.setData(data);
       core.refresh();
-      core.trigger("change", { data, type: "addElement" });
+      core.trigger(eventKeys.change, { data, type: "addElement" });
       return data;
     }
     deleteElement(uuid) {
@@ -7792,7 +8136,7 @@ var __privateMethod = (obj, member, method) => {
       deleteElementInList(uuid, data.elements);
       core.setData(data);
       core.refresh();
-      core.trigger("change", { data, type: "deleteElement" });
+      core.trigger(eventKeys.change, { data, type: "deleteElement" });
     }
     moveElement(uuid, to) {
       const core = __privateGet(this, _core);
@@ -7802,7 +8146,7 @@ var __privateMethod = (obj, member, method) => {
       data.elements = list;
       core.setData(data);
       core.refresh();
-      core.trigger("change", { data, type: "moveElement" });
+      core.trigger(eventKeys.change, { data, type: "moveElement" });
     }
     async getImageBlobURL(opts) {
       const data = this.getData() || { elements: [] };
@@ -7827,7 +8171,9 @@ var __privateMethod = (obj, member, method) => {
     }
     destroy() {
       const core = __privateGet(this, _core);
+      const store = __privateGet(this, _store);
       core.destroy();
+      store.destroy();
     }
     getViewCenter() {
       const { viewScaleInfo, viewSizeInfo } = this.getViewInfo();
@@ -7842,16 +8188,22 @@ var __privateMethod = (obj, member, method) => {
   }
   _core = new WeakMap();
   _opts = new WeakMap();
+  _store = new WeakMap();
   _init = new WeakSet();
   init_fn = function() {
-    const { enableRuler, enableScale, enableScroll, enableSelect, enableTextEdit, enableDrag } = __privateGet(this, _opts);
     const core = __privateGet(this, _core);
-    enableScroll === true && core.use(MiddlewareScroller);
-    enableSelect === true && core.use(MiddlewareSelector);
-    enableScale === true && core.use(MiddlewareScaler);
-    enableRuler === true && core.use(MiddlewareRuler);
-    enableTextEdit === true && core.use(MiddlewareTextEditor);
-    enableDrag === true && core.use(MiddlewareDragger);
+    const store = __privateGet(this, _store);
+    changeMode("select", core, store);
+    this.enable("ruler");
+  };
+  _setFeature = new WeakSet();
+  setFeature_fn = function(feat, status) {
+    if (feat === "ruler") {
+      const store = __privateGet(this, _store);
+      store.set("enableRuler", !!status);
+      const currentMode = store.get("mode");
+      this.setMode(currentMode);
+    }
   };
   exports.Calculator = Calculator;
   exports.Context2D = Context2D;
@@ -7869,10 +8221,13 @@ var __privateMethod = (obj, member, method) => {
   exports.calcElementCenter = calcElementCenter;
   exports.calcElementCenterFromVertexes = calcElementCenterFromVertexes;
   exports.calcElementListSize = calcElementListSize;
+  exports.calcElementOriginRectInfo = calcElementOriginRectInfo;
   exports.calcElementQueueVertexesQueueInGroup = calcElementQueueVertexesQueueInGroup;
   exports.calcElementSizeController = calcElementSizeController;
   exports.calcElementVertexesInGroup = calcElementVertexesInGroup;
   exports.calcElementVertexesQueueInGroup = calcElementVertexesQueueInGroup;
+  exports.calcElementViewRectInfo = calcElementViewRectInfo;
+  exports.calcElementViewRectInfoMap = calcElementViewRectInfoMap;
   exports.calcElementsContextSize = calcElementsContextSize;
   exports.calcElementsViewInfo = calcElementsViewInfo;
   exports.calcSpeed = calcSpeed;
@@ -7906,6 +8261,7 @@ var __privateMethod = (obj, member, method) => {
   exports.downloadImageFromCanvas = downloadImageFromCanvas;
   exports.equalPoint = equalPoint;
   exports.equalTouchPoint = equalTouchPoint;
+  exports.eventKeys = eventKeys;
   exports.filterElementAsset = filterElementAsset;
   exports.findElementFromList = findElementFromList;
   exports.findElementFromListByPosition = findElementFromListByPosition;
@@ -7963,6 +8319,7 @@ var __privateMethod = (obj, member, method) => {
   exports.rotatePointInGroup = rotatePointInGroup;
   exports.rotateVertexes = rotateVertexes;
   exports.sortDataAsserts = sortDataAsserts;
+  exports.sortElementsViewVisiableInfoMap = sortElementsViewVisiableInfoMap;
   exports.throttle = throttle;
   exports.toColorHexNum = toColorHexNum;
   exports.toColorHexStr = toColorHexStr;
