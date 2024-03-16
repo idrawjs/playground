@@ -1450,8 +1450,11 @@ var __privateMethod = (obj, member, method) => {
     get(name) {
       return __classPrivateFieldGet$9(this, _Store_temp, "f")[name];
     }
-    getSnapshot() {
-      return __classPrivateFieldGet$9(this, _Store_temp, "f");
+    getSnapshot(opts) {
+      if ((opts === null || opts === void 0 ? void 0 : opts.deepClone) === true) {
+        return deepClone(__classPrivateFieldGet$9(this, _Store_temp, "f"));
+      }
+      return Object.assign({}, __classPrivateFieldGet$9(this, _Store_temp, "f"));
     }
     clear() {
       __classPrivateFieldSet$9(this, _Store_temp, __classPrivateFieldGet$9(this, _Store_instances, "m", _Store_createTempStorage).call(this), "f");
@@ -1931,7 +1934,8 @@ var __privateMethod = (obj, member, method) => {
     let currentElements = elements;
     if (position.length > 1) {
       for (let i = 0; i < position.length - 1; i++) {
-        const group = currentElements[i];
+        const index = position[i];
+        const group = currentElements[index];
         if ((group === null || group === void 0 ? void 0 : group.type) === "group" && Array.isArray((_a = group === null || group === void 0 ? void 0 : group.detail) === null || _a === void 0 ? void 0 : _a.children)) {
           groupQueue.push(group);
           currentElements = group.detail.children;
@@ -2078,15 +2082,15 @@ var __privateMethod = (obj, member, method) => {
     return result;
   }
   function checkRectIntersect(rect1, rect2) {
-    const react1MinX = rect1.x;
-    const react1MinY = rect1.y;
-    const react1MaxX = rect1.x + rect1.w;
-    const react1MaxY = rect1.y + rect1.h;
-    const react2MinX = rect2.x;
-    const react2MinY = rect2.y;
-    const react2MaxX = rect2.x + rect2.w;
-    const react2MaxY = rect2.y + rect2.h;
-    return react1MinX <= react2MaxX && react1MaxX >= react2MinX && react1MinY <= react2MaxY && react1MaxY >= react2MinY;
+    const rect1MinX = rect1.x;
+    const rect1MinY = rect1.y;
+    const rect1MaxX = rect1.x + rect1.w;
+    const rect1MaxY = rect1.y + rect1.h;
+    const rect2MinX = rect2.x;
+    const rect2MinY = rect2.y;
+    const rect2MaxX = rect2.x + rect2.w;
+    const rect2MaxY = rect2.y + rect2.h;
+    return rect1MinX <= rect2MaxX && rect1MaxX >= rect2MinX && rect1MinY <= rect2MaxY && rect1MaxY >= rect2MinY;
   }
   function getElementVertexes(elemSize) {
     const { x: x2, y: y2, h: h2, w: w2 } = elemSize;
@@ -2374,6 +2378,33 @@ var __privateMethod = (obj, member, method) => {
     };
     return rectInfo;
   }
+  function originRectInfoToRangeRectInfo(originRectInfo) {
+    const rangeMaxX = Math.max(originRectInfo.topLeft.x, originRectInfo.topRight.x, originRectInfo.bottomRight.x, originRectInfo.bottomLeft.x);
+    const rangeMaxY = Math.max(originRectInfo.topLeft.y, originRectInfo.topRight.y, originRectInfo.bottomRight.y, originRectInfo.bottomLeft.y);
+    const rangeMinX = Math.min(originRectInfo.topLeft.x, originRectInfo.topRight.x, originRectInfo.bottomRight.x, originRectInfo.bottomLeft.x);
+    const rangeMinY = Math.min(originRectInfo.topLeft.y, originRectInfo.topRight.y, originRectInfo.bottomRight.y, originRectInfo.bottomLeft.y);
+    const rangeCenter = { x: originRectInfo.center.x, y: originRectInfo.center.y };
+    const rangeTopLeft = { x: rangeMinX, y: rangeMinY };
+    const rangeTopRight = { x: rangeMaxX, y: rangeMinY };
+    const rangeBottomRight = { x: rangeMaxX, y: rangeMaxY };
+    const rangeBottomLeft = { x: rangeMinX, y: rangeMaxY };
+    const rangeTop = getCenterFromTwoPoints(rangeTopLeft, rangeTopRight);
+    const rangeBottom = getCenterFromTwoPoints(rangeBottomLeft, rangeBottomRight);
+    const rangeLeft = getCenterFromTwoPoints(rangeTopLeft, rangeBottomLeft);
+    const rangeRight = getCenterFromTwoPoints(rangeTopRight, rangeBottomRight);
+    const rangeRectInfo = {
+      center: rangeCenter,
+      topLeft: rangeTopLeft,
+      topRight: rangeTopRight,
+      bottomLeft: rangeBottomLeft,
+      bottomRight: rangeBottomRight,
+      top: rangeTop,
+      right: rangeRight,
+      left: rangeLeft,
+      bottom: rangeBottom
+    };
+    return rangeRectInfo;
+  }
   function calcElementViewRectInfo(elemSize, opts) {
     const { groupQueue, viewScaleInfo, range } = opts;
     const originRectInfo = calcElementOriginRectInfo(elemSize, { groupQueue });
@@ -2463,13 +2494,11 @@ var __privateMethod = (obj, member, method) => {
       rangeRectInfo
     };
   }
-  function sortElementsViewVisiableInfoMap(elements) {
+  function sortElementsViewVisiableInfoMap(elements, opts) {
     const visibleInfoMap = {};
     const currentPosition = [];
     const _walk = (elem) => {
       const baseInfo = {
-        viewRectInfo: null,
-        rangeRectInfo: null,
         isVisibleInView: true,
         isGroup: elem.type === "group",
         position: [...currentPosition]
@@ -2480,17 +2509,14 @@ var __privateMethod = (obj, member, method) => {
         groupQueue: groupQueue || []
       });
       visibleInfoMap[elem.uuid] = Object.assign(Object.assign({}, baseInfo), {
-        originRectInfo
+        originRectInfo,
+        rangeRectInfo: is.angle(elem.angle) ? originRectInfoToRangeRectInfo(originRectInfo) : originRectInfo
       });
       if (elem.type === "group") {
         elem.detail.children.forEach((ele, i) => {
-          if (ele.type === "group") {
-            currentPosition.push(i);
-          }
+          currentPosition.push(i);
           _walk(ele);
-          if (ele.type === "group") {
-            currentPosition.pop();
-          }
+          currentPosition.pop();
         });
       }
     };
@@ -2499,7 +2525,62 @@ var __privateMethod = (obj, member, method) => {
       _walk(elem);
       currentPosition.pop();
     });
-    return visibleInfoMap;
+    return updateViewVisibleInfoMapStatus(visibleInfoMap, opts);
+  }
+  function isRangeRectInfoCollide(info1, info2) {
+    const rect1MinX = Math.min(info1.topLeft.x, info1.topRight.x, info1.bottomLeft.x, info1.bottomRight.x);
+    const rect1MaxX = Math.max(info1.topLeft.x, info1.topRight.x, info1.bottomLeft.x, info1.bottomRight.x);
+    const rect1MinY = Math.min(info1.topLeft.y, info1.topRight.y, info1.bottomLeft.y, info1.bottomRight.y);
+    const rect1MaxY = Math.max(info1.topLeft.y, info1.topRight.y, info1.bottomLeft.y, info1.bottomRight.y);
+    const rect2MinX = Math.min(info2.topLeft.x, info2.topRight.x, info2.bottomLeft.x, info2.bottomRight.x);
+    const rect2MaxX = Math.max(info2.topLeft.x, info2.topRight.x, info2.bottomLeft.x, info2.bottomRight.x);
+    const rect2MinY = Math.min(info2.topLeft.y, info2.topRight.y, info2.bottomLeft.y, info2.bottomRight.y);
+    const rect2MaxY = Math.max(info2.topLeft.y, info2.topRight.y, info2.bottomLeft.y, info2.bottomRight.y);
+    if (rect1MinX <= rect2MaxX && rect1MaxX >= rect2MinX && rect1MinY <= rect2MaxY && rect1MaxY >= rect2MinY || rect2MaxX <= rect1MaxY && rect2MaxX >= rect1MaxY && rect2MaxX <= rect1MaxY && rect2MaxX >= rect1MaxY) {
+      return true;
+    }
+    return false;
+  }
+  function updateViewVisibleInfoMapStatus(viewVisibleInfoMap, opts) {
+    const canvasRectInfo = calcVisibleOriginCanvasRectInfo(opts);
+    let visibleCount = 0;
+    let invisibleCount = 0;
+    Object.keys(viewVisibleInfoMap).forEach((uuid) => {
+      const info = viewVisibleInfoMap[uuid];
+      info.isVisibleInView = isRangeRectInfoCollide(info.rangeRectInfo, canvasRectInfo);
+      info.isVisibleInView ? visibleCount++ : invisibleCount++;
+    });
+    return { viewVisibleInfoMap, visibleCount, invisibleCount };
+  }
+  function calcVisibleOriginCanvasRectInfo(opts) {
+    const { viewScaleInfo, viewSizeInfo } = opts;
+    const { scale, offsetTop, offsetLeft } = viewScaleInfo;
+    const { width, height } = viewSizeInfo;
+    const x2 = 0 - offsetLeft / scale;
+    const y2 = 0 - offsetTop / scale;
+    const w2 = width / scale;
+    const h2 = height / scale;
+    const center = calcElementCenter({ x: x2, y: y2, w: w2, h: h2 });
+    const topLeft = { x: x2, y: y2 };
+    const topRight = { x: x2 + w2, y: y2 };
+    const bottomLeft = { x: x2, y: y2 + h2 };
+    const bottomRight = { x: x2 + w2, y: y2 + h2 };
+    const left = { x: x2, y: center.y };
+    const top = { x: center.x, y: y2 };
+    const right = { x: x2 + w2, y: center.y };
+    const bottom = { x: center.x, y: y2 + h2 };
+    const rectInfo = {
+      center,
+      topLeft,
+      topRight,
+      bottomLeft,
+      bottomRight,
+      left,
+      top,
+      right,
+      bottom
+    };
+    return rectInfo;
   }
   function createControllerElementSizeFromCenter(center, opts) {
     const { x: x2, y: y2 } = center;
@@ -3726,7 +3807,7 @@ var __privateMethod = (obj, member, method) => {
   }
   function drawCircle(ctx, elem, opts) {
     const { detail, angle: angle2 } = elem;
-    const { calculator, viewScaleInfo, viewSizeInfo, parentOpacity } = opts;
+    const { viewScaleInfo, viewSizeInfo, parentOpacity } = opts;
     const { background: background2 = "#000000", borderColor: borderColor2 = "#000000", boxSizing, borderWidth: borderWidth2 = 0 } = detail;
     let bw = 0;
     if (typeof borderWidth2 === "number" && borderWidth2 > 0) {
@@ -3735,7 +3816,7 @@ var __privateMethod = (obj, member, method) => {
       bw = borderWidth2[0];
     }
     bw = bw * viewScaleInfo.scale;
-    const { x: x2, y: y2, w: w2, h: h2 } = (calculator === null || calculator === void 0 ? void 0 : calculator.elementSize({ x: elem.x, y: elem.y, w: elem.w, h: elem.h }, viewScaleInfo, viewSizeInfo)) || elem;
+    const { x: x2, y: y2, w: w2, h: h2 } = calcViewElementSize({ x: elem.x, y: elem.y, w: elem.w, h: elem.h }, { viewScaleInfo, viewSizeInfo }) || elem;
     const viewElem = Object.assign(Object.assign({}, elem), { x: x2, y: y2, w: w2, h: h2, angle: angle2 });
     rotateElement$1(ctx, { x: x2, y: y2, w: w2, h: h2, angle: angle2 }, () => {
       drawBoxShadow(ctx, viewElem, {
@@ -3788,8 +3869,8 @@ var __privateMethod = (obj, member, method) => {
     });
   }
   function drawRect(ctx, elem, opts) {
-    const { calculator, viewScaleInfo, viewSizeInfo, parentOpacity } = opts;
-    const { x: x2, y: y2, w: w2, h: h2, angle: angle2 } = (calculator === null || calculator === void 0 ? void 0 : calculator.elementSize(elem, viewScaleInfo, viewSizeInfo)) || elem;
+    const { viewScaleInfo, viewSizeInfo, parentOpacity } = opts;
+    const { x: x2, y: y2, w: w2, h: h2, angle: angle2 } = calcViewElementSize(elem, { viewScaleInfo, viewSizeInfo }) || elem;
     const viewElem = Object.assign(Object.assign({}, elem), { x: x2, y: y2, w: w2, h: h2, angle: angle2 });
     rotateElement$1(ctx, { x: x2, y: y2, w: w2, h: h2, angle: angle2 }, () => {
       drawBoxShadow(ctx, viewElem, {
@@ -3811,8 +3892,8 @@ var __privateMethod = (obj, member, method) => {
   }
   function drawImage(ctx, elem, opts) {
     const content = opts.loader.getContent(elem);
-    const { calculator, viewScaleInfo, viewSizeInfo, parentOpacity } = opts;
-    const { x: x2, y: y2, w: w2, h: h2, angle: angle2 } = (calculator === null || calculator === void 0 ? void 0 : calculator.elementSize(elem, viewScaleInfo, viewSizeInfo)) || elem;
+    const { viewScaleInfo, viewSizeInfo, parentOpacity } = opts;
+    const { x: x2, y: y2, w: w2, h: h2, angle: angle2 } = calcViewElementSize(elem, { viewScaleInfo, viewSizeInfo }) || elem;
     const viewElem = Object.assign(Object.assign({}, elem), { x: x2, y: y2, w: w2, h: h2, angle: angle2 });
     rotateElement$1(ctx, { x: x2, y: y2, w: w2, h: h2, angle: angle2 }, () => {
       drawBoxShadow(ctx, viewElem, {
@@ -3858,8 +3939,8 @@ var __privateMethod = (obj, member, method) => {
   }
   function drawSVG(ctx, elem, opts) {
     const content = opts.loader.getContent(elem);
-    const { calculator, viewScaleInfo, viewSizeInfo, parentOpacity } = opts;
-    const { x: x2, y: y2, w: w2, h: h2, angle: angle2 } = (calculator === null || calculator === void 0 ? void 0 : calculator.elementSize(elem, viewScaleInfo, viewSizeInfo)) || elem;
+    const { viewScaleInfo, viewSizeInfo, parentOpacity } = opts;
+    const { x: x2, y: y2, w: w2, h: h2, angle: angle2 } = calcViewElementSize(elem, { viewScaleInfo, viewSizeInfo }) || elem;
     rotateElement$1(ctx, { x: x2, y: y2, w: w2, h: h2, angle: angle2 }, () => {
       if (!content && !opts.loader.isDestroyed()) {
         opts.loader.load(elem, opts.elementAssets || {});
@@ -3873,8 +3954,8 @@ var __privateMethod = (obj, member, method) => {
   }
   function drawHTML(ctx, elem, opts) {
     const content = opts.loader.getContent(elem);
-    const { calculator, viewScaleInfo, viewSizeInfo, parentOpacity } = opts;
-    const { x: x2, y: y2, w: w2, h: h2, angle: angle2 } = (calculator === null || calculator === void 0 ? void 0 : calculator.elementSize(elem, viewScaleInfo, viewSizeInfo)) || elem;
+    const { viewScaleInfo, viewSizeInfo, parentOpacity } = opts;
+    const { x: x2, y: y2, w: w2, h: h2, angle: angle2 } = calcViewElementSize(elem, { viewScaleInfo, viewSizeInfo }) || elem;
     rotateElement$1(ctx, { x: x2, y: y2, w: w2, h: h2, angle: angle2 }, () => {
       if (!content && !opts.loader.isDestroyed()) {
         opts.loader.load(elem, opts.elementAssets || {});
@@ -3888,8 +3969,8 @@ var __privateMethod = (obj, member, method) => {
   }
   const detailConfig = getDefaultElementDetailConfig();
   function drawText(ctx, elem, opts) {
-    const { calculator, viewScaleInfo, viewSizeInfo, parentOpacity } = opts;
-    const { x: x2, y: y2, w: w2, h: h2, angle: angle2 } = (calculator === null || calculator === void 0 ? void 0 : calculator.elementSize(elem, viewScaleInfo, viewSizeInfo)) || elem;
+    const { viewScaleInfo, viewSizeInfo, parentOpacity } = opts;
+    const { x: x2, y: y2, w: w2, h: h2, angle: angle2 } = calcViewElementSize(elem, { viewScaleInfo, viewSizeInfo }) || elem;
     const viewElem = Object.assign(Object.assign({}, elem), { x: x2, y: y2, w: w2, h: h2, angle: angle2 });
     rotateElement$1(ctx, { x: x2, y: y2, w: w2, h: h2, angle: angle2 }, () => {
       drawBox(ctx, viewElem, {
@@ -3992,8 +4073,8 @@ var __privateMethod = (obj, member, method) => {
   function drawPath(ctx, elem, opts) {
     const { detail } = elem;
     const { originX, originY, originW, originH } = detail;
-    const { calculator, viewScaleInfo, viewSizeInfo, parentOpacity } = opts;
-    const { x: x2, y: y2, w: w2, h: h2, angle: angle2 } = (calculator === null || calculator === void 0 ? void 0 : calculator.elementSize(elem, viewScaleInfo, viewSizeInfo)) || elem;
+    const { viewScaleInfo, viewSizeInfo, parentOpacity } = opts;
+    const { x: x2, y: y2, w: w2, h: h2, angle: angle2 } = calcViewElementSize(elem, { viewScaleInfo, viewSizeInfo }) || elem;
     const scaleW = w2 / originW;
     const scaleH = h2 / originH;
     const viewOriginX = originX * scaleW;
@@ -4091,8 +4172,8 @@ var __privateMethod = (obj, member, method) => {
     }
   }
   function drawGroup(ctx, elem, opts) {
-    const { calculator, viewScaleInfo, viewSizeInfo, parentOpacity } = opts;
-    const { x: x2, y: y2, w: w2, h: h2, angle: angle2 } = (calculator === null || calculator === void 0 ? void 0 : calculator.elementSize({ x: elem.x, y: elem.y, w: elem.w, h: elem.h, angle: elem.angle }, viewScaleInfo, viewSizeInfo)) || elem;
+    const { viewScaleInfo, viewSizeInfo, parentOpacity } = opts;
+    const { x: x2, y: y2, w: w2, h: h2, angle: angle2 } = calcViewElementSize({ x: elem.x, y: elem.y, w: elem.w, h: elem.h, angle: elem.angle }, { viewScaleInfo, viewSizeInfo }) || elem;
     const viewElem = Object.assign(Object.assign({}, elem), { x: x2, y: y2, w: w2, h: h2, angle: angle2 });
     rotateElement$1(ctx, { x: x2, y: y2, w: w2, h: h2, angle: angle2 }, () => {
       ctx.globalAlpha = getOpacity(elem) * parentOpacity;
@@ -4133,7 +4214,7 @@ var __privateMethod = (obj, member, method) => {
                   h: elem.h || parentSize.h,
                   angle: elem.angle
                 };
-                const { calculator: calculator2 } = opts;
+                const { calculator } = opts;
                 for (let i = 0; i < elem.detail.children.length; i++) {
                   let child = elem.detail.children[i];
                   child = Object.assign(Object.assign({}, child), {
@@ -4141,7 +4222,7 @@ var __privateMethod = (obj, member, method) => {
                     y: newParentSize.y + child.y
                   });
                   if (opts.forceDrawAll !== true) {
-                    if (!(calculator2 === null || calculator2 === void 0 ? void 0 : calculator2.isElementInView(child, opts.viewScaleInfo, opts.viewSizeInfo))) {
+                    if (!(calculator === null || calculator === void 0 ? void 0 : calculator.isElementInView(child, opts.viewScaleInfo, opts.viewSizeInfo))) {
                       continue;
                     }
                   }
@@ -4187,9 +4268,9 @@ var __privateMethod = (obj, member, method) => {
     }
   }
   function drawUnderlay(ctx, underlay, opts) {
-    const { calculator, viewScaleInfo, viewSizeInfo, parentOpacity } = opts;
+    const { viewScaleInfo, viewSizeInfo, parentOpacity } = opts;
     const elem = Object.assign({ uuid: "underlay" }, underlay);
-    const { x: x2, y: y2, w: w2, h: h2 } = (calculator === null || calculator === void 0 ? void 0 : calculator.elementSize(elem, viewScaleInfo, viewSizeInfo)) || elem;
+    const { x: x2, y: y2, w: w2, h: h2 } = calcViewElementSize(elem, { viewScaleInfo, viewSizeInfo }) || elem;
     const angle2 = 0;
     const viewElem = Object.assign(Object.assign({}, elem), { x: x2, y: y2, w: w2, h: h2, angle: angle2 });
     drawBoxShadow(ctx, viewElem, {
@@ -4559,17 +4640,25 @@ var __privateMethod = (obj, member, method) => {
       throw new TypeError("Cannot read private member from an object whose class did not declare it");
     return kind === "m" ? f : kind === "a" ? f.call(receiver) : f ? f.value : state.get(receiver);
   };
-  var _Calculator_opts;
+  var _Calculator_opts, _Calculator_store;
   class Calculator {
     constructor(opts) {
       _Calculator_opts.set(this, void 0);
+      _Calculator_store.set(this, void 0);
       __classPrivateFieldSet$6(this, _Calculator_opts, opts, "f");
+      __classPrivateFieldSet$6(this, _Calculator_store, new Store({
+        defaultStorage: {
+          viewVisibleInfoMap: {},
+          visibleCount: 0,
+          invisibleCount: 0
+        }
+      }), "f");
+    }
+    toGridNum(num) {
+      return Math.round(num);
     }
     destroy() {
       __classPrivateFieldSet$6(this, _Calculator_opts, null, "f");
-    }
-    elementSize(size, viewScaleInfo, viewSizeInfo) {
-      return calcViewElementSize(size, { viewScaleInfo, viewSizeInfo });
     }
     isElementInView(elem, viewScaleInfo, viewSizeInfo) {
       return isElementInView(elem, { viewScaleInfo, viewSizeInfo });
@@ -4587,8 +4676,103 @@ var __privateMethod = (obj, member, method) => {
       const context2d = __classPrivateFieldGet$6(this, _Calculator_opts, "f").viewContext;
       return getViewPointAtElement(p, Object.assign(Object.assign({}, opts), { context2d }));
     }
+    resetViewVisibleInfoMap(data, opts) {
+      if (data) {
+        const { viewVisibleInfoMap, invisibleCount, visibleCount } = sortElementsViewVisiableInfoMap(data.elements, opts);
+        __classPrivateFieldGet$6(this, _Calculator_store, "f").set("viewVisibleInfoMap", viewVisibleInfoMap);
+        __classPrivateFieldGet$6(this, _Calculator_store, "f").set("invisibleCount", invisibleCount);
+        __classPrivateFieldGet$6(this, _Calculator_store, "f").set("visibleCount", visibleCount);
+      }
+    }
+    updateVisiableStatus(opts) {
+      const { viewVisibleInfoMap, invisibleCount, visibleCount } = updateViewVisibleInfoMapStatus(__classPrivateFieldGet$6(this, _Calculator_store, "f").get("viewVisibleInfoMap"), opts);
+      __classPrivateFieldGet$6(this, _Calculator_store, "f").set("viewVisibleInfoMap", viewVisibleInfoMap);
+      __classPrivateFieldGet$6(this, _Calculator_store, "f").set("invisibleCount", invisibleCount);
+      __classPrivateFieldGet$6(this, _Calculator_store, "f").set("visibleCount", visibleCount);
+    }
+    calcViewRectInfoFromOrigin(uuid, opts) {
+      const infoData = __classPrivateFieldGet$6(this, _Calculator_store, "f").get("viewVisibleInfoMap")[uuid];
+      if (!(infoData === null || infoData === void 0 ? void 0 : infoData.originRectInfo)) {
+        return null;
+      }
+      const { checkVisible, viewScaleInfo, viewSizeInfo } = opts;
+      const { center, left, right, bottom, top, topLeft, topRight, bottomLeft, bottomRight } = infoData.originRectInfo;
+      if (checkVisible === true && infoData.isVisibleInView === false) {
+        return null;
+      }
+      const calcOpts = { viewScaleInfo, viewSizeInfo };
+      const viewRectInfo = {
+        center: calcViewPointSize(center, calcOpts),
+        left: calcViewPointSize(left, calcOpts),
+        right: calcViewPointSize(right, calcOpts),
+        bottom: calcViewPointSize(bottom, calcOpts),
+        top: calcViewPointSize(top, calcOpts),
+        topLeft: calcViewPointSize(topLeft, calcOpts),
+        topRight: calcViewPointSize(topRight, calcOpts),
+        bottomLeft: calcViewPointSize(bottomLeft, calcOpts),
+        bottomRight: calcViewPointSize(bottomRight, calcOpts)
+      };
+      return viewRectInfo;
+    }
+    calcViewRectInfoFromRange(uuid, opts) {
+      const infoData = __classPrivateFieldGet$6(this, _Calculator_store, "f").get("viewVisibleInfoMap")[uuid];
+      if (!(infoData === null || infoData === void 0 ? void 0 : infoData.originRectInfo)) {
+        return null;
+      }
+      const { checkVisible, viewScaleInfo, viewSizeInfo } = opts;
+      const { center, left, right, bottom, top, topLeft, topRight, bottomLeft, bottomRight } = infoData.rangeRectInfo;
+      if (checkVisible === true && infoData.isVisibleInView === false) {
+        return null;
+      }
+      const calcOpts = { viewScaleInfo, viewSizeInfo };
+      const viewRectInfo = {
+        center: calcViewPointSize(center, calcOpts),
+        left: calcViewPointSize(left, calcOpts),
+        right: calcViewPointSize(right, calcOpts),
+        bottom: calcViewPointSize(bottom, calcOpts),
+        top: calcViewPointSize(top, calcOpts),
+        topLeft: calcViewPointSize(topLeft, calcOpts),
+        topRight: calcViewPointSize(topRight, calcOpts),
+        bottomLeft: calcViewPointSize(bottomLeft, calcOpts),
+        bottomRight: calcViewPointSize(bottomRight, calcOpts)
+      };
+      return viewRectInfo;
+    }
+    modifyViewVisibleInfoMap(data, opts) {
+      const { modifyOptions, viewScaleInfo, viewSizeInfo } = opts;
+      const { type, content } = modifyOptions;
+      const list = data.elements;
+      const viewVisibleInfoMap = __classPrivateFieldGet$6(this, _Calculator_store, "f").get("viewVisibleInfoMap");
+      if (type === "deleteElement") {
+        const { element } = content;
+        delete viewVisibleInfoMap[element.uuid];
+      } else if (type === "addElement" || type === "updateElement") {
+        const { position } = content;
+        const element = findElementFromListByPosition(position, data.elements);
+        const groupQueue = getGroupQueueByElementPosition(list, position);
+        if (element) {
+          const originRectInfo = calcElementOriginRectInfo(element, {
+            groupQueue: groupQueue || []
+          });
+          const newViewVisibleInfo = {
+            originRectInfo,
+            rangeRectInfo: is.angle(element.angle) ? originRectInfoToRangeRectInfo(originRectInfo) : originRectInfo,
+            isVisibleInView: true,
+            isGroup: (element === null || element === void 0 ? void 0 : element.type) === "group",
+            position: [...position]
+          };
+          viewVisibleInfoMap[element.uuid] = newViewVisibleInfo;
+          if (type === "updateElement") {
+            this.updateVisiableStatus({ viewScaleInfo, viewSizeInfo });
+          }
+        }
+      } else if (type === "moveElement") {
+        this.resetViewVisibleInfoMap(data, { viewScaleInfo, viewSizeInfo });
+      }
+      __classPrivateFieldGet$6(this, _Calculator_store, "f").set("viewVisibleInfoMap", viewVisibleInfoMap);
+    }
   }
-  _Calculator_opts = /* @__PURE__ */ new WeakMap();
+  _Calculator_opts = /* @__PURE__ */ new WeakMap(), _Calculator_store = /* @__PURE__ */ new WeakMap();
   var __classPrivateFieldSet$5 = function(receiver, state, value, kind, f) {
     if (kind === "m")
       throw new TypeError("Private method is not writable");
@@ -4828,8 +5012,8 @@ var __privateMethod = (obj, member, method) => {
     setActiveStorage(key2, storage) {
       return __classPrivateFieldGet$4(this, _Sharer_activeStore, "f").set(key2, storage);
     }
-    getActiveStoreSnapshot() {
-      return __classPrivateFieldGet$4(this, _Sharer_activeStore, "f").getSnapshot();
+    getActiveStoreSnapshot(opts) {
+      return __classPrivateFieldGet$4(this, _Sharer_activeStore, "f").getSnapshot(opts);
     }
     getSharedStorage(key2) {
       return __classPrivateFieldGet$4(this, _Sharer_sharedStore, "f").get(key2);
@@ -4837,8 +5021,8 @@ var __privateMethod = (obj, member, method) => {
     setSharedStorage(key2, storage) {
       return __classPrivateFieldGet$4(this, _Sharer_sharedStore, "f").set(key2, storage);
     }
-    getSharedStoreSnapshot() {
-      return __classPrivateFieldGet$4(this, _Sharer_sharedStore, "f").getSnapshot();
+    getSharedStoreSnapshot(opts) {
+      return __classPrivateFieldGet$4(this, _Sharer_sharedStore, "f").getSnapshot(opts);
     }
     getActiveViewScaleInfo() {
       const viewScaleInfo = {
@@ -4905,6 +5089,11 @@ var __privateMethod = (obj, member, method) => {
       __classPrivateFieldSet$3(this, _Viewer_opts, opts, "f");
       __classPrivateFieldGet$3(this, _Viewer_instances, "m", _Viewer_init).call(this);
     }
+    resetViewVisibleInfoMap(data, opts) {
+      if (data) {
+        __classPrivateFieldGet$3(this, _Viewer_opts, "f").calculator.resetViewVisibleInfoMap(data, opts);
+      }
+    }
     drawFrame() {
       const { sharer } = __classPrivateFieldGet$3(this, _Viewer_opts, "f");
       const activeStore = sharer.getActiveStoreSnapshot();
@@ -4916,7 +5105,7 @@ var __privateMethod = (obj, member, method) => {
       __classPrivateFieldGet$3(this, _Viewer_instances, "m", _Viewer_drawAnimationFrame).call(this);
     }
     scale(opts) {
-      const { scale, point } = opts;
+      const { scale, point, ignoreUpdateVisibleStatus } = opts;
       const { sharer } = __classPrivateFieldGet$3(this, _Viewer_opts, "f");
       const { moveX, moveY } = viewScale({
         scale,
@@ -4925,12 +5114,18 @@ var __privateMethod = (obj, member, method) => {
         viewSizeInfo: sharer.getActiveViewSizeInfo()
       });
       sharer.setActiveStorage("scale", scale);
+      if (!ignoreUpdateVisibleStatus) {
+        __classPrivateFieldGet$3(this, _Viewer_opts, "f").calculator.updateVisiableStatus({
+          viewScaleInfo: sharer.getActiveViewScaleInfo(),
+          viewSizeInfo: sharer.getActiveViewSizeInfo()
+        });
+      }
       return { moveX, moveY };
     }
     scroll(opts) {
       const { sharer } = __classPrivateFieldGet$3(this, _Viewer_opts, "f");
       const prevViewScaleInfo = sharer.getActiveViewScaleInfo();
-      const { moveX, moveY } = opts;
+      const { moveX, moveY, ignoreUpdateVisibleStatus } = opts;
       const viewSizeInfo = sharer.getActiveViewSizeInfo();
       const viewScaleInfo = viewScroll({
         moveX,
@@ -4939,6 +5134,12 @@ var __privateMethod = (obj, member, method) => {
         viewSizeInfo
       });
       sharer.setActiveViewScaleInfo(viewScaleInfo);
+      if (!ignoreUpdateVisibleStatus) {
+        __classPrivateFieldGet$3(this, _Viewer_opts, "f").calculator.updateVisiableStatus({
+          viewScaleInfo: sharer.getActiveViewScaleInfo(),
+          viewSizeInfo: sharer.getActiveViewSizeInfo()
+        });
+      }
       return viewScaleInfo;
     }
     updateViewScaleInfo(opts) {
@@ -4947,9 +5148,13 @@ var __privateMethod = (obj, member, method) => {
         viewSizeInfo: sharer.getActiveViewSizeInfo()
       });
       sharer.setActiveViewScaleInfo(viewScaleInfo);
+      __classPrivateFieldGet$3(this, _Viewer_opts, "f").calculator.updateVisiableStatus({
+        viewScaleInfo: sharer.getActiveViewScaleInfo(),
+        viewSizeInfo: sharer.getActiveViewSizeInfo()
+      });
       return viewScaleInfo;
     }
-    resize(viewSize = {}) {
+    resize(viewSize = {}, opts) {
       const { sharer } = __classPrivateFieldGet$3(this, _Viewer_opts, "f");
       const originViewSize = sharer.getActiveViewSizeInfo();
       const newViewSize = Object.assign(Object.assign({}, originViewSize), viewSize);
@@ -4966,6 +5171,12 @@ var __privateMethod = (obj, member, method) => {
       viewContext.canvas.width = width * devicePixelRatio;
       viewContext.canvas.height = height * devicePixelRatio;
       sharer.setActiveViewSizeInfo(newViewSize);
+      if (!(opts === null || opts === void 0 ? void 0 : opts.ignoreUpdateVisibleStatus)) {
+        __classPrivateFieldGet$3(this, _Viewer_opts, "f").calculator.updateVisiableStatus({
+          viewScaleInfo: sharer.getActiveViewScaleInfo(),
+          viewSizeInfo: sharer.getActiveViewSizeInfo()
+        });
+      }
       return newViewSize;
     }
   }
@@ -5100,15 +5311,28 @@ var __privateMethod = (obj, member, method) => {
     getRenderer() {
       return __classPrivateFieldGet$2(this, _Board_renderer, "f");
     }
-    setData(data) {
+    setData(data, opts) {
+      const { modifiedOptions } = opts || {};
       const sharer = __classPrivateFieldGet$2(this, _Board_sharer, "f");
       __classPrivateFieldGet$2(this, _Board_sharer, "f").setActiveStorage("data", data);
       const viewSizeInfo = sharer.getActiveViewSizeInfo();
+      const viewScaleInfo = sharer.getActiveViewScaleInfo();
       const newViewContextSize = calcElementsContextSize(data.elements, {
         viewWidth: viewSizeInfo.width,
         viewHeight: viewSizeInfo.height,
         extend: true
       });
+      if (modifiedOptions) {
+        __classPrivateFieldGet$2(this, _Board_viewer, "f").resetViewVisibleInfoMap(data, {
+          viewSizeInfo,
+          viewScaleInfo
+        });
+      } else {
+        __classPrivateFieldGet$2(this, _Board_viewer, "f").resetViewVisibleInfoMap(data, {
+          viewSizeInfo,
+          viewScaleInfo
+        });
+      }
       __classPrivateFieldGet$2(this, _Board_viewer, "f").drawFrame();
       const newViewSizeInfo = Object.assign(Object.assign({}, viewSizeInfo), newViewContextSize);
       __classPrivateFieldGet$2(this, _Board_sharer, "f").setActiveViewSizeInfo(newViewSizeInfo);
@@ -5157,17 +5381,22 @@ var __privateMethod = (obj, member, method) => {
     }
     scale(opts) {
       const viewer = __classPrivateFieldGet$2(this, _Board_viewer, "f");
-      const { moveX, moveY } = viewer.scale(opts);
-      viewer.scroll({ moveX, moveY });
+      const { ignoreUpdateVisibleStatus } = opts;
+      const { moveX, moveY } = viewer.scale(Object.assign(Object.assign({}, opts), {
+        ignoreUpdateVisibleStatus: true
+      }));
+      viewer.scroll({ moveX, moveY, ignoreUpdateVisibleStatus });
     }
     scroll(opts) {
-      return __classPrivateFieldGet$2(this, _Board_viewer, "f").scroll(opts);
+      const result = __classPrivateFieldGet$2(this, _Board_viewer, "f").scroll(opts);
+      return result;
     }
     updateViewScaleInfo(opts) {
-      return __classPrivateFieldGet$2(this, _Board_viewer, "f").updateViewScaleInfo(opts);
+      const result = __classPrivateFieldGet$2(this, _Board_viewer, "f").updateViewScaleInfo(opts);
+      return result;
     }
-    resize(newViewSize) {
-      const viewSize = __classPrivateFieldGet$2(this, _Board_viewer, "f").resize(newViewSize);
+    resize(newViewSize, opts) {
+      const viewSize = __classPrivateFieldGet$2(this, _Board_viewer, "f").resize(newViewSize, opts);
       const { width, height, devicePixelRatio } = newViewSize;
       const { boardContent } = __classPrivateFieldGet$2(this, _Board_opts, "f");
       boardContent.viewContext.$resize({ width, height, devicePixelRatio });
@@ -5494,6 +5723,9 @@ var __privateMethod = (obj, member, method) => {
   const keySelectedElementList = Symbol(`${key$2}_selectedElementList`);
   const keySelectedElementListVertexes = Symbol(`${key$2}_selectedElementListVertexes`);
   const keySelectedElementController = Symbol(`${key$2}_selectedElementController`);
+  const keySelectedElementPosition = Symbol(`${key$2}_selectedElementPosition`);
+  const keySelectedReferenceXLines = Symbol(`${key$2}_selectedReferenceXLines`);
+  const keySelectedReferenceYLines = Symbol(`${key$2}_selectedReferenceYLines`);
   const keyGroupQueue = Symbol(`${key$2}_groupQueue`);
   const keyGroupQueueVertexesList = Symbol(`${key$2}_groupQueueVertexesList`);
   const keyIsMoving = Symbol(`${key$2}_isMoving`);
@@ -5503,6 +5735,7 @@ var __privateMethod = (obj, member, method) => {
   const wrapperColor = "#1973ba";
   const lockColor = "#5b5959b5";
   const controllerSize = 10;
+  const referenceColor = "#f7276e";
   function drawVertexes(ctx, vertexes, opts) {
     const { borderColor: borderColor2, borderWidth: borderWidth2, background: background2, lineDash } = opts;
     ctx.setLineDash([]);
@@ -5572,6 +5805,36 @@ var __privateMethod = (obj, member, method) => {
     ctx.lineTo(vertexes[3].x, vertexes[3].y);
     ctx.closePath();
     ctx.stroke();
+  }
+  function drawCrossByCenter(ctx, center, opts) {
+    const { size, borderColor: borderColor2, borderWidth: borderWidth2, lineDash } = opts;
+    const minX = center.x - size / 2;
+    const maxX = center.x + size / 2;
+    const minY = center.y - size / 2;
+    const maxY = center.y + size / 2;
+    const vertexes = [
+      {
+        x: minX,
+        y: minY
+      },
+      {
+        x: maxX,
+        y: minY
+      },
+      {
+        x: maxX,
+        y: maxY
+      },
+      {
+        x: minX,
+        y: maxY
+      }
+    ];
+    drawCrossVertexes(ctx, vertexes, {
+      borderColor: borderColor2,
+      borderWidth: borderWidth2,
+      lineDash
+    });
   }
   function drawHoverVertexesWrapper(ctx, vertexes, opts) {
     if (!vertexes) {
@@ -5656,6 +5919,35 @@ var __privateMethod = (obj, member, method) => {
       drawVertexes(ctx, calcViewVertexes(vertexes, opts), wrapperOpts);
     }
   }
+  function drawReferenceLines(ctx, opts) {
+    const { xLines, yLines } = opts;
+    const lineOpts = {
+      borderColor: referenceColor,
+      borderWidth: 1,
+      lineDash: []
+    };
+    const crossOpts = Object.assign(Object.assign({}, lineOpts), { size: 6 });
+    if (xLines) {
+      xLines.forEach((line) => {
+        line.forEach((p, pIdx) => {
+          drawCrossByCenter(ctx, p, crossOpts);
+          if (line[pIdx + 1]) {
+            drawLine(ctx, line[pIdx], line[pIdx + 1], lineOpts);
+          }
+        });
+      });
+    }
+    if (yLines) {
+      yLines.forEach((line) => {
+        line.forEach((p, pIdx) => {
+          drawCrossByCenter(ctx, p, crossOpts);
+          if (line[pIdx + 1]) {
+            drawLine(ctx, line[pIdx], line[pIdx + 1], lineOpts);
+          }
+        });
+      });
+    }
+  }
   function parseRadian(angle2) {
     return angle2 * Math.PI / 180;
   }
@@ -5666,11 +5958,11 @@ var __privateMethod = (obj, member, method) => {
     return moveDirect > 0 ? Math.abs(moveDist) : 0 - Math.abs(moveDist);
   }
   function isPointInViewActiveVertexes(p, opts) {
-    const { ctx, viewScaleInfo, viewSizeInfo, vertexes } = opts;
-    const v0 = calcViewPointSize(vertexes[0], { viewScaleInfo, viewSizeInfo });
-    const v1 = calcViewPointSize(vertexes[1], { viewScaleInfo, viewSizeInfo });
-    const v2 = calcViewPointSize(vertexes[2], { viewScaleInfo, viewSizeInfo });
-    const v3 = calcViewPointSize(vertexes[3], { viewScaleInfo, viewSizeInfo });
+    const { ctx, viewScaleInfo, vertexes } = opts;
+    const v0 = calcViewPointSize(vertexes[0], { viewScaleInfo });
+    const v1 = calcViewPointSize(vertexes[1], { viewScaleInfo });
+    const v2 = calcViewPointSize(vertexes[2], { viewScaleInfo });
+    const v3 = calcViewPointSize(vertexes[3], { viewScaleInfo });
     ctx.beginPath();
     ctx.moveTo(v0.x, v0.y);
     ctx.lineTo(v1.x, v1.y);
@@ -6289,10 +6581,9 @@ var __privateMethod = (obj, member, method) => {
   }
   function rotateElement(elem, opts) {
     const { x: x2, y: y2, w: w2, h: h2, angle: angle2 = 0 } = elem;
-    const { center, start, end, viewScaleInfo, viewSizeInfo } = opts;
+    const { center, start, end, viewScaleInfo } = opts;
     const elemCenter = calcViewPointSize(center, {
-      viewScaleInfo,
-      viewSizeInfo
+      viewScaleInfo
     });
     const startAngle = limitAngle(angle2);
     const changedRadian = calcRadian(elemCenter, start, end);
@@ -6310,7 +6601,7 @@ var __privateMethod = (obj, member, method) => {
     const indexes = [];
     const uuids = [];
     const elements = [];
-    const { calculator, viewScaleInfo, viewSizeInfo, start, end } = opts;
+    const { viewScaleInfo, viewSizeInfo, start, end } = opts;
     if (!(Array.isArray(data.elements) && start && end)) {
       return { indexes, uuids, elements };
     }
@@ -6323,7 +6614,7 @@ var __privateMethod = (obj, member, method) => {
       if (((_a = elem === null || elem === void 0 ? void 0 : elem.operations) === null || _a === void 0 ? void 0 : _a.lock) === true) {
         continue;
       }
-      const elemSize = calculator.elementSize(elem, viewScaleInfo, viewSizeInfo);
+      const elemSize = calcViewElementSize(elem, { viewScaleInfo, viewSizeInfo });
       const center = calcElementCenter(elemSize);
       if (center.x >= startX && center.x <= endX && center.y >= startY && center.y <= endY) {
         indexes.push(idx);
@@ -6350,14 +6641,14 @@ var __privateMethod = (obj, member, method) => {
       return null;
     }
     const area = { x: 0, y: 0, w: 0, h: 0 };
-    const { calculator, viewScaleInfo, viewSizeInfo } = opts;
+    const { viewScaleInfo, viewSizeInfo } = opts;
     let prevElemSize = null;
     for (let i = 0; i < elements.length; i++) {
       const elem = elements[i];
       if ((_a = elem === null || elem === void 0 ? void 0 : elem.operations) === null || _a === void 0 ? void 0 : _a.invisible) {
         continue;
       }
-      const elemSize = calculator.elementSize(elem, viewScaleInfo, viewSizeInfo);
+      const elemSize = calcViewElementSize(elem, { viewScaleInfo, viewSizeInfo });
       if (elemSize.angle && (elemSize.angle > 0 || elemSize.angle < 0)) {
         const ves = rotateElementVertexes(elemSize);
         if (ves.length === 4) {
@@ -6423,6 +6714,272 @@ var __privateMethod = (obj, member, method) => {
     return {
       moveX,
       moveY
+    };
+  }
+  const unitSize = 2;
+  function getViewBoxInfo(rectInfo) {
+    const boxInfo = {
+      minX: rectInfo.topLeft.x,
+      minY: rectInfo.topLeft.y,
+      maxX: rectInfo.bottomRight.x,
+      maxY: rectInfo.bottomRight.y,
+      midX: rectInfo.center.x,
+      midY: rectInfo.center.y
+    };
+    return boxInfo;
+  }
+  const getClosestNumInSortedKeys = (sortedKeys, target) => {
+    if (sortedKeys.length === 0) {
+      throw null;
+    }
+    if (sortedKeys.length === 1) {
+      return sortedKeys[0];
+    }
+    let left = 0;
+    let right = sortedKeys.length - 1;
+    while (left <= right) {
+      const mid = Math.floor((left + right) / 2);
+      if (sortedKeys[mid] === target) {
+        return sortedKeys[mid];
+      } else if (sortedKeys[mid] < target) {
+        left = mid + 1;
+      } else {
+        right = mid - 1;
+      }
+    }
+    if (left >= sortedKeys.length) {
+      return sortedKeys[right];
+    }
+    if (right < 0) {
+      return sortedKeys[left];
+    }
+    return Math.abs(sortedKeys[right] - target) <= Math.abs(sortedKeys[left] - target) ? sortedKeys[right] : sortedKeys[left];
+  };
+  const isEqualNum = (a, b) => Math.abs(a - b) < 1e-5;
+  function calcReferenceInfo(uuid, opts) {
+    var _a, _b;
+    const { data, groupQueue, calculator, viewScaleInfo, viewSizeInfo } = opts;
+    let targetElements = data.elements || [];
+    if ((groupQueue === null || groupQueue === void 0 ? void 0 : groupQueue.length) > 0) {
+      targetElements = ((_b = (_a = groupQueue[groupQueue.length - 1]) === null || _a === void 0 ? void 0 : _a.detail) === null || _b === void 0 ? void 0 : _b.children) || [];
+    }
+    const siblingViewRectInfoList = [];
+    targetElements.forEach((elem) => {
+      if (elem.uuid !== uuid) {
+        const info = calculator.calcViewRectInfoFromRange(elem.uuid, { checkVisible: true, viewScaleInfo, viewSizeInfo });
+        if (info) {
+          siblingViewRectInfoList.push(info);
+        }
+      }
+    });
+    const targetRectInfo = calculator.calcViewRectInfoFromRange(uuid, { viewScaleInfo, viewSizeInfo });
+    if (!targetRectInfo) {
+      return null;
+    }
+    const vTargetLineDotMap = {};
+    const hTargetLineDotMap = {};
+    const vRefLineDotMap = {};
+    const hRefLineDotMap = {};
+    const vHelperLineDotMapList = [];
+    const hHelperLineDotMapList = [];
+    let sortedRefXKeys = [];
+    let sortedRefYKeys = [];
+    const targetBox = getViewBoxInfo(targetRectInfo);
+    vTargetLineDotMap[targetBox.minX] = [targetBox.minY, targetBox.midY, targetBox.maxY];
+    vTargetLineDotMap[targetBox.midX] = [targetBox.minY, targetBox.midY, targetBox.maxY];
+    vTargetLineDotMap[targetBox.maxX] = [targetBox.minY, targetBox.midY, targetBox.maxY];
+    hTargetLineDotMap[targetBox.minY] = [targetBox.minX, targetBox.midX, targetBox.maxX];
+    hTargetLineDotMap[targetBox.midY] = [targetBox.minX, targetBox.midX, targetBox.maxX];
+    hTargetLineDotMap[targetBox.maxY] = [targetBox.minX, targetBox.midX, targetBox.maxX];
+    siblingViewRectInfoList.forEach((info) => {
+      const box2 = getViewBoxInfo(info);
+      if (!vRefLineDotMap[box2.minX]) {
+        vRefLineDotMap[box2.minX] = [];
+      }
+      if (!vRefLineDotMap[box2.midX]) {
+        vRefLineDotMap[box2.midX] = [];
+      }
+      if (!vRefLineDotMap[box2.maxX]) {
+        vRefLineDotMap[box2.maxX] = [];
+      }
+      if (!hRefLineDotMap[box2.minY]) {
+        hRefLineDotMap[box2.minY] = [];
+      }
+      if (!hRefLineDotMap[box2.midY]) {
+        hRefLineDotMap[box2.midY] = [];
+      }
+      if (!hRefLineDotMap[box2.maxY]) {
+        hRefLineDotMap[box2.maxY] = [];
+      }
+      vRefLineDotMap[box2.minX] = [box2.minY, box2.midY, box2.maxY];
+      vRefLineDotMap[box2.midX] = [box2.minY, box2.midY, box2.maxY];
+      vRefLineDotMap[box2.maxX] = [box2.minY, box2.midY, box2.maxY];
+      sortedRefXKeys.push(box2.minX);
+      sortedRefXKeys.push(box2.midX);
+      sortedRefXKeys.push(box2.maxX);
+      hRefLineDotMap[box2.minY] = [box2.minX, box2.midX, box2.maxX];
+      hRefLineDotMap[box2.midY] = [box2.minX, box2.midX, box2.maxX];
+      hRefLineDotMap[box2.maxY] = [box2.minX, box2.midX, box2.maxX];
+      sortedRefYKeys.push(box2.minY);
+      sortedRefYKeys.push(box2.midY);
+      sortedRefYKeys.push(box2.maxY);
+    });
+    sortedRefXKeys = sortedRefXKeys.sort((a, b) => a - b);
+    sortedRefYKeys = sortedRefYKeys.sort((a, b) => a - b);
+    let offsetX = null;
+    let offsetY = null;
+    let closestMinX = null;
+    let closestMidX = null;
+    let closestMaxX = null;
+    let closestMinY = null;
+    let closestMidY = null;
+    let closestMaxY = null;
+    if (sortedRefXKeys.length > 0) {
+      closestMinX = getClosestNumInSortedKeys(sortedRefXKeys, targetBox.minX);
+      closestMidX = getClosestNumInSortedKeys(sortedRefXKeys, targetBox.midX);
+      closestMaxX = getClosestNumInSortedKeys(sortedRefXKeys, targetBox.maxX);
+      const distMinX = Math.abs(closestMinX - targetBox.minX);
+      const distMidX = Math.abs(closestMidX - targetBox.midX);
+      const distMaxX = Math.abs(closestMaxX - targetBox.maxX);
+      const closestXDist = Math.min(distMinX, distMidX, distMaxX);
+      if (closestXDist <= unitSize / viewScaleInfo.scale) {
+        if (isEqualNum(closestXDist, distMinX)) {
+          offsetX = closestMinX - targetBox.minX;
+        } else if (isEqualNum(closestXDist, distMidX)) {
+          offsetX = closestMidX - targetBox.midX;
+        } else if (isEqualNum(closestXDist, distMaxX)) {
+          offsetX = closestMaxX - targetBox.maxX;
+        }
+      }
+    }
+    if (sortedRefYKeys.length > 0) {
+      closestMinY = getClosestNumInSortedKeys(sortedRefYKeys, targetBox.minY);
+      closestMidY = getClosestNumInSortedKeys(sortedRefYKeys, targetBox.midY);
+      closestMaxY = getClosestNumInSortedKeys(sortedRefYKeys, targetBox.maxY);
+      const distMinY = Math.abs(closestMinY - targetBox.minY);
+      const distMidY = Math.abs(closestMidY - targetBox.midY);
+      const distMaxY = Math.abs(closestMaxY - targetBox.maxY);
+      const closestYDist = Math.min(distMinY, distMidY, distMaxY);
+      if (closestYDist <= unitSize / viewScaleInfo.scale) {
+        if (isEqualNum(closestYDist, distMinY)) {
+          offsetY = closestMinY - targetBox.minY;
+        } else if (isEqualNum(closestYDist, distMidY)) {
+          offsetY = closestMidY - targetBox.midY;
+        } else if (isEqualNum(closestYDist, distMaxY)) {
+          offsetY = closestMaxY - targetBox.maxY;
+        }
+      }
+    }
+    const newTargetBox = Object.assign({}, targetBox);
+    if (offsetX !== null) {
+      newTargetBox.minX += offsetX;
+      newTargetBox.midX += offsetX;
+      newTargetBox.maxX += offsetX;
+    }
+    if (offsetY !== null) {
+      newTargetBox.minY += offsetY;
+      newTargetBox.midY += offsetY;
+      newTargetBox.maxY += offsetY;
+    }
+    if (is.x(offsetX) && offsetX !== null && closestMinX !== null && closestMidX !== null && closestMaxX !== null) {
+      if (isEqualNum(offsetX, closestMinX - targetBox.minX)) {
+        const vLine = {
+          x: closestMinX,
+          yList: []
+        };
+        vLine.yList.push(newTargetBox.minY);
+        vLine.yList.push(newTargetBox.midY);
+        vLine.yList.push(newTargetBox.maxY);
+        vLine.yList.push(...(hRefLineDotMap === null || hRefLineDotMap === void 0 ? void 0 : hRefLineDotMap[closestMinX]) || []);
+        vHelperLineDotMapList.push(vLine);
+      }
+      if (isEqualNum(offsetX, closestMidX - targetBox.minX)) {
+        const vLine = {
+          x: closestMidX,
+          yList: []
+        };
+        vLine.yList.push(newTargetBox.minY);
+        vLine.yList.push(newTargetBox.midY);
+        vLine.yList.push(newTargetBox.maxY);
+        vLine.yList.push(...(hRefLineDotMap === null || hRefLineDotMap === void 0 ? void 0 : hRefLineDotMap[closestMidX]) || []);
+        vHelperLineDotMapList.push(vLine);
+      }
+      if (isEqualNum(offsetX, closestMaxX - targetBox.minX)) {
+        const vLine = {
+          x: closestMaxX,
+          yList: []
+        };
+        vLine.yList.push(newTargetBox.minY);
+        vLine.yList.push(newTargetBox.midY);
+        vLine.yList.push(newTargetBox.maxY);
+        vLine.yList.push(...(hRefLineDotMap === null || hRefLineDotMap === void 0 ? void 0 : hRefLineDotMap[closestMaxX]) || []);
+        vHelperLineDotMapList.push(vLine);
+      }
+    }
+    if (is.y(offsetY) && offsetY !== null && closestMinY !== null && closestMidY !== null && closestMaxY !== null) {
+      if (isEqualNum(offsetY, closestMinY - targetBox.minY)) {
+        const hLine = {
+          y: closestMinY,
+          xList: []
+        };
+        hLine.xList.push(newTargetBox.minX);
+        hLine.xList.push(newTargetBox.midX);
+        hLine.xList.push(newTargetBox.maxX);
+        hLine.xList.push(...(vRefLineDotMap === null || vRefLineDotMap === void 0 ? void 0 : vRefLineDotMap[closestMinY]) || []);
+        hHelperLineDotMapList.push(hLine);
+      }
+      if (isEqualNum(offsetY, closestMidY - targetBox.midY)) {
+        const hLine = {
+          y: closestMidY,
+          xList: []
+        };
+        hLine.xList.push(newTargetBox.minX);
+        hLine.xList.push(newTargetBox.midX);
+        hLine.xList.push(newTargetBox.maxX);
+        hLine.xList.push(...(vRefLineDotMap === null || vRefLineDotMap === void 0 ? void 0 : vRefLineDotMap[closestMinY]) || []);
+        hHelperLineDotMapList.push(hLine);
+      }
+      if (isEqualNum(offsetY, closestMaxY - targetBox.maxY)) {
+        const hLine = {
+          y: closestMaxY,
+          xList: []
+        };
+        hLine.xList.push(newTargetBox.minX);
+        hLine.xList.push(newTargetBox.midX);
+        hLine.xList.push(newTargetBox.maxX);
+        hLine.xList.push(...(vRefLineDotMap === null || vRefLineDotMap === void 0 ? void 0 : vRefLineDotMap[closestMaxY]) || []);
+        hHelperLineDotMapList.push(hLine);
+      }
+    }
+    const yLines = [];
+    if ((vHelperLineDotMapList === null || vHelperLineDotMapList === void 0 ? void 0 : vHelperLineDotMapList.length) > 0) {
+      vHelperLineDotMapList.forEach((item, i) => {
+        yLines.push([]);
+        item.yList.forEach((y2) => {
+          yLines[i].push({
+            x: item.x,
+            y: y2
+          });
+        });
+      });
+    }
+    const xLines = [];
+    if ((hHelperLineDotMapList === null || hHelperLineDotMapList === void 0 ? void 0 : hHelperLineDotMapList.length) > 0) {
+      hHelperLineDotMapList.forEach((item, i) => {
+        xLines.push([]);
+        item.xList.forEach((x2) => {
+          xLines[i].push({
+            x: x2,
+            y: item.y
+          });
+        });
+      });
+    }
+    return {
+      offsetX,
+      offsetY,
+      yLines,
+      xLines
     };
   }
   const middlewareEventTextEdit = "@middleware/text-edit";
@@ -6668,6 +7225,7 @@ var __privateMethod = (obj, member, method) => {
       sharer.setSharedStorage(keyHoverElementVertexes, vertexes);
     };
     const updateSelectedElementList = (list, opts2) => {
+      var _a;
       sharer.setSharedStorage(keySelectedElementList, list);
       if (list.length === 1) {
         const controller = calcElementSizeController(list[0], {
@@ -6676,8 +7234,10 @@ var __privateMethod = (obj, member, method) => {
           viewScaleInfo: sharer.getActiveViewScaleInfo()
         });
         sharer.setSharedStorage(keySelectedElementController, controller);
+        sharer.setSharedStorage(keySelectedElementPosition, getElementPositionFromList(list[0].uuid, ((_a = sharer.getActiveStorage("data")) === null || _a === void 0 ? void 0 : _a.elements) || []));
       } else {
         sharer.setSharedStorage(keySelectedElementController, null);
+        sharer.setSharedStorage(keySelectedElementPosition, []);
       }
       if ((opts2 === null || opts2 === void 0 ? void 0 : opts2.triggerEvent) === true) {
         eventHub.trigger(middlewareEventSelect, { uuids: list.map((elem) => elem.uuid) });
@@ -6693,7 +7253,8 @@ var __privateMethod = (obj, member, method) => {
         viewSizeInfo: sharer.getActiveViewSizeInfo(),
         groupQueue: sharer.getSharedStorage(keyGroupQueue),
         areaSize: null,
-        selectedElementController: sharer.getSharedStorage(keySelectedElementController)
+        selectedElementController: sharer.getSharedStorage(keySelectedElementController),
+        selectedElementPosition: sharer.getSharedStorage(keySelectedElementPosition)
       };
     };
     const clear = () => {
@@ -6708,6 +7269,9 @@ var __privateMethod = (obj, member, method) => {
       sharer.setSharedStorage(keySelectedElementList, []);
       sharer.setSharedStorage(keySelectedElementListVertexes, null);
       sharer.setSharedStorage(keySelectedElementController, null);
+      sharer.setSharedStorage(keySelectedElementPosition, []);
+      sharer.setSharedStorage(keySelectedReferenceXLines, []);
+      sharer.setSharedStorage(keySelectedReferenceYLines, []);
       sharer.setSharedStorage(keyIsMoving, null);
     };
     clear();
@@ -6890,6 +7454,8 @@ var __privateMethod = (obj, member, method) => {
       },
       pointMove: (e) => {
         var _a, _b, _c;
+        sharer.setSharedStorage(keySelectedReferenceXLines, []);
+        sharer.setSharedStorage(keySelectedReferenceYLines, []);
         sharer.setSharedStorage(keyIsMoving, true);
         const data = sharer.getActiveStorage("data");
         const elems = getActiveElements();
@@ -6905,9 +7471,43 @@ var __privateMethod = (obj, member, method) => {
           inBusyMode = "drag";
           if (data && (elems === null || elems === void 0 ? void 0 : elems.length) === 1 && start && end && ((_b = (_a = elems[0]) === null || _a === void 0 ? void 0 : _a.operations) === null || _b === void 0 ? void 0 : _b.lock) !== true) {
             const { moveX, moveY } = calcMoveInGroup(start, end, groupQueue);
-            elems[0].x += moveX / scale;
-            elems[0].y += moveY / scale;
+            let totalMoveX = calculator.toGridNum(moveX / scale);
+            let totalMoveY = calculator.toGridNum(moveY / scale);
+            const referenceInfo = calcReferenceInfo(elems[0].uuid, {
+              calculator,
+              data,
+              groupQueue,
+              viewScaleInfo,
+              viewSizeInfo
+            });
+            try {
+              if (referenceInfo) {
+                if (is.x(referenceInfo.offsetX) && referenceInfo.offsetX !== null) {
+                  totalMoveX = calculator.toGridNum(totalMoveX + referenceInfo.offsetX);
+                }
+                if (is.y(referenceInfo.offsetY) && referenceInfo.offsetY !== null) {
+                  totalMoveY = calculator.toGridNum(totalMoveY + referenceInfo.offsetY);
+                }
+                sharer.setSharedStorage(keySelectedReferenceXLines, referenceInfo.xLines);
+                sharer.setSharedStorage(keySelectedReferenceYLines, referenceInfo.yLines);
+              }
+            } catch (err) {
+              console.error(err);
+            }
+            elems[0].x = calculator.toGridNum(elems[0].x + totalMoveX);
+            elems[0].y = calculator.toGridNum(elems[0].y + totalMoveY);
             updateSelectedElementList([elems[0]]);
+            calculator.modifyViewVisibleInfoMap(data, {
+              modifyOptions: {
+                type: "updateElement",
+                content: {
+                  element: elems[0],
+                  position: sharer.getSharedStorage(keySelectedElementPosition) || []
+                }
+              },
+              viewSizeInfo,
+              viewScaleInfo
+            });
           }
           viewer.drawFrame();
         } else if (actionType === "drag-list") {
@@ -6918,8 +7518,19 @@ var __privateMethod = (obj, member, method) => {
             elems.forEach((elem) => {
               var _a2;
               if (elem && ((_a2 = elem === null || elem === void 0 ? void 0 : elem.operations) === null || _a2 === void 0 ? void 0 : _a2.lock) !== true) {
-                elem.x += moveX;
-                elem.y += moveY;
+                elem.x = calculator.toGridNum(elem.x + moveX);
+                elem.y = calculator.toGridNum(elem.y + moveY);
+                calculator.modifyViewVisibleInfoMap(data, {
+                  modifyOptions: {
+                    type: "updateElement",
+                    content: {
+                      element: elem,
+                      position: sharer.getSharedStorage(keySelectedElementPosition) || []
+                    }
+                  },
+                  viewSizeInfo,
+                  viewScaleInfo
+                });
               }
             });
             sharer.setActiveStorage("data", data);
@@ -6966,19 +7577,30 @@ var __privateMethod = (obj, member, method) => {
               elems[0].angle = resizedElemSize.angle;
             } else {
               const resizedElemSize = resizeElement(elems[0], { scale, start: resizeStart, end: resizeEnd, resizeType, sharer });
-              elems[0].x = resizedElemSize.x;
-              elems[0].y = resizedElemSize.y;
+              elems[0].x = calculator.toGridNum(resizedElemSize.x);
+              elems[0].y = calculator.toGridNum(resizedElemSize.y);
               if (elems[0].type === "group" && ((_c = elems[0].operations) === null || _c === void 0 ? void 0 : _c.deepResize) === true) {
                 deepResizeGroupElement(elems[0], {
-                  w: resizedElemSize.w,
-                  h: resizedElemSize.h
+                  w: calculator.toGridNum(resizedElemSize.w),
+                  h: calculator.toGridNum(resizedElemSize.h)
                 });
               } else {
-                elems[0].w = resizedElemSize.w;
-                elems[0].h = resizedElemSize.h;
+                elems[0].w = calculator.toGridNum(resizedElemSize.w);
+                elems[0].h = calculator.toGridNum(resizedElemSize.h);
               }
             }
             updateSelectedElementList([elems[0]]);
+            calculator.modifyViewVisibleInfoMap(data, {
+              modifyOptions: {
+                type: "updateElement",
+                content: {
+                  element: elems[0],
+                  position: sharer.getSharedStorage(keySelectedElementPosition) || []
+                }
+              },
+              viewSizeInfo,
+              viewScaleInfo
+            });
             viewer.drawFrame();
           }
         } else if (actionType === "area") {
@@ -6990,6 +7612,8 @@ var __privateMethod = (obj, member, method) => {
       },
       pointEnd(e) {
         inBusyMode = null;
+        sharer.setSharedStorage(keySelectedReferenceXLines, []);
+        sharer.setSharedStorage(keySelectedReferenceYLines, []);
         sharer.setSharedStorage(keyIsMoving, false);
         const data = sharer.getActiveStorage("data");
         const resizeType = sharer.getSharedStorage(keyResizeType);
@@ -7125,7 +7749,15 @@ var __privateMethod = (obj, member, method) => {
             }
           }
           if (!isLock && elem && ["select", "drag", "resize"].includes(actionType)) {
-            drawSelectedElementControllersVertexes(helperContext, selectedElementController, Object.assign(Object.assign({}, drawBaseOpts), { element: elem, groupQueue, hideControllers: !!isMoving && actionType === "drag" }));
+            drawSelectedElementControllersVertexes(helperContext, selectedElementController, Object.assign(Object.assign({}, drawBaseOpts), { element: elem, calculator, hideControllers: !!isMoving && actionType === "drag" }));
+            if (actionType === "drag") {
+              const xLines = sharer2.getSharedStorage(keySelectedReferenceXLines);
+              const yLines = sharer2.getSharedStorage(keySelectedReferenceYLines);
+              drawReferenceLines(helperContext, {
+                xLines,
+                yLines
+              });
+            }
           }
         } else {
           if (hoverElement && actionType !== "drag") {
@@ -7140,7 +7772,15 @@ var __privateMethod = (obj, member, method) => {
             }
           }
           if (!isLock && elem && ["select", "drag", "resize"].includes(actionType)) {
-            drawSelectedElementControllersVertexes(helperContext, selectedElementController, Object.assign(Object.assign({}, drawBaseOpts), { element: elem, groupQueue, hideControllers: !!isMoving && actionType === "drag" }));
+            drawSelectedElementControllersVertexes(helperContext, selectedElementController, Object.assign(Object.assign({}, drawBaseOpts), { element: elem, calculator, hideControllers: !!isMoving && actionType === "drag" }));
+            if (actionType === "drag") {
+              const xLines = sharer2.getSharedStorage(keySelectedReferenceXLines);
+              const yLines = sharer2.getSharedStorage(keySelectedReferenceYLines);
+              drawReferenceLines(helperContext, {
+                xLines,
+                yLines
+              });
+            }
           } else if (actionType === "area" && areaStart && areaEnd) {
             drawArea(helperContext, { start: areaStart, end: areaEnd });
           } else if (["drag-list", "drag-list-end"].includes(actionType)) {
@@ -7792,9 +8432,9 @@ var __privateMethod = (obj, member, method) => {
     disuse(middleware) {
       __classPrivateFieldGet(this, _Core_board, "f").disuse(middleware);
     }
-    setData(data) {
+    setData(data, opts) {
       validateElements((data === null || data === void 0 ? void 0 : data.elements) || []);
-      __classPrivateFieldGet(this, _Core_board, "f").setData(data);
+      __classPrivateFieldGet(this, _Core_board, "f").setData(data, opts);
     }
     getData() {
       return __classPrivateFieldGet(this, _Core_board, "f").getData();
@@ -7961,7 +8601,7 @@ var __privateMethod = (obj, member, method) => {
     let enableSelect = false;
     let enableTextEdit = false;
     let enableDrag = false;
-    let enableRuler = store.get("enableRuler");
+    let enableRuler = false;
     let innerMode = "select";
     store.set("mode", innerMode);
     if (isValidMode(mode)) {
@@ -7975,12 +8615,14 @@ var __privateMethod = (obj, member, method) => {
       enableSelect = true;
       enableTextEdit = true;
       enableDrag = false;
+      enableRuler = true;
     } else if (innerMode === "drag") {
       enableScale = true;
       enableScroll = true;
       enableSelect = false;
       enableTextEdit = false;
       enableDrag = true;
+      enableRuler = true;
     } else if (innerMode === "readOnly") {
       enableScale = false;
       enableScroll = false;
@@ -8194,15 +8836,19 @@ var __privateMethod = (obj, member, method) => {
     const core = __privateGet(this, _core);
     const store = __privateGet(this, _store);
     changeMode("select", core, store);
-    this.enable("ruler");
   };
   _setFeature = new WeakSet();
   setFeature_fn = function(feat, status) {
-    if (feat === "ruler") {
-      const store = __privateGet(this, _store);
-      store.set("enableRuler", !!status);
-      const currentMode = store.get("mode");
-      this.setMode(currentMode);
+    const store = __privateGet(this, _store);
+    if (["ruler", "scroll", "scale"].includes(feat)) {
+      const map = {
+        ruler: "enableRuler",
+        scroll: "enableScroll",
+        scale: "enableScale"
+      };
+      store.set(map[feat], !!status);
+      runMiddlewares(__privateGet(this, _core), store);
+      __privateGet(this, _core).refresh();
     }
   };
   exports.Calculator = Calculator;
