@@ -794,7 +794,7 @@ var __privateMethod = (obj, member, method) => {
   function textAlign(value) {
     return ["center", "left", "right"].includes(value);
   }
-  function fontFamily$1(value) {
+  function fontFamily$2(value) {
     return typeof value === "string" && value.length > 0;
   }
   function fontWeight$1(value) {
@@ -823,7 +823,7 @@ var __privateMethod = (obj, member, method) => {
     fontSize: fontSize$1,
     lineHeight,
     textAlign,
-    fontFamily: fontFamily$1,
+    fontFamily: fontFamily$2,
     fontWeight: fontWeight$1,
     strokeWidth
   };
@@ -2490,7 +2490,6 @@ var __privateMethod = (obj, member, method) => {
     };
     return {
       originRectInfo,
-      viewRectInfo,
       rangeRectInfo
     };
   }
@@ -3400,7 +3399,7 @@ var __privateMethod = (obj, member, method) => {
     return elem;
   }
   function calcViewCenterContent(data, opts) {
-    var _a, _b, _c, _d, _e, _f, _g, _h;
+    var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k;
     let offsetX = 0;
     let offsetY = 0;
     let scale = 1;
@@ -3409,34 +3408,41 @@ var __privateMethod = (obj, member, method) => {
     let contentW = ((_f = (_e = data === null || data === void 0 ? void 0 : data.elements) === null || _e === void 0 ? void 0 : _e[0]) === null || _f === void 0 ? void 0 : _f.w) || 0;
     let contentH = ((_h = (_g = data === null || data === void 0 ? void 0 : data.elements) === null || _g === void 0 ? void 0 : _g[0]) === null || _h === void 0 ? void 0 : _h.h) || 0;
     const { width, height } = opts.viewSizeInfo;
-    data.elements.forEach((elem) => {
-      const elemSize = {
-        x: elem.x,
-        y: elem.y,
-        w: elem.w,
-        h: elem.h,
-        angle: elem.angle
-      };
-      if (elemSize.angle && (elemSize.angle > 0 || elemSize.angle < 0)) {
-        const ves = rotateElementVertexes(elemSize);
-        if (ves.length === 4) {
-          const xList = [ves[0].x, ves[1].x, ves[2].x, ves[3].x];
-          const yList = [ves[0].y, ves[1].y, ves[2].y, ves[3].y];
-          elemSize.x = Math.min(...xList);
-          elemSize.y = Math.min(...yList);
-          elemSize.w = Math.abs(Math.max(...xList) - Math.min(...xList));
-          elemSize.h = Math.abs(Math.max(...yList) - Math.min(...yList));
+    if (data.layout && ((_k = (_j = data.layout) === null || _j === void 0 ? void 0 : _j.detail) === null || _k === void 0 ? void 0 : _k.overflow) === "hidden") {
+      contentX = 0;
+      contentY = 0;
+      contentW = data.layout.w || 0;
+      contentH = data.layout.h || 0;
+    } else {
+      data.elements.forEach((elem) => {
+        const elemSize = {
+          x: elem.x,
+          y: elem.y,
+          w: elem.w,
+          h: elem.h,
+          angle: elem.angle
+        };
+        if (elemSize.angle && (elemSize.angle > 0 || elemSize.angle < 0)) {
+          const ves = rotateElementVertexes(elemSize);
+          if (ves.length === 4) {
+            const xList = [ves[0].x, ves[1].x, ves[2].x, ves[3].x];
+            const yList = [ves[0].y, ves[1].y, ves[2].y, ves[3].y];
+            elemSize.x = Math.min(...xList);
+            elemSize.y = Math.min(...yList);
+            elemSize.w = Math.abs(Math.max(...xList) - Math.min(...xList));
+            elemSize.h = Math.abs(Math.max(...yList) - Math.min(...yList));
+          }
         }
-      }
-      const areaStartX = Math.min(elemSize.x, contentX);
-      const areaStartY = Math.min(elemSize.y, contentY);
-      const areaEndX = Math.max(elemSize.x + elemSize.w, contentX + contentW);
-      const areaEndY = Math.max(elemSize.y + elemSize.h, contentY + contentH);
-      contentX = areaStartX;
-      contentY = areaStartY;
-      contentW = Math.abs(areaEndX - areaStartX);
-      contentH = Math.abs(areaEndY - areaStartY);
-    });
+        const areaStartX = Math.min(elemSize.x, contentX);
+        const areaStartY = Math.min(elemSize.y, contentY);
+        const areaEndX = Math.max(elemSize.x + elemSize.w, contentX + contentW);
+        const areaEndY = Math.max(elemSize.y + elemSize.h, contentY + contentH);
+        contentX = areaStartX;
+        contentY = areaStartY;
+        contentW = Math.abs(areaEndX - areaStartX);
+        contentH = Math.abs(areaEndY - areaStartY);
+      });
+    }
     if (contentW > 0 && contentH > 0) {
       const scaleW = formatNumber(width / contentW, { decimalPlaces: 4 });
       const scaleH = formatNumber(height / contentH, { decimalPlaces: 4 });
@@ -4222,7 +4228,7 @@ var __privateMethod = (obj, member, method) => {
                     y: newParentSize.y + child.y
                   });
                   if (opts.forceDrawAll !== true) {
-                    if (!(calculator === null || calculator === void 0 ? void 0 : calculator.isElementInView(child, opts.viewScaleInfo, opts.viewSizeInfo))) {
+                    if (!(calculator === null || calculator === void 0 ? void 0 : calculator.needRender(child))) {
                       continue;
                     }
                   }
@@ -4254,7 +4260,7 @@ var __privateMethod = (obj, member, method) => {
         detail: Object.assign(Object.assign({}, defaultDetail), element === null || element === void 0 ? void 0 : element.detail)
       });
       if (opts.forceDrawAll !== true) {
-        if (!((_a = opts.calculator) === null || _a === void 0 ? void 0 : _a.isElementInView(elem, opts.viewScaleInfo, opts.viewSizeInfo))) {
+        if (!((_a = opts.calculator) === null || _a === void 0 ? void 0 : _a.needRender(elem))) {
           continue;
         }
       }
@@ -4267,27 +4273,47 @@ var __privateMethod = (obj, member, method) => {
       }
     }
   }
-  function drawUnderlay(ctx, underlay, opts) {
+  function drawLayout(ctx, layout, opts, renderContent) {
     const { viewScaleInfo, viewSizeInfo, parentOpacity } = opts;
-    const elem = Object.assign({ uuid: "underlay" }, underlay);
+    const elem = Object.assign({ uuid: "layout", type: "group", x: 0, y: 0 }, layout);
     const { x: x2, y: y2, w: w2, h: h2 } = calcViewElementSize(elem, { viewScaleInfo, viewSizeInfo }) || elem;
     const angle2 = 0;
     const viewElem = Object.assign(Object.assign({}, elem), { x: x2, y: y2, w: w2, h: h2, angle: angle2 });
+    ctx.globalAlpha = 1;
     drawBoxShadow(ctx, viewElem, {
       viewScaleInfo,
       viewSizeInfo,
       renderContent: () => {
-        drawBox(ctx, viewElem, {
-          originElem: elem,
-          calcElemSize: { x: x2, y: y2, w: w2, h: h2, angle: angle2 },
-          viewScaleInfo,
-          viewSizeInfo,
-          parentOpacity,
-          renderContent: () => {
-          }
-        });
+        drawBoxBackground(ctx, viewElem, { viewScaleInfo, viewSizeInfo });
       }
     });
+    if (layout.detail.overflow === "hidden") {
+      const { viewScaleInfo: viewScaleInfo2, viewSizeInfo: viewSizeInfo2 } = opts;
+      const elem2 = Object.assign({ uuid: "layout", type: "group", x: 0, y: 0 }, layout);
+      const viewElemSize = calcViewElementSize(elem2, { viewScaleInfo: viewScaleInfo2, viewSizeInfo: viewSizeInfo2 }) || elem2;
+      const viewElem2 = Object.assign(Object.assign({}, elem2), viewElemSize);
+      const { x: x3, y: y3, w: w3, h: h3, radiusList } = calcViewBoxSize(viewElem2, {
+        viewScaleInfo: viewScaleInfo2,
+        viewSizeInfo: viewSizeInfo2
+      });
+      ctx.save();
+      ctx.fillStyle = "transparent";
+      ctx.beginPath();
+      ctx.moveTo(x3 + radiusList[0], y3);
+      ctx.arcTo(x3 + w3, y3, x3 + w3, y3 + h3, radiusList[1]);
+      ctx.arcTo(x3 + w3, y3 + h3, x3, y3 + h3, radiusList[2]);
+      ctx.arcTo(x3, y3 + h3, x3, y3, radiusList[3]);
+      ctx.arcTo(x3, y3, x3 + w3, y3, radiusList[0]);
+      ctx.closePath();
+      ctx.fill();
+      ctx.clip();
+    }
+    renderContent(ctx);
+    if (layout.detail.overflow === "hidden") {
+      ctx.restore();
+    }
+    drawBoxBorder(ctx, viewElem, { viewScaleInfo, viewSizeInfo });
+    ctx.globalAlpha = parentOpacity;
   }
   var __awaiter = function(thisArg, _arguments, P, generator) {
     function adopt(value) {
@@ -4564,21 +4590,20 @@ var __privateMethod = (obj, member, method) => {
         w: opts.viewSizeInfo.width,
         h: opts.viewSizeInfo.height
       };
-      if (data.underlay) {
-        drawUnderlay(viewContext, data.underlay, Object.assign({
-          loader,
-          calculator,
-          parentElementSize,
-          parentOpacity: 1
-        }, opts));
-      }
-      drawElementList(viewContext, data, Object.assign({
+      const drawOpts = Object.assign({
         loader,
         calculator,
         parentElementSize,
         elementAssets: data.assets,
         parentOpacity: 1
-      }, opts));
+      }, opts);
+      if (data.layout) {
+        drawLayout(viewContext, data.layout, drawOpts, () => {
+          drawElementList(viewContext, data, drawOpts);
+        });
+      } else {
+        drawElementList(viewContext, data, drawOpts);
+      }
     }
     scale(num) {
       const { sharer } = __classPrivateFieldGet$7(this, _Renderer_opts, "f");
@@ -4654,14 +4679,22 @@ var __privateMethod = (obj, member, method) => {
         }
       }), "f");
     }
-    toGridNum(num) {
+    toGridNum(num, opts) {
+      if ((opts === null || opts === void 0 ? void 0 : opts.ignore) === true) {
+        return num;
+      }
       return Math.round(num);
     }
     destroy() {
       __classPrivateFieldSet$6(this, _Calculator_opts, null, "f");
     }
-    isElementInView(elem, viewScaleInfo, viewSizeInfo) {
-      return isElementInView(elem, { viewScaleInfo, viewSizeInfo });
+    needRender(elem) {
+      const viewVisibleInfoMap = __classPrivateFieldGet$6(this, _Calculator_store, "f").get("viewVisibleInfoMap");
+      const info = viewVisibleInfoMap[elem.uuid];
+      if (!info) {
+        return true;
+      }
+      return info.isVisibleInView;
     }
     isPointInElement(p, elem, viewScaleInfo, viewSizeInfo) {
       const context2d = __classPrivateFieldGet$6(this, _Calculator_opts, "f").viewContext;
@@ -7525,7 +7558,7 @@ var __privateMethod = (obj, member, method) => {
                     type: "updateElement",
                     content: {
                       element: elem,
-                      position: sharer.getSharedStorage(keySelectedElementPosition) || []
+                      position: getElementPositionFromList(elem.uuid, data.elements) || []
                     }
                   },
                   viewSizeInfo,
@@ -7574,19 +7607,20 @@ var __privateMethod = (obj, member, method) => {
                 resizeType,
                 sharer
               });
-              elems[0].angle = resizedElemSize.angle;
+              elems[0].angle = calculator.toGridNum(resizedElemSize.angle || 0);
             } else {
               const resizedElemSize = resizeElement(elems[0], { scale, start: resizeStart, end: resizeEnd, resizeType, sharer });
-              elems[0].x = calculator.toGridNum(resizedElemSize.x);
-              elems[0].y = calculator.toGridNum(resizedElemSize.y);
+              const calcOpts = { ignore: !!elems[0].angle };
+              elems[0].x = calculator.toGridNum(resizedElemSize.x, calcOpts);
+              elems[0].y = calculator.toGridNum(resizedElemSize.y, calcOpts);
               if (elems[0].type === "group" && ((_c = elems[0].operations) === null || _c === void 0 ? void 0 : _c.deepResize) === true) {
                 deepResizeGroupElement(elems[0], {
-                  w: calculator.toGridNum(resizedElemSize.w),
-                  h: calculator.toGridNum(resizedElemSize.h)
+                  w: calculator.toGridNum(resizedElemSize.w, calcOpts),
+                  h: calculator.toGridNum(resizedElemSize.h, calcOpts)
                 });
               } else {
-                elems[0].w = calculator.toGridNum(resizedElemSize.w);
-                elems[0].h = calculator.toGridNum(resizedElemSize.h);
+                elems[0].w = calculator.toGridNum(resizedElemSize.w, calcOpts);
+                elems[0].h = calculator.toGridNum(resizedElemSize.h, calcOpts);
               }
             }
             updateSelectedElementList([elems[0]]);
@@ -7805,7 +7839,7 @@ var __privateMethod = (obj, member, method) => {
   const keyActiveThumbType = Symbol(`${key$1}_activeThumbType`);
   const minScrollerWidth = 12;
   const scrollerLineWidth = 16;
-  const scrollerThumbAlpha = 0.36;
+  const scrollerThumbAlpha = 0.3;
   const scrollConfig = {
     width: minScrollerWidth,
     thumbColor: "#000000AA",
@@ -8105,12 +8139,13 @@ var __privateMethod = (obj, member, method) => {
   const borderColor = "#00000080";
   const scaleColor = "#000000";
   const textColor = "#00000080";
-  const fontFamily = "monospace";
+  const fontFamily$1 = "monospace";
   const fontSize = 10;
   const fontWeight = 100;
   const gridColor = "#AAAAAA20";
   const gridKeyColor = "#AAAAAA40";
   const lineSize = 1;
+  const selectedAreaColor = "#196097";
   function calcRulerScaleList(opts) {
     const { scale, viewLength, viewOffset } = opts;
     const list = [];
@@ -8189,7 +8224,7 @@ var __privateMethod = (obj, member, method) => {
         ctx.$setFont({
           fontWeight,
           fontSize,
-          fontFamily
+          fontFamily: fontFamily$1
         });
         ctx.fillText(`${item.num}`, item.position + fontStart, fontStart);
       }
@@ -8225,7 +8260,7 @@ var __privateMethod = (obj, member, method) => {
           ctx.$setFont({
             fontWeight,
             fontSize,
-            fontFamily
+            fontFamily: fontFamily$1
           });
           ctx.fillText(numText, fontStart + fontSize, item.position + fontStart);
         });
@@ -8284,9 +8319,61 @@ var __privateMethod = (obj, member, method) => {
       ctx.stroke();
     }
   }
+  function drawScrollerSelectedArea(ctx, opts) {
+    const { snapshot, calculator } = opts;
+    const { sharedStore } = snapshot;
+    const selectedElementList = sharedStore[keySelectedElementList];
+    const actionType = sharedStore[keyActionType];
+    if (["select", "drag", "drag-list", "drag-list-end"].includes(actionType) && selectedElementList.length > 0) {
+      const viewScaleInfo = getViewScaleInfoFromSnapshot(snapshot);
+      const viewSizeInfo = getViewSizeInfoFromSnapshot(snapshot);
+      const rangeRectInfoList = [];
+      const xAreaStartList = [];
+      const xAreaEndList = [];
+      const yAreaStartList = [];
+      const yAreaEndList = [];
+      selectedElementList.forEach((elem) => {
+        const rectInfo = calculator.calcViewRectInfoFromRange(elem.uuid, {
+          viewScaleInfo,
+          viewSizeInfo
+        });
+        if (rectInfo) {
+          rangeRectInfoList.push(rectInfo);
+          xAreaStartList.push(rectInfo.left.x);
+          xAreaEndList.push(rectInfo.right.x);
+          yAreaStartList.push(rectInfo.top.y);
+          yAreaEndList.push(rectInfo.bottom.y);
+        }
+      });
+      if (!(rangeRectInfoList.length > 0)) {
+        return;
+      }
+      const xAreaStart = Math.min(...xAreaStartList);
+      const xAreaEnd = Math.max(...xAreaEndList);
+      const yAreaStart = Math.min(...yAreaStartList);
+      const yAreaEnd = Math.max(...yAreaEndList);
+      ctx.globalAlpha = 1;
+      ctx.beginPath();
+      ctx.moveTo(xAreaStart, 0);
+      ctx.lineTo(xAreaEnd, 0);
+      ctx.lineTo(xAreaEnd, rulerSize);
+      ctx.lineTo(xAreaStart, rulerSize);
+      ctx.fillStyle = selectedAreaColor;
+      ctx.closePath();
+      ctx.fill();
+      ctx.beginPath();
+      ctx.moveTo(0, yAreaStart);
+      ctx.lineTo(rulerSize, yAreaStart);
+      ctx.lineTo(rulerSize, yAreaEnd);
+      ctx.lineTo(0, yAreaEnd);
+      ctx.fillStyle = selectedAreaColor;
+      ctx.closePath();
+      ctx.fill();
+    }
+  }
   const middlewareEventRuler = "@middleware/show-ruler";
   const MiddlewareRuler = (opts) => {
-    const { boardContent, viewer, eventHub } = opts;
+    const { boardContent, viewer, eventHub, calculator } = opts;
     const { helperContext, underContext } = boardContent;
     let show = true;
     let showGrid = true;
@@ -8313,6 +8400,7 @@ var __privateMethod = (obj, member, method) => {
         if (show === true) {
           const viewScaleInfo = getViewScaleInfoFromSnapshot(snapshot);
           const viewSizeInfo = getViewSizeInfoFromSnapshot(snapshot);
+          drawScrollerSelectedArea(helperContext, { snapshot, calculator });
           drawRulerBackground(helperContext, { viewScaleInfo, viewSizeInfo });
           const xList = calcXRulerScaleList({ viewScaleInfo, viewSizeInfo });
           drawXRuler(helperContext, { scaleList: xList });
@@ -8370,6 +8458,222 @@ var __privateMethod = (obj, member, method) => {
         eventHub.trigger("cursor", {
           type: "drag-default"
         });
+      }
+    };
+  };
+  const fontFamily = "monospace";
+  function drawSizeInfoText(ctx, opts) {
+    const { point, rotateCenter, angle: angle2, text: text2, color: color2, background: background2, fontSize: fontSize2, lineHeight: lineHeight2 } = opts;
+    rotateByCenter(ctx, angle2, rotateCenter, () => {
+      ctx.$setFont({
+        fontWeight: "300",
+        fontSize: fontSize2,
+        fontFamily
+      });
+      const padding = (lineHeight2 - fontSize2) / 2;
+      const textWidth = ctx.$undoPixelRatio(ctx.measureText(text2).width);
+      const bgStart = {
+        x: point.x - textWidth / 2 - padding,
+        y: point.y
+      };
+      const bgEnd = {
+        x: bgStart.x + textWidth + padding * 2,
+        y: bgStart.y + fontSize2 + padding
+      };
+      const textStart = {
+        x: point.x - textWidth / 2,
+        y: point.y
+      };
+      ctx.setLineDash([]);
+      ctx.fillStyle = background2;
+      ctx.beginPath();
+      ctx.moveTo(bgStart.x, bgStart.y);
+      ctx.lineTo(bgEnd.x, bgStart.y);
+      ctx.lineTo(bgEnd.x, bgEnd.y);
+      ctx.lineTo(bgStart.x, bgEnd.y);
+      ctx.closePath();
+      ctx.fill();
+      ctx.fillStyle = color2;
+      ctx.textBaseline = "top";
+      ctx.fillText(text2, textStart.x, textStart.y + padding);
+    });
+  }
+  function drawPositionInfoText(ctx, opts) {
+    const { point, rotateCenter, angle: angle2, text: text2, color: color2, background: background2, fontSize: fontSize2, lineHeight: lineHeight2 } = opts;
+    rotateByCenter(ctx, angle2, rotateCenter, () => {
+      ctx.$setFont({
+        fontWeight: "300",
+        fontSize: fontSize2,
+        fontFamily
+      });
+      const padding = (lineHeight2 - fontSize2) / 2;
+      const textWidth = ctx.$undoPixelRatio(ctx.measureText(text2).width);
+      const bgStart = {
+        x: point.x,
+        y: point.y
+      };
+      const bgEnd = {
+        x: bgStart.x + textWidth + padding * 2,
+        y: bgStart.y + fontSize2 + padding
+      };
+      const textStart = {
+        x: point.x + padding,
+        y: point.y
+      };
+      ctx.setLineDash([]);
+      ctx.fillStyle = background2;
+      ctx.beginPath();
+      ctx.moveTo(bgStart.x, bgStart.y);
+      ctx.lineTo(bgEnd.x, bgStart.y);
+      ctx.lineTo(bgEnd.x, bgEnd.y);
+      ctx.lineTo(bgStart.x, bgEnd.y);
+      ctx.closePath();
+      ctx.fill();
+      ctx.fillStyle = color2;
+      ctx.textBaseline = "top";
+      ctx.fillText(text2, textStart.x, textStart.y + padding);
+    });
+  }
+  function drawAngleInfoText(ctx, opts) {
+    const { point, rotateCenter, angle: angle2, text: text2, color: color2, background: background2, fontSize: fontSize2, lineHeight: lineHeight2 } = opts;
+    rotateByCenter(ctx, angle2, rotateCenter, () => {
+      ctx.$setFont({
+        fontWeight: "300",
+        fontSize: fontSize2,
+        fontFamily
+      });
+      const padding = (lineHeight2 - fontSize2) / 2;
+      const textWidth = ctx.$undoPixelRatio(ctx.measureText(text2).width);
+      const bgStart = {
+        x: point.x,
+        y: point.y
+      };
+      const bgEnd = {
+        x: bgStart.x + textWidth + padding * 2,
+        y: bgStart.y + fontSize2 + padding
+      };
+      const textStart = {
+        x: point.x + padding,
+        y: point.y
+      };
+      ctx.setLineDash([]);
+      ctx.fillStyle = background2;
+      ctx.beginPath();
+      ctx.moveTo(bgStart.x, bgStart.y);
+      ctx.lineTo(bgEnd.x, bgStart.y);
+      ctx.lineTo(bgEnd.x, bgEnd.y);
+      ctx.lineTo(bgStart.x, bgEnd.y);
+      ctx.closePath();
+      ctx.fill();
+      ctx.fillStyle = color2;
+      ctx.textBaseline = "top";
+      ctx.fillText(text2, textStart.x, textStart.y + padding);
+    });
+  }
+  const infoBackground = "#1973bac6";
+  const infoTextColor = "#ffffff";
+  const infoFontSize = 10;
+  const infoLineHeight = 16;
+  const MiddlewareInfo = (opts) => {
+    const { boardContent, calculator } = opts;
+    const { helperContext } = boardContent;
+    return {
+      name: "@middleware/info",
+      beforeDrawFrame({ snapshot }) {
+        const { sharedStore } = snapshot;
+        const selectedElementList = sharedStore[keySelectedElementList];
+        const actionType = sharedStore[keyActionType];
+        const groupQueue = sharedStore[keyGroupQueue] || [];
+        if (selectedElementList.length === 1) {
+          const elem = selectedElementList[0];
+          if (elem && ["select", "drag", "resize"].includes(actionType)) {
+            const viewScaleInfo = getViewScaleInfoFromSnapshot(snapshot);
+            const viewSizeInfo = getViewSizeInfoFromSnapshot(snapshot);
+            const { x: x2, y: y2, w: w2, h: h2, angle: angle2 } = elem;
+            const totalGroupQueue = [
+              ...groupQueue,
+              ...[
+                {
+                  uuid: createUUID(),
+                  x: x2,
+                  y: y2,
+                  w: w2,
+                  h: h2,
+                  angle: angle2,
+                  type: "group",
+                  detail: { children: [] }
+                }
+              ]
+            ];
+            const calcOpts = { viewScaleInfo, viewSizeInfo };
+            const rangeRectInfo = calculator.calcViewRectInfoFromOrigin(elem.uuid, calcOpts);
+            let totalAngle = 0;
+            totalGroupQueue.forEach((group) => {
+              totalAngle += group.angle || 0;
+            });
+            const totalRadian = parseAngleToRadian(limitAngle(0 - totalAngle));
+            if (rangeRectInfo) {
+              const elemCenter = rangeRectInfo === null || rangeRectInfo === void 0 ? void 0 : rangeRectInfo.center;
+              const rectInfo = {
+                topLeft: rotatePoint(elemCenter, rangeRectInfo.topLeft, totalRadian),
+                topRight: rotatePoint(elemCenter, rangeRectInfo.topRight, totalRadian),
+                bottomRight: rotatePoint(elemCenter, rangeRectInfo.bottomRight, totalRadian),
+                bottomLeft: rotatePoint(elemCenter, rangeRectInfo.bottomLeft, totalRadian),
+                center: rotatePoint(elemCenter, rangeRectInfo.center, totalRadian),
+                top: rotatePoint(elemCenter, rangeRectInfo.top, totalRadian),
+                right: rotatePoint(elemCenter, rangeRectInfo.right, totalRadian),
+                bottom: rotatePoint(elemCenter, rangeRectInfo.bottom, totalRadian),
+                left: rotatePoint(elemCenter, rangeRectInfo.left, totalRadian)
+              };
+              const x3 = formatNumber(elem.x, { decimalPlaces: 2 });
+              const y3 = formatNumber(elem.y, { decimalPlaces: 2 });
+              const w3 = formatNumber(elem.w, { decimalPlaces: 2 });
+              const h3 = formatNumber(elem.h, { decimalPlaces: 2 });
+              const xyText = `${formatNumber(x3, { decimalPlaces: 0 })},${formatNumber(y3, { decimalPlaces: 0 })}`;
+              const whText = `${formatNumber(w3, { decimalPlaces: 0 })}x${formatNumber(h3, { decimalPlaces: 0 })}`;
+              const angleText = `${formatNumber(elem.angle || 0, { decimalPlaces: 0 })}°`;
+              drawSizeInfoText(helperContext, {
+                point: {
+                  x: rectInfo.bottom.x,
+                  y: rectInfo.bottom.y + infoFontSize
+                },
+                rotateCenter: rectInfo.center,
+                angle: totalAngle,
+                text: whText,
+                fontSize: infoFontSize,
+                lineHeight: infoLineHeight,
+                color: infoTextColor,
+                background: infoBackground
+              });
+              drawPositionInfoText(helperContext, {
+                point: {
+                  x: rectInfo.topLeft.x,
+                  y: rectInfo.topLeft.y - infoFontSize * 2
+                },
+                rotateCenter: rectInfo.center,
+                angle: totalAngle,
+                text: xyText,
+                fontSize: infoFontSize,
+                lineHeight: infoLineHeight,
+                color: infoTextColor,
+                background: infoBackground
+              });
+              drawAngleInfoText(helperContext, {
+                point: {
+                  x: rectInfo.top.x + infoFontSize,
+                  y: rectInfo.top.y - infoFontSize * 2
+                },
+                rotateCenter: rectInfo.center,
+                angle: totalAngle,
+                text: angleText,
+                fontSize: infoFontSize,
+                lineHeight: infoLineHeight,
+                color: infoTextColor,
+                background: infoBackground
+              });
+            }
+          }
+        }
       }
     };
   };
@@ -8507,7 +8811,8 @@ var __privateMethod = (obj, member, method) => {
       enableScroll: false,
       enableSelect: false,
       enableTextEdit: false,
-      enableDrag: false
+      enableDrag: false,
+      enableInfo: false
     };
     return storage;
   }
@@ -8563,7 +8868,7 @@ var __privateMethod = (obj, member, method) => {
     return ["select", "drag", "readOnly"].includes(mode);
   }
   function runMiddlewares(core, store) {
-    const { enableRuler, enableScale, enableScroll, enableSelect, enableTextEdit, enableDrag } = store.getSnapshot();
+    const { enableRuler, enableScale, enableScroll, enableSelect, enableTextEdit, enableDrag, enableInfo } = store.getSnapshot();
     if (enableScroll === true) {
       core.use(MiddlewareScroller);
     } else if (enableScroll === false) {
@@ -8594,6 +8899,11 @@ var __privateMethod = (obj, member, method) => {
     } else if (enableDrag === false) {
       core.disuse(MiddlewareDragger);
     }
+    if (enableInfo === true) {
+      core.use(MiddlewareInfo);
+    } else if (enableInfo === false) {
+      core.disuse(MiddlewareInfo);
+    }
   }
   function changeMode(mode, core, store) {
     let enableScale = false;
@@ -8602,6 +8912,7 @@ var __privateMethod = (obj, member, method) => {
     let enableTextEdit = false;
     let enableDrag = false;
     let enableRuler = false;
+    const enableInfo = true;
     let innerMode = "select";
     store.set("mode", innerMode);
     if (isValidMode(mode)) {
@@ -8637,6 +8948,7 @@ var __privateMethod = (obj, member, method) => {
     store.set("enableTextEdit", enableTextEdit);
     store.set("enableDrag", enableDrag);
     store.set("enableRuler", enableRuler);
+    store.set("enableInfo", enableInfo);
     runMiddlewares(core, store);
   }
   class iDraw2 {
@@ -8840,11 +9152,12 @@ var __privateMethod = (obj, member, method) => {
   _setFeature = new WeakSet();
   setFeature_fn = function(feat, status) {
     const store = __privateGet(this, _store);
-    if (["ruler", "scroll", "scale"].includes(feat)) {
+    if (["ruler", "scroll", "scale", "info"].includes(feat)) {
       const map = {
         ruler: "enableRuler",
         scroll: "enableScroll",
-        scale: "enableScale"
+        scale: "enableScale",
+        info: "enableInfo"
       };
       store.set(map[feat], !!status);
       runMiddlewares(__privateGet(this, _core), store);
