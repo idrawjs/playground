@@ -3085,6 +3085,8 @@ var __privateMethod = (obj, member, method) => {
       fontSize: 16,
       fontFamily: "sans-serif",
       fontWeight: 400,
+      minInlineSize: "auto",
+      wordBreak: "break-all",
       overflow: "hidden"
     };
     return config;
@@ -3620,6 +3622,10 @@ var __privateMethod = (obj, member, method) => {
     }
     return { data, content };
   }
+  const baseFontFamilyList = ["-apple-system", '"system-ui"', ' "Segoe UI"', " Roboto", '"Helvetica Neue"', "Arial", '"Noto Sans"', " sans-serif"];
+  function enhanceFontFamliy(fontFamily2) {
+    return [fontFamily2, ...baseFontFamilyList].join(", ");
+  }
   function createColorStyle(ctx, color2, opts) {
     if (typeof color2 === "string") {
       return color2;
@@ -3676,19 +3682,36 @@ var __privateMethod = (obj, member, method) => {
     const { pattern, renderContent, originElem, calcElemSize, viewScaleInfo, viewSizeInfo } = opts || {};
     const { parentOpacity } = opts;
     const opacity = getOpacity(originElem) * parentOpacity;
-    drawClipPath(ctx, viewElem, {
-      originElem,
-      calcElemSize,
-      viewScaleInfo,
-      viewSizeInfo,
-      renderContent: () => {
-        ctx.globalAlpha = opacity;
-        drawBoxBackground(ctx, viewElem, { pattern, viewScaleInfo, viewSizeInfo });
-        renderContent === null || renderContent === void 0 ? void 0 : renderContent();
-        drawBoxBorder(ctx, viewElem, { viewScaleInfo, viewSizeInfo });
-        ctx.globalAlpha = parentOpacity;
+    const { clipPath, clipPathStrokeColor, clipPathStrokeWidth } = originElem.detail;
+    const mainRender = () => {
+      ctx.globalAlpha = opacity;
+      drawBoxBackground(ctx, viewElem, { pattern, viewScaleInfo, viewSizeInfo });
+      renderContent === null || renderContent === void 0 ? void 0 : renderContent();
+      drawBoxBorder(ctx, viewElem, { viewScaleInfo, viewSizeInfo });
+      ctx.globalAlpha = parentOpacity;
+    };
+    if (clipPath) {
+      drawClipPath(ctx, viewElem, {
+        originElem,
+        calcElemSize,
+        viewScaleInfo,
+        viewSizeInfo,
+        renderContent: () => {
+          mainRender();
+        }
+      });
+      if (typeof clipPathStrokeWidth === "number" && clipPathStrokeWidth > 0 && clipPathStrokeColor) {
+        drawClipPathStroke(ctx, viewElem, {
+          originElem,
+          calcElemSize,
+          viewScaleInfo,
+          viewSizeInfo,
+          parentOpacity
+        });
       }
-    });
+    } else {
+      mainRender();
+    }
   }
   function drawClipPath(ctx, viewElem, opts) {
     const { renderContent, originElem, calcElemSize, viewSizeInfo } = opts;
@@ -3709,6 +3732,38 @@ var __privateMethod = (obj, member, method) => {
       const pathStr = generateSVGPath(clipPath.commands || []);
       const path2d = new Path2D(pathStr);
       ctx.clip(path2d);
+      ctx.translate(0 - internalX, 0 - internalY);
+      ctx.setTransform(1, 0, 0, 1, 0, 0);
+      rotateElement$1(ctx, Object.assign({}, viewElem), () => {
+        renderContent === null || renderContent === void 0 ? void 0 : renderContent();
+      });
+      ctx.restore();
+    } else {
+      renderContent === null || renderContent === void 0 ? void 0 : renderContent();
+    }
+  }
+  function drawClipPathStroke(ctx, viewElem, opts) {
+    const { renderContent, originElem, calcElemSize, viewSizeInfo, parentOpacity } = opts;
+    const totalScale = viewSizeInfo.devicePixelRatio;
+    const { clipPath, clipPathStrokeColor, clipPathStrokeWidth } = (originElem === null || originElem === void 0 ? void 0 : originElem.detail) || {};
+    if (clipPath && calcElemSize && clipPath.commands && typeof clipPathStrokeWidth === "number" && clipPathStrokeWidth > 0 && clipPathStrokeColor) {
+      const { x: x2, y: y2, w: w2, h: h2 } = calcElemSize;
+      const { originW, originH, originX, originY } = clipPath;
+      const scaleW = w2 / originW;
+      const scaleH = h2 / originH;
+      const viewOriginX = originX * scaleW;
+      const viewOriginY = originY * scaleH;
+      const internalX = x2 - viewOriginX;
+      const internalY = y2 - viewOriginY;
+      ctx.save();
+      ctx.globalAlpha = parentOpacity;
+      ctx.translate(internalX, internalY);
+      ctx.scale(totalScale * scaleW, totalScale * scaleH);
+      const pathStr = generateSVGPath(clipPath.commands || []);
+      const path2d = new Path2D(pathStr);
+      ctx.strokeStyle = clipPathStrokeColor;
+      ctx.lineWidth = clipPathStrokeWidth;
+      ctx.stroke(path2d);
       ctx.translate(0 - internalX, 0 - internalY);
       ctx.setTransform(1, 0, 0, 1, 0, 0);
       rotateElement$1(ctx, Object.assign({}, viewElem), () => {
@@ -4137,6 +4192,14 @@ var __privateMethod = (obj, member, method) => {
     });
   }
   const detailConfig = getDefaultElementDetailConfig();
+  function isTextWidthWithinErrorRange(w0, w1, scale) {
+    if (scale < 0.5) {
+      if (w0 < w1 && (w0 - w1) / w0 > -0.15) {
+        return true;
+      }
+    }
+    return w0 >= w1;
+  }
   function drawText(ctx, elem, opts) {
     const { viewScaleInfo, viewSizeInfo, parentOpacity } = opts;
     const { x: x2, y: y2, w: w2, h: h2, angle: angle2 } = calcViewElementSize(elem, { viewScaleInfo }) || elem;
@@ -4152,6 +4215,9 @@ var __privateMethod = (obj, member, method) => {
           const detail = Object.assign(Object.assign({}, detailConfig), elem.detail);
           const originFontSize = detail.fontSize || detailConfig.fontSize;
           const fontSize2 = originFontSize * viewScaleInfo.scale;
+          if (fontSize2 < 2) {
+            return;
+          }
           const originLineHeight = detail.lineHeight || originFontSize;
           const lineHeight2 = originLineHeight * viewScaleInfo.scale;
           ctx.fillStyle = elem.detail.color || detailConfig.color;
@@ -4159,7 +4225,7 @@ var __privateMethod = (obj, member, method) => {
           ctx.$setFont({
             fontWeight: detail.fontWeight,
             fontSize: fontSize2,
-            fontFamily: detail.fontFamily
+            fontFamily: enhanceFontFamliy(detail.fontFamily)
           });
           let detailText = detail.text.replace(/\r\n/gi, "\n");
           if (detail.textTransform === "lowercase") {
@@ -4171,30 +4237,48 @@ var __privateMethod = (obj, member, method) => {
           const detailTextList = detailText.split("\n");
           const lines = [];
           let lineNum = 0;
-          detailTextList.forEach((tempText, idx) => {
+          detailTextList.forEach((itemText, idx) => {
             if (detail.minInlineSize === "maxContent") {
               lines.push({
-                text: tempText,
-                width: ctx.$undoPixelRatio(ctx.measureText(tempText).width)
+                text: itemText,
+                width: ctx.$undoPixelRatio(ctx.measureText(itemText).width)
               });
             } else {
               let lineText = "";
-              if (tempText.length > 0) {
-                for (let i = 0; i < tempText.length; i++) {
-                  if (ctx.measureText(lineText + (tempText[i] || "")).width <= ctx.$doPixelRatio(w2)) {
-                    lineText += tempText[i] || "";
+              let splitStr = "";
+              let tempStrList = itemText.split(splitStr);
+              if (detail.wordBreak === "normal") {
+                const splitStr2 = " ";
+                const wordList = itemText.split(splitStr2);
+                tempStrList = [];
+                wordList.forEach((word, idx2) => {
+                  tempStrList.push(word);
+                  if (idx2 < wordList.length - 1) {
+                    tempStrList.push(splitStr2);
+                  }
+                });
+              }
+              if (tempStrList.length === 1 && detail.overflow === "visible") {
+                lines.push({
+                  text: tempStrList[0],
+                  width: ctx.$undoPixelRatio(ctx.measureText(tempStrList[0]).width)
+                });
+              } else if (tempStrList.length > 0) {
+                for (let i = 0; i < tempStrList.length; i++) {
+                  if (isTextWidthWithinErrorRange(ctx.$doPixelRatio(w2), ctx.measureText(lineText + tempStrList[i]).width, viewScaleInfo.scale)) {
+                    lineText += tempStrList[i] || "";
                   } else {
                     lines.push({
                       text: lineText,
                       width: ctx.$undoPixelRatio(ctx.measureText(lineText).width)
                     });
-                    lineText = tempText[i] || "";
+                    lineText = tempStrList[i] || "";
                     lineNum++;
                   }
-                  if ((lineNum + 1) * fontHeight > h2) {
+                  if ((lineNum + 1) * fontHeight > h2 && detail.overflow === "hidden") {
                     break;
                   }
-                  if (tempText.length - 1 === i) {
+                  if (tempStrList.length - 1 === i) {
                     if ((lineNum + 1) * fontHeight <= h2) {
                       lines.push({
                         text: lineText,
@@ -4216,6 +4300,10 @@ var __privateMethod = (obj, member, method) => {
             }
           });
           let startY = 0;
+          let eachLineStartY = 0;
+          if (fontHeight > fontSize2) {
+            eachLineStartY = (fontHeight - fontSize2) / 2;
+          }
           if (lines.length * fontHeight < h2) {
             if (elem.detail.verticalAlign === "top") {
               startY = 0;
@@ -4246,7 +4334,7 @@ var __privateMethod = (obj, member, method) => {
               } else if (detail.textAlign === "right") {
                 _x = x2 + (w2 - line.width);
               }
-              ctx.fillText(line.text, _x, _y + fontHeight * i);
+              ctx.fillText(line.text, _x, _y + fontHeight * i + eachLineStartY);
             });
           }
         }
@@ -4302,13 +4390,17 @@ var __privateMethod = (obj, member, method) => {
     });
   }
   function drawElement(ctx, elem, opts) {
-    var _a;
+    var _a, _b, _c;
     if (((_a = elem === null || elem === void 0 ? void 0 : elem.operations) === null || _a === void 0 ? void 0 : _a.invisible) === true) {
       return;
     }
     const { w: w2, h: h2 } = elem;
     const { scale } = opts.viewScaleInfo;
     if (scale < 1 && (w2 * scale < 1 || h2 * scale < 1) || opts.parentOpacity === 0) {
+      return;
+    }
+    const { overrideElementMap } = opts;
+    if ((_c = (_b = overrideElementMap === null || overrideElementMap === void 0 ? void 0 : overrideElementMap[elem.uuid]) === null || _b === void 0 ? void 0 : _b.operations) === null || _c === void 0 ? void 0 : _c.invisible) {
       return;
     }
     try {
@@ -4356,7 +4448,7 @@ var __privateMethod = (obj, member, method) => {
   }
   function drawGroup(ctx, elem, opts) {
     const { viewScaleInfo, viewSizeInfo, parentOpacity } = opts;
-    const { x: x2, y: y2, w: w2, h: h2, angle: angle2 } = calcViewElementSize({ x: elem.x, y: elem.y, w: elem.w, h: elem.h, angle: elem.angle }, { viewScaleInfo, viewSizeInfo }) || elem;
+    const { x: x2, y: y2, w: w2, h: h2, angle: angle2 } = calcViewElementSize({ x: elem.x, y: elem.y, w: elem.w, h: elem.h, angle: elem.angle }, { viewScaleInfo }) || elem;
     const viewElem = Object.assign(Object.assign({}, elem), { x: x2, y: y2, w: w2, h: h2, angle: angle2 });
     rotateElement$1(ctx, { x: x2, y: y2, w: w2, h: h2, angle: angle2 }, () => {
       ctx.globalAlpha = getOpacity(elem) * parentOpacity;
@@ -4453,7 +4545,7 @@ var __privateMethod = (obj, member, method) => {
   function drawLayout(ctx, layout, opts, renderContent) {
     const { viewScaleInfo, viewSizeInfo, parentOpacity } = opts;
     const elem = Object.assign({ uuid: "layout", type: "group" }, layout);
-    const { x: x2, y: y2, w: w2, h: h2 } = calcViewElementSize(elem, { viewScaleInfo, viewSizeInfo }) || elem;
+    const { x: x2, y: y2, w: w2, h: h2 } = calcViewElementSize(elem, { viewScaleInfo }) || elem;
     const angle2 = 0;
     const viewElem = Object.assign(Object.assign({}, elem), { x: x2, y: y2, w: w2, h: h2, angle: angle2 });
     ctx.globalAlpha = 1;
@@ -4467,7 +4559,7 @@ var __privateMethod = (obj, member, method) => {
     if (layout.detail.overflow === "hidden") {
       const { viewScaleInfo: viewScaleInfo2, viewSizeInfo: viewSizeInfo2 } = opts;
       const elem2 = Object.assign({ uuid: "layout", type: "group" }, layout);
-      const viewElemSize = calcViewElementSize(elem2, { viewScaleInfo: viewScaleInfo2, viewSizeInfo: viewSizeInfo2 }) || elem2;
+      const viewElemSize = calcViewElementSize(elem2, { viewScaleInfo: viewScaleInfo2 }) || elem2;
       const viewElem2 = Object.assign(Object.assign({}, elem2), viewElemSize);
       const { x: x3, y: y3, w: w3, h: h3, radiusList } = calcViewBoxSize(viewElem2, {
         viewScaleInfo: viewScaleInfo2,
@@ -4491,6 +4583,15 @@ var __privateMethod = (obj, member, method) => {
     }
     drawBoxBorder(ctx, viewElem, { viewScaleInfo, viewSizeInfo });
     ctx.globalAlpha = parentOpacity;
+  }
+  function drawGlobalBackground(ctx, global, opts) {
+    if (typeof (global === null || global === void 0 ? void 0 : global.background) === "string") {
+      const { viewSizeInfo } = opts;
+      const { width, height } = viewSizeInfo;
+      ctx.globalAlpha = 1;
+      ctx.fillStyle = global.background;
+      ctx.fillRect(0, 0, width, height);
+    }
   }
   var __awaiter = function(thisArg, _arguments, P, generator) {
     function adopt(value) {
@@ -4758,7 +4859,7 @@ var __privateMethod = (obj, member, method) => {
     }
     drawData(data, opts) {
       const loader = __classPrivateFieldGet$7(this, _Renderer_loader, "f");
-      const { calculator } = __classPrivateFieldGet$7(this, _Renderer_opts, "f");
+      const { calculator, sharer } = __classPrivateFieldGet$7(this, _Renderer_opts, "f");
       const viewContext = __classPrivateFieldGet$7(this, _Renderer_opts, "f").viewContext;
       viewContext.clearRect(0, 0, viewContext.canvas.width, viewContext.canvas.height);
       const parentElementSize = {
@@ -4772,8 +4873,10 @@ var __privateMethod = (obj, member, method) => {
         calculator,
         parentElementSize,
         elementAssets: data.assets,
-        parentOpacity: 1
+        parentOpacity: 1,
+        overrideElementMap: sharer === null || sharer === void 0 ? void 0 : sharer.getActiveOverrideElemenentMap()
       }, opts);
+      drawGlobalBackground(viewContext, data.global, drawOpts);
       if (data.layout) {
         drawLayout(viewContext, data.layout, drawOpts, () => {
           drawElementList(viewContext, data, drawOpts);
@@ -5201,7 +5304,8 @@ var __privateMethod = (obj, member, method) => {
     offsetLeft: 0,
     offsetRight: 0,
     offsetTop: 0,
-    offsetBottom: 0
+    offsetBottom: 0,
+    overrideElementMap: null
   };
   class Sharer {
     constructor() {
@@ -5268,6 +5372,12 @@ var __privateMethod = (obj, member, method) => {
         contextHeight: __classPrivateFieldGet$4(this, _Sharer_activeStore, "f").get("contextHeight")
       };
       return sizeInfo;
+    }
+    getActiveOverrideElemenentMap() {
+      return __classPrivateFieldGet$4(this, _Sharer_activeStore, "f").get("overrideElementMap");
+    }
+    setActiveOverrideElemenentMap(map) {
+      __classPrivateFieldGet$4(this, _Sharer_activeStore, "f").set("overrideElementMap", map);
     }
   }
   _Sharer_activeStore = /* @__PURE__ */ new WeakMap(), _Sharer_sharedStore = /* @__PURE__ */ new WeakMap();
@@ -7201,7 +7311,7 @@ var __privateMethod = (obj, member, method) => {
   const middlewareEventTextChange = "@middleware/text-change";
   const defaultElementDetail = getDefaultElementDetailConfig();
   const MiddlewareTextEditor = (opts) => {
-    const { eventHub, boardContent, viewer } = opts;
+    const { eventHub, boardContent, viewer, sharer } = opts;
     const canvas = boardContent.boardContext.canvas;
     const textarea = document.createElement("div");
     textarea.setAttribute("contenteditable", "true");
@@ -7224,8 +7334,24 @@ var __privateMethod = (obj, member, method) => {
       resetCanvasWrapper();
       resetTextArea(e);
       mask.style.display = "block";
+      if (activeElem === null || activeElem === void 0 ? void 0 : activeElem.uuid) {
+        sharer.setActiveOverrideElemenentMap({
+          [activeElem.uuid]: {
+            operations: { invisible: true }
+          }
+        });
+        viewer.drawFrame();
+      }
     };
     const hideTextArea = () => {
+      if (activeElem === null || activeElem === void 0 ? void 0 : activeElem.uuid) {
+        const map = sharer.getActiveOverrideElemenentMap();
+        if (map) {
+          delete map[activeElem.uuid];
+        }
+        sharer.setActiveOverrideElemenentMap(map);
+        viewer.drawFrame();
+      }
       mask.style.display = "none";
       activeElem = null;
       activePosition = [];
@@ -7312,11 +7438,11 @@ var __privateMethod = (obj, member, method) => {
       textarea.style.resize = "none";
       textarea.style.overflow = "hidden";
       textarea.style.wordBreak = "break-all";
-      textarea.style.background = "#FFFFFF";
-      textarea.style.color = "#333333";
+      textarea.style.background = "transparent";
+      textarea.style.color = `${detail.color || "#333333"}`;
       textarea.style.fontSize = `${detail.fontSize * scale}px`;
-      textarea.style.lineHeight = `${detail.lineHeight * scale}px`;
-      textarea.style.fontFamily = detail.fontFamily;
+      textarea.style.lineHeight = `${(detail.lineHeight || detail.fontSize) * scale}px`;
+      textarea.style.fontFamily = enhanceFontFamliy(detail.fontFamily);
       textarea.style.fontWeight = `${detail.fontWeight}`;
       textarea.style.padding = "0";
       textarea.style.margin = "0";
@@ -7912,7 +8038,7 @@ var __privateMethod = (obj, member, method) => {
         viewer.drawFrame();
       },
       doubleClick(e) {
-        var _a, _b, _c, _d, _e, _f;
+        var _a, _b, _c, _d, _e, _f, _g, _h;
         if (sharer.getSharedStorage(keyEnableSelectInGroup) === false) {
           return;
         }
@@ -7929,11 +8055,11 @@ var __privateMethod = (obj, member, method) => {
             viewer.drawFrame();
             return;
           }
-        } else if (target.elements.length === 1 && ((_d = target.elements[0]) === null || _d === void 0 ? void 0 : _d.type) === "text") {
+        } else if (target.elements.length === 1 && ((_d = target.elements[0]) === null || _d === void 0 ? void 0 : _d.type) === "text" && !((_f = (_e = target.elements[0]) === null || _e === void 0 ? void 0 : _e.operations) === null || _f === void 0 ? void 0 : _f.invisible)) {
           eventHub.trigger(middlewareEventTextEdit, {
             element: target.elements[0],
             groupQueue: sharer.getSharedStorage(keyGroupQueue) || [],
-            position: getElementPositionFromList((_e = target.elements[0]) === null || _e === void 0 ? void 0 : _e.uuid, ((_f = sharer.getActiveStorage("data")) === null || _f === void 0 ? void 0 : _f.elements) || []),
+            position: getElementPositionFromList((_g = target.elements[0]) === null || _g === void 0 ? void 0 : _g.uuid, ((_h = sharer.getActiveStorage("data")) === null || _h === void 0 ? void 0 : _h.elements) || []),
             viewScaleInfo: sharer.getActiveViewScaleInfo()
           });
         }
