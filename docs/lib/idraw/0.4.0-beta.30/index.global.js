@@ -2266,6 +2266,10 @@ var __privateMethod = (obj, member, method) => {
     }
     return false;
   }
+  function isViewPointInElementSize(p, elemSize, opts) {
+    const vertexes = calcElementVertexes(elemSize);
+    return isViewPointInVertexes(p, vertexes);
+  }
   function isViewPointInVertexes(p, vertexes, opts) {
     const xList = [vertexes[0].x, vertexes[1].x, vertexes[2].x, vertexes[3].x];
     const yList = [vertexes[0].y, vertexes[1].y, vertexes[2].y, vertexes[3].y];
@@ -3420,15 +3424,56 @@ var __privateMethod = (obj, member, method) => {
         return { elements, from, to };
       }
       let trimDeletePosIndex = -1;
-      for (let i = 0; i < from.length; i++) {
-        if (!(to[i] >= 0)) {
-          break;
+      let isEffectToIndex = false;
+      if (from.length >= 1 && to.length >= 1) {
+        if (from.length <= to.length) {
+          if (from.length === 1) {
+            if (from[0] < to[0]) {
+              isEffectToIndex = true;
+            }
+          } else {
+            for (let i = 0; i < from.length; i++) {
+              if (from[i] === to[i]) {
+                if (from.length === from.length - 1) {
+                  isEffectToIndex = true;
+                  break;
+                }
+              } else {
+                break;
+              }
+            }
+          }
         }
-        if (to[i] === from[i]) {
-          continue;
+        if (from.length >= to.length) {
+          if (to.length === 1) {
+            if (to[0] < from[0]) {
+              isEffectToIndex = true;
+            }
+          } else {
+            for (let i = 0; i < to.length; i++) {
+              if (i === to.length - 1 && to[i] < from[i]) {
+                isEffectToIndex = true;
+              }
+              if (from[i] === to[i]) {
+                continue;
+              } else {
+                break;
+              }
+            }
+          }
         }
-        if (to[i] < from[i] && i == to.length - 1) {
-          trimDeletePosIndex = i;
+      }
+      if (isEffectToIndex === true) {
+        for (let i = 0; i < from.length; i++) {
+          if (!(to[i] >= 0)) {
+            break;
+          }
+          if (to[i] === from[i]) {
+            continue;
+          }
+          if (to[i] < from[i] && i == to.length - 1) {
+            trimDeletePosIndex = i;
+          }
         }
       }
       if (trimDeletePosIndex >= 0) {
@@ -3626,6 +3671,18 @@ var __privateMethod = (obj, member, method) => {
   function enhanceFontFamliy(fontFamily2) {
     return [fontFamily2, ...baseFontFamilyList].join(", ");
   }
+  (function(s, e) {
+    var t = {};
+    for (var p in s)
+      if (Object.prototype.hasOwnProperty.call(s, p) && e.indexOf(p) < 0)
+        t[p] = s[p];
+    if (s != null && typeof Object.getOwnPropertySymbols === "function")
+      for (var i = 0, p = Object.getOwnPropertySymbols(s); i < p.length; i++) {
+        if (e.indexOf(p[i]) < 0 && Object.prototype.propertyIsEnumerable.call(s, p[i]))
+          t[p[i]] = s[p[i]];
+      }
+    return t;
+  });
   function createColorStyle(ctx, color2, opts) {
     if (typeof color2 === "string") {
       return color2;
@@ -4056,7 +4113,7 @@ var __privateMethod = (obj, member, method) => {
   }
   function drawRect(ctx, elem, opts) {
     const { viewScaleInfo, viewSizeInfo, parentOpacity } = opts;
-    const { x: x2, y: y2, w: w2, h: h2, angle: angle2 } = calcViewElementSize(elem, { viewScaleInfo, viewSizeInfo }) || elem;
+    const { x: x2, y: y2, w: w2, h: h2, angle: angle2 } = calcViewElementSize(elem, { viewScaleInfo }) || elem;
     const viewElem = Object.assign(Object.assign({}, elem), { x: x2, y: y2, w: w2, h: h2, angle: angle2 });
     rotateElement$1(ctx, { x: x2, y: y2, w: w2, h: h2, angle: angle2 }, () => {
       drawBoxShadow(ctx, viewElem, {
@@ -4205,143 +4262,162 @@ var __privateMethod = (obj, member, method) => {
     const { x: x2, y: y2, w: w2, h: h2, angle: angle2 } = calcViewElementSize(elem, { viewScaleInfo }) || elem;
     const viewElem = Object.assign(Object.assign({}, elem), { x: x2, y: y2, w: w2, h: h2, angle: angle2 });
     rotateElement$1(ctx, { x: x2, y: y2, w: w2, h: h2, angle: angle2 }, () => {
-      drawBox(ctx, viewElem, {
-        originElem: elem,
-        calcElemSize: { x: x2, y: y2, w: w2, h: h2, angle: angle2 },
+      drawBoxShadow(ctx, viewElem, {
         viewScaleInfo,
         viewSizeInfo,
-        parentOpacity,
         renderContent: () => {
-          const detail = Object.assign(Object.assign({}, detailConfig), elem.detail);
-          const originFontSize = detail.fontSize || detailConfig.fontSize;
-          const fontSize2 = originFontSize * viewScaleInfo.scale;
-          if (fontSize2 < 2) {
-            return;
-          }
-          const originLineHeight = detail.lineHeight || originFontSize;
-          const lineHeight2 = originLineHeight * viewScaleInfo.scale;
-          ctx.fillStyle = elem.detail.color || detailConfig.color;
-          ctx.textBaseline = "top";
-          ctx.$setFont({
-            fontWeight: detail.fontWeight,
-            fontSize: fontSize2,
-            fontFamily: enhanceFontFamliy(detail.fontFamily)
+          drawBox(ctx, viewElem, {
+            originElem: elem,
+            calcElemSize: { x: x2, y: y2, w: w2, h: h2, angle: angle2 },
+            viewScaleInfo,
+            viewSizeInfo,
+            parentOpacity
           });
-          let detailText = detail.text.replace(/\r\n/gi, "\n");
-          if (detail.textTransform === "lowercase") {
-            detailText = detailText.toLowerCase();
-          } else if (detail.textTransform === "uppercase") {
-            detailText = detailText.toUpperCase();
-          }
-          const fontHeight = lineHeight2;
-          const detailTextList = detailText.split("\n");
-          const lines = [];
-          let lineNum = 0;
-          detailTextList.forEach((itemText, idx) => {
-            if (detail.minInlineSize === "maxContent") {
-              lines.push({
-                text: itemText,
-                width: ctx.$undoPixelRatio(ctx.measureText(itemText).width)
+        }
+      });
+      {
+        const detail = Object.assign(Object.assign({}, detailConfig), elem.detail);
+        const originFontSize = detail.fontSize || detailConfig.fontSize;
+        const fontSize2 = originFontSize * viewScaleInfo.scale;
+        if (fontSize2 < 2) {
+          return;
+        }
+        const originLineHeight = detail.lineHeight || originFontSize;
+        const lineHeight2 = originLineHeight * viewScaleInfo.scale;
+        ctx.fillStyle = elem.detail.color || detailConfig.color;
+        ctx.textBaseline = "top";
+        ctx.$setFont({
+          fontWeight: detail.fontWeight,
+          fontSize: fontSize2,
+          fontFamily: enhanceFontFamliy(detail.fontFamily)
+        });
+        let detailText = detail.text.replace(/\r\n/gi, "\n");
+        if (detail.textTransform === "lowercase") {
+          detailText = detailText.toLowerCase();
+        } else if (detail.textTransform === "uppercase") {
+          detailText = detailText.toUpperCase();
+        }
+        const fontHeight = lineHeight2;
+        const detailTextList = detailText.split("\n");
+        const lines = [];
+        let lineNum = 0;
+        detailTextList.forEach((itemText, idx) => {
+          if (detail.minInlineSize === "maxContent") {
+            lines.push({
+              text: itemText,
+              width: ctx.$undoPixelRatio(ctx.measureText(itemText).width)
+            });
+          } else {
+            let lineText = "";
+            let splitStr = "";
+            let tempStrList = itemText.split(splitStr);
+            if (detail.wordBreak === "normal") {
+              const splitStr2 = " ";
+              const wordList = itemText.split(splitStr2);
+              tempStrList = [];
+              wordList.forEach((word, idx2) => {
+                tempStrList.push(word);
+                if (idx2 < wordList.length - 1) {
+                  tempStrList.push(splitStr2);
+                }
               });
-            } else {
-              let lineText = "";
-              let splitStr = "";
-              let tempStrList = itemText.split(splitStr);
-              if (detail.wordBreak === "normal") {
-                const splitStr2 = " ";
-                const wordList = itemText.split(splitStr2);
-                tempStrList = [];
-                wordList.forEach((word, idx2) => {
-                  tempStrList.push(word);
-                  if (idx2 < wordList.length - 1) {
-                    tempStrList.push(splitStr2);
-                  }
-                });
-              }
-              if (tempStrList.length === 1 && detail.overflow === "visible") {
-                lines.push({
-                  text: tempStrList[0],
-                  width: ctx.$undoPixelRatio(ctx.measureText(tempStrList[0]).width)
-                });
-              } else if (tempStrList.length > 0) {
-                for (let i = 0; i < tempStrList.length; i++) {
-                  if (isTextWidthWithinErrorRange(ctx.$doPixelRatio(w2), ctx.measureText(lineText + tempStrList[i]).width, viewScaleInfo.scale)) {
-                    lineText += tempStrList[i] || "";
-                  } else {
+            }
+            if (tempStrList.length === 1 && detail.overflow === "visible") {
+              lines.push({
+                text: tempStrList[0],
+                width: ctx.$undoPixelRatio(ctx.measureText(tempStrList[0]).width)
+              });
+            } else if (tempStrList.length > 0) {
+              for (let i = 0; i < tempStrList.length; i++) {
+                if (isTextWidthWithinErrorRange(ctx.$doPixelRatio(w2), ctx.measureText(lineText + tempStrList[i]).width, viewScaleInfo.scale)) {
+                  lineText += tempStrList[i] || "";
+                } else {
+                  lines.push({
+                    text: lineText,
+                    width: ctx.$undoPixelRatio(ctx.measureText(lineText).width)
+                  });
+                  lineText = tempStrList[i] || "";
+                  lineNum++;
+                }
+                if ((lineNum + 1) * fontHeight > h2 && detail.overflow === "hidden") {
+                  break;
+                }
+                if (tempStrList.length - 1 === i) {
+                  if ((lineNum + 1) * fontHeight <= h2) {
                     lines.push({
                       text: lineText,
                       width: ctx.$undoPixelRatio(ctx.measureText(lineText).width)
                     });
-                    lineText = tempStrList[i] || "";
-                    lineNum++;
-                  }
-                  if ((lineNum + 1) * fontHeight > h2 && detail.overflow === "hidden") {
+                    if (idx < detailTextList.length - 1) {
+                      lineNum++;
+                    }
                     break;
                   }
-                  if (tempStrList.length - 1 === i) {
-                    if ((lineNum + 1) * fontHeight <= h2) {
-                      lines.push({
-                        text: lineText,
-                        width: ctx.$undoPixelRatio(ctx.measureText(lineText).width)
-                      });
-                      if (idx < detailTextList.length - 1) {
-                        lineNum++;
-                      }
-                      break;
-                    }
-                  }
                 }
-              } else {
-                lines.push({
-                  text: "",
-                  width: 0
-                });
               }
-            }
-          });
-          let startY = 0;
-          let eachLineStartY = 0;
-          if (fontHeight > fontSize2) {
-            eachLineStartY = (fontHeight - fontSize2) / 2;
-          }
-          if (lines.length * fontHeight < h2) {
-            if (elem.detail.verticalAlign === "top") {
-              startY = 0;
-            } else if (elem.detail.verticalAlign === "bottom") {
-              startY += h2 - lines.length * fontHeight;
             } else {
-              startY += (h2 - lines.length * fontHeight) / 2;
+              lines.push({
+                text: "",
+                width: 0
+              });
             }
           }
-          {
-            const _y = y2 + startY;
-            if (detail.textShadowColor !== void 0 && isColorStr(detail.textShadowColor)) {
-              ctx.shadowColor = detail.textShadowColor;
-            }
-            if (detail.textShadowOffsetX !== void 0 && is.number(detail.textShadowOffsetX)) {
-              ctx.shadowOffsetX = detail.textShadowOffsetX;
-            }
-            if (detail.textShadowOffsetY !== void 0 && is.number(detail.textShadowOffsetY)) {
-              ctx.shadowOffsetY = detail.textShadowOffsetY;
-            }
-            if (detail.textShadowBlur !== void 0 && is.number(detail.textShadowBlur)) {
-              ctx.shadowBlur = detail.textShadowBlur;
-            }
-            lines.forEach((line, i) => {
-              let _x = x2;
-              if (detail.textAlign === "center") {
-                _x = x2 + (w2 - line.width) / 2;
-              } else if (detail.textAlign === "right") {
-                _x = x2 + (w2 - line.width);
-              }
-              ctx.fillText(line.text, _x, _y + fontHeight * i + eachLineStartY);
-            });
+        });
+        let startY = 0;
+        let eachLineStartY = 0;
+        if (fontHeight > fontSize2) {
+          eachLineStartY = (fontHeight - fontSize2) / 2;
+        }
+        if (lines.length * fontHeight < h2) {
+          if (elem.detail.verticalAlign === "top") {
+            startY = 0;
+          } else if (elem.detail.verticalAlign === "bottom") {
+            startY += h2 - lines.length * fontHeight;
+          } else {
+            startY += (h2 - lines.length * fontHeight) / 2;
           }
         }
-      });
+        {
+          const _y = y2 + startY;
+          if (detail.textShadowColor !== void 0 && isColorStr(detail.textShadowColor)) {
+            ctx.shadowColor = detail.textShadowColor;
+          }
+          if (detail.textShadowOffsetX !== void 0 && is.number(detail.textShadowOffsetX)) {
+            ctx.shadowOffsetX = detail.textShadowOffsetX;
+          }
+          if (detail.textShadowOffsetY !== void 0 && is.number(detail.textShadowOffsetY)) {
+            ctx.shadowOffsetY = detail.textShadowOffsetY;
+          }
+          if (detail.textShadowBlur !== void 0 && is.number(detail.textShadowBlur)) {
+            ctx.shadowBlur = detail.textShadowBlur;
+          }
+          lines.forEach((line, i) => {
+            let _x = x2;
+            if (detail.textAlign === "center") {
+              _x = x2 + (w2 - line.width) / 2;
+            } else if (detail.textAlign === "right") {
+              _x = x2 + (w2 - line.width);
+            }
+            ctx.fillText(line.text, _x, _y + fontHeight * i + eachLineStartY);
+          });
+        }
+      }
     });
   }
+  var __rest = function(s, e) {
+    var t = {};
+    for (var p in s)
+      if (Object.prototype.hasOwnProperty.call(s, p) && e.indexOf(p) < 0)
+        t[p] = s[p];
+    if (s != null && typeof Object.getOwnPropertySymbols === "function")
+      for (var i = 0, p = Object.getOwnPropertySymbols(s); i < p.length; i++) {
+        if (e.indexOf(p[i]) < 0 && Object.prototype.propertyIsEnumerable.call(s, p[i]))
+          t[p[i]] = s[p[i]];
+      }
+    return t;
+  };
   function drawPath(ctx, elem, opts) {
+    var _a, _b;
     const { detail } = elem;
     const { originX, originY, originW, originH, fillRule } = detail;
     const { viewScaleInfo, viewSizeInfo, parentOpacity } = opts;
@@ -4352,11 +4428,31 @@ var __privateMethod = (obj, member, method) => {
     const viewOriginY = originY * scaleH;
     const internalX = x2 - viewOriginX;
     const internalY = y2 - viewOriginY;
+    const _c = elem.detail, restDetail = __rest(_c, ["clipPath", "clipPathStrokeColor", "clipPathStrokeWidth"]);
     const scaleNum = viewScaleInfo.scale * viewSizeInfo.devicePixelRatio;
     const viewElem = Object.assign(Object.assign({}, elem), { x: x2, y: y2, w: w2, h: h2, angle: angle2 });
+    let boxViewElem = Object.assign({}, viewElem);
+    boxViewElem.detail = restDetail;
+    let boxOriginElem = Object.assign({}, elem);
+    boxOriginElem.detail = restDetail;
+    if (detail.fill && detail.fill !== "string" && ((_b = (_a = detail.fill) === null || _a === void 0 ? void 0 : _a.type) === null || _b === void 0 ? void 0 : _b.includes("gradient"))) {
+      boxViewElem = Object.assign(Object.assign({}, viewElem), {
+        detail: Object.assign(Object.assign({}, viewElem.detail), {
+          background: detail.fill,
+          clipPath: {
+            commands: detail.commands,
+            originX,
+            originY,
+            originW,
+            originH
+          }
+        })
+      });
+      boxOriginElem.detail = Object.assign({}, boxViewElem.detail);
+    }
     rotateElement$1(ctx, { x: x2, y: y2, w: w2, h: h2, angle: angle2 }, () => {
-      drawBox(ctx, viewElem, {
-        originElem: elem,
+      drawBox(ctx, boxViewElem, {
+        originElem: boxOriginElem,
         calcElemSize: { x: x2, y: y2, w: w2, h: h2, angle: angle2 },
         viewScaleInfo,
         viewSizeInfo,
@@ -4372,7 +4468,13 @@ var __privateMethod = (obj, member, method) => {
               const pathStr = generateSVGPath(detail.commands || []);
               const path2d = new Path2D(pathStr);
               if (detail.fill) {
-                ctx.fillStyle = detail.fill;
+                if (typeof detail.fill === "string") {
+                  ctx.fillStyle = detail.fill;
+                } else {
+                  ctx.fillStyle = "transparent";
+                }
+              }
+              if (detail.fill) {
                 ctx.fill(path2d, fillRule);
               }
               if (detail.stroke && detail.strokeWidth !== 0) {
@@ -4389,6 +4491,7 @@ var __privateMethod = (obj, member, method) => {
       });
     });
   }
+  const visiableMinSize = 0.4;
   function drawElement(ctx, elem, opts) {
     var _a, _b, _c;
     if (((_a = elem === null || elem === void 0 ? void 0 : elem.operations) === null || _a === void 0 ? void 0 : _a.invisible) === true) {
@@ -4396,7 +4499,7 @@ var __privateMethod = (obj, member, method) => {
     }
     const { w: w2, h: h2 } = elem;
     const { scale } = opts.viewScaleInfo;
-    if (scale < 1 && (w2 * scale < 1 || h2 * scale < 1) || opts.parentOpacity === 0) {
+    if (scale < 1 && (w2 * scale < visiableMinSize || h2 * scale < visiableMinSize) || opts.parentOpacity === 0) {
       return;
     }
     const { overrideElementMap } = opts;
@@ -5058,31 +5161,48 @@ var __privateMethod = (obj, member, method) => {
       const viewVisibleInfoMap = __classPrivateFieldGet$6(this, _Calculator_store, "f").get("viewVisibleInfoMap");
       if (type === "deleteElement") {
         const { element } = content;
-        delete viewVisibleInfoMap[element.uuid];
+        const uuids = [];
+        const _walk = (e) => {
+          uuids.push(e.uuid);
+          if (e.type === "group" && Array.isArray(e.detail.children)) {
+            e.detail.children.forEach((child) => {
+              _walk(child);
+            });
+          }
+        };
+        _walk(element);
+        uuids.forEach((uuid) => {
+          delete viewVisibleInfoMap[uuid];
+        });
+        __classPrivateFieldGet$6(this, _Calculator_store, "f").set("viewVisibleInfoMap", viewVisibleInfoMap);
       } else if (type === "addElement" || type === "updateElement") {
         const { position } = content;
         const element = findElementFromListByPosition(position, data.elements);
         const groupQueue = getGroupQueueByElementPosition(list, position);
         if (element) {
-          const originRectInfo = calcElementOriginRectInfo(element, {
-            groupQueue: groupQueue || []
-          });
-          const newViewVisibleInfo = {
-            originRectInfo,
-            rangeRectInfo: is.angle(element.angle) ? originRectInfoToRangeRectInfo(originRectInfo) : originRectInfo,
-            isVisibleInView: true,
-            isGroup: (element === null || element === void 0 ? void 0 : element.type) === "group",
-            position: [...position]
-          };
-          viewVisibleInfoMap[element.uuid] = newViewVisibleInfo;
-          if (type === "updateElement") {
-            this.updateVisiableStatus({ viewScaleInfo, viewSizeInfo });
+          if (type === "updateElement" && element.type === "group") {
+            this.resetViewVisibleInfoMap(data, { viewScaleInfo, viewSizeInfo });
+          } else {
+            const originRectInfo = calcElementOriginRectInfo(element, {
+              groupQueue: groupQueue || []
+            });
+            const newViewVisibleInfo = {
+              originRectInfo,
+              rangeRectInfo: is.angle(element.angle) ? originRectInfoToRangeRectInfo(originRectInfo) : originRectInfo,
+              isVisibleInView: true,
+              isGroup: (element === null || element === void 0 ? void 0 : element.type) === "group",
+              position: [...position]
+            };
+            viewVisibleInfoMap[element.uuid] = newViewVisibleInfo;
+            __classPrivateFieldGet$6(this, _Calculator_store, "f").set("viewVisibleInfoMap", viewVisibleInfoMap);
+            if (type === "updateElement") {
+              this.updateVisiableStatus({ viewScaleInfo, viewSizeInfo });
+            }
           }
         }
       } else if (type === "moveElement") {
         this.resetViewVisibleInfoMap(data, { viewScaleInfo, viewSizeInfo });
       }
-      __classPrivateFieldGet$6(this, _Calculator_store, "f").set("viewVisibleInfoMap", viewVisibleInfoMap);
     }
   }
   _Calculator_opts = /* @__PURE__ */ new WeakMap(), _Calculator_store = /* @__PURE__ */ new WeakMap();
@@ -6045,22 +6165,22 @@ var __privateMethod = (obj, member, method) => {
   const keySelectedElementListVertexes = Symbol(`${key$3}_selectedElementListVertexes`);
   const keySelectedElementController = Symbol(`${key$3}_selectedElementController`);
   const keySelectedElementPosition = Symbol(`${key$3}_selectedElementPosition`);
-  const keySelectedReferenceXLines = Symbol(`${key$3}_selectedReferenceXLines`);
-  const keySelectedReferenceYLines = Symbol(`${key$3}_selectedReferenceYLines`);
   const keyGroupQueue = Symbol(`${key$3}_groupQueue`);
   const keyGroupQueueVertexesList = Symbol(`${key$3}_groupQueueVertexesList`);
   const keyIsMoving = Symbol(`${key$3}_isMoving`);
-  const keyEnableSelectInGroup = Symbol(`${key$3}_canSelectInGroup`);
+  const keyEnableSelectInGroup = Symbol(`${key$3}_enableSelectInGroup`);
+  const keyEnableSnapToGrid = Symbol(`${key$3}_enableSnapToGrid`);
   const selectWrapperBorderWidth = 2;
   const resizeControllerBorderWidth = 4;
   const areaBorderWidth = 1;
   const wrapperColor = "#1973ba";
   const lockColor = "#5b5959b5";
-  const controllerSize = 10;
+  const controllerSize$1 = 10;
   const referenceColor = "#f7276e";
   const middlewareEventSelect = "@middleware/select";
   const middlewareEventSelectClear = "@middleware/select-clear";
   const middlewareEventSelectInGroup = "@middleware/select-in-group";
+  const middlewareEventSnapToGrid = "@middleware/snap-to-grid";
   function drawVertexes(ctx, vertexes, opts) {
     const { borderColor: borderColor2, borderWidth: borderWidth2, background: background2, lineDash } = opts;
     ctx.setLineDash([]);
@@ -6203,7 +6323,7 @@ var __privateMethod = (obj, member, method) => {
       drawVertexes(ctx, calcViewVertexes(topRight.vertexes, opts), ctrlOpts);
       drawVertexes(ctx, calcViewVertexes(bottomLeft.vertexes, opts), ctrlOpts);
       drawVertexes(ctx, calcViewVertexes(bottomRight.vertexes, opts), ctrlOpts);
-      drawCircleController(ctx, calcViewPointSize(rotate.center, opts), Object.assign(Object.assign({}, ctrlOpts), { size: controllerSize, borderWidth: 2 }));
+      drawCircleController(ctx, calcViewPointSize(rotate.center, opts), Object.assign(Object.assign({}, ctrlOpts), { size: controllerSize$1, borderWidth: 2 }));
     }
   }
   function drawArea(ctx, opts) {
@@ -7213,7 +7333,6 @@ var __privateMethod = (obj, member, method) => {
           yList: []
         };
         vLine.yList.push(newTargetBox.minY);
-        vLine.yList.push(newTargetBox.midY);
         vLine.yList.push(newTargetBox.maxY);
         vLine.yList.push(...(hRefLineDotMap === null || hRefLineDotMap === void 0 ? void 0 : hRefLineDotMap[closestMinX]) || []);
         vHelperLineDotMapList.push(vLine);
@@ -7224,7 +7343,6 @@ var __privateMethod = (obj, member, method) => {
           yList: []
         };
         vLine.yList.push(newTargetBox.minY);
-        vLine.yList.push(newTargetBox.midY);
         vLine.yList.push(newTargetBox.maxY);
         vLine.yList.push(...(hRefLineDotMap === null || hRefLineDotMap === void 0 ? void 0 : hRefLineDotMap[closestMidX]) || []);
         vHelperLineDotMapList.push(vLine);
@@ -7235,7 +7353,6 @@ var __privateMethod = (obj, member, method) => {
           yList: []
         };
         vLine.yList.push(newTargetBox.minY);
-        vLine.yList.push(newTargetBox.midY);
         vLine.yList.push(newTargetBox.maxY);
         vLine.yList.push(...(hRefLineDotMap === null || hRefLineDotMap === void 0 ? void 0 : hRefLineDotMap[closestMaxX]) || []);
         vHelperLineDotMapList.push(vLine);
@@ -7248,7 +7365,6 @@ var __privateMethod = (obj, member, method) => {
           xList: []
         };
         hLine.xList.push(newTargetBox.minX);
-        hLine.xList.push(newTargetBox.midX);
         hLine.xList.push(newTargetBox.maxX);
         hLine.xList.push(...(vRefLineDotMap === null || vRefLineDotMap === void 0 ? void 0 : vRefLineDotMap[closestMinY]) || []);
         hHelperLineDotMapList.push(hLine);
@@ -7259,7 +7375,6 @@ var __privateMethod = (obj, member, method) => {
           xList: []
         };
         hLine.xList.push(newTargetBox.minX);
-        hLine.xList.push(newTargetBox.midX);
         hLine.xList.push(newTargetBox.maxX);
         hLine.xList.push(...(vRefLineDotMap === null || vRefLineDotMap === void 0 ? void 0 : vRefLineDotMap[closestMinY]) || []);
         hHelperLineDotMapList.push(hLine);
@@ -7270,7 +7385,6 @@ var __privateMethod = (obj, member, method) => {
           xList: []
         };
         hLine.xList.push(newTargetBox.minX);
-        hLine.xList.push(newTargetBox.midX);
         hLine.xList.push(newTargetBox.maxX);
         hLine.xList.push(...(vRefLineDotMap === null || vRefLineDotMap === void 0 ? void 0 : vRefLineDotMap[closestMaxY]) || []);
         hHelperLineDotMapList.push(hLine);
@@ -7438,7 +7552,8 @@ var __privateMethod = (obj, member, method) => {
       textarea.style.resize = "none";
       textarea.style.overflow = "hidden";
       textarea.style.wordBreak = "break-all";
-      textarea.style.background = "transparent";
+      textarea.style.borderRadius = `${(typeof detail.borderRadius === "number" ? detail.borderRadius : 0) * scale}px`;
+      textarea.style.background = `${detail.background || "transparent"}`;
       textarea.style.color = `${detail.color || "#333333"}`;
       textarea.style.fontSize = `${detail.fontSize * scale}px`;
       textarea.style.lineHeight = `${(detail.lineHeight || detail.fontSize) * scale}px`;
@@ -7525,12 +7640,434 @@ var __privateMethod = (obj, member, method) => {
       }
     };
   };
+  const key$2 = "LAYOUT_SELECT";
+  const keyLayoutActionType = Symbol(`${key$2}_layoutActionType`);
+  const keyLayoutControlType = Symbol(`${key$2}_layoutControlType`);
+  const keyLayoutController = Symbol(`${key$2}_layoutController`);
+  const keyLayoutIsHover = Symbol(`${key$2}_layoutIsHover`);
+  const keyLayoutIsSelected = Symbol(`${key$2}_layoutIsSelected`);
+  const selectColor = "#b331c9";
+  const disableColor = "#5b5959b5";
+  const controllerSize = 10;
+  function drawControllerBox(ctx, boxVertexes) {
+    ctx.setLineDash([]);
+    ctx.fillStyle = "#FFFFFF";
+    ctx.beginPath();
+    ctx.moveTo(boxVertexes[0].x, boxVertexes[0].y);
+    ctx.lineTo(boxVertexes[1].x, boxVertexes[1].y);
+    ctx.lineTo(boxVertexes[2].x, boxVertexes[2].y);
+    ctx.lineTo(boxVertexes[3].x, boxVertexes[3].y);
+    ctx.closePath();
+    ctx.fill();
+    ctx.strokeStyle = selectColor;
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(boxVertexes[0].x, boxVertexes[0].y);
+    ctx.lineTo(boxVertexes[1].x, boxVertexes[1].y);
+    ctx.lineTo(boxVertexes[2].x, boxVertexes[2].y);
+    ctx.lineTo(boxVertexes[3].x, boxVertexes[3].y);
+    ctx.closePath();
+    ctx.stroke();
+  }
+  function drawControllerCross(ctx, opts) {
+    const { vertexes, strokeStyle, lineWidth } = opts;
+    ctx.setLineDash([]);
+    ctx.strokeStyle = strokeStyle;
+    ctx.lineWidth = lineWidth;
+    ctx.beginPath();
+    ctx.moveTo(vertexes[0].x, vertexes[0].y);
+    ctx.lineTo(vertexes[2].x, vertexes[2].y);
+    ctx.closePath();
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(vertexes[1].x, vertexes[1].y);
+    ctx.lineTo(vertexes[3].x, vertexes[3].y);
+    ctx.closePath();
+    ctx.stroke();
+  }
+  function drawControllerLine(ctx, opts) {
+    const { start, end, centerVertexes, disabled } = opts;
+    const lineWidth = disabled === true ? 1 : 2;
+    const strokeStyle = disabled === true ? disableColor : selectColor;
+    ctx.setLineDash([]);
+    ctx.strokeStyle = strokeStyle;
+    ctx.lineWidth = lineWidth;
+    ctx.beginPath();
+    ctx.moveTo(start.x, start.y);
+    ctx.lineTo(end.x, end.y);
+    ctx.closePath();
+    ctx.stroke();
+    if (disabled === true) {
+      drawControllerCross(ctx, {
+        vertexes: centerVertexes,
+        lineWidth,
+        strokeStyle
+      });
+    }
+  }
+  function drawLayoutController(ctx, opts) {
+    const { controller, operations } = opts;
+    const { topLeft, topRight, bottomLeft, bottomRight, topMiddle, rightMiddle, bottomMiddle, leftMiddle } = controller;
+    drawControllerLine(ctx, { start: topLeft.center, end: topRight.center, centerVertexes: topMiddle.vertexes, disabled: !!(operations === null || operations === void 0 ? void 0 : operations.disabledTop) });
+    drawControllerLine(ctx, { start: topRight.center, end: bottomRight.center, centerVertexes: rightMiddle.vertexes, disabled: !!(operations === null || operations === void 0 ? void 0 : operations.disabledRight) });
+    drawControllerLine(ctx, { start: bottomRight.center, end: bottomLeft.center, centerVertexes: bottomMiddle.vertexes, disabled: !!(operations === null || operations === void 0 ? void 0 : operations.disabledBottom) });
+    drawControllerLine(ctx, { start: bottomLeft.center, end: topLeft.center, centerVertexes: leftMiddle.vertexes, disabled: !!(operations === null || operations === void 0 ? void 0 : operations.disabledLeft) });
+    const disabledOpts = {
+      lineWidth: 1,
+      strokeStyle: disableColor
+    };
+    if ((operations === null || operations === void 0 ? void 0 : operations.disabledTopLeft) === true) {
+      drawControllerCross(ctx, Object.assign({ vertexes: topLeft.vertexes }, disabledOpts));
+    } else {
+      drawControllerBox(ctx, topLeft.vertexes);
+    }
+    if ((operations === null || operations === void 0 ? void 0 : operations.disabledTopRight) === true) {
+      drawControllerCross(ctx, Object.assign({ vertexes: topRight.vertexes }, disabledOpts));
+    } else {
+      drawControllerBox(ctx, topRight.vertexes);
+    }
+    if ((operations === null || operations === void 0 ? void 0 : operations.disabledBottomRight) === true) {
+      drawControllerCross(ctx, Object.assign({ vertexes: bottomRight.vertexes }, disabledOpts));
+    } else {
+      drawControllerBox(ctx, bottomRight.vertexes);
+    }
+    if ((operations === null || operations === void 0 ? void 0 : operations.disabledBottomLeft) === true) {
+      drawControllerCross(ctx, Object.assign({ vertexes: bottomLeft.vertexes }, disabledOpts));
+    } else {
+      drawControllerBox(ctx, bottomLeft.vertexes);
+    }
+  }
+  function drawLayoutHover(ctx, opts) {
+    const { layoutSize } = opts;
+    const { x: x2, y: y2, w: w2, h: h2 } = layoutSize;
+    ctx.setLineDash([]);
+    ctx.strokeStyle = selectColor;
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(x2, y2);
+    ctx.lineTo(x2 + w2, y2);
+    ctx.lineTo(x2 + w2, y2 + h2);
+    ctx.lineTo(x2, y2 + h2);
+    ctx.lineTo(x2, y2);
+    ctx.closePath();
+    ctx.stroke();
+  }
+  const MiddlewareLayoutSelector = (opts) => {
+    const { sharer, boardContent, calculator, viewer, eventHub } = opts;
+    const { overlayContext } = boardContent;
+    let prevPoint = null;
+    let prevIsHover = null;
+    let prevIsSelected = null;
+    let isBusy = null;
+    const clear = () => {
+      prevPoint = null;
+      sharer.setSharedStorage(keyLayoutActionType, null);
+      sharer.setSharedStorage(keyLayoutControlType, null);
+      sharer.setSharedStorage(keyLayoutController, null);
+      sharer.setSharedStorage(keyLayoutIsHover, null);
+      sharer.setSharedStorage(keyLayoutIsSelected, null);
+      prevIsHover = null;
+      prevIsSelected = null;
+      isBusy = null;
+    };
+    const isInElementHover = () => {
+      const hoverElement = sharer.getSharedStorage(keyHoverElement);
+      if (hoverElement) {
+        clear();
+        return true;
+      }
+      return false;
+    };
+    const isInElementAction = () => {
+      const elementActionType = sharer.getSharedStorage(keyActionType);
+      if (elementActionType && elementActionType !== "area") {
+        clear();
+        return true;
+      }
+      return false;
+    };
+    const getLayoutSize = () => {
+      const data = sharer.getActiveStorage("data");
+      if (data === null || data === void 0 ? void 0 : data.layout) {
+        const { x: x2, y: y2, w: w2, h: h2 } = data.layout;
+        return { x: x2, y: y2, w: w2, h: h2 };
+      }
+      return null;
+    };
+    const isInLayout = (p) => {
+      const size = getLayoutSize();
+      if (size) {
+        const { x: x2, y: y2, w: w2, h: h2 } = size;
+        const viewScaleInfo = sharer.getActiveViewScaleInfo();
+        const viewSize = calcViewElementSize({
+          x: x2 - controllerSize / 2,
+          y: y2 - controllerSize / 2,
+          w: w2 + controllerSize,
+          h: h2 + controllerSize
+        }, { viewScaleInfo });
+        return isViewPointInElementSize(p, viewSize);
+      }
+      return false;
+    };
+    const resetController = () => {
+      const viewScaleInfo = sharer.getActiveViewScaleInfo();
+      const size = getLayoutSize();
+      if (size) {
+        const controller = calcLayoutSizeController(size, { viewScaleInfo, controllerSize: 10 });
+        sharer.setSharedStorage(keyLayoutController, controller);
+      } else {
+        sharer.setSharedStorage(keyLayoutController, null);
+      }
+    };
+    const resetControlType = (e) => {
+      const data = sharer.getActiveStorage("data");
+      const controller = sharer.getSharedStorage(keyLayoutController);
+      if (controller && (data === null || data === void 0 ? void 0 : data.layout) && (e === null || e === void 0 ? void 0 : e.point)) {
+        let layoutControlType = null;
+        if (controller) {
+          const { topLeft, top, topRight, right, bottomRight, bottom, bottomLeft, left } = controller;
+          const list = [topLeft, top, topRight, right, bottomRight, bottom, bottomLeft, left];
+          for (let i = 0; i < list.length; i++) {
+            const item = list[i];
+            if (isViewPointInVertexes(e.point, item.vertexes)) {
+              layoutControlType = `${item.type}`;
+              break;
+            }
+          }
+          if (layoutControlType) {
+            sharer.setSharedStorage(keyLayoutControlType, layoutControlType);
+            eventHub.trigger(middlewareEventSelectClear, {});
+            return layoutControlType;
+          }
+        }
+      }
+      return null;
+    };
+    const updateCursor = (controlType) => {
+      if (isBusy === true) {
+        return;
+      }
+      eventHub.trigger("cursor", {
+        type: controlType ? `resize-${controlType}` : controlType,
+        groupQueue: [],
+        element: getLayoutSize()
+      });
+    };
+    return {
+      name: "@middleware/layout-selector",
+      use: () => {
+        clear();
+        resetController();
+      },
+      hover: (e) => {
+        if (isBusy === true) {
+          return;
+        }
+        if (isInElementAction()) {
+          return;
+        }
+        if (isInElementHover()) {
+          return;
+        }
+        if (isInLayout(e.point)) {
+          sharer.setSharedStorage(keyLayoutIsHover, true);
+        } else {
+          sharer.setSharedStorage(keyLayoutIsHover, false);
+          if (prevIsHover === true) {
+            viewer.drawFrame();
+            prevIsHover = false;
+          }
+        }
+        if (sharer.getSharedStorage(keyLayoutIsSelected) === true) {
+          const prevLayoutActionType = sharer.getSharedStorage(keyLayoutActionType);
+          const data = sharer.getActiveStorage("data");
+          if (data === null || data === void 0 ? void 0 : data.layout) {
+            if (prevLayoutActionType !== "resize") {
+              resetController();
+              const layoutControlType = resetControlType(e);
+              if (layoutControlType) {
+                updateCursor(layoutControlType);
+              } else {
+                updateCursor();
+                sharer.setSharedStorage(keyLayoutActionType, null);
+              }
+            } else {
+              const layoutControlType = resetControlType(e);
+              updateCursor(layoutControlType);
+            }
+          }
+          return;
+        }
+        if (sharer.getSharedStorage(keyLayoutIsHover) && !prevIsHover) {
+          viewer.drawFrame();
+        }
+        prevIsHover = sharer.getSharedStorage(keyLayoutIsHover);
+      },
+      pointStart: (e) => {
+        if (isInElementAction()) {
+          return;
+        }
+        if (isInLayout(e.point)) {
+          sharer.setSharedStorage(keyLayoutIsSelected, true);
+        } else {
+          if (prevIsSelected === true) {
+            clear();
+            viewer.drawFrame();
+          }
+          sharer.setSharedStorage(keyLayoutIsSelected, false);
+        }
+        resetController();
+        const layoutControlType = resetControlType(e);
+        prevPoint = e.point;
+        if (layoutControlType) {
+          sharer.setSharedStorage(keyLayoutActionType, "resize");
+        }
+        if (sharer.getSharedStorage(keyLayoutIsSelected) === true && !prevIsSelected) {
+          viewer.drawFrame();
+        }
+        prevIsSelected = sharer.getSharedStorage(keyLayoutIsSelected);
+      },
+      pointMove: (e) => {
+        if (!sharer.getSharedStorage(keyLayoutIsSelected)) {
+          if (isInElementAction()) {
+            return;
+          }
+        }
+        const layoutActionType = sharer.getSharedStorage(keyLayoutActionType);
+        const layoutControlType = sharer.getSharedStorage(keyLayoutControlType);
+        const data = sharer.getActiveStorage("data");
+        if (layoutActionType === "resize" && layoutControlType && (data === null || data === void 0 ? void 0 : data.layout)) {
+          if (prevPoint) {
+            isBusy = true;
+            const scale = sharer.getActiveStorage("scale");
+            const viewMoveX = e.point.x - prevPoint.x;
+            const viewMoveY = e.point.y - prevPoint.y;
+            const moveX = viewMoveX / scale;
+            const moveY = viewMoveY / scale;
+            const { x: x2, y: y2, w: w2, h: h2, operations = {} } = data.layout;
+            const { position = "absolute" } = operations;
+            if (layoutControlType === "top") {
+              if (position === "relative") {
+                data.layout.h = calculator.toGridNum(h2 - moveY);
+                viewer.scroll({ moveY: viewMoveY });
+              } else {
+                data.layout.y = calculator.toGridNum(y2 + moveY);
+                data.layout.h = calculator.toGridNum(h2 - moveY);
+              }
+            } else if (layoutControlType === "right") {
+              data.layout.w = calculator.toGridNum(w2 + moveX);
+            } else if (layoutControlType === "bottom") {
+              data.layout.h = calculator.toGridNum(h2 + moveY);
+            } else if (layoutControlType === "left") {
+              if (position === "relative") {
+                data.layout.w = calculator.toGridNum(w2 - moveX);
+                viewer.scroll({ moveX: viewMoveX });
+              } else {
+                data.layout.x = calculator.toGridNum(x2 + moveX);
+                data.layout.w = calculator.toGridNum(w2 - moveX);
+              }
+            } else if (layoutControlType === "top-left") {
+              if (position === "relative") {
+                data.layout.w = calculator.toGridNum(w2 - moveX);
+                data.layout.h = calculator.toGridNum(h2 - moveY);
+                viewer.scroll({ moveX: viewMoveX, moveY: viewMoveY });
+              } else {
+                data.layout.x = calculator.toGridNum(x2 + moveX);
+                data.layout.y = calculator.toGridNum(y2 + moveY);
+                data.layout.w = calculator.toGridNum(w2 - moveX);
+                data.layout.h = calculator.toGridNum(h2 - moveY);
+              }
+            } else if (layoutControlType === "top-right") {
+              if (position === "relative") {
+                viewer.scroll({
+                  moveY: viewMoveY
+                });
+                data.layout.w = calculator.toGridNum(w2 + moveX);
+                data.layout.h = calculator.toGridNum(h2 - moveY);
+              } else {
+                data.layout.y = calculator.toGridNum(y2 + moveY);
+                data.layout.w = calculator.toGridNum(w2 + moveX);
+                data.layout.h = calculator.toGridNum(h2 - moveY);
+              }
+            } else if (layoutControlType === "bottom-right") {
+              data.layout.w = calculator.toGridNum(w2 + moveX);
+              data.layout.h = calculator.toGridNum(h2 + moveY);
+            } else if (layoutControlType === "bottom-left") {
+              if (position === "relative") {
+                viewer.scroll({
+                  moveX: viewMoveX
+                });
+                data.layout.w = calculator.toGridNum(w2 - moveX);
+                data.layout.h = calculator.toGridNum(h2 + moveY);
+              } else {
+                data.layout.x = calculator.toGridNum(x2 + moveX);
+                data.layout.w = calculator.toGridNum(w2 - moveX);
+                data.layout.h = calculator.toGridNum(h2 + moveY);
+              }
+            }
+          }
+          prevPoint = e.point;
+          resetController();
+          viewer.drawFrame();
+          return false;
+        }
+        if (["resize"].includes(layoutActionType)) {
+          return false;
+        }
+      },
+      pointEnd: () => {
+        isBusy = false;
+        const layoutActionType = sharer.getSharedStorage(keyLayoutActionType);
+        const layoutControlType = sharer.getSharedStorage(keyLayoutControlType);
+        const data = sharer.getActiveStorage("data");
+        if (data && layoutActionType === "resize" && layoutControlType) {
+          eventHub.trigger(eventChange, {
+            type: "changeLayout",
+            data
+          });
+        }
+      },
+      beforeDrawFrame: ({ snapshot }) => {
+        var _a;
+        if (isInElementAction()) {
+          return;
+        }
+        const { sharedStore, activeStore } = snapshot;
+        const layoutActionType = sharedStore[keyLayoutActionType];
+        const layoutIsHover = sharedStore[keyLayoutIsHover];
+        const layoutIsSelected = sharedStore[keyLayoutIsSelected];
+        if ((_a = activeStore.data) === null || _a === void 0 ? void 0 : _a.layout) {
+          const { x: x2, y: y2, w: w2, h: h2 } = activeStore.data.layout;
+          const viewScaleInfo = getViewScaleInfoFromSnapshot(snapshot);
+          const size = { x: x2, y: y2, w: w2, h: h2 };
+          const controller = calcLayoutSizeController(size, { viewScaleInfo, controllerSize });
+          if (layoutIsHover === true) {
+            const viewSize = calcViewElementSize(size, { viewScaleInfo });
+            drawLayoutHover(overlayContext, { layoutSize: viewSize });
+          }
+          if (layoutActionType && ["resize"].includes(layoutActionType) || layoutIsSelected === true) {
+            drawLayoutController(overlayContext, { controller, operations: activeStore.data.layout.operations || {} });
+          }
+        }
+      },
+      scrollX: () => {
+        clear();
+      },
+      scrollY: () => {
+        clear();
+      },
+      wheelScale: () => {
+        clear();
+      }
+    };
+  };
   const MiddlewareSelector = (opts) => {
     const { viewer, sharer, boardContent, calculator, eventHub } = opts;
     const { overlayContext } = boardContent;
     let prevPoint = null;
     let inBusyMode = null;
     sharer.setSharedStorage(keyActionType, null);
+    sharer.setSharedStorage(keyEnableSnapToGrid, true);
     const getActiveElements = () => {
       return sharer.getSharedStorage(keySelectedElementList);
     };
@@ -7569,7 +8106,7 @@ var __privateMethod = (obj, member, method) => {
       if (list.length === 1) {
         const controller = calcElementSizeController(list[0], {
           groupQueue: sharer.getSharedStorage(keyGroupQueue),
-          controllerSize,
+          controllerSize: controllerSize$1,
           viewScaleInfo: sharer.getActiveViewScaleInfo()
         });
         sharer.setSharedStorage(keySelectedElementController, controller);
@@ -7609,8 +8146,6 @@ var __privateMethod = (obj, member, method) => {
       sharer.setSharedStorage(keySelectedElementListVertexes, null);
       sharer.setSharedStorage(keySelectedElementController, null);
       sharer.setSharedStorage(keySelectedElementPosition, []);
-      sharer.setSharedStorage(keySelectedReferenceXLines, []);
-      sharer.setSharedStorage(keySelectedReferenceYLines, []);
       sharer.setSharedStorage(keyIsMoving, null);
       sharer.setSharedStorage(keyEnableSelectInGroup, null);
     };
@@ -7643,6 +8178,9 @@ var __privateMethod = (obj, member, method) => {
       clear();
       viewer.drawFrame();
     };
+    const setSnapToSnapCallback = (e) => {
+      sharer.setSharedStorage(keyEnableSnapToGrid, !!e.enable);
+    };
     const selectInGroupCallback = (e) => {
       sharer.setSharedStorage(keyEnableSelectInGroup, !!e.enable);
     };
@@ -7652,18 +8190,24 @@ var __privateMethod = (obj, member, method) => {
         eventHub.on(middlewareEventSelect, selectCallback);
         eventHub.on(middlewareEventSelectClear, selectClearCallback);
         eventHub.on(middlewareEventSelectInGroup, selectInGroupCallback);
+        eventHub.on(middlewareEventSnapToGrid, setSnapToSnapCallback);
       },
       disuse() {
         eventHub.off(middlewareEventSelect, selectCallback);
         eventHub.off(middlewareEventSelectClear, selectClearCallback);
         eventHub.off(middlewareEventSelectInGroup, selectInGroupCallback);
+        eventHub.off(middlewareEventSnapToGrid, setSnapToSnapCallback);
       },
       hover: (e) => {
         var _a, _b, _c, _d, _e;
+        const layoutIsSelected = sharer.getSharedStorage(keyLayoutIsSelected);
         const resizeType = sharer.getSharedStorage(keyResizeType);
         const actionType = sharer.getSharedStorage(keyActionType);
         const groupQueue = sharer.getSharedStorage(keyGroupQueue);
         const triggerCursor = (target2) => {
+          if (layoutIsSelected === true) {
+            return;
+          }
           const cursor = target2.type;
           if (inBusyMode === null) {
             eventHub.trigger("cursor", {
@@ -7804,8 +8348,6 @@ var __privateMethod = (obj, member, method) => {
       },
       pointMove: (e) => {
         var _a, _b, _c;
-        sharer.setSharedStorage(keySelectedReferenceXLines, []);
-        sharer.setSharedStorage(keySelectedReferenceYLines, []);
         sharer.setSharedStorage(keyIsMoving, true);
         const data = sharer.getActiveStorage("data");
         const elems = getActiveElements();
@@ -7817,32 +8359,33 @@ var __privateMethod = (obj, member, method) => {
         const resizeType = sharer.getSharedStorage(keyResizeType);
         const actionType = sharer.getSharedStorage(keyActionType);
         const groupQueue = sharer.getSharedStorage(keyGroupQueue);
+        const enableSnapToGrid = sharer.getSharedStorage(keyEnableSnapToGrid);
         if (actionType === "drag") {
           inBusyMode = "drag";
           if (data && (elems === null || elems === void 0 ? void 0 : elems.length) === 1 && start && end && ((_b = (_a = elems[0]) === null || _a === void 0 ? void 0 : _a.operations) === null || _b === void 0 ? void 0 : _b.lock) !== true) {
             const { moveX, moveY } = calcMoveInGroup(start, end, groupQueue);
             let totalMoveX = calculator.toGridNum(moveX / scale);
             let totalMoveY = calculator.toGridNum(moveY / scale);
-            const referenceInfo = calcReferenceInfo(elems[0].uuid, {
-              calculator,
-              data,
-              groupQueue,
-              viewScaleInfo,
-              viewSizeInfo
-            });
-            try {
-              if (referenceInfo) {
-                if (is.x(referenceInfo.offsetX) && referenceInfo.offsetX !== null) {
-                  totalMoveX = calculator.toGridNum(totalMoveX + referenceInfo.offsetX);
+            if (enableSnapToGrid === true) {
+              const referenceInfo = calcReferenceInfo(elems[0].uuid, {
+                calculator,
+                data,
+                groupQueue,
+                viewScaleInfo,
+                viewSizeInfo
+              });
+              try {
+                if (referenceInfo) {
+                  if (is.x(referenceInfo.offsetX) && referenceInfo.offsetX !== null) {
+                    totalMoveX = calculator.toGridNum(totalMoveX + referenceInfo.offsetX);
+                  }
+                  if (is.y(referenceInfo.offsetY) && referenceInfo.offsetY !== null) {
+                    totalMoveY = calculator.toGridNum(totalMoveY + referenceInfo.offsetY);
+                  }
                 }
-                if (is.y(referenceInfo.offsetY) && referenceInfo.offsetY !== null) {
-                  totalMoveY = calculator.toGridNum(totalMoveY + referenceInfo.offsetY);
-                }
-                sharer.setSharedStorage(keySelectedReferenceXLines, referenceInfo.xLines);
-                sharer.setSharedStorage(keySelectedReferenceYLines, referenceInfo.yLines);
+              } catch (err) {
+                console.error(err);
               }
-            } catch (err) {
-              console.error(err);
             }
             elems[0].x = calculator.toGridNum(elems[0].x + totalMoveX);
             elems[0].y = calculator.toGridNum(elems[0].y + totalMoveY);
@@ -7963,10 +8506,10 @@ var __privateMethod = (obj, member, method) => {
       },
       pointEnd(e) {
         inBusyMode = null;
-        sharer.setSharedStorage(keySelectedReferenceXLines, []);
-        sharer.setSharedStorage(keySelectedReferenceYLines, []);
         sharer.setSharedStorage(keyIsMoving, false);
         const data = sharer.getActiveStorage("data");
+        const selectedElements = sharer.getSharedStorage(keySelectedElementList);
+        const hoverElement = sharer.getSharedStorage(keyHoverElement);
         const resizeType = sharer.getSharedStorage(keyResizeType);
         const actionType = sharer.getSharedStorage(keyActionType);
         const viewSizeInfo = sharer.getActiveViewSizeInfo();
@@ -8026,7 +8569,7 @@ var __privateMethod = (obj, member, method) => {
           }
           if (data && ["drag", "drag-list", "drag-list-end", "resize"].includes(actionType)) {
             let type = "dragElement";
-            eventHub.trigger(eventChange, { data, type });
+            eventHub.trigger(eventChange, { data, type, selectedElements, hoverElement });
           }
           viewer.drawFrame();
         };
@@ -8082,6 +8625,7 @@ var __privateMethod = (obj, member, method) => {
         const groupQueue = sharedStore[keyGroupQueue];
         const groupQueueVertexesList = sharedStore[keyGroupQueueVertexesList];
         const isMoving = sharedStore[keyIsMoving];
+        const enableSnapToGrid = sharedStore[keyEnableSnapToGrid];
         const drawBaseOpts = { calculator, viewScaleInfo, viewSizeInfo };
         const selectedElementController = elem ? calcElementSizeController(elem, {
           groupQueue,
@@ -8105,12 +8649,24 @@ var __privateMethod = (obj, member, method) => {
           if (!isLock && elem && ["select", "drag", "resize"].includes(actionType)) {
             drawSelectedElementControllersVertexes(overlayContext, selectedElementController, Object.assign(Object.assign({}, drawBaseOpts), { element: elem, calculator, hideControllers: !!isMoving && actionType === "drag" }));
             if (actionType === "drag") {
-              const xLines = sharer2.getSharedStorage(keySelectedReferenceXLines);
-              const yLines = sharer2.getSharedStorage(keySelectedReferenceYLines);
-              drawReferenceLines(overlayContext, {
-                xLines,
-                yLines
-              });
+              if (enableSnapToGrid === true) {
+                const referenceInfo = calcReferenceInfo(elem.uuid, {
+                  calculator,
+                  data: activeStore.data,
+                  groupQueue,
+                  viewScaleInfo,
+                  viewSizeInfo
+                });
+                if (referenceInfo) {
+                  const { offsetX, offsetY, xLines, yLines } = referenceInfo;
+                  if (offsetX === 0 || offsetY === 0) {
+                    drawReferenceLines(overlayContext, {
+                      xLines,
+                      yLines
+                    });
+                  }
+                }
+              }
             }
           }
         } else {
@@ -8128,12 +8684,24 @@ var __privateMethod = (obj, member, method) => {
           if (!isLock && elem && ["select", "drag", "resize"].includes(actionType)) {
             drawSelectedElementControllersVertexes(overlayContext, selectedElementController, Object.assign(Object.assign({}, drawBaseOpts), { element: elem, calculator, hideControllers: !!isMoving && actionType === "drag" }));
             if (actionType === "drag") {
-              const xLines = sharer2.getSharedStorage(keySelectedReferenceXLines);
-              const yLines = sharer2.getSharedStorage(keySelectedReferenceYLines);
-              drawReferenceLines(overlayContext, {
-                xLines,
-                yLines
-              });
+              if (enableSnapToGrid === true) {
+                const referenceInfo = calcReferenceInfo(elem.uuid, {
+                  calculator,
+                  data: activeStore.data,
+                  groupQueue,
+                  viewScaleInfo,
+                  viewSizeInfo
+                });
+                if (referenceInfo) {
+                  const { offsetX, offsetY, xLines, yLines } = referenceInfo;
+                  if (offsetX === 0 || offsetY === 0) {
+                    drawReferenceLines(overlayContext, {
+                      xLines,
+                      yLines
+                    });
+                  }
+                }
+              }
             }
           } else if (actionType === "area" && areaStart && areaEnd) {
             drawArea(overlayContext, { start: areaStart, end: areaEnd });
@@ -8151,18 +8719,21 @@ var __privateMethod = (obj, member, method) => {
       }
     };
   };
-  const key$2 = "SCROLL";
-  const keyXThumbRect = Symbol(`${key$2}_xThumbRect`);
-  const keyYThumbRect = Symbol(`${key$2}_yThumbRect`);
-  const keyPrevPoint$1 = Symbol(`${key$2}_prevPoint`);
-  const keyActivePoint = Symbol(`${key$2}_activePoint`);
-  const keyActiveThumbType = Symbol(`${key$2}_activeThumbType`);
+  const key$1 = "SCROLL";
+  const keyXThumbRect = Symbol(`${key$1}_xThumbRect`);
+  const keyYThumbRect = Symbol(`${key$1}_yThumbRect`);
+  const keyHoverXThumbRect = Symbol(`${key$1}_hoverXThumbRect`);
+  const keyHoverYThumbRect = Symbol(`${key$1}_hoverYThumbRect`);
+  const keyPrevPoint$1 = Symbol(`${key$1}_prevPoint`);
+  const keyActivePoint = Symbol(`${key$1}_activePoint`);
+  const keyActiveThumbType = Symbol(`${key$1}_activeThumbType`);
   const minScrollerWidth = 12;
   const scrollerLineWidth = 16;
   const scrollerThumbAlpha = 0.3;
   const scrollConfig = {
     width: minScrollerWidth,
-    thumbColor: "#000000AA",
+    thumbColor: "#0000008A",
+    thumbHoverColor: "#000000EE",
     scrollBarColor: "#FFFFFF60",
     showScrollBar: false
   };
@@ -8194,11 +8765,14 @@ var __privateMethod = (obj, member, method) => {
       prevPoint: sharedStore[keyPrevPoint$1] || null,
       activeThumbType: sharedStore[keyActiveThumbType] || null,
       xThumbRect: sharedStore[keyXThumbRect] || null,
-      yThumbRect: sharedStore[keyYThumbRect] || null
+      yThumbRect: sharedStore[keyYThumbRect] || null,
+      hoverXThumb: sharedStore[keyHoverXThumbRect],
+      hoverYThumb: sharedStore[keyHoverYThumbRect]
     };
     return info;
   }
-  function calcScrollerInfo(viewScaleInfo, viewSizeInfo) {
+  function calcScrollerInfo(opts) {
+    const { viewScaleInfo, viewSizeInfo, hoverXThumb, hoverYThumb } = opts;
     const { width, height } = viewSizeInfo;
     const { offsetTop, offsetBottom, offsetLeft, offsetRight } = viewScaleInfo;
     const sliderMinSize = scrollerLineWidth * 2.5;
@@ -8253,7 +8827,8 @@ var __privateMethod = (obj, member, method) => {
       ySize,
       translateY,
       translateX,
-      thumbColor: scrollConfig.thumbColor,
+      xThumbColor: hoverXThumb ? scrollConfig.thumbHoverColor : scrollConfig.thumbColor,
+      yThumbColor: hoverYThumb ? scrollConfig.thumbHoverColor : scrollConfig.thumbColor,
       scrollBarColor: scrollConfig.scrollBarColor,
       xThumbRect,
       yThumbRect
@@ -8309,8 +8884,8 @@ var __privateMethod = (obj, member, method) => {
   function drawScrollerInfo(overlayContext, opts) {
     const ctx = overlayContext;
     const { viewScaleInfo, viewSizeInfo, scrollInfo } = opts;
-    const { activeThumbType, prevPoint, activePoint } = scrollInfo;
-    const wrapper = calcScrollerInfo(viewScaleInfo, viewSizeInfo);
+    const { activeThumbType, prevPoint, activePoint, hoverXThumb, hoverYThumb } = scrollInfo;
+    const wrapper = calcScrollerInfo({ viewScaleInfo, viewSizeInfo, hoverXThumb, hoverYThumb });
     let xThumbRect = Object.assign({}, wrapper.xThumbRect);
     let yThumbRect = Object.assign({}, wrapper.yThumbRect);
     if (activeThumbType && prevPoint && activePoint) {
@@ -8322,8 +8897,8 @@ var __privateMethod = (obj, member, method) => {
         yThumbRect.y = yThumbRect.y + (activePoint.y - prevPoint.y);
       }
     }
-    drawScrollerThumb(ctx, Object.assign(Object.assign({ axis: "X" }, xThumbRect), { r: wrapper.lineSize / 2, color: wrapper.thumbColor }));
-    drawScrollerThumb(ctx, Object.assign(Object.assign({ axis: "Y" }, yThumbRect), { r: wrapper.lineSize / 2, color: wrapper.thumbColor }));
+    drawScrollerThumb(ctx, Object.assign(Object.assign({ axis: "X" }, xThumbRect), { r: wrapper.lineSize / 2, color: wrapper.xThumbColor }));
+    drawScrollerThumb(ctx, Object.assign(Object.assign({ axis: "Y" }, yThumbRect), { r: wrapper.lineSize / 2, color: wrapper.yThumbColor }));
     ctx.globalAlpha = 1;
     return {
       xThumbRect,
@@ -8339,14 +8914,18 @@ var __privateMethod = (obj, member, method) => {
     return { xThumbRect, yThumbRect };
   }
   const MiddlewareScroller = (opts) => {
-    const { viewer, boardContent, sharer } = opts;
+    const { viewer, boardContent, sharer, eventHub } = opts;
     const { overlayContext } = boardContent;
     sharer.setSharedStorage(keyXThumbRect, null);
     sharer.setSharedStorage(keyYThumbRect, null);
+    let isBusy = false;
     const clear = () => {
       sharer.setSharedStorage(keyPrevPoint$1, null);
       sharer.setSharedStorage(keyActivePoint, null);
       sharer.setSharedStorage(keyActiveThumbType, null);
+      sharer.setSharedStorage(keyHoverXThumbRect, null);
+      sharer.setSharedStorage(keyHoverYThumbRect, null);
+      isBusy = false;
     };
     clear();
     const scrollX = (p) => {
@@ -8388,10 +8967,31 @@ var __privateMethod = (obj, member, method) => {
         });
         viewer.drawFrame();
       },
+      hover: (e) => {
+        if (isBusy === true) {
+          return false;
+        }
+        const { point } = e;
+        const thumbType = getThumbType(point);
+        if (thumbType === "X" || thumbType === "Y") {
+          if (thumbType === "X") {
+            sharer.setSharedStorage(keyHoverXThumbRect, true);
+            sharer.setSharedStorage(keyHoverYThumbRect, false);
+          } else {
+            sharer.setSharedStorage(keyHoverXThumbRect, false);
+            sharer.setSharedStorage(keyHoverYThumbRect, true);
+          }
+          eventHub.trigger("cursor", { type: "default" });
+          return false;
+        }
+        sharer.setSharedStorage(keyHoverXThumbRect, false);
+        sharer.setSharedStorage(keyHoverYThumbRect, false);
+      },
       pointStart: (e) => {
         const { point } = e;
         const thumbType = getThumbType(point);
         if (thumbType === "X" || thumbType === "Y") {
+          isBusy = true;
           sharer.setSharedStorage(keyActiveThumbType, thumbType);
           sharer.setSharedStorage(keyPrevPoint$1, point);
           return false;
@@ -8412,6 +9012,7 @@ var __privateMethod = (obj, member, method) => {
         }
       },
       pointEnd: () => {
+        isBusy = false;
         const activeThumbType = sharer.getSharedStorage(keyActiveThumbType);
         clear();
         if (activeThumbType === "X" || activeThumbType === "Y") {
@@ -8762,8 +9363,8 @@ var __privateMethod = (obj, member, method) => {
       }
     };
   };
-  const key$1 = "DRAG";
-  const keyPrevPoint = Symbol(`${key$1}_prevPoint`);
+  const key = "DRAG";
+  const keyPrevPoint = Symbol(`${key}_prevPoint`);
   const MiddlewareDragger = (opts) => {
     const { eventHub, sharer, viewer } = opts;
     let isDragging = false;
@@ -9018,337 +9619,6 @@ var __privateMethod = (obj, member, method) => {
             }
           }
         }
-      }
-    };
-  };
-  const key = "LAYOUT_SELECT";
-  const keyLayoutActionType = Symbol(`${key}_layoutActionType`);
-  const keyLayoutControlType = Symbol(`${key}_layoutControlType`);
-  const keyLayoutController = Symbol(`${key}_layoutController`);
-  const selectColor = "#1973ba";
-  const disableColor = "#5b5959b5";
-  function drawControllerBox(ctx, boxVertexes) {
-    ctx.setLineDash([]);
-    ctx.fillStyle = "#FFFFFF";
-    ctx.beginPath();
-    ctx.moveTo(boxVertexes[0].x, boxVertexes[0].y);
-    ctx.lineTo(boxVertexes[1].x, boxVertexes[1].y);
-    ctx.lineTo(boxVertexes[2].x, boxVertexes[2].y);
-    ctx.lineTo(boxVertexes[3].x, boxVertexes[3].y);
-    ctx.closePath();
-    ctx.fill();
-    ctx.strokeStyle = selectColor;
-    ctx.lineWidth = 2;
-    ctx.beginPath();
-    ctx.moveTo(boxVertexes[0].x, boxVertexes[0].y);
-    ctx.lineTo(boxVertexes[1].x, boxVertexes[1].y);
-    ctx.lineTo(boxVertexes[2].x, boxVertexes[2].y);
-    ctx.lineTo(boxVertexes[3].x, boxVertexes[3].y);
-    ctx.closePath();
-    ctx.stroke();
-  }
-  function drawControllerCross(ctx, opts) {
-    const { vertexes, strokeStyle, lineWidth } = opts;
-    ctx.setLineDash([]);
-    ctx.strokeStyle = strokeStyle;
-    ctx.lineWidth = lineWidth;
-    ctx.beginPath();
-    ctx.moveTo(vertexes[0].x, vertexes[0].y);
-    ctx.lineTo(vertexes[2].x, vertexes[2].y);
-    ctx.closePath();
-    ctx.stroke();
-    ctx.beginPath();
-    ctx.moveTo(vertexes[1].x, vertexes[1].y);
-    ctx.lineTo(vertexes[3].x, vertexes[3].y);
-    ctx.closePath();
-    ctx.stroke();
-  }
-  function drawControllerLine(ctx, opts) {
-    const { start, end, centerVertexes, disabled } = opts;
-    const lineWidth = disabled === true ? 1 : 2;
-    const strokeStyle = disabled === true ? disableColor : selectColor;
-    ctx.setLineDash([]);
-    ctx.strokeStyle = strokeStyle;
-    ctx.lineWidth = lineWidth;
-    ctx.beginPath();
-    ctx.moveTo(start.x, start.y);
-    ctx.lineTo(end.x, end.y);
-    ctx.closePath();
-    ctx.stroke();
-    if (disabled === true) {
-      drawControllerCross(ctx, {
-        vertexes: centerVertexes,
-        lineWidth,
-        strokeStyle
-      });
-    }
-  }
-  function drawLayoutController(ctx, opts) {
-    const { controller, operations } = opts;
-    const { topLeft, topRight, bottomLeft, bottomRight, topMiddle, rightMiddle, bottomMiddle, leftMiddle } = controller;
-    drawControllerLine(ctx, { start: topLeft.center, end: topRight.center, centerVertexes: topMiddle.vertexes, disabled: !!(operations === null || operations === void 0 ? void 0 : operations.disabledTop) });
-    drawControllerLine(ctx, { start: topRight.center, end: bottomRight.center, centerVertexes: rightMiddle.vertexes, disabled: !!(operations === null || operations === void 0 ? void 0 : operations.disabledRight) });
-    drawControllerLine(ctx, { start: bottomRight.center, end: bottomLeft.center, centerVertexes: bottomMiddle.vertexes, disabled: !!(operations === null || operations === void 0 ? void 0 : operations.disabledBottom) });
-    drawControllerLine(ctx, { start: bottomLeft.center, end: topLeft.center, centerVertexes: leftMiddle.vertexes, disabled: !!(operations === null || operations === void 0 ? void 0 : operations.disabledLeft) });
-    const disabledOpts = {
-      lineWidth: 1,
-      strokeStyle: disableColor
-    };
-    if ((operations === null || operations === void 0 ? void 0 : operations.disabledTopLeft) === true) {
-      drawControllerCross(ctx, Object.assign({ vertexes: topLeft.vertexes }, disabledOpts));
-    } else {
-      drawControllerBox(ctx, topLeft.vertexes);
-    }
-    if ((operations === null || operations === void 0 ? void 0 : operations.disabledTopRight) === true) {
-      drawControllerCross(ctx, Object.assign({ vertexes: topRight.vertexes }, disabledOpts));
-    } else {
-      drawControllerBox(ctx, topRight.vertexes);
-    }
-    if ((operations === null || operations === void 0 ? void 0 : operations.disabledBottomRight) === true) {
-      drawControllerCross(ctx, Object.assign({ vertexes: bottomRight.vertexes }, disabledOpts));
-    } else {
-      drawControllerBox(ctx, bottomRight.vertexes);
-    }
-    if ((operations === null || operations === void 0 ? void 0 : operations.disabledBottomLeft) === true) {
-      drawControllerCross(ctx, Object.assign({ vertexes: bottomLeft.vertexes }, disabledOpts));
-    } else {
-      drawControllerBox(ctx, bottomLeft.vertexes);
-    }
-  }
-  const MiddlewareLayoutSelector = (opts) => {
-    const { sharer, boardContent, calculator, viewer, eventHub } = opts;
-    const { overlayContext } = boardContent;
-    let prevPoint = null;
-    const clear = () => {
-      prevPoint = null;
-      sharer.setSharedStorage(keyLayoutActionType, null);
-      sharer.setSharedStorage(keyLayoutControlType, null);
-      sharer.setSharedStorage(keyLayoutController, null);
-    };
-    const isInElementAction = () => {
-      const elementType = sharer.getSharedStorage(keyActionType);
-      if (elementType) {
-        return true;
-      }
-      return false;
-    };
-    const isDisbaledControl = (controlType) => {
-      var _a;
-      const data = sharer.getActiveStorage("data");
-      if ((_a = data === null || data === void 0 ? void 0 : data.layout) === null || _a === void 0 ? void 0 : _a.operations) {
-        const operations = data.layout.operations;
-        if (controlType === "left" && operations.disabledLeft === true) {
-          return true;
-        }
-        if (controlType === "top" && operations.disabledTop === true) {
-          return true;
-        }
-        if (controlType === "right" && operations.disabledRight === true) {
-          return true;
-        }
-        if (controlType === "bottom" && operations.disabledBottom === true) {
-          return true;
-        }
-        if (controlType === "top-left" && operations.disabledTopLeft === true) {
-          return true;
-        }
-        if (controlType === "top-right" && operations.disabledTopRight === true) {
-          return true;
-        }
-        if (controlType === "bottom-left" && operations.disabledBottomLeft === true) {
-          return true;
-        }
-        if (controlType === "bottom-right" && operations.disabledBottomRight === true) {
-          return true;
-        }
-      }
-      return false;
-    };
-    const getLayoutSize = () => {
-      const data = sharer.getActiveStorage("data");
-      if (data === null || data === void 0 ? void 0 : data.layout) {
-        const { x: x2, y: y2, w: w2, h: h2 } = data.layout;
-        return { x: x2, y: y2, w: w2, h: h2 };
-      }
-      return null;
-    };
-    const resetController = () => {
-      const viewScaleInfo = sharer.getActiveViewScaleInfo();
-      const size = getLayoutSize();
-      if (size) {
-        const controller = calcLayoutSizeController(size, { viewScaleInfo, controllerSize: 10 });
-        sharer.setSharedStorage(keyLayoutController, controller);
-      } else {
-        sharer.setSharedStorage(keyLayoutController, null);
-      }
-    };
-    const resetControlType = (e) => {
-      const data = sharer.getActiveStorage("data");
-      const controller = sharer.getSharedStorage(keyLayoutController);
-      if (controller && (data === null || data === void 0 ? void 0 : data.layout) && (e === null || e === void 0 ? void 0 : e.point)) {
-        let layoutControlType = null;
-        if (controller) {
-          const { topLeft, top, topRight, right, bottomRight, bottom, bottomLeft, left } = controller;
-          const list = [topLeft, top, topRight, right, bottomRight, bottom, bottomLeft, left];
-          for (let i = 0; i < list.length; i++) {
-            const item = list[i];
-            if (isViewPointInVertexes(e.point, item.vertexes)) {
-              layoutControlType = `${item.type}`;
-              break;
-            }
-          }
-          if (layoutControlType) {
-            sharer.setSharedStorage(keyLayoutControlType, layoutControlType);
-            eventHub.trigger(middlewareEventSelectClear, {});
-            return layoutControlType;
-          }
-        }
-      }
-      return null;
-    };
-    return {
-      name: "@middleware/layout-selector",
-      use: () => {
-        clear();
-        resetController();
-      },
-      hover: (e) => {
-        if (isInElementAction()) {
-          return;
-        }
-        const prevLayoutActionType = sharer.getSharedStorage(keyLayoutActionType);
-        const data = sharer.getActiveStorage("data");
-        if ((data === null || data === void 0 ? void 0 : data.layout) && prevLayoutActionType !== "resize") {
-          resetController();
-          const layoutControlType = resetControlType(e);
-          if (layoutControlType) {
-            sharer.setSharedStorage(keyLayoutActionType, "hover");
-            if (!isDisbaledControl(layoutControlType)) {
-              eventHub.trigger("cursor", {
-                type: `resize-${layoutControlType}`,
-                groupQueue: [],
-                element: getLayoutSize()
-              });
-            }
-            viewer.drawFrame();
-          } else {
-            sharer.setSharedStorage(keyLayoutActionType, null);
-          }
-        }
-        if (["hover", "resize"].includes(sharer.getSharedStorage(keyLayoutActionType))) {
-          return false;
-        }
-        if (prevLayoutActionType === "hover" && !sharer.getSharedStorage(keyLayoutActionType)) {
-          viewer.drawFrame();
-        }
-      },
-      pointStart: (e) => {
-        if (isInElementAction()) {
-          return;
-        }
-        resetController();
-        const layoutControlType = resetControlType(e);
-        prevPoint = e.point;
-        if (layoutControlType) {
-          if (isDisbaledControl(layoutControlType)) {
-            return;
-          }
-          sharer.setSharedStorage(keyLayoutActionType, "resize");
-          return false;
-        }
-        const layoutActionType = sharer.getSharedStorage(keyLayoutActionType);
-        if (["hover", "resize"].includes(layoutActionType)) {
-          return false;
-        }
-      },
-      pointMove: (e) => {
-        if (isInElementAction()) {
-          return;
-        }
-        const layoutActionType = sharer.getSharedStorage(keyLayoutActionType);
-        const layoutControlType = sharer.getSharedStorage(keyLayoutControlType);
-        const data = sharer.getActiveStorage("data");
-        if (layoutControlType && isDisbaledControl(layoutControlType)) {
-          return;
-        }
-        if (layoutActionType === "resize" && layoutControlType && (data === null || data === void 0 ? void 0 : data.layout)) {
-          if (prevPoint) {
-            const scale = sharer.getActiveStorage("scale");
-            const moveX = (e.point.x - prevPoint.x) / scale;
-            const moveY = (e.point.y - prevPoint.y) / scale;
-            const { x: x2, y: y2, w: w2, h: h2 } = data.layout;
-            if (layoutControlType === "top") {
-              data.layout.y = calculator.toGridNum(y2 + moveY);
-              data.layout.h = calculator.toGridNum(h2 - moveY);
-            } else if (layoutControlType === "right") {
-              data.layout.w = calculator.toGridNum(w2 + moveX);
-            } else if (layoutControlType === "bottom") {
-              data.layout.h = calculator.toGridNum(h2 + moveY);
-            } else if (layoutControlType === "left") {
-              data.layout.x = calculator.toGridNum(x2 + moveX);
-              data.layout.w = calculator.toGridNum(w2 - moveX);
-            } else if (layoutControlType === "top-left") {
-              data.layout.x = calculator.toGridNum(x2 + moveX);
-              data.layout.y = calculator.toGridNum(y2 + moveY);
-              data.layout.w = calculator.toGridNum(w2 - moveX);
-              data.layout.h = calculator.toGridNum(h2 - moveY);
-            } else if (layoutControlType === "top-right") {
-              data.layout.y = calculator.toGridNum(y2 + moveY);
-              data.layout.w = calculator.toGridNum(w2 + moveX);
-              data.layout.h = calculator.toGridNum(h2 - moveY);
-            } else if (layoutControlType === "bottom-right") {
-              data.layout.w = calculator.toGridNum(w2 + moveX);
-              data.layout.h = calculator.toGridNum(h2 + moveY);
-            } else if (layoutControlType === "bottom-left") {
-              data.layout.x = calculator.toGridNum(x2 + moveX);
-              data.layout.w = calculator.toGridNum(w2 - moveX);
-              data.layout.h = calculator.toGridNum(h2 + moveY);
-            }
-          }
-          prevPoint = e.point;
-          resetController();
-          viewer.drawFrame();
-          return false;
-        }
-        if (["hover", "resize"].includes(layoutActionType)) {
-          return false;
-        }
-      },
-      pointEnd: () => {
-        const layoutActionType = sharer.getSharedStorage(keyLayoutActionType);
-        const layoutControlType = sharer.getSharedStorage(keyLayoutControlType);
-        const data = sharer.getActiveStorage("data");
-        if (data && layoutActionType === "resize" && layoutControlType && !isDisbaledControl(layoutControlType)) {
-          eventHub.trigger(eventChange, {
-            type: "changeLayout",
-            data
-          });
-        }
-        clear();
-      },
-      beforeDrawFrame: ({ snapshot }) => {
-        var _a;
-        const { sharedStore, activeStore } = snapshot;
-        const layoutActionType = sharedStore[keyLayoutActionType];
-        const layoutControlType = sharedStore[keyLayoutControlType];
-        if (((_a = activeStore.data) === null || _a === void 0 ? void 0 : _a.layout) && layoutActionType && layoutControlType) {
-          if (["hover", "resize"].includes(layoutActionType)) {
-            const viewScaleInfo = getViewScaleInfoFromSnapshot(snapshot);
-            const { x: x2, y: y2, w: w2, h: h2 } = activeStore.data.layout;
-            const size = { x: x2, y: y2, w: w2, h: h2 };
-            const controller = calcLayoutSizeController(size, { viewScaleInfo, controllerSize: 10 });
-            drawLayoutController(overlayContext, { controller, operations: activeStore.data.layout.operations || {} });
-          }
-        }
-      },
-      scrollX: () => {
-        clear();
-      },
-      scrollY: () => {
-        clear();
-      },
-      wheelScale: () => {
-        clear();
       }
     };
   };
@@ -9781,7 +10051,7 @@ var __privateMethod = (obj, member, method) => {
     }
     async getImageBlobURL(opts) {
       const data = this.getData() || { elements: [] };
-      const { devicePixelRatio } = opts;
+      const { devicePixelRatio } = opts || { devicePixelRatio: 1 };
       const outputSize = calcElementListSize(data.elements);
       const { viewSizeInfo } = this.getViewInfo();
       return await exportImageFileBlobURL({
@@ -9808,7 +10078,8 @@ var __privateMethod = (obj, member, method) => {
     }
     getViewCenter() {
       const { viewScaleInfo, viewSizeInfo } = this.getViewInfo();
-      return calcViewCenter({ viewScaleInfo, viewSizeInfo });
+      const pointSize = calcViewCenter({ viewScaleInfo, viewSizeInfo });
+      return pointSize;
     }
     $onBoardWatcherEvents() {
       __privateGet(this, _core).onBoardWatcherEvents();
@@ -9841,6 +10112,10 @@ var __privateMethod = (obj, member, method) => {
       __privateGet(this, _core).refresh();
     } else if (feat === "selectInGroup") {
       __privateGet(this, _core).trigger(middlewareEventSelectInGroup, {
+        enable: !!status
+      });
+    } else if (feat === "snapToGrid") {
+      __privateGet(this, _core).trigger(middlewareEventSnapToGrid, {
         enable: !!status
       });
     }
