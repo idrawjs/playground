@@ -11,7 +11,7 @@ type TypeDemoList = {
 
 const demoList: TypeDemoList = [
   {
-    name: 'Quick Start',
+    name: 'Quick Started',
     list: [
       {
         name: 'Basic',
@@ -77,6 +77,69 @@ const demoList: TypeDemoList = [
     ]
   },
   {
+    name: 'Custom Styles',
+    list: [
+      {
+        name: 'Selector Style',
+        key: 'custom-style-selector'
+      },
+      {
+        name: 'Ruler Style',
+        key: 'custom-style-ruler'
+      },
+      {
+        name: 'Scroller Style',
+        key: 'custom-style-scroller'
+      },
+      {
+        name: 'Info Style',
+        key: 'custom-style-info'
+      }
+    ]
+  },
+  {
+    name: 'Switching Mode',
+    list: [
+      {
+        name: 'Select Mode',
+        key: 'mode-select'
+      },
+      {
+        name: 'Drag Mode',
+        key: 'mode-drag'
+      },
+      {
+        name: 'Read-Only Mode',
+        key: 'mode-readOnly'
+      }
+    ]
+  },
+  {
+    name: 'Features',
+    list: [
+      {
+        name: 'Ruler',
+        key: 'feature-ruler'
+      },
+      {
+        name: 'Scroll',
+        key: 'feature-scroll'
+      },
+      {
+        name: 'Info',
+        key: 'feature-info'
+      },
+      {
+        name: 'Select In Group',
+        key: 'feature-selectInGroup'
+      },
+      {
+        name: 'Snap To Grid',
+        key: 'feature-snapToGrid'
+      }
+    ]
+  },
+  {
     name: 'iDraw API',
     list: [
       {
@@ -130,11 +193,11 @@ const demoList: TypeDemoList = [
       {
         name: 'enable',
         key: 'api-enable'
+      },
+      {
+        name: 'getImageBlobURL',
+        key: 'api-getImageBlobURL'
       }
-      // {
-      //   name: 'getSelectedElements',
-      //   key: 'api-getSelectedElements',
-      // },
       // {
       //   name: 'moveDownElement',
       //   key: 'api-moveDownElement',
