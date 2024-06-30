@@ -18,6 +18,10 @@ const demoList: TypeDemoList = [
         key: 'basic'
       },
       {
+        name: 'Advanced Data',
+        key: 'advanced-data'
+      },
+      {
         name: 'Options',
         key: 'basic-options'
       }
