@@ -5782,7 +5782,7 @@ var __privateMethod = (obj, member, method) => {
       const { data } = __classPrivateFieldGet$2(this, _Board_sharer, "f").getActiveStoreSnapshot();
       return data;
     }
-    use(middleware) {
+    use(middleware, config) {
       var _a, _b, _c;
       if (__classPrivateFieldGet$2(this, _Board_middlewareMap, "f").has(middleware)) {
         const item = __classPrivateFieldGet$2(this, _Board_middlewareMap, "f").get(middleware);
@@ -5799,13 +5799,14 @@ var __privateMethod = (obj, member, method) => {
       const viewer = __classPrivateFieldGet$2(this, _Board_viewer, "f");
       const calculator = __classPrivateFieldGet$2(this, _Board_calculator, "f");
       const eventHub = __classPrivateFieldGet$2(this, _Board_eventHub, "f");
-      const obj = middleware({ boardContent, sharer, viewer, calculator, eventHub, container });
+      const obj = middleware({ boardContent, sharer, viewer, calculator, eventHub, container }, config);
       (_c = obj.use) === null || _c === void 0 ? void 0 : _c.call(obj);
       __classPrivateFieldGet$2(this, _Board_middlewares, "f").push(middleware);
       __classPrivateFieldGet$2(this, _Board_activeMiddlewareObjs, "f").push(obj);
       __classPrivateFieldGet$2(this, _Board_middlewareMap, "f").set(middleware, {
         status: "enable",
-        middlewareObject: obj
+        middlewareObject: obj,
+        config
       });
       __classPrivateFieldGet$2(this, _Board_instances, "m", _Board_resetActiveMiddlewareObjs).call(this);
     }
@@ -6173,10 +6174,17 @@ var __privateMethod = (obj, member, method) => {
   const selectWrapperBorderWidth = 2;
   const resizeControllerBorderWidth = 4;
   const areaBorderWidth = 1;
-  const wrapperColor = "#1973ba";
-  const lockColor = "#5b5959b5";
   const controllerSize$1 = 10;
+  const activeColor = "#1973ba";
+  const activeAreaColor = "#1976d21c";
+  const lockedColor = "#5b5959b5";
   const referenceColor = "#f7276e";
+  const defaultStyle$2 = {
+    activeColor,
+    activeAreaColor,
+    lockedColor,
+    referenceColor
+  };
   const middlewareEventSelect = "@middleware/select";
   const middlewareEventSelectClear = "@middleware/select-clear";
   const middlewareEventSelectInGroup = "@middleware/select-in-group";
@@ -6285,19 +6293,23 @@ var __privateMethod = (obj, member, method) => {
     if (!vertexes) {
       return;
     }
-    const wrapperOpts = { borderColor: wrapperColor, borderWidth: 1, background: "transparent", lineDash: [] };
+    const { style } = opts;
+    const { activeColor: activeColor2 } = style;
+    const wrapperOpts = { borderColor: activeColor2, borderWidth: 1, background: "transparent", lineDash: [] };
     drawVertexes(ctx, calcViewVertexes(vertexes, opts), wrapperOpts);
   }
   function drawLockVertexesWrapper(ctx, vertexes, opts) {
     if (!vertexes) {
       return;
     }
-    const wrapperOpts = { borderColor: lockColor, borderWidth: 1, background: "transparent", lineDash: [] };
+    const { style } = opts;
+    const { lockedColor: lockedColor2 } = style;
+    const wrapperOpts = { borderColor: lockedColor2, borderWidth: 1, background: "transparent", lineDash: [] };
     drawVertexes(ctx, calcViewVertexes(vertexes, opts), wrapperOpts);
     const { controller } = opts;
     if (controller) {
       const { topLeft, topRight, bottomLeft, bottomRight, topMiddle, bottomMiddle, leftMiddle, rightMiddle } = controller;
-      const ctrlOpts = Object.assign(Object.assign({}, wrapperOpts), { borderWidth: 1, background: lockColor });
+      const ctrlOpts = Object.assign(Object.assign({}, wrapperOpts), { borderWidth: 1, background: lockedColor2 });
       drawCrossVertexes(ctx, calcViewVertexes(topMiddle.vertexes, opts), ctrlOpts);
       drawCrossVertexes(ctx, calcViewVertexes(bottomMiddle.vertexes, opts), ctrlOpts);
       drawCrossVertexes(ctx, calcViewVertexes(leftMiddle.vertexes, opts), ctrlOpts);
@@ -6312,9 +6324,10 @@ var __privateMethod = (obj, member, method) => {
     if (!controller) {
       return;
     }
-    const { hideControllers } = opts;
+    const { hideControllers, style } = opts;
+    const { activeColor: activeColor2 } = style;
     const { elementWrapper, topLeft, topRight, bottomLeft, bottomRight, top, rotate } = controller;
-    const wrapperOpts = { borderColor: wrapperColor, borderWidth: selectWrapperBorderWidth, background: "transparent", lineDash: [] };
+    const wrapperOpts = { borderColor: activeColor2, borderWidth: selectWrapperBorderWidth, background: "transparent", lineDash: [] };
     const ctrlOpts = Object.assign(Object.assign({}, wrapperOpts), { borderWidth: resizeControllerBorderWidth, background: "#FFFFFF" });
     drawVertexes(ctx, calcViewVertexes(elementWrapper, opts), wrapperOpts);
     if (!hideControllers) {
@@ -6327,11 +6340,12 @@ var __privateMethod = (obj, member, method) => {
     }
   }
   function drawArea(ctx, opts) {
-    const { start, end } = opts;
+    const { start, end, style } = opts;
+    const { activeColor: activeColor2, activeAreaColor: activeAreaColor2 } = style;
     ctx.setLineDash([]);
     ctx.lineWidth = areaBorderWidth;
-    ctx.strokeStyle = wrapperColor;
-    ctx.fillStyle = "#1976d24f";
+    ctx.strokeStyle = activeColor2;
+    ctx.fillStyle = activeAreaColor2;
     ctx.beginPath();
     ctx.moveTo(start.x, start.y);
     ctx.lineTo(end.x, start.y);
@@ -6342,12 +6356,13 @@ var __privateMethod = (obj, member, method) => {
     ctx.fill();
   }
   function drawListArea(ctx, opts) {
-    const { areaSize } = opts;
+    const { areaSize, style } = opts;
+    const { activeColor: activeColor2, activeAreaColor: activeAreaColor2 } = style;
     const { x: x2, y: y2, w: w2, h: h2 } = areaSize;
     ctx.setLineDash([]);
     ctx.lineWidth = areaBorderWidth;
-    ctx.strokeStyle = wrapperColor;
-    ctx.fillStyle = "#1976d21c";
+    ctx.strokeStyle = activeColor2;
+    ctx.fillStyle = activeAreaColor2;
     ctx.beginPath();
     ctx.moveTo(x2, y2);
     ctx.lineTo(x2 + w2, y2);
@@ -6358,16 +6373,19 @@ var __privateMethod = (obj, member, method) => {
     ctx.fill();
   }
   function drawGroupQueueVertexesWrappers(ctx, vertexesList, opts) {
+    const { style } = opts;
+    const { activeColor: activeColor2 } = style;
     for (let i = 0; i < vertexesList.length; i++) {
       const vertexes = vertexesList[i];
-      const wrapperOpts = { borderColor: wrapperColor, borderWidth: selectWrapperBorderWidth, background: "transparent", lineDash: [4, 4] };
+      const wrapperOpts = { borderColor: activeColor2, borderWidth: selectWrapperBorderWidth, background: "transparent", lineDash: [4, 4] };
       drawVertexes(ctx, calcViewVertexes(vertexes, opts), wrapperOpts);
     }
   }
   function drawReferenceLines(ctx, opts) {
-    const { xLines, yLines } = opts;
+    const { xLines, yLines, style } = opts;
+    const { referenceColor: referenceColor2 } = style;
     const lineOpts = {
-      borderColor: referenceColor,
+      borderColor: referenceColor2,
       borderWidth: 1,
       lineDash: []
     };
@@ -8061,7 +8079,10 @@ var __privateMethod = (obj, member, method) => {
       }
     };
   };
-  const MiddlewareSelector = (opts) => {
+  const MiddlewareSelector = (opts, config) => {
+    const innerConfig = Object.assign(Object.assign({}, defaultStyle$2), config);
+    const { activeColor: activeColor2, activeAreaColor: activeAreaColor2, lockedColor: lockedColor2, referenceColor: referenceColor2 } = innerConfig;
+    const style = { activeColor: activeColor2, activeAreaColor: activeAreaColor2, lockedColor: lockedColor2, referenceColor: referenceColor2 };
     const { viewer, sharer, boardContent, calculator, eventHub } = opts;
     const { overlayContext } = boardContent;
     let prevPoint = null;
@@ -8626,7 +8647,7 @@ var __privateMethod = (obj, member, method) => {
         const groupQueueVertexesList = sharedStore[keyGroupQueueVertexesList];
         const isMoving = sharedStore[keyIsMoving];
         const enableSnapToGrid = sharedStore[keyEnableSnapToGrid];
-        const drawBaseOpts = { calculator, viewScaleInfo, viewSizeInfo };
+        const drawBaseOpts = { calculator, viewScaleInfo, viewSizeInfo, style };
         const selectedElementController = elem ? calcElementSizeController(elem, {
           groupQueue,
           controllerSize: 10,
@@ -8641,13 +8662,13 @@ var __privateMethod = (obj, member, method) => {
                 groupQueue,
                 controllerSize: 10,
                 viewScaleInfo
-              }) }));
+              }), style }));
             } else {
               drawHoverVertexesWrapper(overlayContext, hoverElementVertexes, drawBaseOpts);
             }
           }
           if (!isLock && elem && ["select", "drag", "resize"].includes(actionType)) {
-            drawSelectedElementControllersVertexes(overlayContext, selectedElementController, Object.assign(Object.assign({}, drawBaseOpts), { element: elem, calculator, hideControllers: !!isMoving && actionType === "drag" }));
+            drawSelectedElementControllersVertexes(overlayContext, selectedElementController, Object.assign(Object.assign({}, drawBaseOpts), { element: elem, calculator, hideControllers: !!isMoving && actionType === "drag", style }));
             if (actionType === "drag") {
               if (enableSnapToGrid === true) {
                 const referenceInfo = calcReferenceInfo(elem.uuid, {
@@ -8662,7 +8683,8 @@ var __privateMethod = (obj, member, method) => {
                   if (offsetX === 0 || offsetY === 0) {
                     drawReferenceLines(overlayContext, {
                       xLines,
-                      yLines
+                      yLines,
+                      style
                     });
                   }
                 }
@@ -8676,13 +8698,13 @@ var __privateMethod = (obj, member, method) => {
                 groupQueue,
                 controllerSize: 10,
                 viewScaleInfo
-              }) }));
+              }), style }));
             } else {
               drawHoverVertexesWrapper(overlayContext, hoverElementVertexes, drawBaseOpts);
             }
           }
           if (!isLock && elem && ["select", "drag", "resize"].includes(actionType)) {
-            drawSelectedElementControllersVertexes(overlayContext, selectedElementController, Object.assign(Object.assign({}, drawBaseOpts), { element: elem, calculator, hideControllers: !!isMoving && actionType === "drag" }));
+            drawSelectedElementControllersVertexes(overlayContext, selectedElementController, Object.assign(Object.assign({}, drawBaseOpts), { element: elem, calculator, hideControllers: !!isMoving && actionType === "drag", style }));
             if (actionType === "drag") {
               if (enableSnapToGrid === true) {
                 const referenceInfo = calcReferenceInfo(elem.uuid, {
@@ -8697,14 +8719,15 @@ var __privateMethod = (obj, member, method) => {
                   if (offsetX === 0 || offsetY === 0) {
                     drawReferenceLines(overlayContext, {
                       xLines,
-                      yLines
+                      yLines,
+                      style
                     });
                   }
                 }
               }
             }
           } else if (actionType === "area" && areaStart && areaEnd) {
-            drawArea(overlayContext, { start: areaStart, end: areaEnd });
+            drawArea(overlayContext, { start: areaStart, end: areaEnd, style });
           } else if (["drag-list", "drag-list-end"].includes(actionType)) {
             const listAreaSize = calcSelectedElementsArea(getActiveElements(), {
               viewScaleInfo: sharer2.getActiveViewScaleInfo(),
@@ -8712,7 +8735,7 @@ var __privateMethod = (obj, member, method) => {
               calculator
             });
             if (listAreaSize) {
-              drawListArea(overlayContext, { areaSize: listAreaSize });
+              drawListArea(overlayContext, { areaSize: listAreaSize, style });
             }
           }
         }
@@ -8727,16 +8750,16 @@ var __privateMethod = (obj, member, method) => {
   const keyPrevPoint$1 = Symbol(`${key$1}_prevPoint`);
   const keyActivePoint = Symbol(`${key$1}_activePoint`);
   const keyActiveThumbType = Symbol(`${key$1}_activeThumbType`);
-  const minScrollerWidth = 12;
-  const scrollerLineWidth = 16;
-  const scrollerThumbAlpha = 0.3;
-  const scrollConfig = {
-    width: minScrollerWidth,
-    thumbColor: "#0000008A",
-    thumbHoverColor: "#000000EE",
-    scrollBarColor: "#FFFFFF60",
-    showScrollBar: false
+  const defaultStyle$1 = {
+    thumbBackground: "#0000003A",
+    thumbBorderColor: "#0000008A",
+    hoverThumbBackground: "#0000005F",
+    hoverThumbBorderColor: "#000000EE",
+    activeThumbBackground: "#0000005E",
+    activeThumbBorderColor: "#000000F0"
   };
+  const scrollerLineWidth = 16;
+  const minThumbLength = scrollerLineWidth * 2.5;
   function isPointAtRect(overlayContext, p, rect) {
     const ctx = overlayContext;
     const { x: x2, y: y2, w: w2, h: h2 } = rect;
@@ -8772,11 +8795,12 @@ var __privateMethod = (obj, member, method) => {
     return info;
   }
   function calcScrollerInfo(opts) {
-    const { viewScaleInfo, viewSizeInfo, hoverXThumb, hoverYThumb } = opts;
+    const { viewScaleInfo, viewSizeInfo, hoverXThumb, hoverYThumb, style } = opts;
     const { width, height } = viewSizeInfo;
     const { offsetTop, offsetBottom, offsetLeft, offsetRight } = viewScaleInfo;
-    const sliderMinSize = scrollerLineWidth * 2.5;
+    const sliderMinSize = minThumbLength;
     const lineSize2 = scrollerLineWidth;
+    const { thumbBackground, thumbBorderColor, hoverThumbBackground, hoverThumbBorderColor } = style;
     let xSize = 0;
     let ySize = 0;
     xSize = Math.max(sliderMinSize, width - lineSize2 * 2 - (Math.abs(offsetLeft) + Math.abs(offsetRight)));
@@ -8827,23 +8851,24 @@ var __privateMethod = (obj, member, method) => {
       ySize,
       translateY,
       translateX,
-      xThumbColor: hoverXThumb ? scrollConfig.thumbHoverColor : scrollConfig.thumbColor,
-      yThumbColor: hoverYThumb ? scrollConfig.thumbHoverColor : scrollConfig.thumbColor,
-      scrollBarColor: scrollConfig.scrollBarColor,
+      xThumbBackground: hoverXThumb ? hoverThumbBackground : thumbBackground,
+      yThumbBackground: hoverYThumb ? hoverThumbBackground : thumbBackground,
+      xThumbBorderColor: hoverXThumb ? hoverThumbBorderColor : thumbBorderColor,
+      yThumbBorderColor: hoverYThumb ? hoverThumbBorderColor : thumbBorderColor,
       xThumbRect,
       yThumbRect
     };
     return scrollWrapper;
   }
   function drawScrollerThumb(ctx, opts) {
-    let { x: x2, y: y2, h: h2, w: w2 } = opts;
+    let { x: x2, y: y2, h: h2, w: w2, background: background2, borderColor: borderColor2 } = opts;
     ctx.save();
     ctx.shadowColor = "#FFFFFF";
     ctx.shadowOffsetX = 0;
     ctx.shadowOffsetY = 0;
     ctx.shadowBlur = 1;
     {
-      const { color: color2, axis } = opts;
+      const { axis } = opts;
       if (axis === "X") {
         y2 = y2 + h2 / 4 + 0;
         h2 = h2 / 2;
@@ -8856,7 +8881,7 @@ var __privateMethod = (obj, member, method) => {
       if (w2 < r * 2 || h2 < r * 2) {
         r = 0;
       }
-      ctx.globalAlpha = scrollerThumbAlpha;
+      ctx.globalAlpha = 1;
       ctx.beginPath();
       ctx.moveTo(x2 + r, y2);
       ctx.arcTo(x2 + w2, y2, x2 + w2, y2 + h2, r);
@@ -8864,12 +8889,11 @@ var __privateMethod = (obj, member, method) => {
       ctx.arcTo(x2, y2 + h2, x2, y2, r);
       ctx.arcTo(x2, y2, x2 + w2, y2, r);
       ctx.closePath();
-      ctx.fillStyle = color2;
+      ctx.fillStyle = background2;
       ctx.fill();
-      ctx.globalAlpha = 1;
       ctx.beginPath();
       ctx.lineWidth = 1;
-      ctx.strokeStyle = color2;
+      ctx.strokeStyle = borderColor2;
       ctx.setLineDash([]);
       ctx.moveTo(x2 + r, y2);
       ctx.arcTo(x2 + w2, y2, x2 + w2, y2 + h2, r);
@@ -8883,9 +8907,9 @@ var __privateMethod = (obj, member, method) => {
   }
   function drawScrollerInfo(overlayContext, opts) {
     const ctx = overlayContext;
-    const { viewScaleInfo, viewSizeInfo, scrollInfo } = opts;
+    const { viewScaleInfo, viewSizeInfo, scrollInfo, style } = opts;
     const { activeThumbType, prevPoint, activePoint, hoverXThumb, hoverYThumb } = scrollInfo;
-    const wrapper = calcScrollerInfo({ viewScaleInfo, viewSizeInfo, hoverXThumb, hoverYThumb });
+    const wrapper = calcScrollerInfo({ viewScaleInfo, viewSizeInfo, hoverXThumb, hoverYThumb, style });
     let xThumbRect = Object.assign({}, wrapper.xThumbRect);
     let yThumbRect = Object.assign({}, wrapper.yThumbRect);
     if (activeThumbType && prevPoint && activePoint) {
@@ -8897,28 +8921,37 @@ var __privateMethod = (obj, member, method) => {
         yThumbRect.y = yThumbRect.y + (activePoint.y - prevPoint.y);
       }
     }
-    drawScrollerThumb(ctx, Object.assign(Object.assign({ axis: "X" }, xThumbRect), { r: wrapper.lineSize / 2, color: wrapper.xThumbColor }));
-    drawScrollerThumb(ctx, Object.assign(Object.assign({ axis: "Y" }, yThumbRect), { r: wrapper.lineSize / 2, color: wrapper.yThumbColor }));
-    ctx.globalAlpha = 1;
+    drawScrollerThumb(ctx, Object.assign(Object.assign({ axis: "X" }, xThumbRect), { r: wrapper.lineSize / 2, background: wrapper.xThumbBackground, borderColor: wrapper.xThumbBorderColor }));
+    drawScrollerThumb(ctx, Object.assign(Object.assign({ axis: "Y" }, yThumbRect), { r: wrapper.lineSize / 2, background: wrapper.yThumbBackground, borderColor: wrapper.yThumbBorderColor }));
     return {
       xThumbRect,
       yThumbRect
     };
   }
   function drawScroller(ctx, opts) {
-    const { snapshot } = opts;
+    const { snapshot, style } = opts;
     const viewSizeInfo = getViewSizeInfoFromSnapshot(snapshot);
     const viewScaleInfo = getViewScaleInfoFromSnapshot(snapshot);
     const scrollInfo = getScrollInfoFromSnapshot(snapshot);
-    const { xThumbRect, yThumbRect } = drawScrollerInfo(ctx, { viewSizeInfo, viewScaleInfo, scrollInfo });
+    const { xThumbRect, yThumbRect } = drawScrollerInfo(ctx, { viewSizeInfo, viewScaleInfo, scrollInfo, style });
     return { xThumbRect, yThumbRect };
   }
-  const MiddlewareScroller = (opts) => {
+  const MiddlewareScroller = (opts, config) => {
     const { viewer, boardContent, sharer, eventHub } = opts;
     const { overlayContext } = boardContent;
     sharer.setSharedStorage(keyXThumbRect, null);
     sharer.setSharedStorage(keyYThumbRect, null);
     let isBusy = false;
+    const innerConfig = Object.assign(Object.assign({}, defaultStyle$1), config);
+    const { thumbBackground, thumbBorderColor, hoverThumbBackground, hoverThumbBorderColor, activeThumbBackground, activeThumbBorderColor } = innerConfig;
+    const style = {
+      thumbBackground,
+      thumbBorderColor,
+      hoverThumbBackground,
+      hoverThumbBorderColor,
+      activeThumbBackground,
+      activeThumbBorderColor
+    };
     const clear = () => {
       sharer.setSharedStorage(keyPrevPoint$1, null);
       sharer.setSharedStorage(keyActivePoint, null);
@@ -9022,7 +9055,7 @@ var __privateMethod = (obj, member, method) => {
         }
       },
       beforeDrawFrame({ snapshot }) {
-        const { xThumbRect, yThumbRect } = drawScroller(overlayContext, { snapshot });
+        const { xThumbRect, yThumbRect } = drawScroller(overlayContext, { snapshot, style });
         sharer.setSharedStorage(keyXThumbRect, xThumbRect);
         sharer.setSharedStorage(keyYThumbRect, yThumbRect);
       }
@@ -9056,17 +9089,26 @@ var __privateMethod = (obj, member, method) => {
     };
   };
   const rulerSize = 16;
+  const fontSize = 10;
+  const fontWeight = 100;
+  const lineSize = 1;
+  const fontFamily$1 = "monospace";
   const background = "#FFFFFFA8";
   const borderColor = "#00000080";
   const scaleColor = "#000000";
   const textColor = "#00000080";
-  const fontFamily$1 = "monospace";
-  const fontSize = 10;
-  const fontWeight = 100;
   const gridColor = "#AAAAAA20";
-  const gridKeyColor = "#AAAAAA40";
-  const lineSize = 1;
+  const gridPrimaryColor = "#AAAAAA40";
   const selectedAreaColor = "#196097";
+  const defaultStyle = {
+    background,
+    borderColor,
+    scaleColor,
+    textColor,
+    gridColor,
+    gridPrimaryColor,
+    selectedAreaColor
+  };
   const limitRulerUnitList = [1, 2, 5, 10, 20, 50, 100, 200, 500];
   function limitRulerUnit(unit) {
     unit = Math.max(limitRulerUnitList[0], Math.min(unit, limitRulerUnitList[limitRulerUnitList.length - 1]));
@@ -9143,7 +9185,8 @@ var __privateMethod = (obj, member, method) => {
     });
   }
   function drawXRuler(ctx, opts) {
-    const { scaleList } = opts;
+    const { scaleList, style } = opts;
+    const { scaleColor: scaleColor2, textColor: textColor2 } = style;
     const scaleDrawStart = rulerSize;
     const scaleDrawEnd = rulerSize * 4 / 5;
     const subKeyScaleDrawEnd = rulerSize * 2 / 5;
@@ -9160,10 +9203,10 @@ var __privateMethod = (obj, member, method) => {
       ctx.closePath();
       ctx.lineWidth = lineSize;
       ctx.setLineDash([]);
-      ctx.fillStyle = scaleColor;
+      ctx.fillStyle = scaleColor2;
       ctx.stroke();
       if (item.isKeyNum) {
-        ctx.fillStyle = textColor;
+        ctx.fillStyle = textColor2;
         ctx.textBaseline = "top";
         ctx.$setFont({
           fontWeight,
@@ -9175,7 +9218,8 @@ var __privateMethod = (obj, member, method) => {
     }
   }
   function drawYRuler(ctx, opts) {
-    const { scaleList } = opts;
+    const { scaleList, style } = opts;
+    const { scaleColor: scaleColor2, textColor: textColor2 } = style;
     const scaleDrawStart = rulerSize;
     const scaleDrawEnd = rulerSize * 4 / 5;
     const subKeyScaleDrawEnd = rulerSize * 2 / 5;
@@ -9190,7 +9234,7 @@ var __privateMethod = (obj, member, method) => {
       ctx.moveTo(scaleDrawStart, item.position);
       ctx.lineTo(item.isKeyNum ? keyScaleDrawEnd : item.isSubKeyNum ? subKeyScaleDrawEnd : scaleDrawEnd, item.position);
       ctx.closePath();
-      ctx.fillStyle = scaleColor;
+      ctx.fillStyle = scaleColor2;
       ctx.lineWidth = lineSize;
       ctx.setLineDash([]);
       ctx.stroke();
@@ -9199,7 +9243,7 @@ var __privateMethod = (obj, member, method) => {
         const textY = item.position + fontStart;
         const numText = `${item.num}`;
         rotateByCenter(ctx, -90, { x: textX, y: textY }, () => {
-          ctx.fillStyle = textColor;
+          ctx.fillStyle = textColor2;
           ctx.textBaseline = "top";
           ctx.$setFont({
             fontWeight,
@@ -9212,8 +9256,9 @@ var __privateMethod = (obj, member, method) => {
     }
   }
   function drawRulerBackground(ctx, opts) {
-    const { viewSizeInfo } = opts;
+    const { viewSizeInfo, style } = opts;
     const { width, height } = viewSizeInfo;
+    const { background: background2, borderColor: borderColor2 } = style;
     ctx.beginPath();
     ctx.moveTo(0, 0);
     ctx.lineTo(width + 1, 0);
@@ -9223,25 +9268,26 @@ var __privateMethod = (obj, member, method) => {
     ctx.lineTo(0, height + 1);
     ctx.lineTo(0, 0);
     ctx.closePath();
-    ctx.fillStyle = background;
+    ctx.fillStyle = background2;
     ctx.fill();
     ctx.lineWidth = lineSize;
     ctx.setLineDash([]);
-    ctx.strokeStyle = borderColor;
+    ctx.strokeStyle = borderColor2;
     ctx.stroke();
   }
   function drawGrid(ctx, opts) {
-    const { xList, yList, viewSizeInfo } = opts;
+    const { xList, yList, viewSizeInfo, style } = opts;
     const { width, height } = viewSizeInfo;
+    const { gridColor: gridColor2, gridPrimaryColor: gridPrimaryColor2 } = style;
     for (let i = 0; i < xList.length; i++) {
       const item = xList[i];
       ctx.beginPath();
       ctx.moveTo(item.position, 0);
       ctx.lineTo(item.position, height);
       if (item.isKeyNum === true || item.isSubKeyNum === true) {
-        ctx.strokeStyle = gridKeyColor;
+        ctx.strokeStyle = gridPrimaryColor2;
       } else {
-        ctx.strokeStyle = gridColor;
+        ctx.strokeStyle = gridColor2;
       }
       ctx.closePath();
       ctx.lineWidth = lineSize;
@@ -9254,9 +9300,9 @@ var __privateMethod = (obj, member, method) => {
       ctx.moveTo(0, item.position);
       ctx.lineTo(width, item.position);
       if (item.isKeyNum === true || item.isSubKeyNum === true) {
-        ctx.strokeStyle = gridKeyColor;
+        ctx.strokeStyle = gridPrimaryColor2;
       } else {
-        ctx.strokeStyle = gridColor;
+        ctx.strokeStyle = gridColor2;
       }
       ctx.lineWidth = 1;
       ctx.closePath();
@@ -9264,8 +9310,9 @@ var __privateMethod = (obj, member, method) => {
     }
   }
   function drawScrollerSelectedArea(ctx, opts) {
-    const { snapshot, calculator } = opts;
+    const { snapshot, calculator, style } = opts;
     const { sharedStore } = snapshot;
+    const { selectedAreaColor: selectedAreaColor2 } = style;
     const selectedElementList = sharedStore[keySelectedElementList];
     const actionType = sharedStore[keyActionType];
     if (["select", "drag", "drag-list", "drag-list-end"].includes(actionType) && selectedElementList.length > 0) {
@@ -9302,7 +9349,7 @@ var __privateMethod = (obj, member, method) => {
       ctx.lineTo(xAreaEnd, 0);
       ctx.lineTo(xAreaEnd, rulerSize);
       ctx.lineTo(xAreaStart, rulerSize);
-      ctx.fillStyle = selectedAreaColor;
+      ctx.fillStyle = selectedAreaColor2;
       ctx.closePath();
       ctx.fill();
       ctx.beginPath();
@@ -9310,15 +9357,26 @@ var __privateMethod = (obj, member, method) => {
       ctx.lineTo(rulerSize, yAreaStart);
       ctx.lineTo(rulerSize, yAreaEnd);
       ctx.lineTo(0, yAreaEnd);
-      ctx.fillStyle = selectedAreaColor;
+      ctx.fillStyle = selectedAreaColor2;
       ctx.closePath();
       ctx.fill();
     }
   }
   const middlewareEventRuler = "@middleware/show-ruler";
-  const MiddlewareRuler = (opts) => {
+  const MiddlewareRuler = (opts, config) => {
     const { boardContent, viewer, eventHub, calculator } = opts;
     const { overlayContext, underlayContext } = boardContent;
+    const innerConfig = Object.assign(Object.assign({}, defaultStyle), config);
+    const { background: background2, borderColor: borderColor2, scaleColor: scaleColor2, textColor: textColor2, gridColor: gridColor2, gridPrimaryColor: gridPrimaryColor2, selectedAreaColor: selectedAreaColor2 } = innerConfig;
+    const style = {
+      background: background2,
+      borderColor: borderColor2,
+      scaleColor: scaleColor2,
+      textColor: textColor2,
+      gridColor: gridColor2,
+      gridPrimaryColor: gridPrimaryColor2,
+      selectedAreaColor: selectedAreaColor2
+    };
     let show = true;
     let showGrid = true;
     const rulerCallback = (e) => {
@@ -9344,19 +9402,20 @@ var __privateMethod = (obj, member, method) => {
         if (show === true) {
           const viewScaleInfo = getViewScaleInfoFromSnapshot(snapshot);
           const viewSizeInfo = getViewSizeInfoFromSnapshot(snapshot);
-          drawScrollerSelectedArea(overlayContext, { snapshot, calculator });
-          drawRulerBackground(overlayContext, { viewScaleInfo, viewSizeInfo });
+          drawScrollerSelectedArea(overlayContext, { snapshot, calculator, style });
+          drawRulerBackground(overlayContext, { viewScaleInfo, viewSizeInfo, style });
           const { list: xList, rulerUnit } = calcXRulerScaleList({ viewScaleInfo, viewSizeInfo });
-          drawXRuler(overlayContext, { scaleList: xList });
+          drawXRuler(overlayContext, { scaleList: xList, style });
           const { list: yList } = calcYRulerScaleList({ viewScaleInfo, viewSizeInfo });
-          drawYRuler(overlayContext, { scaleList: yList });
+          drawYRuler(overlayContext, { scaleList: yList, style });
           if (showGrid === true) {
             const ctx = rulerUnit === 1 ? overlayContext : underlayContext;
             drawGrid(ctx, {
               xList,
               yList,
               viewScaleInfo,
-              viewSizeInfo
+              viewSizeInfo,
+              style
             });
           }
         }
@@ -9408,7 +9467,8 @@ var __privateMethod = (obj, member, method) => {
   };
   const fontFamily = "monospace";
   function drawSizeInfoText(ctx, opts) {
-    const { point, rotateCenter, angle: angle2, text: text2, color: color2, background: background2, fontSize: fontSize2, lineHeight: lineHeight2 } = opts;
+    const { point, rotateCenter, angle: angle2, text: text2, style, fontSize: fontSize2, lineHeight: lineHeight2 } = opts;
+    const { textColor: textColor2, textBackground } = style;
     rotateByCenter(ctx, angle2, rotateCenter, () => {
       ctx.$setFont({
         fontWeight: "300",
@@ -9430,7 +9490,7 @@ var __privateMethod = (obj, member, method) => {
         y: point.y
       };
       ctx.setLineDash([]);
-      ctx.fillStyle = background2;
+      ctx.fillStyle = textBackground;
       ctx.beginPath();
       ctx.moveTo(bgStart.x, bgStart.y);
       ctx.lineTo(bgEnd.x, bgStart.y);
@@ -9438,13 +9498,14 @@ var __privateMethod = (obj, member, method) => {
       ctx.lineTo(bgStart.x, bgEnd.y);
       ctx.closePath();
       ctx.fill();
-      ctx.fillStyle = color2;
+      ctx.fillStyle = textColor2;
       ctx.textBaseline = "top";
       ctx.fillText(text2, textStart.x, textStart.y + padding);
     });
   }
   function drawPositionInfoText(ctx, opts) {
-    const { point, rotateCenter, angle: angle2, text: text2, color: color2, background: background2, fontSize: fontSize2, lineHeight: lineHeight2 } = opts;
+    const { point, rotateCenter, angle: angle2, text: text2, style, fontSize: fontSize2, lineHeight: lineHeight2 } = opts;
+    const { textBackground, textColor: textColor2 } = style;
     rotateByCenter(ctx, angle2, rotateCenter, () => {
       ctx.$setFont({
         fontWeight: "300",
@@ -9466,7 +9527,7 @@ var __privateMethod = (obj, member, method) => {
         y: point.y
       };
       ctx.setLineDash([]);
-      ctx.fillStyle = background2;
+      ctx.fillStyle = textBackground;
       ctx.beginPath();
       ctx.moveTo(bgStart.x, bgStart.y);
       ctx.lineTo(bgEnd.x, bgStart.y);
@@ -9474,13 +9535,14 @@ var __privateMethod = (obj, member, method) => {
       ctx.lineTo(bgStart.x, bgEnd.y);
       ctx.closePath();
       ctx.fill();
-      ctx.fillStyle = color2;
+      ctx.fillStyle = textColor2;
       ctx.textBaseline = "top";
       ctx.fillText(text2, textStart.x, textStart.y + padding);
     });
   }
   function drawAngleInfoText(ctx, opts) {
-    const { point, rotateCenter, angle: angle2, text: text2, color: color2, background: background2, fontSize: fontSize2, lineHeight: lineHeight2 } = opts;
+    const { point, rotateCenter, angle: angle2, text: text2, style, fontSize: fontSize2, lineHeight: lineHeight2 } = opts;
+    const { textBackground, textColor: textColor2 } = style;
     rotateByCenter(ctx, angle2, rotateCenter, () => {
       ctx.$setFont({
         fontWeight: "300",
@@ -9502,7 +9564,7 @@ var __privateMethod = (obj, member, method) => {
         y: point.y
       };
       ctx.setLineDash([]);
-      ctx.fillStyle = background2;
+      ctx.fillStyle = textBackground;
       ctx.beginPath();
       ctx.moveTo(bgStart.x, bgStart.y);
       ctx.lineTo(bgEnd.x, bgStart.y);
@@ -9510,18 +9572,28 @@ var __privateMethod = (obj, member, method) => {
       ctx.lineTo(bgStart.x, bgEnd.y);
       ctx.closePath();
       ctx.fill();
-      ctx.fillStyle = color2;
+      ctx.fillStyle = textColor2;
       ctx.textBaseline = "top";
       ctx.fillText(text2, textStart.x, textStart.y + padding);
     });
   }
   const infoBackground = "#1973bac6";
   const infoTextColor = "#ffffff";
+  const defaltStyle = {
+    textBackground: infoBackground,
+    textColor: infoTextColor
+  };
   const infoFontSize = 10;
   const infoLineHeight = 16;
-  const MiddlewareInfo = (opts) => {
+  const MiddlewareInfo = (opts, config) => {
     const { boardContent, calculator } = opts;
     const { overlayContext } = boardContent;
+    const innerConfig = Object.assign(Object.assign({}, defaltStyle), config);
+    const { textBackground, textColor: textColor2 } = innerConfig;
+    const style = {
+      textBackground,
+      textColor: textColor2
+    };
     return {
       name: "@middleware/info",
       beforeDrawFrame({ snapshot }) {
@@ -9587,8 +9659,7 @@ var __privateMethod = (obj, member, method) => {
                 text: whText,
                 fontSize: infoFontSize,
                 lineHeight: infoLineHeight,
-                color: infoTextColor,
-                background: infoBackground
+                style
               });
               drawPositionInfoText(overlayContext, {
                 point: {
@@ -9600,8 +9671,7 @@ var __privateMethod = (obj, member, method) => {
                 text: xyText,
                 fontSize: infoFontSize,
                 lineHeight: infoLineHeight,
-                color: infoTextColor,
-                background: infoBackground
+                style
               });
               drawAngleInfoText(overlayContext, {
                 point: {
@@ -9613,8 +9683,7 @@ var __privateMethod = (obj, member, method) => {
                 text: angleText,
                 fontSize: infoFontSize,
                 lineHeight: infoLineHeight,
-                color: infoTextColor,
-                background: infoBackground
+                style
               });
             }
           }
@@ -9675,8 +9744,8 @@ var __privateMethod = (obj, member, method) => {
       __classPrivateFieldGet(this, _Core_board, "f").destroy();
       __classPrivateFieldGet(this, _Core_canvas, "f").remove();
     }
-    use(middleware) {
-      __classPrivateFieldGet(this, _Core_board, "f").use(middleware);
+    use(middleware, config) {
+      __classPrivateFieldGet(this, _Core_board, "f").use(middleware, config);
     }
     disuse(middleware) {
       __classPrivateFieldGet(this, _Core_board, "f").disuse(middleware);
@@ -9757,9 +9826,84 @@ var __privateMethod = (obj, member, method) => {
       enableSelect: false,
       enableTextEdit: false,
       enableDrag: false,
-      enableInfo: false
+      enableInfo: false,
+      middlewareStyles: {
+        selector: {},
+        info: {},
+        ruler: {},
+        scroller: {}
+      }
     };
     return storage;
+  }
+  function parseStyles(opts) {
+    const styles = {
+      selector: {},
+      ruler: {},
+      info: {},
+      scroller: {}
+    };
+    if (opts.styles) {
+      const { selector, info, ruler, scroller } = opts.styles;
+      if (istype.string(selector == null ? void 0 : selector.activeColor)) {
+        styles.selector.activeColor = selector == null ? void 0 : selector.activeColor;
+      }
+      if (istype.string(selector == null ? void 0 : selector.activeAreaColor)) {
+        styles.selector.activeAreaColor = selector == null ? void 0 : selector.activeAreaColor;
+      }
+      if (istype.string(selector == null ? void 0 : selector.lockedColor)) {
+        styles.selector.lockedColor = selector == null ? void 0 : selector.lockedColor;
+      }
+      if (istype.string(selector == null ? void 0 : selector.referenceColor)) {
+        styles.selector.referenceColor = selector == null ? void 0 : selector.referenceColor;
+      }
+      if (istype.string(info == null ? void 0 : info.textBackground)) {
+        styles.info.textBackground = info == null ? void 0 : info.textBackground;
+      }
+      if (istype.string(info == null ? void 0 : info.textColor)) {
+        styles.info.textColor = info == null ? void 0 : info.textColor;
+      }
+      if (istype.string(ruler == null ? void 0 : ruler.background)) {
+        styles.ruler.background = ruler == null ? void 0 : ruler.background;
+      }
+      if (istype.string(ruler == null ? void 0 : ruler.borderColor)) {
+        styles.ruler.borderColor = ruler == null ? void 0 : ruler.borderColor;
+      }
+      if (istype.string(ruler == null ? void 0 : ruler.scaleColor)) {
+        styles.ruler.scaleColor = ruler == null ? void 0 : ruler.scaleColor;
+      }
+      if (istype.string(ruler == null ? void 0 : ruler.textColor)) {
+        styles.ruler.textColor = ruler == null ? void 0 : ruler.textColor;
+      }
+      if (istype.string(ruler == null ? void 0 : ruler.gridColor)) {
+        styles.ruler.gridColor = ruler == null ? void 0 : ruler.gridColor;
+      }
+      if (istype.string(ruler == null ? void 0 : ruler.gridPrimaryColor)) {
+        styles.ruler.gridPrimaryColor = ruler == null ? void 0 : ruler.gridPrimaryColor;
+      }
+      if (istype.string(ruler == null ? void 0 : ruler.selectedAreaColor)) {
+        styles.ruler.selectedAreaColor = ruler == null ? void 0 : ruler.selectedAreaColor;
+      }
+      if (istype.string(scroller == null ? void 0 : scroller.thumbBackground)) {
+        styles.scroller.thumbBackground = scroller == null ? void 0 : scroller.thumbBackground;
+      }
+      if (istype.string(scroller == null ? void 0 : scroller.thumbBorderColor)) {
+        styles.scroller.thumbBorderColor = scroller == null ? void 0 : scroller.thumbBorderColor;
+      }
+      if (istype.string(scroller == null ? void 0 : scroller.hoverThumbBackground)) {
+        styles.scroller.hoverThumbBackground = scroller == null ? void 0 : scroller.hoverThumbBackground;
+      }
+      if (istype.string(scroller == null ? void 0 : scroller.hoverThumbBorderColor)) {
+        styles.scroller.hoverThumbBorderColor = scroller == null ? void 0 : scroller.hoverThumbBorderColor;
+      }
+      if (istype.string(scroller == null ? void 0 : scroller.activeThumbBackground)) {
+        styles.scroller.activeThumbBackground = scroller == null ? void 0 : scroller.activeThumbBackground;
+      }
+      if (istype.string(scroller == null ? void 0 : scroller.activeThumbBorderColor)) {
+        styles.scroller.activeThumbBorderColor = scroller == null ? void 0 : scroller.activeThumbBorderColor;
+      }
+    }
+    return styles;
   }
   async function exportImageFileBlobURL(opts) {
     const { data, width, height, devicePixelRatio, viewScaleInfo, viewSizeInfo, loadItemMap } = opts;
@@ -9814,14 +9958,15 @@ var __privateMethod = (obj, member, method) => {
   }
   function runMiddlewares(core, store) {
     const { enableRuler, enableScale, enableScroll, enableSelect, enableTextEdit, enableDrag, enableInfo } = store.getSnapshot();
+    const styles = store.get("middlewareStyles");
     if (enableScroll === true) {
-      core.use(MiddlewareScroller);
+      core.use(MiddlewareScroller, styles == null ? void 0 : styles.scroller);
     } else if (enableScroll === false) {
       core.disuse(MiddlewareScroller);
     }
     if (enableSelect === true) {
       core.use(MiddlewareLayoutSelector);
-      core.use(MiddlewareSelector);
+      core.use(MiddlewareSelector, styles == null ? void 0 : styles.selector);
     } else if (enableSelect === false) {
       core.disuse(MiddlewareLayoutSelector);
       core.disuse(MiddlewareSelector);
@@ -9832,7 +9977,7 @@ var __privateMethod = (obj, member, method) => {
       core.disuse(MiddlewareScaler);
     }
     if (enableRuler === true) {
-      core.use(MiddlewareRuler);
+      core.use(MiddlewareRuler, styles == null ? void 0 : styles.ruler);
     } else if (enableRuler === false) {
       core.disuse(MiddlewareRuler);
     }
@@ -9847,7 +9992,7 @@ var __privateMethod = (obj, member, method) => {
       core.disuse(MiddlewareDragger);
     }
     if (enableInfo === true) {
-      core.use(MiddlewareInfo);
+      core.use(MiddlewareInfo, styles == null ? void 0 : styles.info);
     } else if (enableInfo === false) {
       core.disuse(MiddlewareInfo);
     }
@@ -9908,6 +10053,7 @@ var __privateMethod = (obj, member, method) => {
         defaultStorage: getDefaultStorage()
       }));
       const opts = { ...defaultSettings, ...options };
+      __privateGet(this, _store).set("middlewareStyles", parseStyles(opts));
       const { width, height, devicePixelRatio, createCustomContext2D } = opts;
       const core = new Core(mount, { width, height, devicePixelRatio, createCustomContext2D });
       __privateSet(this, _core, core);
