@@ -47,7 +47,7 @@ export default {
         borderColor: '#ff9800'
       },
       operations: {
-        lock: true
+        locked: true
       }
     }
   ]

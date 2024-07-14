@@ -51,7 +51,7 @@ export default {
       w: 200,
       h: 100,
       type: 'rect',
-      lock: true,
+      locked: true,
       detail: {
         background: '#e0e0e0',
         borderRadius: 20,

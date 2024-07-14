@@ -3671,7 +3671,7 @@ var __privateMethod = (obj, member, method) => {
   function enhanceFontFamliy(fontFamily2) {
     return [fontFamily2, ...baseFontFamilyList].join(", ");
   }
-  (function(s, e) {
+  var __rest$1 = function(s, e) {
     var t = {};
     for (var p in s)
       if (Object.prototype.hasOwnProperty.call(s, p) && e.indexOf(p) < 0)
@@ -3682,7 +3682,125 @@ var __privateMethod = (obj, member, method) => {
           t[p[i]] = s[p[i]];
       }
     return t;
-  });
+  };
+  function flatElementSize(elemSize, opts) {
+    const { groupQueue } = opts;
+    let { x: x2, y: y2, w: w2, h: h2, angle: angle2 = 0 } = elemSize;
+    let totalAngle = 0;
+    groupQueue.forEach((group) => {
+      x2 += group.x;
+      y2 += group.y;
+      totalAngle += group.angle || 0;
+    });
+    totalAngle = limitAngle(totalAngle);
+    if (totalAngle === 0) {
+      return {
+        x: x2,
+        y: y2,
+        w: w2,
+        h: h2,
+        angle: angle2
+      };
+    }
+    totalAngle += elemSize.angle || 0;
+    totalAngle = limitAngle(totalAngle);
+    const vertexes = calcElementVertexesInGroup(elemSize, { groupQueue });
+    const center = calcElementCenterFromVertexes(vertexes);
+    const start = rotatePoint(center, vertexes[0], parseAngleToRadian(0 - totalAngle));
+    x2 = start.x;
+    y2 = start.y;
+    return {
+      x: x2,
+      y: y2,
+      w: w2,
+      h: h2,
+      angle: totalAngle
+    };
+  }
+  function isValidElement(elem) {
+    var _a;
+    if (["rect", "circle"].includes(elem.type)) {
+      const detail = elem.detail;
+      if (!detail.background && !detail.borderWidth) {
+        return false;
+      }
+      if (detail.background === "transparent" && !detail.borderWidth) {
+        return false;
+      }
+    }
+    if (["group"].includes(elem.type)) {
+      const detail = elem.detail || {};
+      const { children } = detail;
+      if (!(children.length > 0) && !detail.background && !detail.borderWidth) {
+        return false;
+      }
+      if (!(children.length > 0) && detail.background === "transparent" && !detail.borderWidth) {
+        return false;
+      }
+    }
+    if (elem.type === "text") {
+      if (!elem.detail.text) {
+        return false;
+      }
+    }
+    if (elem.type === "image") {
+      if (!elem.detail.src) {
+        return false;
+      }
+    }
+    if (elem.type === "html") {
+      if (!elem.detail.html) {
+        return false;
+      }
+    }
+    if (elem.type === "svg") {
+      if (!elem.detail.svg) {
+        return false;
+      }
+    }
+    if (elem.type === "path") {
+      const detail = elem.detail;
+      if (!(((_a = detail === null || detail === void 0 ? void 0 : detail.commands) === null || _a === void 0 ? void 0 : _a.length) > 0)) {
+        return false;
+      }
+    }
+    return true;
+  }
+  function flatElementList(list) {
+    const elemeList = [];
+    const currentGroupQueue = [];
+    const _resetElemSize = (elem) => {
+      if (!isValidElement(elem)) {
+        return;
+      }
+      const newSize = flatElementSize(elem, { groupQueue: currentGroupQueue });
+      const resizeElem = Object.assign(Object.assign({}, elem), newSize);
+      elemeList.push(resizeElem);
+    };
+    const _walk = (elem) => {
+      var _a;
+      if (((_a = elem === null || elem === void 0 ? void 0 : elem.operations) === null || _a === void 0 ? void 0 : _a.invisible) === true) {
+        return;
+      }
+      if (elem.type === "group") {
+        const { detail } = elem;
+        const { children } = detail, restDetail = __rest$1(detail, ["children"]);
+        _resetElemSize(Object.assign(Object.assign({}, elem), { detail: Object.assign(Object.assign({}, restDetail), { children: [] }) }));
+        currentGroupQueue.push(elem);
+        children.forEach((child) => {
+          _walk(child);
+        });
+        currentGroupQueue.pop();
+      } else {
+        _resetElemSize(elem);
+      }
+    };
+    for (let i = 0; i < list.length; i++) {
+      const elem = list[i];
+      _walk(elem);
+    }
+    return elemeList;
+  }
   function createColorStyle(ctx, color2, opts) {
     if (typeof color2 === "string") {
       return color2;
@@ -6179,7 +6297,7 @@ var __privateMethod = (obj, member, method) => {
   const activeAreaColor = "#1976d21c";
   const lockedColor = "#5b5959b5";
   const referenceColor = "#f7276e";
-  const defaultStyle$2 = {
+  const defaultStyle$3 = {
     activeColor,
     activeAreaColor,
     lockedColor,
@@ -6298,7 +6416,7 @@ var __privateMethod = (obj, member, method) => {
     const wrapperOpts = { borderColor: activeColor2, borderWidth: 1, background: "transparent", lineDash: [] };
     drawVertexes(ctx, calcViewVertexes(vertexes, opts), wrapperOpts);
   }
-  function drawLockVertexesWrapper(ctx, vertexes, opts) {
+  function drawLockedVertexesWrapper(ctx, vertexes, opts) {
     if (!vertexes) {
       return;
     }
@@ -7074,10 +7192,10 @@ var __privateMethod = (obj, member, method) => {
     const endY = Math.max(start.y, end.y);
     for (let idx = 0; idx < data.elements.length; idx++) {
       const elem = data.elements[idx];
-      if (((_a = elem === null || elem === void 0 ? void 0 : elem.operations) === null || _a === void 0 ? void 0 : _a.lock) === true) {
+      if (((_a = elem === null || elem === void 0 ? void 0 : elem.operations) === null || _a === void 0 ? void 0 : _a.locked) === true) {
         continue;
       }
-      const elemSize = calcViewElementSize(elem, { viewScaleInfo, viewSizeInfo });
+      const elemSize = calcViewElementSize(elem, { viewScaleInfo });
       const center = calcElementCenter(elemSize);
       if (center.x >= startX && center.x <= endX && center.y >= startY && center.y <= endY) {
         indexes.push(idx);
@@ -7104,14 +7222,14 @@ var __privateMethod = (obj, member, method) => {
       return null;
     }
     const area = { x: 0, y: 0, w: 0, h: 0 };
-    const { viewScaleInfo, viewSizeInfo } = opts;
+    const { viewScaleInfo } = opts;
     let prevElemSize = null;
     for (let i = 0; i < elements.length; i++) {
       const elem = elements[i];
       if ((_a = elem === null || elem === void 0 ? void 0 : elem.operations) === null || _a === void 0 ? void 0 : _a.invisible) {
         continue;
       }
-      const elemSize = calcViewElementSize(elem, { viewScaleInfo, viewSizeInfo });
+      const elemSize = calcViewElementSize(elem, { viewScaleInfo });
       if (elemSize.angle && (elemSize.angle > 0 || elemSize.angle < 0)) {
         const ves = rotateElementVertexes(elemSize);
         if (ves.length === 4) {
@@ -7664,10 +7782,12 @@ var __privateMethod = (obj, member, method) => {
   const keyLayoutController = Symbol(`${key$2}_layoutController`);
   const keyLayoutIsHover = Symbol(`${key$2}_layoutIsHover`);
   const keyLayoutIsSelected = Symbol(`${key$2}_layoutIsSelected`);
-  const selectColor = "#b331c9";
-  const disableColor = "#5b5959b5";
   const controllerSize = 10;
-  function drawControllerBox(ctx, boxVertexes) {
+  const defaultStyle$2 = {
+    activeColor: "#b331c9"
+  };
+  function drawControllerBox(ctx, boxVertexes, style) {
+    const { activeColor: activeColor2 } = style;
     ctx.setLineDash([]);
     ctx.fillStyle = "#FFFFFF";
     ctx.beginPath();
@@ -7677,7 +7797,7 @@ var __privateMethod = (obj, member, method) => {
     ctx.lineTo(boxVertexes[3].x, boxVertexes[3].y);
     ctx.closePath();
     ctx.fill();
-    ctx.strokeStyle = selectColor;
+    ctx.strokeStyle = activeColor2;
     ctx.lineWidth = 2;
     ctx.beginPath();
     ctx.moveTo(boxVertexes[0].x, boxVertexes[0].y);
@@ -7687,26 +7807,11 @@ var __privateMethod = (obj, member, method) => {
     ctx.closePath();
     ctx.stroke();
   }
-  function drawControllerCross(ctx, opts) {
-    const { vertexes, strokeStyle, lineWidth } = opts;
-    ctx.setLineDash([]);
-    ctx.strokeStyle = strokeStyle;
-    ctx.lineWidth = lineWidth;
-    ctx.beginPath();
-    ctx.moveTo(vertexes[0].x, vertexes[0].y);
-    ctx.lineTo(vertexes[2].x, vertexes[2].y);
-    ctx.closePath();
-    ctx.stroke();
-    ctx.beginPath();
-    ctx.moveTo(vertexes[1].x, vertexes[1].y);
-    ctx.lineTo(vertexes[3].x, vertexes[3].y);
-    ctx.closePath();
-    ctx.stroke();
-  }
   function drawControllerLine(ctx, opts) {
-    const { start, end, centerVertexes, disabled } = opts;
-    const lineWidth = disabled === true ? 1 : 2;
-    const strokeStyle = disabled === true ? disableColor : selectColor;
+    const { start, end, style } = opts;
+    const { activeColor: activeColor2 } = style;
+    const lineWidth = 2;
+    const strokeStyle = activeColor2;
     ctx.setLineDash([]);
     ctx.strokeStyle = strokeStyle;
     ctx.lineWidth = lineWidth;
@@ -7715,51 +7820,25 @@ var __privateMethod = (obj, member, method) => {
     ctx.lineTo(end.x, end.y);
     ctx.closePath();
     ctx.stroke();
-    if (disabled === true) {
-      drawControllerCross(ctx, {
-        vertexes: centerVertexes,
-        lineWidth,
-        strokeStyle
-      });
-    }
   }
   function drawLayoutController(ctx, opts) {
-    const { controller, operations } = opts;
+    const { controller, style } = opts;
     const { topLeft, topRight, bottomLeft, bottomRight, topMiddle, rightMiddle, bottomMiddle, leftMiddle } = controller;
-    drawControllerLine(ctx, { start: topLeft.center, end: topRight.center, centerVertexes: topMiddle.vertexes, disabled: !!(operations === null || operations === void 0 ? void 0 : operations.disabledTop) });
-    drawControllerLine(ctx, { start: topRight.center, end: bottomRight.center, centerVertexes: rightMiddle.vertexes, disabled: !!(operations === null || operations === void 0 ? void 0 : operations.disabledRight) });
-    drawControllerLine(ctx, { start: bottomRight.center, end: bottomLeft.center, centerVertexes: bottomMiddle.vertexes, disabled: !!(operations === null || operations === void 0 ? void 0 : operations.disabledBottom) });
-    drawControllerLine(ctx, { start: bottomLeft.center, end: topLeft.center, centerVertexes: leftMiddle.vertexes, disabled: !!(operations === null || operations === void 0 ? void 0 : operations.disabledLeft) });
-    const disabledOpts = {
-      lineWidth: 1,
-      strokeStyle: disableColor
-    };
-    if ((operations === null || operations === void 0 ? void 0 : operations.disabledTopLeft) === true) {
-      drawControllerCross(ctx, Object.assign({ vertexes: topLeft.vertexes }, disabledOpts));
-    } else {
-      drawControllerBox(ctx, topLeft.vertexes);
-    }
-    if ((operations === null || operations === void 0 ? void 0 : operations.disabledTopRight) === true) {
-      drawControllerCross(ctx, Object.assign({ vertexes: topRight.vertexes }, disabledOpts));
-    } else {
-      drawControllerBox(ctx, topRight.vertexes);
-    }
-    if ((operations === null || operations === void 0 ? void 0 : operations.disabledBottomRight) === true) {
-      drawControllerCross(ctx, Object.assign({ vertexes: bottomRight.vertexes }, disabledOpts));
-    } else {
-      drawControllerBox(ctx, bottomRight.vertexes);
-    }
-    if ((operations === null || operations === void 0 ? void 0 : operations.disabledBottomLeft) === true) {
-      drawControllerCross(ctx, Object.assign({ vertexes: bottomLeft.vertexes }, disabledOpts));
-    } else {
-      drawControllerBox(ctx, bottomLeft.vertexes);
-    }
+    drawControllerLine(ctx, { start: topLeft.center, end: topRight.center, centerVertexes: topMiddle.vertexes, style });
+    drawControllerLine(ctx, { start: topRight.center, end: bottomRight.center, centerVertexes: rightMiddle.vertexes, style });
+    drawControllerLine(ctx, { start: bottomRight.center, end: bottomLeft.center, centerVertexes: bottomMiddle.vertexes, style });
+    drawControllerLine(ctx, { start: bottomLeft.center, end: topLeft.center, centerVertexes: leftMiddle.vertexes, style });
+    drawControllerBox(ctx, topLeft.vertexes, style);
+    drawControllerBox(ctx, topRight.vertexes, style);
+    drawControllerBox(ctx, bottomRight.vertexes, style);
+    drawControllerBox(ctx, bottomLeft.vertexes, style);
   }
   function drawLayoutHover(ctx, opts) {
-    const { layoutSize } = opts;
+    const { layoutSize, style } = opts;
+    const { activeColor: activeColor2 } = style;
     const { x: x2, y: y2, w: w2, h: h2 } = layoutSize;
     ctx.setLineDash([]);
-    ctx.strokeStyle = selectColor;
+    ctx.strokeStyle = activeColor2;
     ctx.lineWidth = 1;
     ctx.beginPath();
     ctx.moveTo(x2, y2);
@@ -7770,9 +7849,12 @@ var __privateMethod = (obj, member, method) => {
     ctx.closePath();
     ctx.stroke();
   }
-  const MiddlewareLayoutSelector = (opts) => {
+  const MiddlewareLayoutSelector = (opts, config) => {
     const { sharer, boardContent, calculator, viewer, eventHub } = opts;
     const { overlayContext } = boardContent;
+    const innerConfig = Object.assign(Object.assign({}, defaultStyle$2), config);
+    const { activeColor: activeColor2 } = innerConfig;
+    const style = { activeColor: activeColor2 };
     let prevPoint = null;
     let prevIsHover = null;
     let prevIsSelected = null;
@@ -8061,10 +8143,10 @@ var __privateMethod = (obj, member, method) => {
           const controller = calcLayoutSizeController(size, { viewScaleInfo, controllerSize });
           if (layoutIsHover === true) {
             const viewSize = calcViewElementSize(size, { viewScaleInfo });
-            drawLayoutHover(overlayContext, { layoutSize: viewSize });
+            drawLayoutHover(overlayContext, { layoutSize: viewSize, style });
           }
           if (layoutActionType && ["resize"].includes(layoutActionType) || layoutIsSelected === true) {
-            drawLayoutController(overlayContext, { controller, operations: activeStore.data.layout.operations || {} });
+            drawLayoutController(overlayContext, { controller, style });
           }
         }
       },
@@ -8080,12 +8162,14 @@ var __privateMethod = (obj, member, method) => {
     };
   };
   const MiddlewareSelector = (opts, config) => {
-    const innerConfig = Object.assign(Object.assign({}, defaultStyle$2), config);
+    const innerConfig = Object.assign(Object.assign({}, defaultStyle$3), config);
     const { activeColor: activeColor2, activeAreaColor: activeAreaColor2, lockedColor: lockedColor2, referenceColor: referenceColor2 } = innerConfig;
     const style = { activeColor: activeColor2, activeAreaColor: activeAreaColor2, lockedColor: lockedColor2, referenceColor: referenceColor2 };
     const { viewer, sharer, boardContent, calculator, eventHub } = opts;
     const { overlayContext } = boardContent;
     let prevPoint = null;
+    let moveOriginalStartPoint = null;
+    let moveOriginalStartElementSize = null;
     let inBusyMode = null;
     sharer.setSharedStorage(keyActionType, null);
     sharer.setSharedStorage(keyEnableSnapToGrid, true);
@@ -8168,7 +8252,6 @@ var __privateMethod = (obj, member, method) => {
       sharer.setSharedStorage(keySelectedElementController, null);
       sharer.setSharedStorage(keySelectedElementPosition, []);
       sharer.setSharedStorage(keyIsMoving, null);
-      sharer.setSharedStorage(keyEnableSelectInGroup, null);
     };
     clear();
     const selectCallback = ({ uuids, positions }) => {
@@ -8309,8 +8392,9 @@ var __privateMethod = (obj, member, method) => {
         }
       },
       pointStart: (e) => {
-        var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k;
+        var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m;
         prevPoint = e.point;
+        moveOriginalStartPoint = e.point;
         const groupQueue = sharer.getSharedStorage(keyGroupQueue);
         if ((groupQueue === null || groupQueue === void 0 ? void 0 : groupQueue.length) > 0) {
           if (isPointInViewActiveGroup(e.point, {
@@ -8320,15 +8404,18 @@ var __privateMethod = (obj, member, method) => {
             groupQueue
           })) {
             const target2 = getPointTarget(e.point, pointTargetBaseOptions());
-            if (((_a = target2 === null || target2 === void 0 ? void 0 : target2.elements) === null || _a === void 0 ? void 0 : _a.length) === 1 && ((_c = (_b = target2.elements[0]) === null || _b === void 0 ? void 0 : _b.operations) === null || _c === void 0 ? void 0 : _c.lock) === true) {
+            if (((_a = target2 === null || target2 === void 0 ? void 0 : target2.elements) === null || _a === void 0 ? void 0 : _a.length) === 1 && ((_c = (_b = target2.elements[0]) === null || _b === void 0 ? void 0 : _b.operations) === null || _c === void 0 ? void 0 : _c.locked) === true) {
               return;
             } else {
               updateHoverElement(null);
             }
-            if (target2.type === "over-element" && ((_d = target2 === null || target2 === void 0 ? void 0 : target2.elements) === null || _d === void 0 ? void 0 : _d.length) === 1) {
+            if (((_d = target2 === null || target2 === void 0 ? void 0 : target2.elements) === null || _d === void 0 ? void 0 : _d.length) === 1) {
+              moveOriginalStartElementSize = getElementSize(target2 === null || target2 === void 0 ? void 0 : target2.elements[0]);
+            }
+            if (target2.type === "over-element" && ((_e = target2 === null || target2 === void 0 ? void 0 : target2.elements) === null || _e === void 0 ? void 0 : _e.length) === 1) {
               updateSelectedElementList([target2.elements[0]], { triggerEvent: true });
               sharer.setSharedStorage(keyActionType, "drag");
-            } else if ((_e = target2.type) === null || _e === void 0 ? void 0 : _e.startsWith("resize-")) {
+            } else if ((_f = target2.type) === null || _f === void 0 ? void 0 : _f.startsWith("resize-")) {
               sharer.setSharedStorage(keyResizeType, target2.type);
               sharer.setSharedStorage(keyActionType, "resize");
             } else {
@@ -8346,19 +8433,28 @@ var __privateMethod = (obj, member, method) => {
           calculator
         });
         const target = getPointTarget(e.point, Object.assign(Object.assign({}, pointTargetBaseOptions()), { areaSize: listAreaSize, groupQueue: [] }));
-        if (((_f = target === null || target === void 0 ? void 0 : target.elements) === null || _f === void 0 ? void 0 : _f.length) === 1 && ((_h = (_g = target.elements[0]) === null || _g === void 0 ? void 0 : _g.operations) === null || _h === void 0 ? void 0 : _h.lock) === true) {
-          return;
-        } else {
+        const isLockedElement = ((_g = target === null || target === void 0 ? void 0 : target.elements) === null || _g === void 0 ? void 0 : _g.length) === 1 && ((_j = (_h = target.elements[0]) === null || _h === void 0 ? void 0 : _h.operations) === null || _j === void 0 ? void 0 : _j.locked) === true;
+        if (!isLockedElement) {
           updateHoverElement(null);
         }
-        if (target.type === "list-area") {
-          sharer.setSharedStorage(keyActionType, "drag-list");
-        } else if (target.type === "over-element" && ((_j = target === null || target === void 0 ? void 0 : target.elements) === null || _j === void 0 ? void 0 : _j.length) === 1) {
-          updateSelectedElementList([target.elements[0]], { triggerEvent: true });
-          sharer.setSharedStorage(keyActionType, "drag");
-        } else if ((_k = target.type) === null || _k === void 0 ? void 0 : _k.startsWith("resize-")) {
-          sharer.setSharedStorage(keyResizeType, target.type);
-          sharer.setSharedStorage(keyActionType, "resize");
+        if (((_k = target === null || target === void 0 ? void 0 : target.elements) === null || _k === void 0 ? void 0 : _k.length) === 1) {
+          moveOriginalStartElementSize = getElementSize(target === null || target === void 0 ? void 0 : target.elements[0]);
+        }
+        if (!isLockedElement) {
+          if (target.type === "list-area") {
+            sharer.setSharedStorage(keyActionType, "drag-list");
+          } else if (target.type === "over-element" && ((_l = target === null || target === void 0 ? void 0 : target.elements) === null || _l === void 0 ? void 0 : _l.length) === 1) {
+            updateSelectedElementList([target.elements[0]], { triggerEvent: true });
+            sharer.setSharedStorage(keyActionType, "drag");
+          } else if ((_m = target.type) === null || _m === void 0 ? void 0 : _m.startsWith("resize-")) {
+            sharer.setSharedStorage(keyResizeType, target.type);
+            sharer.setSharedStorage(keyActionType, "resize");
+          } else {
+            clear();
+            sharer.setSharedStorage(keyActionType, "area");
+            sharer.setSharedStorage(keyAreaStart, e.point);
+            updateSelectedElementList([], { triggerEvent: true });
+          }
         } else {
           clear();
           sharer.setSharedStorage(keyActionType, "area");
@@ -8376,6 +8472,7 @@ var __privateMethod = (obj, member, method) => {
         const viewScaleInfo = sharer.getActiveViewScaleInfo();
         const viewSizeInfo = sharer.getActiveViewSizeInfo();
         const start = prevPoint;
+        const originalStart = moveOriginalStartPoint;
         const end = e.point;
         const resizeType = sharer.getSharedStorage(keyResizeType);
         const actionType = sharer.getSharedStorage(keyActionType);
@@ -8383,8 +8480,8 @@ var __privateMethod = (obj, member, method) => {
         const enableSnapToGrid = sharer.getSharedStorage(keyEnableSnapToGrid);
         if (actionType === "drag") {
           inBusyMode = "drag";
-          if (data && (elems === null || elems === void 0 ? void 0 : elems.length) === 1 && start && end && ((_b = (_a = elems[0]) === null || _a === void 0 ? void 0 : _a.operations) === null || _b === void 0 ? void 0 : _b.lock) !== true) {
-            const { moveX, moveY } = calcMoveInGroup(start, end, groupQueue);
+          if (data && (elems === null || elems === void 0 ? void 0 : elems.length) === 1 && moveOriginalStartElementSize && originalStart && end && ((_b = (_a = elems[0]) === null || _a === void 0 ? void 0 : _a.operations) === null || _b === void 0 ? void 0 : _b.locked) !== true) {
+            const { moveX, moveY } = calcMoveInGroup(originalStart, end, groupQueue);
             let totalMoveX = calculator.toGridNum(moveX / scale);
             let totalMoveY = calculator.toGridNum(moveY / scale);
             if (enableSnapToGrid === true) {
@@ -8408,8 +8505,8 @@ var __privateMethod = (obj, member, method) => {
                 console.error(err);
               }
             }
-            elems[0].x = calculator.toGridNum(elems[0].x + totalMoveX);
-            elems[0].y = calculator.toGridNum(elems[0].y + totalMoveY);
+            elems[0].x = calculator.toGridNum(moveOriginalStartElementSize.x + totalMoveX);
+            elems[0].y = calculator.toGridNum(moveOriginalStartElementSize.y + totalMoveY);
             updateSelectedElementList([elems[0]]);
             calculator.modifyViewVisibleInfoMap(data, {
               modifyOptions: {
@@ -8426,12 +8523,12 @@ var __privateMethod = (obj, member, method) => {
           viewer.drawFrame();
         } else if (actionType === "drag-list") {
           inBusyMode = "drag-list";
-          if (data && start && end && (elems === null || elems === void 0 ? void 0 : elems.length) > 1) {
+          if (data && originalStart && start && end && (elems === null || elems === void 0 ? void 0 : elems.length) > 1) {
             const moveX = (end.x - start.x) / scale;
             const moveY = (end.y - start.y) / scale;
             elems.forEach((elem) => {
               var _a2;
-              if (elem && ((_a2 = elem === null || elem === void 0 ? void 0 : elem.operations) === null || _a2 === void 0 ? void 0 : _a2.lock) !== true) {
+              if (elem && ((_a2 = elem === null || elem === void 0 ? void 0 : elem.operations) === null || _a2 === void 0 ? void 0 : _a2.locked) !== true) {
                 elem.x = calculator.toGridNum(elem.x + moveX);
                 elem.y = calculator.toGridNum(elem.y + moveY);
                 calculator.modifyViewVisibleInfoMap(data, {
@@ -8451,7 +8548,7 @@ var __privateMethod = (obj, member, method) => {
           }
           viewer.drawFrame();
         } else if (actionType === "resize") {
-          if (data && (elems === null || elems === void 0 ? void 0 : elems.length) === 1 && start && (resizeType === null || resizeType === void 0 ? void 0 : resizeType.startsWith("resize-"))) {
+          if (data && (elems === null || elems === void 0 ? void 0 : elems.length) === 1 && originalStart && moveOriginalStartElementSize && (resizeType === null || resizeType === void 0 ? void 0 : resizeType.startsWith("resize-"))) {
             inBusyMode = "resize";
             const pointGroupQueue = [];
             groupQueue.forEach((group) => {
@@ -8464,10 +8561,10 @@ var __privateMethod = (obj, member, method) => {
                 angle: 0 - angle2
               });
             });
-            let resizeStart = start;
+            let resizeStart = originalStart;
             let resizeEnd = end;
             if (groupQueue.length > 0) {
-              resizeStart = rotatePointInGroup(start, pointGroupQueue);
+              resizeStart = rotatePointInGroup(originalStart, pointGroupQueue);
               resizeEnd = rotatePointInGroup(end, pointGroupQueue);
             }
             if (resizeType === "resize-rotate") {
@@ -8479,19 +8576,19 @@ var __privateMethod = (obj, member, method) => {
                 controller.bottomRight.center
               ];
               const viewCenter = calcElementCenterFromVertexes(viewVertexes);
-              const resizedElemSize = rotateElement(elems[0], {
+              const resizedElemSize = rotateElement(moveOriginalStartElementSize, {
                 center: viewCenter,
                 viewScaleInfo,
                 viewSizeInfo,
-                start,
+                start: originalStart,
                 end,
                 resizeType,
                 sharer
               });
               elems[0].angle = calculator.toGridNum(resizedElemSize.angle || 0);
             } else {
-              const resizedElemSize = resizeElement(elems[0], { scale, start: resizeStart, end: resizeEnd, resizeType, sharer });
-              const calcOpts = { ignore: !!elems[0].angle };
+              const resizedElemSize = resizeElement(moveOriginalStartElementSize, { scale, start: resizeStart, end: resizeEnd, resizeType, sharer });
+              const calcOpts = { ignore: !!moveOriginalStartElementSize.angle };
               elems[0].x = calculator.toGridNum(resizedElemSize.x, calcOpts);
               elems[0].y = calculator.toGridNum(resizedElemSize.y, calcOpts);
               if (elems[0].type === "group" && ((_c = elems[0].operations) === null || _c === void 0 ? void 0 : _c.deepResize) === true) {
@@ -8536,6 +8633,8 @@ var __privateMethod = (obj, member, method) => {
         const viewSizeInfo = sharer.getActiveViewSizeInfo();
         let needDrawFrame = false;
         prevPoint = null;
+        moveOriginalStartPoint = null;
+        moveOriginalStartElementSize = null;
         if (actionType === "resize" && resizeType) {
           sharer.setSharedStorage(keyResizeType, null);
           needDrawFrame = true;
@@ -8598,6 +8697,8 @@ var __privateMethod = (obj, member, method) => {
       },
       pointLeave() {
         prevPoint = null;
+        moveOriginalStartPoint = null;
+        moveOriginalStartElementSize = null;
         clear();
         viewer.drawFrame();
       },
@@ -8609,7 +8710,7 @@ var __privateMethod = (obj, member, method) => {
         const target = getPointTarget(e.point, pointTargetBaseOptions());
         sharer.setSharedStorage(keySelectedElementController, null);
         sharer.setSharedStorage(keySelectedElementList, []);
-        if (target.elements.length === 1 && ((_b = (_a = target.elements[0]) === null || _a === void 0 ? void 0 : _a.operations) === null || _b === void 0 ? void 0 : _b.lock) === true) {
+        if (target.elements.length === 1 && ((_b = (_a = target.elements[0]) === null || _a === void 0 ? void 0 : _a.operations) === null || _b === void 0 ? void 0 : _b.locked) === true) {
           return;
         }
         if (target.elements.length === 1 && ((_c = target.elements[0]) === null || _c === void 0 ? void 0 : _c.type) === "group") {
@@ -8653,12 +8754,12 @@ var __privateMethod = (obj, member, method) => {
           controllerSize: 10,
           viewScaleInfo
         }) : null;
-        const isLock = !!((_a = hoverElement === null || hoverElement === void 0 ? void 0 : hoverElement.operations) === null || _a === void 0 ? void 0 : _a.lock);
+        const isLocked = !!((_a = hoverElement === null || hoverElement === void 0 ? void 0 : hoverElement.operations) === null || _a === void 0 ? void 0 : _a.locked);
         if ((groupQueue === null || groupQueue === void 0 ? void 0 : groupQueue.length) > 0) {
           drawGroupQueueVertexesWrappers(overlayContext, groupQueueVertexesList, drawBaseOpts);
           if (hoverElement && actionType !== "drag") {
-            if (isLock) {
-              drawLockVertexesWrapper(overlayContext, hoverElementVertexes, Object.assign(Object.assign({}, drawBaseOpts), { controller: calcElementSizeController(hoverElement, {
+            if (isLocked) {
+              drawLockedVertexesWrapper(overlayContext, hoverElementVertexes, Object.assign(Object.assign({}, drawBaseOpts), { controller: calcElementSizeController(hoverElement, {
                 groupQueue,
                 controllerSize: 10,
                 viewScaleInfo
@@ -8667,7 +8768,7 @@ var __privateMethod = (obj, member, method) => {
               drawHoverVertexesWrapper(overlayContext, hoverElementVertexes, drawBaseOpts);
             }
           }
-          if (!isLock && elem && ["select", "drag", "resize"].includes(actionType)) {
+          if (!isLocked && elem && ["select", "drag", "resize"].includes(actionType)) {
             drawSelectedElementControllersVertexes(overlayContext, selectedElementController, Object.assign(Object.assign({}, drawBaseOpts), { element: elem, calculator, hideControllers: !!isMoving && actionType === "drag", style }));
             if (actionType === "drag") {
               if (enableSnapToGrid === true) {
@@ -8693,8 +8794,8 @@ var __privateMethod = (obj, member, method) => {
           }
         } else {
           if (hoverElement && actionType !== "drag") {
-            if (isLock) {
-              drawLockVertexesWrapper(overlayContext, hoverElementVertexes, Object.assign(Object.assign({}, drawBaseOpts), { controller: calcElementSizeController(hoverElement, {
+            if (isLocked) {
+              drawLockedVertexesWrapper(overlayContext, hoverElementVertexes, Object.assign(Object.assign({}, drawBaseOpts), { controller: calcElementSizeController(hoverElement, {
                 groupQueue,
                 controllerSize: 10,
                 viewScaleInfo
@@ -8703,7 +8804,7 @@ var __privateMethod = (obj, member, method) => {
               drawHoverVertexesWrapper(overlayContext, hoverElementVertexes, drawBaseOpts);
             }
           }
-          if (!isLock && elem && ["select", "drag", "resize"].includes(actionType)) {
+          if (!isLocked && elem && ["select", "drag", "resize"].includes(actionType)) {
             drawSelectedElementControllersVertexes(overlayContext, selectedElementController, Object.assign(Object.assign({}, drawBaseOpts), { element: elem, calculator, hideControllers: !!isMoving && actionType === "drag", style }));
             if (actionType === "drag") {
               if (enableSnapToGrid === true) {
@@ -9597,11 +9698,13 @@ var __privateMethod = (obj, member, method) => {
     return {
       name: "@middleware/info",
       beforeDrawFrame({ snapshot }) {
+        var _a;
         const { sharedStore } = snapshot;
         const selectedElementList = sharedStore[keySelectedElementList];
+        const hoverElement = sharedStore[keyHoverElement];
         const actionType = sharedStore[keyActionType];
         const groupQueue = sharedStore[keyGroupQueue] || [];
-        if (selectedElementList.length === 1) {
+        if (selectedElementList.length === 1 && !((_a = hoverElement === null || hoverElement === void 0 ? void 0 : hoverElement.operations) === null || _a === void 0 ? void 0 : _a.locked)) {
           const elem = selectedElementList[0];
           if (elem && ["select", "drag", "resize"].includes(actionType)) {
             const viewScaleInfo = getViewScaleInfoFromSnapshot(snapshot);
@@ -9831,7 +9934,8 @@ var __privateMethod = (obj, member, method) => {
         selector: {},
         info: {},
         ruler: {},
-        scroller: {}
+        scroller: {},
+        layoutSelector: {}
       }
     };
     return storage;
@@ -9841,10 +9945,11 @@ var __privateMethod = (obj, member, method) => {
       selector: {},
       ruler: {},
       info: {},
-      scroller: {}
+      scroller: {},
+      layoutSelector: {}
     };
     if (opts.styles) {
-      const { selector, info, ruler, scroller } = opts.styles;
+      const { selector, info, ruler, scroller, layoutSelector } = opts.styles;
       if (istype.string(selector == null ? void 0 : selector.activeColor)) {
         styles.selector.activeColor = selector == null ? void 0 : selector.activeColor;
       }
@@ -9901,6 +10006,9 @@ var __privateMethod = (obj, member, method) => {
       }
       if (istype.string(scroller == null ? void 0 : scroller.activeThumbBorderColor)) {
         styles.scroller.activeThumbBorderColor = scroller == null ? void 0 : scroller.activeThumbBorderColor;
+      }
+      if (istype.string(layoutSelector == null ? void 0 : layoutSelector.activeColor)) {
+        styles.layoutSelector.activeColor = layoutSelector == null ? void 0 : layoutSelector.activeColor;
       }
     }
     return styles;
@@ -9965,7 +10073,7 @@ var __privateMethod = (obj, member, method) => {
       core.disuse(MiddlewareScroller);
     }
     if (enableSelect === true) {
-      core.use(MiddlewareLayoutSelector);
+      core.use(MiddlewareLayoutSelector, styles == null ? void 0 : styles.layoutSelector);
       core.use(MiddlewareSelector, styles == null ? void 0 : styles.selector);
     } else if (enableSelect === false) {
       core.disuse(MiddlewareLayoutSelector);
@@ -10004,7 +10112,7 @@ var __privateMethod = (obj, member, method) => {
     let enableTextEdit = false;
     let enableDrag = false;
     let enableRuler = false;
-    const enableInfo = true;
+    let enableInfo = false;
     let innerMode = "select";
     store.set("mode", innerMode);
     if (isValidMode(mode)) {
@@ -10016,6 +10124,7 @@ var __privateMethod = (obj, member, method) => {
       enableScale = true;
       enableScroll = true;
       enableSelect = true;
+      enableInfo = true;
       enableTextEdit = true;
       enableDrag = false;
       enableRuler = true;
@@ -10141,7 +10250,7 @@ var __privateMethod = (obj, member, method) => {
       this.trigger(eventKeys.select, { positions });
     }
     cancelElements() {
-      this.trigger(eventKeys.select, { uuids: [] });
+      this.trigger(eventKeys.clearSelect, { uuids: [] });
     }
     createElement(type, opts) {
       const { viewScaleInfo, viewSizeInfo } = __privateGet(this, _core).getViewInfo();
@@ -10329,6 +10438,7 @@ var __privateMethod = (obj, member, method) => {
   exports.findElementQueueFromListByPosition = findElementQueueFromListByPosition;
   exports.findElementsFromList = findElementsFromList;
   exports.findElementsFromListByPositions = findElementsFromListByPositions;
+  exports.flatElementList = flatElementList;
   exports.formatNumber = formatNumber;
   exports.generateHTML = generateHTML;
   exports.generateSVGPath = generateSVGPath;
