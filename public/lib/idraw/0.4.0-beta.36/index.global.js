@@ -1,28 +1,14 @@
 var iDraw = function(exports) {
-  "use strict";var __accessCheck = (obj, member, msg) => {
-  if (!member.has(obj))
-    throw TypeError("Cannot " + msg);
+  "use strict";var __typeError = (msg) => {
+  throw TypeError(msg);
 };
-var __privateGet = (obj, member, getter) => {
-  __accessCheck(obj, member, "read from private field");
-  return getter ? getter.call(obj) : member.get(obj);
-};
-var __privateAdd = (obj, member, value) => {
-  if (member.has(obj))
-    throw TypeError("Cannot add the same private member more than once");
-  member instanceof WeakSet ? member.add(obj) : member.set(obj, value);
-};
-var __privateSet = (obj, member, value, setter) => {
-  __accessCheck(obj, member, "write to private field");
-  setter ? setter.call(obj, value) : member.set(obj, value);
-  return value;
-};
-var __privateMethod = (obj, member, method) => {
-  __accessCheck(obj, member, "access private method");
-  return method;
-};
+var __accessCheck = (obj, member, msg) => member.has(obj) || __typeError("Cannot " + msg);
+var __privateGet = (obj, member, getter) => (__accessCheck(obj, member, "read from private field"), getter ? getter.call(obj) : member.get(obj));
+var __privateAdd = (obj, member, value) => member.has(obj) ? __typeError("Cannot add the same private member more than once") : member instanceof WeakSet ? member.add(obj) : member.set(obj, value);
+var __privateSet = (obj, member, value, setter) => (__accessCheck(obj, member, "write to private field"), setter ? setter.call(obj, value) : member.set(obj, value), value);
+var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "access private method"), method);
 
-  var _core, _opts, _store, _init, init_fn, _setFeature, setFeature_fn;
+  var _core, _opts, _store, _iDraw_instances, init_fn, setFeature_fn;
   function compose(middleware) {
     return function(context, next) {
       return dispatch(0);
@@ -941,19 +927,14 @@ var __privateMethod = (obj, member, method) => {
     htmlDesc
   };
   var __classPrivateFieldSet$b = function(receiver, state, value, kind, f) {
-    if (kind === "m")
-      throw new TypeError("Private method is not writable");
-    if (kind === "a" && !f)
-      throw new TypeError("Private accessor was defined without a setter");
-    if (typeof state === "function" ? receiver !== state || !f : !state.has(receiver))
-      throw new TypeError("Cannot write private member to an object whose class did not declare it");
+    if (kind === "m") throw new TypeError("Private method is not writable");
+    if (kind === "a" && !f) throw new TypeError("Private accessor was defined without a setter");
+    if (typeof state === "function" ? receiver !== state || !f : !state.has(receiver)) throw new TypeError("Cannot write private member to an object whose class did not declare it");
     return kind === "a" ? f.call(receiver, value) : f ? f.value = value : state.set(receiver, value), value;
   };
   var __classPrivateFieldGet$b = function(receiver, state, kind, f) {
-    if (kind === "a" && !f)
-      throw new TypeError("Private accessor was defined without a getter");
-    if (typeof state === "function" ? receiver !== state || !f : !state.has(receiver))
-      throw new TypeError("Cannot read private member from an object whose class did not declare it");
+    if (kind === "a" && !f) throw new TypeError("Private accessor was defined without a getter");
+    if (typeof state === "function" ? receiver !== state || !f : !state.has(receiver)) throw new TypeError("Cannot read private member from an object whose class did not declare it");
     return kind === "m" ? f : kind === "a" ? f.call(receiver) : f ? f.value : state.get(receiver);
   };
   var _Context2D_ctx, _Context2D_opts;
@@ -1317,19 +1298,14 @@ var __privateMethod = (obj, member, method) => {
     }
   }
   var __classPrivateFieldSet$a = function(receiver, state, value, kind, f) {
-    if (kind === "m")
-      throw new TypeError("Private method is not writable");
-    if (kind === "a" && !f)
-      throw new TypeError("Private accessor was defined without a setter");
-    if (typeof state === "function" ? receiver !== state || !f : !state.has(receiver))
-      throw new TypeError("Cannot write private member to an object whose class did not declare it");
+    if (kind === "m") throw new TypeError("Private method is not writable");
+    if (kind === "a" && !f) throw new TypeError("Private accessor was defined without a setter");
+    if (typeof state === "function" ? receiver !== state || !f : !state.has(receiver)) throw new TypeError("Cannot write private member to an object whose class did not declare it");
     return kind === "a" ? f.call(receiver, value) : f ? f.value = value : state.set(receiver, value), value;
   };
   var __classPrivateFieldGet$a = function(receiver, state, kind, f) {
-    if (kind === "a" && !f)
-      throw new TypeError("Private accessor was defined without a getter");
-    if (typeof state === "function" ? receiver !== state || !f : !state.has(receiver))
-      throw new TypeError("Cannot read private member from an object whose class did not declare it");
+    if (kind === "a" && !f) throw new TypeError("Private accessor was defined without a getter");
+    if (typeof state === "function" ? receiver !== state || !f : !state.has(receiver)) throw new TypeError("Cannot read private member from an object whose class did not declare it");
     return kind === "m" ? f : kind === "a" ? f.call(receiver) : f ? f.value : state.get(receiver);
   };
   var _EventEmitter_listeners;
@@ -1420,35 +1396,38 @@ var __privateMethod = (obj, member, method) => {
     };
   }
   var __classPrivateFieldSet$9 = function(receiver, state, value, kind, f) {
-    if (kind === "m")
-      throw new TypeError("Private method is not writable");
-    if (kind === "a" && !f)
-      throw new TypeError("Private accessor was defined without a setter");
-    if (typeof state === "function" ? receiver !== state || !f : !state.has(receiver))
-      throw new TypeError("Cannot write private member to an object whose class did not declare it");
+    if (kind === "m") throw new TypeError("Private method is not writable");
+    if (kind === "a" && !f) throw new TypeError("Private accessor was defined without a setter");
+    if (typeof state === "function" ? receiver !== state || !f : !state.has(receiver)) throw new TypeError("Cannot write private member to an object whose class did not declare it");
     return kind === "a" ? f.call(receiver, value) : f ? f.value = value : state.set(receiver, value), value;
   };
   var __classPrivateFieldGet$9 = function(receiver, state, kind, f) {
-    if (kind === "a" && !f)
-      throw new TypeError("Private accessor was defined without a getter");
-    if (typeof state === "function" ? receiver !== state || !f : !state.has(receiver))
-      throw new TypeError("Cannot read private member from an object whose class did not declare it");
+    if (kind === "a" && !f) throw new TypeError("Private accessor was defined without a getter");
+    if (typeof state === "function" ? receiver !== state || !f : !state.has(receiver)) throw new TypeError("Cannot read private member from an object whose class did not declare it");
     return kind === "m" ? f : kind === "a" ? f.call(receiver) : f ? f.value : state.get(receiver);
   };
-  var _Store_instances, _Store_temp, _Store_backUpDefaultStorage, _Store_createTempStorage;
+  var _Store_instances, _Store_temp, _Store_backUpDefaultStorage, _Store_static, _Store_createTempStorage;
   class Store {
     constructor(opts) {
       _Store_instances.add(this);
       _Store_temp.set(this, void 0);
       _Store_backUpDefaultStorage.set(this, void 0);
+      _Store_static.set(this, void 0);
       __classPrivateFieldSet$9(this, _Store_backUpDefaultStorage, deepClone(opts.defaultStorage), "f");
       __classPrivateFieldSet$9(this, _Store_temp, __classPrivateFieldGet$9(this, _Store_instances, "m", _Store_createTempStorage).call(this), "f");
+      __classPrivateFieldSet$9(this, _Store_static, opts.defaultStatic || {}, "f");
     }
     set(name, value) {
       __classPrivateFieldGet$9(this, _Store_temp, "f")[name] = value;
     }
     get(name) {
       return __classPrivateFieldGet$9(this, _Store_temp, "f")[name];
+    }
+    setStatic(name, value) {
+      __classPrivateFieldGet$9(this, _Store_static, "f")[name] = value;
+    }
+    getStatic(name) {
+      return __classPrivateFieldGet$9(this, _Store_static, "f")[name];
     }
     getSnapshot(opts) {
       if ((opts === null || opts === void 0 ? void 0 : opts.deepClone) === true) {
@@ -1461,9 +1440,10 @@ var __privateMethod = (obj, member, method) => {
     }
     destroy() {
       __classPrivateFieldSet$9(this, _Store_temp, null, "f");
+      __classPrivateFieldSet$9(this, _Store_static, null, "f");
     }
   }
-  _Store_temp = /* @__PURE__ */ new WeakMap(), _Store_backUpDefaultStorage = /* @__PURE__ */ new WeakMap(), _Store_instances = /* @__PURE__ */ new WeakSet(), _Store_createTempStorage = function _Store_createTempStorage2() {
+  _Store_temp = /* @__PURE__ */ new WeakMap(), _Store_backUpDefaultStorage = /* @__PURE__ */ new WeakMap(), _Store_static = /* @__PURE__ */ new WeakMap(), _Store_instances = /* @__PURE__ */ new WeakSet(), _Store_createTempStorage = function _Store_createTempStorage2() {
     return deepClone(__classPrivateFieldGet$9(this, _Store_backUpDefaultStorage, "f"));
   };
   function getViewScaleInfoFromSnapshot(snapshot) {
@@ -1535,16 +1515,10 @@ var __privateMethod = (obj, member, method) => {
     return calcElementCenter(elemSize);
   }
   function calcRadian(center, start, end) {
-    const startAngle = calcLineRadian(center, start);
-    const endAngle = calcLineRadian(center, end);
-    if (endAngle !== null && startAngle !== null) {
-      if (startAngle > Math.PI * 3 / 2 && endAngle < Math.PI / 2) {
-        return endAngle + (Math.PI * 2 - startAngle);
-      } else if (endAngle > Math.PI * 3 / 2 && startAngle < Math.PI / 2) {
-        return startAngle + (Math.PI * 2 - endAngle);
-      } else {
-        return endAngle - startAngle;
-      }
+    const startRadian = calcLineRadian(center, start);
+    const endRadian = calcLineRadian(center, end);
+    if (endRadian !== null && startRadian !== null) {
+      return endRadian - startRadian;
     } else {
       return 0;
     }
@@ -1670,12 +1644,14 @@ var __privateMethod = (obj, member, method) => {
     ];
   }
   function limitAngle(angle2) {
-    if (!(angle2 > 0 || angle2 < 0) || angle2 === 0) {
+    if (!(angle2 > 0 || angle2 < 0) || angle2 === 0 || angle2 === 360) {
       return 0;
     }
     let num = angle2 % 360;
     if (num < 0) {
       num += 360;
+    } else if (angle2 === 360) {
+      num = 0;
     }
     return num;
   }
@@ -2080,6 +2056,36 @@ var __privateMethod = (obj, member, method) => {
     };
     _loop(elements);
     return result;
+  }
+  function getElementPositionMapFromList(uuids, elements) {
+    const currentPosition = [];
+    const positionMap = {};
+    let over = false;
+    const _loop = (list) => {
+      var _a;
+      for (let i = 0; i < list.length; i++) {
+        if (over === true) {
+          break;
+        }
+        currentPosition.push(i);
+        const elem = list[i];
+        if (uuids.includes(elem.uuid)) {
+          positionMap[elem.uuid] = [...currentPosition];
+          if (Object.keys(positionMap).length === uuids.length) {
+            over = true;
+            break;
+          }
+        } else if (elem.type === "group") {
+          _loop(((_a = elem === null || elem === void 0 ? void 0 : elem.detail) === null || _a === void 0 ? void 0 : _a.children) || []);
+        }
+        if (over) {
+          break;
+        }
+        currentPosition.pop();
+      }
+    };
+    _loop(elements);
+    return positionMap;
   }
   function checkRectIntersect(rect1, rect2) {
     const rect1MinX = rect1.x;
@@ -2609,9 +2615,11 @@ var __privateMethod = (obj, member, method) => {
     };
   }
   function calcElementSizeController(elemSize, opts) {
-    const { groupQueue, controllerSize: controllerSize2, viewScaleInfo } = opts;
+    const { groupQueue, controllerSize: controllerSize2, viewScaleInfo, rotateControllerSize: rotateControllerSize2, rotateControllerPosition: rotateControllerPosition2 } = opts;
     const ctrlSize = (controllerSize2 && controllerSize2 > 0 ? controllerSize2 : 8) / viewScaleInfo.scale;
     const { x: x2, y: y2, w: w2, h: h2, angle: angle2 = 0 } = elemSize;
+    const rotateCtrlSize = rotateControllerSize2;
+    const rotateCtrlPos = rotateControllerPosition2;
     const ctrlGroupQueue = [
       ...[
         {
@@ -2633,10 +2641,10 @@ var __privateMethod = (obj, member, method) => {
     });
     const vertexes = calcElementVertexesInGroup(elemSize, { groupQueue });
     const rotateElemVertexes = calcElementVertexesInGroup({
-      x: x2 - ctrlSize * 2,
-      y: y2 - ctrlSize * 2,
-      h: h2 + ctrlSize * 4,
-      w: w2 + ctrlSize * 4,
+      x: x2,
+      y: y2 - (rotateCtrlPos + rotateCtrlSize / 2) / viewScaleInfo.scale,
+      h: h2 + (rotateCtrlPos * 2 + rotateCtrlSize) / viewScaleInfo.scale,
+      w: w2,
       angle: angle2
     }, { groupQueue: [...groupQueue] });
     const topCenter = getCenterFromTwoPoints(vertexes[0], vertexes[1]);
@@ -2668,74 +2676,91 @@ var __privateMethod = (obj, member, method) => {
     const bottomMiddleVertexes = calcElementVertexes(bottomMiddleSize);
     const leftMiddleVertexes = calcElementVertexes(leftMiddleSize);
     const rotateCenter = getCenterFromTwoPoints(rotateElemVertexes[0], rotateElemVertexes[1]);
-    const rotateSize = createControllerElementSizeFromCenter(rotateCenter, { size: ctrlSize, angle: totalAngle });
+    const tempRotateSizeRepairRatio = 1.1;
+    const rotateSize = createControllerElementSizeFromCenter(rotateCenter, {
+      size: rotateControllerSize2 * tempRotateSizeRepairRatio / viewScaleInfo.scale,
+      angle: totalAngle
+    });
     const rotateVertexes2 = calcElementVertexes(rotateSize);
     const sizeController = {
       elementWrapper: vertexes,
       left: {
         type: "left",
         vertexes: leftVertexes,
-        center: leftCenter
+        center: leftCenter,
+        size: ctrlSize
       },
       right: {
         type: "right",
         vertexes: rightVertexes,
-        center: rightCenter
+        center: rightCenter,
+        size: ctrlSize
       },
       top: {
         type: "top",
         vertexes: topVertexes,
-        center: topCenter
+        center: topCenter,
+        size: ctrlSize
       },
       bottom: {
         type: "bottom",
         vertexes: bottomVertexes,
-        center: bottomCenter
+        center: bottomCenter,
+        size: ctrlSize
       },
       topLeft: {
         type: "top-left",
         vertexes: topLeftVertexes,
-        center: topLeftCenter
+        center: topLeftCenter,
+        size: ctrlSize
       },
       topRight: {
         type: "top-right",
         vertexes: topRightVertexes,
-        center: topRightCenter
+        center: topRightCenter,
+        size: ctrlSize
       },
       bottomLeft: {
         type: "bottom-left",
         vertexes: bottomLeftVertexes,
-        center: bottomLeftCenter
+        center: bottomLeftCenter,
+        size: ctrlSize
       },
       bottomRight: {
         type: "bottom-right",
         vertexes: bottomRightVertexes,
-        center: bottomRightCenter
+        center: bottomRightCenter,
+        size: ctrlSize
       },
       leftMiddle: {
         type: "left-middle",
         vertexes: leftMiddleVertexes,
-        center: leftCenter
+        center: leftCenter,
+        size: ctrlSize
       },
       rightMiddle: {
         type: "right-middle",
         vertexes: rightMiddleVertexes,
-        center: rightCenter
+        center: rightCenter,
+        size: ctrlSize
       },
       topMiddle: {
         type: "top-middle",
         vertexes: topMiddleVertexes,
-        center: topCenter
+        center: topCenter,
+        size: ctrlSize
       },
       bottomMiddle: {
         type: "bottom-middle",
         vertexes: bottomMiddleVertexes,
-        center: bottomCenter
+        center: bottomCenter,
+        size: ctrlSize
       },
       rotate: {
         type: "rotate",
         vertexes: rotateVertexes2,
-        center: rotateCenter
+        center: rotateCenter,
+        size: rotateControllerSize2
       }
     };
     return sizeController;
@@ -2777,62 +2802,74 @@ var __privateMethod = (obj, member, method) => {
       left: {
         type: "left",
         vertexes: leftVertexes,
-        center: leftCenter
+        center: leftCenter,
+        size: ctrlSize
       },
       right: {
         type: "right",
         vertexes: rightVertexes,
-        center: rightCenter
+        center: rightCenter,
+        size: ctrlSize
       },
       top: {
         type: "top",
         vertexes: topVertexes,
-        center: topCenter
+        center: topCenter,
+        size: ctrlSize
       },
       bottom: {
         type: "bottom",
         vertexes: bottomVertexes,
-        center: bottomCenter
+        center: bottomCenter,
+        size: ctrlSize
       },
       topLeft: {
         type: "top-left",
         vertexes: topLeftVertexes,
-        center: topLeftCenter
+        center: topLeftCenter,
+        size: ctrlSize
       },
       topRight: {
         type: "top-right",
         vertexes: topRightVertexes,
-        center: topRightCenter
+        center: topRightCenter,
+        size: ctrlSize
       },
       bottomLeft: {
         type: "bottom-left",
         vertexes: bottomLeftVertexes,
-        center: bottomLeftCenter
+        center: bottomLeftCenter,
+        size: ctrlSize
       },
       bottomRight: {
         type: "bottom-right",
         vertexes: bottomRightVertexes,
-        center: bottomRightCenter
+        center: bottomRightCenter,
+        size: ctrlSize
       },
       leftMiddle: {
         type: "left-middle",
         vertexes: leftMiddleVertexes,
-        center: leftCenter
+        center: leftCenter,
+        size: ctrlSize
       },
       rightMiddle: {
         type: "right-middle",
         vertexes: rightMiddleVertexes,
-        center: rightCenter
+        center: rightCenter,
+        size: ctrlSize
       },
       topMiddle: {
         type: "top-middle",
         vertexes: topMiddleVertexes,
-        center: topCenter
+        center: topCenter,
+        size: ctrlSize
       },
       bottomMiddle: {
         type: "bottom-middle",
         vertexes: bottomMiddleVertexes,
-        center: bottomCenter
+        center: bottomCenter,
+        size: ctrlSize
       }
     };
     return sizeController;
@@ -3251,18 +3288,13 @@ var __privateMethod = (obj, member, method) => {
   function resizeElement$1(elem, opts) {
     const { type } = elem;
     resizeElementBase(elem, opts);
-    if (type === "circle")
-      ;
+    if (type === "circle") ;
     else if (type === "text") {
       resizeTextElementDetail(elem, opts);
-    } else if (type === "image")
-      ;
-    else if (type === "svg")
-      ;
-    else if (type === "html")
-      ;
-    else if (type === "path")
-      ;
+    } else if (type === "image") ;
+    else if (type === "svg") ;
+    else if (type === "html") ;
+    else if (type === "path") ;
     else if (type === "group" && Array.isArray(elem.detail.children)) {
       elem.detail.children.forEach((child) => {
         resizeElement$1(child, opts);
@@ -3673,9 +3705,8 @@ var __privateMethod = (obj, member, method) => {
   }
   var __rest$1 = function(s, e) {
     var t = {};
-    for (var p in s)
-      if (Object.prototype.hasOwnProperty.call(s, p) && e.indexOf(p) < 0)
-        t[p] = s[p];
+    for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p) && e.indexOf(p) < 0)
+      t[p] = s[p];
     if (s != null && typeof Object.getOwnPropertySymbols === "function")
       for (var i = 0, p = Object.getOwnPropertySymbols(s); i < p.length; i++) {
         if (e.indexOf(p[i]) < 0 && Object.prototype.propertyIsEnumerable.call(s, p[i]))
@@ -4524,9 +4555,8 @@ var __privateMethod = (obj, member, method) => {
   }
   var __rest = function(s, e) {
     var t = {};
-    for (var p in s)
-      if (Object.prototype.hasOwnProperty.call(s, p) && e.indexOf(p) < 0)
-        t[p] = s[p];
+    for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p) && e.indexOf(p) < 0)
+      t[p] = s[p];
     if (s != null && typeof Object.getOwnPropertySymbols === "function")
       for (var i = 0, p = Object.getOwnPropertySymbols(s); i < p.length; i++) {
         if (e.indexOf(p[i]) < 0 && Object.prototype.propertyIsEnumerable.call(s, p[i]))
@@ -4842,19 +4872,14 @@ var __privateMethod = (obj, member, method) => {
     });
   };
   var __classPrivateFieldGet$8 = function(receiver, state, kind, f) {
-    if (kind === "a" && !f)
-      throw new TypeError("Private accessor was defined without a getter");
-    if (typeof state === "function" ? receiver !== state || !f : !state.has(receiver))
-      throw new TypeError("Cannot read private member from an object whose class did not declare it");
+    if (kind === "a" && !f) throw new TypeError("Private accessor was defined without a getter");
+    if (typeof state === "function" ? receiver !== state || !f : !state.has(receiver)) throw new TypeError("Cannot read private member from an object whose class did not declare it");
     return kind === "m" ? f : kind === "a" ? f.call(receiver) : f ? f.value : state.get(receiver);
   };
   var __classPrivateFieldSet$8 = function(receiver, state, value, kind, f) {
-    if (kind === "m")
-      throw new TypeError("Private method is not writable");
-    if (kind === "a" && !f)
-      throw new TypeError("Private accessor was defined without a setter");
-    if (typeof state === "function" ? receiver !== state || !f : !state.has(receiver))
-      throw new TypeError("Cannot write private member to an object whose class did not declare it");
+    if (kind === "m") throw new TypeError("Private method is not writable");
+    if (kind === "a" && !f) throw new TypeError("Private accessor was defined without a setter");
+    if (typeof state === "function" ? receiver !== state || !f : !state.has(receiver)) throw new TypeError("Cannot write private member to an object whose class did not declare it");
     return kind === "a" ? f.call(receiver, value) : f ? f.value = value : state.set(receiver, value), value;
   };
   var _Loader_instances, _Loader_loadFuncMap, _Loader_currentLoadItemMap, _Loader_storageLoadItemMap, _Loader_hasDestroyed, _Loader_registerLoadFunc, _Loader_getLoadElementSource, _Loader_createLoadItem, _Loader_emitLoad, _Loader_emitError, _Loader_loadResource, _Loader_isExistingErrorStorage;
@@ -4896,8 +4921,8 @@ var __privateMethod = (obj, member, method) => {
         };
       }));
       __classPrivateFieldGet$8(this, _Loader_instances, "m", _Loader_registerLoadFunc).call(this, "html", (elem, assets) => __awaiter(this, void 0, void 0, function* () {
-        var _b;
-        const html2 = ((_b = assets[elem.detail.html]) === null || _b === void 0 ? void 0 : _b.value) || elem.detail.html;
+        var _a;
+        const html2 = ((_a = assets[elem.detail.html]) === null || _a === void 0 ? void 0 : _a.value) || elem.detail.html;
         const content = yield loadHTML(html2, {
           width: elem.detail.originW || elem.w,
           height: elem.detail.originH || elem.h
@@ -4909,8 +4934,8 @@ var __privateMethod = (obj, member, method) => {
         };
       }));
       __classPrivateFieldGet$8(this, _Loader_instances, "m", _Loader_registerLoadFunc).call(this, "svg", (elem, assets) => __awaiter(this, void 0, void 0, function* () {
-        var _c;
-        const svg2 = ((_c = assets[elem.detail.svg]) === null || _c === void 0 ? void 0 : _c.value) || elem.detail.svg;
+        var _a;
+        const svg2 = ((_a = assets[elem.detail.svg]) === null || _a === void 0 ? void 0 : _a.value) || elem.detail.svg;
         const content = yield loadSVG(svg2);
         return {
           uuid: elem.uuid,
@@ -5039,19 +5064,14 @@ var __privateMethod = (obj, member, method) => {
     return false;
   };
   var __classPrivateFieldSet$7 = function(receiver, state, value, kind, f) {
-    if (kind === "m")
-      throw new TypeError("Private method is not writable");
-    if (kind === "a" && !f)
-      throw new TypeError("Private accessor was defined without a setter");
-    if (typeof state === "function" ? receiver !== state || !f : !state.has(receiver))
-      throw new TypeError("Cannot write private member to an object whose class did not declare it");
+    if (kind === "m") throw new TypeError("Private method is not writable");
+    if (kind === "a" && !f) throw new TypeError("Private accessor was defined without a setter");
+    if (typeof state === "function" ? receiver !== state || !f : !state.has(receiver)) throw new TypeError("Cannot write private member to an object whose class did not declare it");
     return kind === "a" ? f.call(receiver, value) : f ? f.value = value : state.set(receiver, value), value;
   };
   var __classPrivateFieldGet$7 = function(receiver, state, kind, f) {
-    if (kind === "a" && !f)
-      throw new TypeError("Private accessor was defined without a getter");
-    if (typeof state === "function" ? receiver !== state || !f : !state.has(receiver))
-      throw new TypeError("Cannot read private member from an object whose class did not declare it");
+    if (kind === "a" && !f) throw new TypeError("Private accessor was defined without a getter");
+    if (typeof state === "function" ? receiver !== state || !f : !state.has(receiver)) throw new TypeError("Cannot read private member from an object whose class did not declare it");
     return kind === "m" ? f : kind === "a" ? f.call(receiver) : f ? f.value : state.get(receiver);
   };
   var _Renderer_instances, _Renderer_opts, _Renderer_loader, _Renderer_hasDestroyed, _Renderer_init;
@@ -5151,19 +5171,14 @@ var __privateMethod = (obj, member, method) => {
     });
   };
   var __classPrivateFieldSet$6 = function(receiver, state, value, kind, f) {
-    if (kind === "m")
-      throw new TypeError("Private method is not writable");
-    if (kind === "a" && !f)
-      throw new TypeError("Private accessor was defined without a setter");
-    if (typeof state === "function" ? receiver !== state || !f : !state.has(receiver))
-      throw new TypeError("Cannot write private member to an object whose class did not declare it");
+    if (kind === "m") throw new TypeError("Private method is not writable");
+    if (kind === "a" && !f) throw new TypeError("Private accessor was defined without a setter");
+    if (typeof state === "function" ? receiver !== state || !f : !state.has(receiver)) throw new TypeError("Cannot write private member to an object whose class did not declare it");
     return kind === "a" ? f.call(receiver, value) : f ? f.value = value : state.set(receiver, value), value;
   };
   var __classPrivateFieldGet$6 = function(receiver, state, kind, f) {
-    if (kind === "a" && !f)
-      throw new TypeError("Private accessor was defined without a getter");
-    if (typeof state === "function" ? receiver !== state || !f : !state.has(receiver))
-      throw new TypeError("Cannot read private member from an object whose class did not declare it");
+    if (kind === "a" && !f) throw new TypeError("Private accessor was defined without a getter");
+    if (typeof state === "function" ? receiver !== state || !f : !state.has(receiver)) throw new TypeError("Cannot read private member from an object whose class did not declare it");
     return kind === "m" ? f : kind === "a" ? f.call(receiver) : f ? f.value : state.get(receiver);
   };
   var _Calculator_opts, _Calculator_store;
@@ -5325,19 +5340,14 @@ var __privateMethod = (obj, member, method) => {
   }
   _Calculator_opts = /* @__PURE__ */ new WeakMap(), _Calculator_store = /* @__PURE__ */ new WeakMap();
   var __classPrivateFieldSet$5 = function(receiver, state, value, kind, f) {
-    if (kind === "m")
-      throw new TypeError("Private method is not writable");
-    if (kind === "a" && !f)
-      throw new TypeError("Private accessor was defined without a setter");
-    if (typeof state === "function" ? receiver !== state || !f : !state.has(receiver))
-      throw new TypeError("Cannot write private member to an object whose class did not declare it");
+    if (kind === "m") throw new TypeError("Private method is not writable");
+    if (kind === "a" && !f) throw new TypeError("Private accessor was defined without a setter");
+    if (typeof state === "function" ? receiver !== state || !f : !state.has(receiver)) throw new TypeError("Cannot write private member to an object whose class did not declare it");
     return kind === "a" ? f.call(receiver, value) : f ? f.value = value : state.set(receiver, value), value;
   };
   var __classPrivateFieldGet$5 = function(receiver, state, kind, f) {
-    if (kind === "a" && !f)
-      throw new TypeError("Private accessor was defined without a getter");
-    if (typeof state === "function" ? receiver !== state || !f : !state.has(receiver))
-      throw new TypeError("Cannot read private member from an object whose class did not declare it");
+    if (kind === "a" && !f) throw new TypeError("Private accessor was defined without a getter");
+    if (typeof state === "function" ? receiver !== state || !f : !state.has(receiver)) throw new TypeError("Cannot read private member from an object whose class did not declare it");
     return kind === "m" ? f : kind === "a" ? f.call(receiver) : f ? f.value : state.get(receiver);
   };
   var _BoardWatcher_instances, _BoardWatcher_opts, _BoardWatcher_store, _BoardWatcher_hasDestroyed, _BoardWatcher_init, _BoardWatcher_onWheel, _BoardWatcher_onContextMenu, _BoardWatcher_onClick, _BoardWatcher_onPointLeave, _BoardWatcher_onPointEnd, _BoardWatcher_onPointMove, _BoardWatcher_onPointStart, _BoardWatcher_onHover, _BoardWatcher_isInTarget, _BoardWatcher_getPoint, _BoardWatcher_isVaildPoint;
@@ -5370,6 +5380,9 @@ var __privateMethod = (obj, member, method) => {
         }
       });
       _BoardWatcher_onContextMenu.set(this, (e) => {
+        if (e.button !== 2) {
+          return;
+        }
         if (!__classPrivateFieldGet$5(this, _BoardWatcher_instances, "m", _BoardWatcher_isInTarget).call(this, e)) {
           return;
         }
@@ -5378,6 +5391,7 @@ var __privateMethod = (obj, member, method) => {
         if (!__classPrivateFieldGet$5(this, _BoardWatcher_instances, "m", _BoardWatcher_isVaildPoint).call(this, point)) {
           return;
         }
+        this.trigger("contextMenu", { point });
       });
       _BoardWatcher_onClick.set(this, (e) => {
         if (!__classPrivateFieldGet$5(this, _BoardWatcher_instances, "m", _BoardWatcher_isInTarget).call(this, e)) {
@@ -5399,9 +5413,6 @@ var __privateMethod = (obj, member, method) => {
       });
       _BoardWatcher_onPointLeave.set(this, (e) => {
         __classPrivateFieldGet$5(this, _BoardWatcher_store, "f").set("hasPointDown", false);
-        if (!__classPrivateFieldGet$5(this, _BoardWatcher_instances, "m", _BoardWatcher_isInTarget).call(this, e)) {
-          return;
-        }
         e.preventDefault();
         const point = __classPrivateFieldGet$5(this, _BoardWatcher_instances, "m", _BoardWatcher_getPoint).call(this, e);
         this.trigger("pointLeave", { point });
@@ -5435,6 +5446,9 @@ var __privateMethod = (obj, member, method) => {
         this.trigger("pointMove", { point });
       });
       _BoardWatcher_onPointStart.set(this, (e) => {
+        if (e.button !== 0) {
+          return;
+        }
         if (!__classPrivateFieldGet$5(this, _BoardWatcher_instances, "m", _BoardWatcher_isInTarget).call(this, e)) {
           return;
         }
@@ -5448,8 +5462,13 @@ var __privateMethod = (obj, member, method) => {
       });
       _BoardWatcher_onHover.set(this, (e) => {
         if (!__classPrivateFieldGet$5(this, _BoardWatcher_instances, "m", _BoardWatcher_isInTarget).call(this, e)) {
+          if (__classPrivateFieldGet$5(this, _BoardWatcher_store, "f").get("inCanvas") === true) {
+            __classPrivateFieldGet$5(this, _BoardWatcher_store, "f").set("inCanvas", false);
+            __classPrivateFieldGet$5(this, _BoardWatcher_onPointLeave, "f").call(this, e);
+          }
           return;
         }
+        __classPrivateFieldGet$5(this, _BoardWatcher_store, "f").set("inCanvas", true);
         e.preventDefault();
         const point = __classPrivateFieldGet$5(this, _BoardWatcher_instances, "m", _BoardWatcher_getPoint).call(this, e);
         if (!__classPrivateFieldGet$5(this, _BoardWatcher_instances, "m", _BoardWatcher_isVaildPoint).call(this, point)) {
@@ -5457,7 +5476,7 @@ var __privateMethod = (obj, member, method) => {
         }
         this.trigger("hover", { point });
       });
-      const store = new Store({ defaultStorage: { hasPointDown: false, prevClickPoint: null } });
+      const store = new Store({ defaultStorage: { hasPointDown: false, prevClickPoint: null, inCanvas: true } });
       __classPrivateFieldSet$5(this, _BoardWatcher_store, store, "f");
       __classPrivateFieldSet$5(this, _BoardWatcher_opts, opts, "f");
       __classPrivateFieldGet$5(this, _BoardWatcher_instances, "m", _BoardWatcher_init).call(this);
@@ -5471,7 +5490,6 @@ var __privateMethod = (obj, member, method) => {
       container.addEventListener("mousedown", __classPrivateFieldGet$5(this, _BoardWatcher_onPointStart, "f"));
       container.addEventListener("mousemove", __classPrivateFieldGet$5(this, _BoardWatcher_onPointMove, "f"));
       container.addEventListener("mouseup", __classPrivateFieldGet$5(this, _BoardWatcher_onPointEnd, "f"));
-      container.addEventListener("mouseleave", __classPrivateFieldGet$5(this, _BoardWatcher_onPointLeave, "f"));
       container.addEventListener("wheel", __classPrivateFieldGet$5(this, _BoardWatcher_onWheel, "f"), { passive: false });
       container.addEventListener("click", __classPrivateFieldGet$5(this, _BoardWatcher_onClick, "f"));
       container.addEventListener("contextmenu", __classPrivateFieldGet$5(this, _BoardWatcher_onContextMenu, "f"));
@@ -5515,19 +5533,14 @@ var __privateMethod = (obj, member, method) => {
     return false;
   };
   var __classPrivateFieldSet$4 = function(receiver, state, value, kind, f) {
-    if (kind === "m")
-      throw new TypeError("Private method is not writable");
-    if (kind === "a" && !f)
-      throw new TypeError("Private accessor was defined without a setter");
-    if (typeof state === "function" ? receiver !== state || !f : !state.has(receiver))
-      throw new TypeError("Cannot write private member to an object whose class did not declare it");
+    if (kind === "m") throw new TypeError("Private method is not writable");
+    if (kind === "a" && !f) throw new TypeError("Private accessor was defined without a setter");
+    if (typeof state === "function" ? receiver !== state || !f : !state.has(receiver)) throw new TypeError("Cannot write private member to an object whose class did not declare it");
     return kind === "a" ? f.call(receiver, value) : f ? f.value = value : state.set(receiver, value), value;
   };
   var __classPrivateFieldGet$4 = function(receiver, state, kind, f) {
-    if (kind === "a" && !f)
-      throw new TypeError("Private accessor was defined without a getter");
-    if (typeof state === "function" ? receiver !== state || !f : !state.has(receiver))
-      throw new TypeError("Cannot read private member from an object whose class did not declare it");
+    if (kind === "a" && !f) throw new TypeError("Private accessor was defined without a getter");
+    if (typeof state === "function" ? receiver !== state || !f : !state.has(receiver)) throw new TypeError("Cannot read private member from an object whose class did not declare it");
     return kind === "m" ? f : kind === "a" ? f.call(receiver) : f ? f.value : state.get(receiver);
   };
   var _Sharer_activeStore, _Sharer_sharedStore;
@@ -5620,19 +5633,14 @@ var __privateMethod = (obj, member, method) => {
   }
   _Sharer_activeStore = /* @__PURE__ */ new WeakMap(), _Sharer_sharedStore = /* @__PURE__ */ new WeakMap();
   var __classPrivateFieldSet$3 = function(receiver, state, value, kind, f) {
-    if (kind === "m")
-      throw new TypeError("Private method is not writable");
-    if (kind === "a" && !f)
-      throw new TypeError("Private accessor was defined without a setter");
-    if (typeof state === "function" ? receiver !== state || !f : !state.has(receiver))
-      throw new TypeError("Cannot write private member to an object whose class did not declare it");
+    if (kind === "m") throw new TypeError("Private method is not writable");
+    if (kind === "a" && !f) throw new TypeError("Private accessor was defined without a setter");
+    if (typeof state === "function" ? receiver !== state || !f : !state.has(receiver)) throw new TypeError("Cannot write private member to an object whose class did not declare it");
     return kind === "a" ? f.call(receiver, value) : f ? f.value = value : state.set(receiver, value), value;
   };
   var __classPrivateFieldGet$3 = function(receiver, state, kind, f) {
-    if (kind === "a" && !f)
-      throw new TypeError("Private accessor was defined without a getter");
-    if (typeof state === "function" ? receiver !== state || !f : !state.has(receiver))
-      throw new TypeError("Cannot read private member from an object whose class did not declare it");
+    if (kind === "a" && !f) throw new TypeError("Private accessor was defined without a getter");
+    if (typeof state === "function" ? receiver !== state || !f : !state.has(receiver)) throw new TypeError("Cannot read private member from an object whose class did not declare it");
     return kind === "m" ? f : kind === "a" ? f.call(receiver) : f ? f.value : state.get(receiver);
   };
   var _Viewer_instances, _Viewer_opts, _Viewer_drawFrameSnapshotQueue, _Viewer_drawFrameStatus, _Viewer_init, _Viewer_drawAnimationFrame;
@@ -5788,22 +5796,17 @@ var __privateMethod = (obj, member, method) => {
     }
   };
   var __classPrivateFieldSet$2 = function(receiver, state, value, kind, f) {
-    if (kind === "m")
-      throw new TypeError("Private method is not writable");
-    if (kind === "a" && !f)
-      throw new TypeError("Private accessor was defined without a setter");
-    if (typeof state === "function" ? receiver !== state || !f : !state.has(receiver))
-      throw new TypeError("Cannot write private member to an object whose class did not declare it");
+    if (kind === "m") throw new TypeError("Private method is not writable");
+    if (kind === "a" && !f) throw new TypeError("Private accessor was defined without a setter");
+    if (typeof state === "function" ? receiver !== state || !f : !state.has(receiver)) throw new TypeError("Cannot write private member to an object whose class did not declare it");
     return kind === "a" ? f.call(receiver, value) : f ? f.value = value : state.set(receiver, value), value;
   };
   var __classPrivateFieldGet$2 = function(receiver, state, kind, f) {
-    if (kind === "a" && !f)
-      throw new TypeError("Private accessor was defined without a getter");
-    if (typeof state === "function" ? receiver !== state || !f : !state.has(receiver))
-      throw new TypeError("Cannot read private member from an object whose class did not declare it");
+    if (kind === "a" && !f) throw new TypeError("Private accessor was defined without a getter");
+    if (typeof state === "function" ? receiver !== state || !f : !state.has(receiver)) throw new TypeError("Cannot read private member from an object whose class did not declare it");
     return kind === "m" ? f : kind === "a" ? f.call(receiver) : f ? f.value : state.get(receiver);
   };
-  var _Board_instances, _Board_opts, _Board_middlewareMap, _Board_middlewares, _Board_activeMiddlewareObjs, _Board_watcher, _Board_renderer, _Board_sharer, _Board_viewer, _Board_calculator, _Board_eventHub, _Board_hasDestroyed, _Board_init, _Board_handlePointStart, _Board_handlePointEnd, _Board_handlePointMove, _Board_handleHover, _Board_handleDoubleClick, _Board_handleWheel, _Board_handleWheelScale, _Board_handleScrollX, _Board_handleScrollY, _Board_handleResize, _Board_handleClear, _Board_handleBeforeDrawFrame, _Board_handleAfterDrawFrame, _Board_resetActiveMiddlewareObjs;
+  var _Board_instances, _Board_opts, _Board_middlewareMap, _Board_middlewares, _Board_activeMiddlewareObjs, _Board_watcher, _Board_renderer, _Board_sharer, _Board_viewer, _Board_calculator, _Board_eventHub, _Board_hasDestroyed, _Board_init, _Board_handlePointStart, _Board_handlePointEnd, _Board_handlePointMove, _Board_handlePointLeave, _Board_handleHover, _Board_handleDoubleClick, _Board_handleContextMenu, _Board_handleWheel, _Board_handleWheelScale, _Board_handleScrollX, _Board_handleScrollY, _Board_handleResize, _Board_handleClear, _Board_handleBeforeDrawFrame, _Board_handleAfterDrawFrame, _Board_resetActiveMiddlewareObjs;
   class Board {
     constructor(opts) {
       _Board_instances.add(this);
@@ -5989,6 +5992,7 @@ var __privateMethod = (obj, member, method) => {
     __classPrivateFieldGet$2(this, _Board_watcher, "f").on("pointStart", __classPrivateFieldGet$2(this, _Board_instances, "m", _Board_handlePointStart).bind(this));
     __classPrivateFieldGet$2(this, _Board_watcher, "f").on("pointEnd", __classPrivateFieldGet$2(this, _Board_instances, "m", _Board_handlePointEnd).bind(this));
     __classPrivateFieldGet$2(this, _Board_watcher, "f").on("pointMove", __classPrivateFieldGet$2(this, _Board_instances, "m", _Board_handlePointMove).bind(this));
+    __classPrivateFieldGet$2(this, _Board_watcher, "f").on("pointLeave", __classPrivateFieldGet$2(this, _Board_instances, "m", _Board_handlePointLeave).bind(this));
     __classPrivateFieldGet$2(this, _Board_watcher, "f").on("hover", __classPrivateFieldGet$2(this, _Board_instances, "m", _Board_handleHover).bind(this));
     __classPrivateFieldGet$2(this, _Board_watcher, "f").on("wheel", __classPrivateFieldGet$2(this, _Board_instances, "m", _Board_handleWheel).bind(this));
     __classPrivateFieldGet$2(this, _Board_watcher, "f").on("wheelScale", __classPrivateFieldGet$2(this, _Board_instances, "m", _Board_handleWheelScale).bind(this));
@@ -5996,6 +6000,7 @@ var __privateMethod = (obj, member, method) => {
     __classPrivateFieldGet$2(this, _Board_watcher, "f").on("scrollY", __classPrivateFieldGet$2(this, _Board_instances, "m", _Board_handleScrollY).bind(this));
     __classPrivateFieldGet$2(this, _Board_watcher, "f").on("resize", __classPrivateFieldGet$2(this, _Board_instances, "m", _Board_handleResize).bind(this));
     __classPrivateFieldGet$2(this, _Board_watcher, "f").on("doubleClick", __classPrivateFieldGet$2(this, _Board_instances, "m", _Board_handleDoubleClick).bind(this));
+    __classPrivateFieldGet$2(this, _Board_watcher, "f").on("contextMenu", __classPrivateFieldGet$2(this, _Board_instances, "m", _Board_handleContextMenu).bind(this));
     __classPrivateFieldGet$2(this, _Board_renderer, "f").on("load", () => {
       __classPrivateFieldGet$2(this, _Board_eventHub, "f").trigger("loadResource");
     });
@@ -6026,6 +6031,15 @@ var __privateMethod = (obj, member, method) => {
         return;
       }
     }
+  }, _Board_handlePointLeave = function _Board_handlePointLeave2(e) {
+    var _a;
+    for (let i = 0; i < __classPrivateFieldGet$2(this, _Board_activeMiddlewareObjs, "f").length; i++) {
+      const obj = __classPrivateFieldGet$2(this, _Board_activeMiddlewareObjs, "f")[i];
+      const result = (_a = obj === null || obj === void 0 ? void 0 : obj.pointLeave) === null || _a === void 0 ? void 0 : _a.call(obj, e);
+      if (result === false) {
+        return;
+      }
+    }
   }, _Board_handleHover = function _Board_handleHover2(e) {
     var _a;
     for (let i = 0; i < __classPrivateFieldGet$2(this, _Board_activeMiddlewareObjs, "f").length; i++) {
@@ -6040,6 +6054,15 @@ var __privateMethod = (obj, member, method) => {
     for (let i = 0; i < __classPrivateFieldGet$2(this, _Board_activeMiddlewareObjs, "f").length; i++) {
       const obj = __classPrivateFieldGet$2(this, _Board_activeMiddlewareObjs, "f")[i];
       const result = (_a = obj === null || obj === void 0 ? void 0 : obj.doubleClick) === null || _a === void 0 ? void 0 : _a.call(obj, e);
+      if (result === false) {
+        return;
+      }
+    }
+  }, _Board_handleContextMenu = function _Board_handleContextMenu2(e) {
+    var _a;
+    for (let i = 0; i < __classPrivateFieldGet$2(this, _Board_activeMiddlewareObjs, "f").length; i++) {
+      const obj = __classPrivateFieldGet$2(this, _Board_activeMiddlewareObjs, "f")[i];
+      const result = (_a = obj === null || obj === void 0 ? void 0 : obj.contextMenu) === null || _a === void 0 ? void 0 : _a.call(obj, e);
       if (result === false) {
         return;
       }
@@ -6132,20 +6155,45 @@ var __privateMethod = (obj, member, method) => {
   const CURSOR_DRAG_DEFAULT = `data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACgAAAApCAYAAABHomvIAAAEvUlEQVRYhc2Y20/cVRDHP8v+uKzAWkpDCtZq8BYhJkq8PBoJxgj7I2m0ryaSyFN9IT74pI8+8WJiggRj/APApFkSTGRJ+qKGUiyxbGPEWsUSuVhYC12Wy8+HmeMeYPe3d3WSye/k/M7le+bMzJkZ+J9ToEJreGVYN+vihcytstjQocUlAw0WCSoIVCv3Ae8CXwIt+u8XHVeOG8qLqgAHqAFCQCNwGugCthBJGd7S/tM6LqTzHI5KuqzgaoAHgEvAtwrkG2AG8FzXvep5nue67lX9N6P/PR1/SefXlBtkFXKNDUA/RyX1D9uUbYzOb9D1ygbSQU7eDMxhSSsSiVz3AxiJRK57nuf19/fPad8coqONFCBJPyUOIKc1OvcbgiY9ICDT8+0DHge2gR0gBeyTtviM5HeKAGlrrfMZVwhdAVaAr4F3KNF4gkA9cBbowOc68+3LwDn1Mhdy4/OcYk54nPr6+m54nofruvPa9SFQ6wfQTweNgTwInAGuQWk6mEUvHwb+Au4Dexx7ffK9+0q+CHWIBIOZ9skHYKWfK9tQ8gZoLDjIyWCg3ORY+2T8aYOyg4EaRIFrkCs4QU1NTSvabC20zyIDzuyfkYzEahHX8jHwE/LwXwHeJ4P7KIVIu5ouxFDC+HgLAy4MfEF2v1UpgOezATSiNVf6EvAWsD01NXVtdnb2bk9Pz81sp/q3KIi8t83Ae4DX0tJy0z7t8PDwD4FAYIX/WILVwKMAzc3Nu/agoaGhzmg0ugcsV0hIvlSNoH8IuIiebHJycrls4sotwaxGYvueAPAjEg3jum79yMjIr5WUjFLOxMpBIopWoBN4GfhOJ+4NDg4ulVt6i4uLm7r+BvAscA4fCXrAAfJQJ5Fg8gPgMuCMjo62d3V1LW1sbKRKlpXSxMTEmjZ/5qQrOwHwUAGmkIjiHhJdfKrM/Pz8Y+3t7RvT09Ob5QAYi8X2tbmke2cEZwAaCdoAt5QvIzEbiUSitbe3tyoej++UCnBhYSGkzdu6d1aQxkgOkfwgieQMCeCu8iwSnpNKpcIdHR3BZDJ5UCy4SCSyvL6+/giiSou67wE+eYmhAKKkIaAJUdynkdflNcQF3dFTpooxjmg0aozDAz4DXkB8bxPy1OYM7QzIOuAU0AY8pQu9CrwJ3AK8UCj0RyHgZmZmli1w3wOvAM/oHo1kiZiygbSDh7PAE8DzQA/wBqKnnuM4a2NjY7dygbtw4cICRy31deBFJA09o7eWsU7kJ1KTLJmyRyOSn5zS70fAkwBtbW2/DwwMHHR3d9d3dnY2rK6u7o2Pj2/GYrH9eDzurK2tndM1vwI+QXT7T2BTD5skQz6SCyAcLRoZkGEFGQbeRqpbubK+BPA5MI14h00L3I6Cy2h4+eQbJsKuRa6iQcGFFfB5oBt4DpFsI+Ky7iDBxW3gBhBH/GtC+R7i1lKk3UxRAG2QpvxWr0AbtB3SA5jkx36djH/dVlDbyibN3M8GDvJPyI2PSulixm/u6kZ1OQCaJ/S+tndJX6tvsFBIxcCUdA3vW5ubxMrObc0hDMhd/Rqp5QQHxeW8dubnHGM7tzVv/IECMlxQ/bpcRfRMqaNRheNcUGG9XFWDACfzWs/6Fl3t/xtO//8gpbCORQAAAABJRU5ErkJggg==`;
   const CURSOR_DRAG_ACTIVE = `data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACgAAAAoCAYAAACM/rhtAAAER0lEQVRYhe2YT2hjRRjAf8lL22xsNsm6EWKrSKvuIkIh+O9QRFxEW18KUsoe7FHoRaWCN1FPetOrIHgVKS0q9P5OxaJbodkalgVrtVZjS7Ntd02z6abPw3yzmaT585q+elj2g2HmvZn35jffN/PNNwP35R6XgM/fuif4n+dO2klQvgsaZRc4NJJvoJbHdhrIAkJAN2ADHwFfAw9J3ZoB/b9I0AA6A0SBc0Aa2EVpSqddeZ+QdmfkO+u0gIPSQQR4HfhRQH4AHMDNZDJXXNd1M5nMFalzdB3wJTAOPAD0yEB9066G6wXepVZTd5MpTdporZ6jVqsatmMJoTR3HvgJQ1u2bS+3ArRte9l1XXdsbGyJo1pdBN6Wf3d3ChlAmSQO9LeC8fquQRpDWaerHWSjSr1iu4BkJyOsF9u2s67rkslkluTVxygltAVsJBZqdCngEj5osIlW+4EYytRNF04jeu3vulCT+7QkLH20dEOhumft97pQI4s3+iiRSPwtxVSbd39J8eEGvzFXc1NAs8KSFAZeBt4AHgNeBFDWObkEAne7HAK2gT2gCFQatdca1GbtBj4E3veFprVYVLXXcg4GqM6588BbAMlkcm1qamqzr6/v6ikBet5RgiizJoDPAXdgYGDZXHkzMzPrrk9CdRWngUeAsxxdCzVwpgZ/BigWiz1mo4mJif7jqMajeJrU5hywgGvAej6fvzA0NLThN1Eul9uT4g5VTbYFNKUIfAbsZ7PZvuHh4Wt+As7Ozu5IcY2j219TQB0NV4A7qODgO4CFhYWLg4ODOb8AHccpG4A68m6pRQ1YAQ6A28A+8BXwBcDq6upTqVTquh+AuVyuW4q/opRRaQdZD1gCbgE3ge+BT4HdfD7/ZDwe/z2bzRY6hRsfH1/e3Nx8FDX/sgbgoZfvg6jo4ixqW7oIPA+8CrwHrAJuJBLJd+JaHMf5k6qmPgGeQe1SCenXk0/U21xcIC8AzwGvAJPAEuAmEon1xcXFba9w8/Pz5oqdB14CnpY+oij35km0qwmjwqAU8ISM9hIwBeQA17KsG9PT07+1gxsZGdmgdqW+BjwLDAAPoo4ALU+W9arVwWoIpXp9kouKZpPAO8AwQCwW+2d0dLQ0OTkZSafT0UKhUJ6bm9t2HKeysrIS3tra0g7+KvABUJC0g5rrJdRcbLpImtleRzYashc1P2OSXwbebDVykX3gW+Ab1AHqhuQ3pe6AJlFMO0CoPROHDcio5I8DL1A9C8dQbmod+APYAK4DvwjQnsDdErgyVTfTEaCG1GFYGHXG7TVSo2OkdvhlAflXoHSuNdfStFqaRhEi2kfdprrj6M5LAt0I8EDaaMdflPal48CB95hMr3Bt8h4jD0kyL5E0pN6dysZzW7N2AqjbmhdIZjJvufTOpE19x3g+9s1XJ/ck5tVbfdhu+rxDfLiSO+lFToCjZwrXyH2/0Lwv95z8B1jAqXmDnj4YAAAAAElFTkSuQmCC`;
   const CURSOR_RESIZE_ROTATE = `data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACgAAAAoCAYAAACM/rhtAAAIiklEQVRYhe2YW2yUxxmGn7W96zXGNnZsr2FJHQyYBHNIU1ttAqVUVjlJUAtxQyUXhKgQktUDdSUkuEDtBVJ9UQXRC0RJRblrq/SCIARpFImWQ8VBIZQinJpQYozNyWaxiw/rfXsx3+z+6xNOe9tPGv2nOTzzffPPvDMhSXwJC1nKAXIDV/9ellLAqF1T9o5A2Ry7J5A/Fbh3mUMh8qYJ5kHCQATID6QIkBcAHAVGgKFAStq33EB53/ao5Rm064i9g0CmqcDyrNICYCZQBJTYdaa9j1jelDUwCAwAz4F+ex61DhZauXzr1CDwDHhq1wFg2Do1KWAo0NsCAyoDKoGYXcuBWdZY1PKnzAsDQB/wBOg1yKTVN8vqmoHz6nOgC7gHdFrbCasrNRFgyMCj5qVXgDlANfAaMA/4ir2rMI+MtSHgEdAN9BjsiNVZYR0sNq8+AtqB69Z2MuDBcYA+pAXW0yoDWgTUWXrd8k1l+cBcSxjIIBlPB63G8uUB/8Z57znwAkgGAX1YC4BSK7QIWA7UWwoDJJNJzp49y4ULF2hvb6e7u5tEIkFhYSGVlZXMmzePhoYGNmzYQElJCVZv2tPt7e3s2bOHvr4+9u3bx/r16+PWjg/zQ9x4BEk+5UkqklQt6ZuSdkn6jaRbMhsYGFBbW5uWLVvmp5MpU3V1tVpbW9XV1aWgbdy4MZ2npqbGvx6W9DtJ35e0RFJREDBX0gxJcUnfkPQDScck3fGlz549q7q6ummBjU2xWEzvvfdeGvCtt95Kf6uoqAiyfyBpt6SvSZrlAUOSIpLKJS2X9D1Jv5Z025d69913FQqFJmy8rKxMS5YsUUNDg5YvX67Zs2dPCrpjxw6NjIxoxYoV6XdVVVVBwI8l/UTS1yWVesBcC+18SRsk/ULS33yJtra2CRtramrSiRMn1NXVpWQyKUlKpVJ6+vSpTp48qZ07dyo/P39cua1bt6q+vn4ywL9IapX0tqQyDxiRFDPq3ZL+JCklSadOnRrXwMKFC3X69GlNx65du6aVK1eOqyMYjTGAf50IsNC8t1FSm6TPJOn+/fuKxWJZFb/zzjvjBvx0bO/evQqHwxNG4mUe9MtYMZk5bwHA4cOH6enpSc9BixYt4uTJk5SVlflXfcBN4DFuapoHLPQfz58/z9WrVwmFQsTjceLxOHfv3uUlNlZcpFeMEtzsXg2QSCQ4duxYulQoFOLQoUNBuE7gvAE+x82b/VZHyblz52hsbCSZTL4MCGWrqUECq0gQsBi3ts4B+PDDD3n48GG61OrVq1mzZo1/fGZw54HbVmGV1bMAWPbRRx9NC24CwD7cajLiAXNwIS7ELW3lAGfOnMmqZPv27cHHvwM3gH8AnwH/wnn0C+AuwLZt25g/f/5L4cLhMNu2bfOPnbh1+xkZ9UMebvmKGmQEoLOzM11JQUEBK1eu9I/JAFAPTqnk4hTNY9xS1V5TU1N7+fJlOjo6SKXS+jPLJFFUVMTixYsxmJtW/inOi2nAXDI/C0BWeMvKyojFYv6xz1LCKhnCRSEBPMCFfBaQKi0tfb2+vn5qFzp7AnwCXAM+t45mAUJGfgMwOpoWtIRCWZ/89BB8TuJ+lG5cNEatkXYgjtN+BYG2ktaxBE4U3AP+iRsud3EeHCTwk6Ss0IhvtaKiIk3Q19dHb28vhYWF4H6mYtxwiBrQIE4aPTHgIVzoO3E/TzlOV4YD3/stj9eMPj2xzg4HAYMSPQnkxePxNGB/fz+XLl1iy5Yt4HTeq+aZTtyA9h18Yb33G6aRQBqyDiUNLihmH1q54LAZ9ZHKISPRn1loaGxsJGjHjx8PPi6xtAgnNufgVHcRmf1J2DpTiJsjvYout3c5gQ49Ns89s3fpOdB70I+Hx7iBXrV27VqKi4tJJBKAm3auXLmCDfpy4G3rZSHur/aSPg83BCpx24MFuNUlbnkHcGMubEDdxpG0lBn8AcBBsgfsVysqKti6dStHjhwBYGRkhJaWFs6dO0ckEgGYj9v0xIA71rkha7jUgBYCb5hHGRoaIj8/f4Z5s8jafUpmN/diLBwAkmZKWiipSdKvJN2VpI6ODhUVFWUt7Js2bdLAwMBYLdAt6VNJlyV9IumLsRkOHjyo2tparVixQrdvp2Xmn00YrJI0R05VBRV+GjAiqcoUxA8lnfI1HD16dJz6WLVqla5fvz4tFdPZ2anm5uas8s3Nzf7zp5J+LmmNpFcl5U8GmCupWFKtpO9K+qWkG76W3bt3j4OMRqNqaWnRhQsXNDQ0lAWVTCZ169YtHThwQFVVVePKtrS0+Kw3pgsYso+Vkuol7ZD0W0ldvsHW1tZJZXxtba0aGxvV1NSkdevWaenSpYpGoxPmXb9+vXp6ejzgx5J+ZiGeLSk8GaD34ky5Hd23JP1I0h8kPQmGu7y8/L/aNEUiEe3fv1/Dw8Pp6Es6KqlZ0puSXpHbVU4KiPVglqQFkr4j6aeSfi/pvq/13r172rVrlyorK6cFFo1GtXnzZl25ciU4Ch5J+qOkH0v6tqTXzDk5EwGGlNFjOWQOd8px4vUN4E3cpn2pz/jgwQPef/99Ll68yJ07d+jt7WVwcJBIJEJJSQlz586loaGBTZs2UVdXF5w0OoDLwFWcbPsct6r04+bRLHEYCoWyAD1kBDfHleHmsxrccccS3NFHNV/eenBy6iZwCycMOnHz5wBuDh2nyyY6H0zhFmoF7vtxk+l9q3ieQfrDo8msF7cy3cN56g7ZWnKcep7IxnrQmz+wHKu2K3EKJWbPpWSUTQ4ZtRJc23sC6ZGB9ZM52JwcboIQjzUvZvNxYfeHlyVkZFcBbux6wKA6ShjoM5yM8uH0Xpuy8ekAQuZc2W8P8nEei9p9mMmPgAfJHO0O27e0lHppw9MEDJo//A4eoE91iB48SJ80lFMB/t/+V/sPGZfTmtMFR4EAAAAASUVORK5CYII=`;
+  const EVENT_KEY_CHANGE = "change";
+  const EVENT_KEY_CURSOR = "cursor";
+  const EVENT_KEY_RULER = "ruler";
+  const EVENT_KEY_SCALE = "scale";
+  const EVENT_KEY_SELECT = "select";
+  const EVENT_KEY_CLEAR_SELECT = "clearSelect";
+  const EVENT_KEY_TEXT_EDIT = "textEdit";
+  const EVENT_KEY_TEXT_CHANGE = "textChange";
+  const EVENT_KEY_CONTEXT_MENU = "contextMenu";
+  const EVENT_KEY_SELECT_IN_GROUP = "selectInGroup";
+  const innerEventKeys = {
+    CURSOR: EVENT_KEY_CURSOR,
+    CHANGE: EVENT_KEY_CHANGE,
+    RULER: EVENT_KEY_RULER,
+    SCALE: EVENT_KEY_SCALE,
+    SELECT: EVENT_KEY_SELECT,
+    CLEAR_SELECT: EVENT_KEY_CLEAR_SELECT,
+    TEXT_EDIT: EVENT_KEY_TEXT_EDIT,
+    TEXT_CHANGE: EVENT_KEY_TEXT_CHANGE,
+    CONTEXT_MENU: EVENT_KEY_CONTEXT_MENU,
+    SELECT_IN_GROUP: EVENT_KEY_SELECT_IN_GROUP,
+    SNAP_TO_GRID: EVENT_KEY_SELECT_IN_GROUP
+  };
+  const coreEventKeys = {};
+  Object.keys(innerEventKeys).forEach((keyName) => {
+    Object.defineProperty(coreEventKeys, keyName, {
+      value: innerEventKeys[keyName],
+      writable: false
+    });
+  });
   var __classPrivateFieldSet$1 = function(receiver, state, value, kind, f) {
-    if (kind === "m")
-      throw new TypeError("Private method is not writable");
-    if (kind === "a" && !f)
-      throw new TypeError("Private accessor was defined without a setter");
-    if (typeof state === "function" ? receiver !== state || !f : !state.has(receiver))
-      throw new TypeError("Cannot write private member to an object whose class did not declare it");
+    if (kind === "m") throw new TypeError("Private method is not writable");
+    if (kind === "a" && !f) throw new TypeError("Private accessor was defined without a setter");
+    if (typeof state === "function" ? receiver !== state || !f : !state.has(receiver)) throw new TypeError("Cannot write private member to an object whose class did not declare it");
     return kind === "a" ? f.call(receiver, value) : f ? f.value = value : state.set(receiver, value), value;
   };
   var __classPrivateFieldGet$1 = function(receiver, state, kind, f) {
-    if (kind === "a" && !f)
-      throw new TypeError("Private accessor was defined without a getter");
-    if (typeof state === "function" ? receiver !== state || !f : !state.has(receiver))
-      throw new TypeError("Cannot read private member from an object whose class did not declare it");
+    if (kind === "a" && !f) throw new TypeError("Private accessor was defined without a getter");
+    if (typeof state === "function" ? receiver !== state || !f : !state.has(receiver)) throw new TypeError("Cannot read private member from an object whose class did not declare it");
     return kind === "m" ? f : kind === "a" ? f.call(receiver) : f ? f.value : state.get(receiver);
   };
   var _Cursor_instances, _Cursor_eventHub, _Cursor_container, _Cursor_cursorType, _Cursor_resizeCursorBaseImage, _Cursor_cursorImageMap, _Cursor_init, _Cursor_loadResizeCursorBaseImage, _Cursor_resetCursor, _Cursor_setCursorResize, _Cursor_appendRotateResizeImage;
@@ -6172,7 +6220,7 @@ var __privateMethod = (obj, member, method) => {
   _Cursor_eventHub = /* @__PURE__ */ new WeakMap(), _Cursor_container = /* @__PURE__ */ new WeakMap(), _Cursor_cursorType = /* @__PURE__ */ new WeakMap(), _Cursor_resizeCursorBaseImage = /* @__PURE__ */ new WeakMap(), _Cursor_cursorImageMap = /* @__PURE__ */ new WeakMap(), _Cursor_instances = /* @__PURE__ */ new WeakSet(), _Cursor_init = function _Cursor_init2() {
     const eventHub = __classPrivateFieldGet$1(this, _Cursor_eventHub, "f");
     __classPrivateFieldGet$1(this, _Cursor_instances, "m", _Cursor_resetCursor).call(this, "default");
-    eventHub.on("cursor", (e) => {
+    eventHub.on(coreEventKeys.CURSOR, (e) => {
       var _a;
       if (e.type === "over-element" || !e.type) {
         __classPrivateFieldGet$1(this, _Cursor_instances, "m", _Cursor_resetCursor).call(this, "auto");
@@ -6272,7 +6320,6 @@ var __privateMethod = (obj, member, method) => {
     }
     return key2;
   };
-  const eventChange = "change";
   const key$3 = "SELECT";
   const keyActionType = Symbol(`${key$3}_actionType`);
   const keyResizeType = Symbol(`${key$3}_resizeType`);
@@ -6293,6 +6340,8 @@ var __privateMethod = (obj, member, method) => {
   const resizeControllerBorderWidth = 4;
   const areaBorderWidth = 1;
   const controllerSize$1 = 10;
+  const rotateControllerSize = 20;
+  const rotateControllerPosition = 22;
   const activeColor = "#1973ba";
   const activeAreaColor = "#1976d21c";
   const lockedColor = "#5b5959b5";
@@ -6303,10 +6352,6 @@ var __privateMethod = (obj, member, method) => {
     lockedColor,
     referenceColor
   };
-  const middlewareEventSelect = "@middleware/select";
-  const middlewareEventSelectClear = "@middleware/select-clear";
-  const middlewareEventSelectInGroup = "@middleware/select-in-group";
-  const middlewareEventSnapToGrid = "@middleware/snap-to-grid";
   function drawVertexes(ctx, vertexes, opts) {
     const { borderColor: borderColor2, borderWidth: borderWidth2, background: background2, lineDash } = opts;
     ctx.setLineDash([]);
@@ -6442,19 +6487,21 @@ var __privateMethod = (obj, member, method) => {
     if (!controller) {
       return;
     }
-    const { hideControllers, style } = opts;
+    const { hideControllers, style, rotateControllerPattern, viewSizeInfo } = opts;
+    const { devicePixelRatio = 1 } = viewSizeInfo;
     const { activeColor: activeColor2 } = style;
-    const { elementWrapper, topLeft, topRight, bottomLeft, bottomRight, top, rotate } = controller;
+    const { elementWrapper, topLeft, topRight, bottomLeft, bottomRight, rotate } = controller;
     const wrapperOpts = { borderColor: activeColor2, borderWidth: selectWrapperBorderWidth, background: "transparent", lineDash: [] };
     const ctrlOpts = Object.assign(Object.assign({}, wrapperOpts), { borderWidth: resizeControllerBorderWidth, background: "#FFFFFF" });
     drawVertexes(ctx, calcViewVertexes(elementWrapper, opts), wrapperOpts);
     if (!hideControllers) {
-      drawLine(ctx, calcViewPointSize(top.center, opts), calcViewPointSize(rotate.center, opts), Object.assign(Object.assign({}, ctrlOpts), { borderWidth: 2 }));
       drawVertexes(ctx, calcViewVertexes(topLeft.vertexes, opts), ctrlOpts);
       drawVertexes(ctx, calcViewVertexes(topRight.vertexes, opts), ctrlOpts);
       drawVertexes(ctx, calcViewVertexes(bottomLeft.vertexes, opts), ctrlOpts);
       drawVertexes(ctx, calcViewVertexes(bottomRight.vertexes, opts), ctrlOpts);
-      drawCircleController(ctx, calcViewPointSize(rotate.center, opts), Object.assign(Object.assign({}, ctrlOpts), { size: controllerSize$1, borderWidth: 2 }));
+      drawCircleController(ctx, calcViewPointSize(rotate.center, opts), Object.assign(Object.assign({}, ctrlOpts), { size: rotate.size, borderWidth: 0 }));
+      const rotateCenter = calcViewPointSize(rotate.center, opts);
+      ctx.drawImage(rotateControllerPattern.canvas, 0, 0, rotateControllerPattern.canvas.width / devicePixelRatio, rotateControllerPattern.canvas.height / devicePixelRatio, rotateCenter.x - rotate.size / 2, rotateCenter.y - rotate.size / 2, rotate.size, rotate.size);
     }
   }
   function drawArea(ctx, opts) {
@@ -7168,7 +7215,7 @@ var __privateMethod = (obj, member, method) => {
     });
     const startAngle = limitAngle(angle2);
     const changedRadian = calcRadian(elemCenter, start, end);
-    const endAngle = startAngle + parseRadianToAngle(changedRadian);
+    const endAngle = limitAngle(startAngle + parseRadianToAngle(changedRadian));
     return {
       x: x2,
       y: y2,
@@ -7557,225 +7604,6 @@ var __privateMethod = (obj, member, method) => {
       xLines
     };
   }
-  const middlewareEventTextEdit = "@middleware/text-edit";
-  const middlewareEventTextChange = "@middleware/text-change";
-  const defaultElementDetail = getDefaultElementDetailConfig();
-  const MiddlewareTextEditor = (opts) => {
-    const { eventHub, boardContent, viewer, sharer } = opts;
-    const canvas = boardContent.boardContext.canvas;
-    const textarea = document.createElement("div");
-    textarea.setAttribute("contenteditable", "true");
-    const canvasWrapper = document.createElement("div");
-    const container = opts.container || document.body;
-    const mask = document.createElement("div");
-    let activeElem = null;
-    let activePosition = [];
-    canvasWrapper.appendChild(textarea);
-    canvasWrapper.style.position = "absolute";
-    mask.appendChild(canvasWrapper);
-    mask.style.position = "fixed";
-    mask.style.top = "0";
-    mask.style.bottom = "0";
-    mask.style.left = "0";
-    mask.style.right = "0";
-    mask.style.display = "none";
-    container.appendChild(mask);
-    const showTextArea = (e) => {
-      resetCanvasWrapper();
-      resetTextArea(e);
-      mask.style.display = "block";
-      if (activeElem === null || activeElem === void 0 ? void 0 : activeElem.uuid) {
-        sharer.setActiveOverrideElemenentMap({
-          [activeElem.uuid]: {
-            operations: { invisible: true }
-          }
-        });
-        viewer.drawFrame();
-      }
-    };
-    const hideTextArea = () => {
-      if (activeElem === null || activeElem === void 0 ? void 0 : activeElem.uuid) {
-        const map = sharer.getActiveOverrideElemenentMap();
-        if (map) {
-          delete map[activeElem.uuid];
-        }
-        sharer.setActiveOverrideElemenentMap(map);
-        viewer.drawFrame();
-      }
-      mask.style.display = "none";
-      activeElem = null;
-      activePosition = [];
-    };
-    const getCanvasRect = () => {
-      const clientRect = canvas.getBoundingClientRect();
-      const { left, top, width, height } = clientRect;
-      return { left, top, width, height };
-    };
-    const createBox = (opts2) => {
-      const { size, parent } = opts2;
-      const div = document.createElement("div");
-      const { x: x2, y: y2, w: w2, h: h2 } = size;
-      const angle2 = limitAngle(size.angle || 0);
-      div.style.position = "absolute";
-      div.style.left = `${x2}px`;
-      div.style.top = `${y2}px`;
-      div.style.width = `${w2}px`;
-      div.style.height = `${h2}px`;
-      div.style.transform = `rotate(${angle2}deg)`;
-      parent.appendChild(div);
-      return div;
-    };
-    const resetTextArea = (e) => {
-      const { viewScaleInfo, element, groupQueue } = e;
-      const { scale, offsetTop, offsetLeft } = viewScaleInfo;
-      if (canvasWrapper.children) {
-        Array.from(canvasWrapper.children).forEach((child) => {
-          child.remove();
-        });
-      }
-      let parent = canvasWrapper;
-      for (let i = 0; i < groupQueue.length; i++) {
-        const group = groupQueue[i];
-        const { x: x2, y: y2, w: w2, h: h2 } = group;
-        const angle2 = limitAngle(group.angle || 0);
-        const size = {
-          x: x2 * scale,
-          y: y2 * scale,
-          w: w2 * scale,
-          h: h2 * scale,
-          angle: angle2
-        };
-        if (i === 0) {
-          size.x += offsetLeft;
-          size.y += offsetTop;
-        }
-        parent = createBox({ size, parent });
-      }
-      const detail = Object.assign(Object.assign({}, defaultElementDetail), element.detail);
-      let elemX = element.x * scale + offsetLeft;
-      let elemY = element.y * scale + offsetTop;
-      let elemW = element.w * scale;
-      let elemH = element.h * scale;
-      if (groupQueue.length > 0) {
-        elemX = element.x * scale;
-        elemY = element.y * scale;
-        elemW = element.w * scale;
-        elemH = element.h * scale;
-      }
-      let justifyContent = "center";
-      let alignItems = "center";
-      if (detail.textAlign === "left") {
-        justifyContent = "start";
-      } else if (detail.textAlign === "right") {
-        justifyContent = "end";
-      }
-      if (detail.verticalAlign === "top") {
-        alignItems = "start";
-      } else if (detail.verticalAlign === "bottom") {
-        alignItems = "end";
-      }
-      textarea.style.display = "inline-flex";
-      textarea.style.justifyContent = justifyContent;
-      textarea.style.alignItems = alignItems;
-      textarea.style.position = "absolute";
-      textarea.style.left = `${elemX - 1}px`;
-      textarea.style.top = `${elemY - 1}px`;
-      textarea.style.width = `${elemW + 2}px`;
-      textarea.style.height = `${elemH + 2}px`;
-      textarea.style.transform = `rotate(${limitAngle(element.angle || 0)}deg)`;
-      textarea.style.boxSizing = "border-box";
-      textarea.style.border = "1px solid #1973ba";
-      textarea.style.resize = "none";
-      textarea.style.overflow = "hidden";
-      textarea.style.wordBreak = "break-all";
-      textarea.style.borderRadius = `${(typeof detail.borderRadius === "number" ? detail.borderRadius : 0) * scale}px`;
-      textarea.style.background = `${detail.background || "transparent"}`;
-      textarea.style.color = `${detail.color || "#333333"}`;
-      textarea.style.fontSize = `${detail.fontSize * scale}px`;
-      textarea.style.lineHeight = `${(detail.lineHeight || detail.fontSize) * scale}px`;
-      textarea.style.fontFamily = enhanceFontFamliy(detail.fontFamily);
-      textarea.style.fontWeight = `${detail.fontWeight}`;
-      textarea.style.padding = "0";
-      textarea.style.margin = "0";
-      textarea.style.outline = "none";
-      textarea.innerText = detail.text || "";
-      parent.appendChild(textarea);
-    };
-    const resetCanvasWrapper = () => {
-      const { left, top, width, height } = getCanvasRect();
-      canvasWrapper.style.position = "absolute";
-      canvasWrapper.style.overflow = "hidden";
-      canvasWrapper.style.top = `${top}px`;
-      canvasWrapper.style.left = `${left}px`;
-      canvasWrapper.style.width = `${width}px`;
-      canvasWrapper.style.height = `${height}px`;
-    };
-    mask.addEventListener("click", () => {
-      hideTextArea();
-    });
-    textarea.addEventListener("click", (e) => {
-      e.stopPropagation();
-    });
-    textarea.addEventListener("input", () => {
-      if (activeElem && activePosition) {
-        activeElem.detail.text = textarea.innerText || "";
-        eventHub.trigger(middlewareEventTextChange, {
-          element: {
-            uuid: activeElem.uuid,
-            detail: {
-              text: activeElem.detail.text
-            }
-          },
-          position: [...activePosition || []]
-        });
-        viewer.drawFrame();
-      }
-    });
-    textarea.addEventListener("blur", () => {
-      if (activeElem && activePosition) {
-        eventHub.trigger(middlewareEventTextChange, {
-          element: {
-            uuid: activeElem.uuid,
-            detail: {
-              text: activeElem.detail.text
-            }
-          },
-          position: [...activePosition]
-        });
-      }
-      hideTextArea();
-    });
-    textarea.addEventListener("keydown", (e) => {
-      e.stopPropagation();
-    });
-    textarea.addEventListener("keypress", (e) => {
-      e.stopPropagation();
-    });
-    textarea.addEventListener("keyup", (e) => {
-      e.stopPropagation();
-    });
-    textarea.addEventListener("wheel", (e) => {
-      e.stopPropagation();
-      e.preventDefault();
-    });
-    const textEditCallback = (e) => {
-      var _a;
-      if ((e === null || e === void 0 ? void 0 : e.position) && (e === null || e === void 0 ? void 0 : e.element) && ((_a = e === null || e === void 0 ? void 0 : e.element) === null || _a === void 0 ? void 0 : _a.type) === "text") {
-        activeElem = e.element;
-        activePosition = e.position;
-      }
-      showTextArea(e);
-    };
-    return {
-      name: "@middleware/text-editor",
-      use() {
-        eventHub.on(middlewareEventTextEdit, textEditCallback);
-      },
-      disuse() {
-        eventHub.off(middlewareEventTextEdit, textEditCallback);
-      }
-    };
-  };
   const key$2 = "LAYOUT_SELECT";
   const keyLayoutActionType = Symbol(`${key$2}_layoutActionType`);
   const keyLayoutControlType = Symbol(`${key$2}_layoutControlType`);
@@ -7936,7 +7764,7 @@ var __privateMethod = (obj, member, method) => {
           }
           if (layoutControlType) {
             sharer.setSharedStorage(keyLayoutControlType, layoutControlType);
-            eventHub.trigger(middlewareEventSelectClear, {});
+            eventHub.trigger(coreEventKeys.CLEAR_SELECT);
             return layoutControlType;
           }
         }
@@ -7947,7 +7775,7 @@ var __privateMethod = (obj, member, method) => {
       if (isBusy === true) {
         return;
       }
-      eventHub.trigger("cursor", {
+      eventHub.trigger(coreEventKeys.CURSOR, {
         type: controlType ? `resize-${controlType}` : controlType,
         groupQueue: [],
         element: getLayoutSize()
@@ -8121,7 +7949,7 @@ var __privateMethod = (obj, member, method) => {
         const layoutControlType = sharer.getSharedStorage(keyLayoutControlType);
         const data = sharer.getActiveStorage("data");
         if (data && layoutActionType === "resize" && layoutControlType) {
-          eventHub.trigger(eventChange, {
+          eventHub.trigger(coreEventKeys.CHANGE, {
             type: "changeLayout",
             data
           });
@@ -8161,6 +7989,429 @@ var __privateMethod = (obj, member, method) => {
       }
     };
   };
+  const createIconRotate = (opts) => {
+    const iconRotate = {
+      uuid: createUUID(),
+      type: "path",
+      x: 0,
+      y: 0,
+      w: 200,
+      h: 200,
+      detail: Object.assign({ commands: [
+        {
+          type: "M",
+          params: [512, 0]
+        },
+        {
+          type: "c",
+          params: [282.8, 0, 512, 229.2, 512, 512]
+        },
+        {
+          type: "s",
+          params: [-229.2, 512, -512, 512]
+        },
+        {
+          type: "S",
+          params: [0, 794.8, 0, 512, 229.2, 0, 512, 0]
+        },
+        {
+          type: "z",
+          params: []
+        },
+        {
+          type: "m",
+          params: [309.8, 253.8]
+        },
+        {
+          type: "c",
+          params: [0, -10.5, -6.5, -19.8, -15.7, -23.8, -9.7, -4, -21, -2, -28.2, 5.6]
+        },
+        {
+          type: "l",
+          params: [-52.5, 52]
+        },
+        {
+          type: "c",
+          params: [
+            -56.9,
+            -53.7,
+            -133.9,
+            -85.5,
+            -213.4,
+            -85.5,
+            -170.7,
+            0,
+            -309.8,
+            139.2,
+            -309.8,
+            309.8,
+            0,
+            170.6,
+            139.2,
+            309.8,
+            309.8,
+            309.8,
+            92.4,
+            0,
+            179.5,
+            -40.8,
+            238.4,
+            -111.8,
+            4,
+            -5.2,
+            4,
+            -12.9,
+            -0.8,
+            -17.3
+          ]
+        },
+        {
+          type: "L",
+          params: [694.3, 637]
+        },
+        {
+          type: "c",
+          params: [
+            -2.8,
+            -2.4,
+            -6.5,
+            -3.6,
+            -10.1,
+            -3.6,
+            -3.6,
+            0.4,
+            -7.3,
+            2,
+            -9.3,
+            4.8,
+            -39.5,
+            51.2,
+            -98.8,
+            80.3,
+            -163,
+            80.3,
+            -113.8,
+            0,
+            -206.5,
+            -92.8,
+            -206.5,
+            -206.5,
+            0,
+            -113.8,
+            92.8,
+            -206.5,
+            206.5,
+            -206.5,
+            52.8,
+            0,
+            102.9,
+            20.2,
+            140.8,
+            55.3
+          ]
+        },
+        {
+          type: "L",
+          params: [597, 416.5]
+        },
+        {
+          type: "c",
+          params: [-7.7, 7.3, -9.7, 18.6, -5.6, 27.9, 4, 9.7, 13.3, 16.1, 23.8, 16.1]
+        },
+        {
+          type: "H",
+          params: [796]
+        },
+        {
+          type: "c",
+          params: [14.1, 0, 25.8, -11.7, 25.8, -25.8]
+        },
+        {
+          type: "V",
+          params: [253.8]
+        },
+        {
+          type: "z",
+          params: []
+        }
+      ], fill: "#2c2c2c", stroke: "transparent", strokeWidth: 0, originX: 0, originY: 0, originW: 1024, originH: 1024, opacity: 1 }, opts)
+    };
+    return iconRotate;
+  };
+  function createRotateControllerPattern(opts) {
+    const { fill, devicePixelRatio } = opts;
+    const iconRotate = createIconRotate({ fill });
+    const { w: w2, h: h2 } = iconRotate;
+    const context2d = createOffscreenContext2D({
+      width: w2,
+      height: h2,
+      devicePixelRatio
+    });
+    drawElement(context2d, iconRotate, {
+      loader: void 0,
+      viewScaleInfo: {
+        scale: 1,
+        offsetTop: 0,
+        offsetBottom: 0,
+        offsetLeft: 0,
+        offsetRight: 0
+      },
+      viewSizeInfo: {
+        width: w2,
+        height: h2,
+        devicePixelRatio,
+        contextWidth: w2,
+        contextHeight: h2
+      },
+      parentElementSize: {
+        x: 0,
+        y: 0,
+        w: w2,
+        h: h2
+      },
+      parentOpacity: 1
+    });
+    return context2d;
+  }
+  const fontFamily$1 = "monospace";
+  function drawSizeInfoText(ctx, opts) {
+    const { point, rotateCenter, angle: angle2, text: text2, style, fontSize: fontSize2, lineHeight: lineHeight2 } = opts;
+    const { textColor: textColor2, textBackground } = style;
+    rotateByCenter(ctx, angle2, rotateCenter, () => {
+      ctx.$setFont({
+        fontWeight: "300",
+        fontSize: fontSize2,
+        fontFamily: fontFamily$1
+      });
+      const padding = (lineHeight2 - fontSize2) / 2;
+      const textWidth = ctx.$undoPixelRatio(ctx.measureText(text2).width);
+      const bgStart = {
+        x: point.x - textWidth / 2 - padding,
+        y: point.y
+      };
+      const bgEnd = {
+        x: bgStart.x + textWidth + padding * 2,
+        y: bgStart.y + fontSize2 + padding
+      };
+      const textStart = {
+        x: point.x - textWidth / 2,
+        y: point.y
+      };
+      ctx.setLineDash([]);
+      ctx.fillStyle = textBackground;
+      ctx.beginPath();
+      ctx.moveTo(bgStart.x, bgStart.y);
+      ctx.lineTo(bgEnd.x, bgStart.y);
+      ctx.lineTo(bgEnd.x, bgEnd.y);
+      ctx.lineTo(bgStart.x, bgEnd.y);
+      ctx.closePath();
+      ctx.fill();
+      ctx.fillStyle = textColor2;
+      ctx.textBaseline = "top";
+      ctx.fillText(text2, textStart.x, textStart.y + padding);
+    });
+  }
+  function drawPositionInfoText(ctx, opts) {
+    const { point, rotateCenter, angle: angle2, text: text2, style, fontSize: fontSize2, lineHeight: lineHeight2 } = opts;
+    const { textBackground, textColor: textColor2 } = style;
+    rotateByCenter(ctx, angle2, rotateCenter, () => {
+      ctx.$setFont({
+        fontWeight: "300",
+        fontSize: fontSize2,
+        fontFamily: fontFamily$1
+      });
+      const padding = (lineHeight2 - fontSize2) / 2;
+      const textWidth = ctx.$undoPixelRatio(ctx.measureText(text2).width);
+      const bgStart = {
+        x: point.x,
+        y: point.y
+      };
+      const bgEnd = {
+        x: bgStart.x + textWidth + padding * 2,
+        y: bgStart.y + fontSize2 + padding
+      };
+      const textStart = {
+        x: point.x + padding,
+        y: point.y
+      };
+      ctx.setLineDash([]);
+      ctx.fillStyle = textBackground;
+      ctx.beginPath();
+      ctx.moveTo(bgStart.x, bgStart.y);
+      ctx.lineTo(bgEnd.x, bgStart.y);
+      ctx.lineTo(bgEnd.x, bgEnd.y);
+      ctx.lineTo(bgStart.x, bgEnd.y);
+      ctx.closePath();
+      ctx.fill();
+      ctx.fillStyle = textColor2;
+      ctx.textBaseline = "top";
+      ctx.fillText(text2, textStart.x, textStart.y + padding);
+    });
+  }
+  function drawAngleInfoText(ctx, opts) {
+    const { point, rotateCenter, angle: angle2, text: text2, style, fontSize: fontSize2, lineHeight: lineHeight2 } = opts;
+    const { textBackground, textColor: textColor2 } = style;
+    rotateByCenter(ctx, angle2, rotateCenter, () => {
+      ctx.$setFont({
+        fontWeight: "300",
+        fontSize: fontSize2,
+        fontFamily: fontFamily$1
+      });
+      const padding = (lineHeight2 - fontSize2) / 2;
+      const textWidth = ctx.$undoPixelRatio(ctx.measureText(text2).width);
+      const bgStart = {
+        x: point.x,
+        y: point.y
+      };
+      const bgEnd = {
+        x: bgStart.x + textWidth + padding * 2,
+        y: bgStart.y + fontSize2 + padding
+      };
+      const textStart = {
+        x: point.x + padding,
+        y: point.y
+      };
+      ctx.setLineDash([]);
+      ctx.fillStyle = textBackground;
+      ctx.beginPath();
+      ctx.moveTo(bgStart.x, bgStart.y);
+      ctx.lineTo(bgEnd.x, bgStart.y);
+      ctx.lineTo(bgEnd.x, bgEnd.y);
+      ctx.lineTo(bgStart.x, bgEnd.y);
+      ctx.closePath();
+      ctx.fill();
+      ctx.fillStyle = textColor2;
+      ctx.textBaseline = "top";
+      ctx.fillText(text2, textStart.x, textStart.y + padding);
+    });
+  }
+  const infoBackground = "#1973bac6";
+  const infoTextColor = "#ffffff";
+  const MIDDLEWARE_INTERNAL_EVENT_SHOW_INFO_ANGLE = "@middleware/internal-event/show-info-angle";
+  const defaltStyle = {
+    textBackground: infoBackground,
+    textColor: infoTextColor
+  };
+  const infoFontSize = 10;
+  const infoLineHeight = 16;
+  const MiddlewareInfo = (opts, config) => {
+    const { boardContent, calculator, eventHub } = opts;
+    const { overlayContext } = boardContent;
+    const innerConfig = Object.assign(Object.assign({}, defaltStyle), config);
+    const { textBackground, textColor: textColor2 } = innerConfig;
+    const style = {
+      textBackground,
+      textColor: textColor2
+    };
+    let showAngleInfo = true;
+    const showInfoAngleCallback = ({ show }) => {
+      showAngleInfo = show;
+    };
+    return {
+      name: "@middleware/info",
+      use() {
+        eventHub.on(MIDDLEWARE_INTERNAL_EVENT_SHOW_INFO_ANGLE, showInfoAngleCallback);
+      },
+      disuse() {
+        eventHub.off(MIDDLEWARE_INTERNAL_EVENT_SHOW_INFO_ANGLE, showInfoAngleCallback);
+      },
+      beforeDrawFrame({ snapshot }) {
+        const { sharedStore } = snapshot;
+        const selectedElementList = sharedStore[keySelectedElementList];
+        const actionType = sharedStore[keyActionType];
+        const groupQueue = sharedStore[keyGroupQueue] || [];
+        if (selectedElementList.length === 1) {
+          const elem = selectedElementList[0];
+          if (elem && ["select", "drag", "resize"].includes(actionType)) {
+            const viewScaleInfo = getViewScaleInfoFromSnapshot(snapshot);
+            const viewSizeInfo = getViewSizeInfoFromSnapshot(snapshot);
+            const { x: x2, y: y2, w: w2, h: h2, angle: angle2 } = elem;
+            const totalGroupQueue = [
+              ...groupQueue,
+              ...[
+                {
+                  uuid: createUUID(),
+                  x: x2,
+                  y: y2,
+                  w: w2,
+                  h: h2,
+                  angle: angle2,
+                  type: "group",
+                  detail: { children: [] }
+                }
+              ]
+            ];
+            const calcOpts = { viewScaleInfo, viewSizeInfo };
+            const rangeRectInfo = calculator.calcViewRectInfoFromOrigin(elem.uuid, calcOpts);
+            let totalAngle = 0;
+            totalGroupQueue.forEach((group) => {
+              totalAngle += group.angle || 0;
+            });
+            const totalRadian = parseAngleToRadian(limitAngle(0 - totalAngle));
+            if (rangeRectInfo) {
+              const elemCenter = rangeRectInfo === null || rangeRectInfo === void 0 ? void 0 : rangeRectInfo.center;
+              const rectInfo = {
+                topLeft: rotatePoint(elemCenter, rangeRectInfo.topLeft, totalRadian),
+                topRight: rotatePoint(elemCenter, rangeRectInfo.topRight, totalRadian),
+                bottomRight: rotatePoint(elemCenter, rangeRectInfo.bottomRight, totalRadian),
+                bottomLeft: rotatePoint(elemCenter, rangeRectInfo.bottomLeft, totalRadian),
+                center: rotatePoint(elemCenter, rangeRectInfo.center, totalRadian),
+                top: rotatePoint(elemCenter, rangeRectInfo.top, totalRadian),
+                right: rotatePoint(elemCenter, rangeRectInfo.right, totalRadian),
+                bottom: rotatePoint(elemCenter, rangeRectInfo.bottom, totalRadian),
+                left: rotatePoint(elemCenter, rangeRectInfo.left, totalRadian)
+              };
+              const x3 = formatNumber(elem.x, { decimalPlaces: 2 });
+              const y3 = formatNumber(elem.y, { decimalPlaces: 2 });
+              const w3 = formatNumber(elem.w, { decimalPlaces: 2 });
+              const h3 = formatNumber(elem.h, { decimalPlaces: 2 });
+              const xyText = `${formatNumber(x3, { decimalPlaces: 0 })},${formatNumber(y3, { decimalPlaces: 0 })}`;
+              const whText = `${formatNumber(w3, { decimalPlaces: 0 })}x${formatNumber(h3, { decimalPlaces: 0 })}`;
+              const angleText = `${formatNumber(elem.angle || 0, { decimalPlaces: 0 })}°`;
+              drawSizeInfoText(overlayContext, {
+                point: {
+                  x: rectInfo.bottom.x,
+                  y: rectInfo.bottom.y + infoFontSize
+                },
+                rotateCenter: rectInfo.center,
+                angle: totalAngle,
+                text: whText,
+                fontSize: infoFontSize,
+                lineHeight: infoLineHeight,
+                style
+              });
+              drawPositionInfoText(overlayContext, {
+                point: {
+                  x: rectInfo.topLeft.x,
+                  y: rectInfo.topLeft.y - infoFontSize * 2
+                },
+                rotateCenter: rectInfo.center,
+                angle: totalAngle,
+                text: xyText,
+                fontSize: infoFontSize,
+                lineHeight: infoLineHeight,
+                style
+              });
+              if (showAngleInfo) {
+                drawAngleInfoText(overlayContext, {
+                  point: {
+                    x: rectInfo.top.x + infoFontSize + 4,
+                    y: rectInfo.top.y - infoFontSize * 2 - 18
+                  },
+                  rotateCenter: rectInfo.center,
+                  angle: totalAngle,
+                  text: angleText,
+                  fontSize: infoFontSize,
+                  lineHeight: infoLineHeight,
+                  style
+                });
+              }
+            }
+          }
+        }
+      }
+    };
+  };
   const MiddlewareSelector = (opts, config) => {
     const innerConfig = Object.assign(Object.assign({}, defaultStyle$3), config);
     const { activeColor: activeColor2, activeAreaColor: activeAreaColor2, lockedColor: lockedColor2, referenceColor: referenceColor2 } = innerConfig;
@@ -8171,6 +8422,11 @@ var __privateMethod = (obj, member, method) => {
     let moveOriginalStartPoint = null;
     let moveOriginalStartElementSize = null;
     let inBusyMode = null;
+    let hasChangedData = null;
+    const rotateControllerPattern = createRotateControllerPattern({
+      fill: style.activeColor,
+      devicePixelRatio: sharer.getActiveViewSizeInfo().devicePixelRatio
+    });
     sharer.setSharedStorage(keyActionType, null);
     sharer.setSharedStorage(keyEnableSnapToGrid, true);
     const getActiveElements = () => {
@@ -8205,23 +8461,34 @@ var __privateMethod = (obj, member, method) => {
       }
       sharer.setSharedStorage(keyHoverElementVertexes, vertexes);
     };
-    const updateSelectedElementList = (list, opts2) => {
-      var _a;
-      sharer.setSharedStorage(keySelectedElementList, list);
+    const updateSelectedElemenetController = () => {
+      const list = sharer.getSharedStorage(keySelectedElementList);
       if (list.length === 1) {
         const controller = calcElementSizeController(list[0], {
           groupQueue: sharer.getSharedStorage(keyGroupQueue),
           controllerSize: controllerSize$1,
-          viewScaleInfo: sharer.getActiveViewScaleInfo()
+          viewScaleInfo: sharer.getActiveViewScaleInfo(),
+          rotateControllerPosition,
+          rotateControllerSize
         });
         sharer.setSharedStorage(keySelectedElementController, controller);
+      }
+    };
+    const updateSelectedElementList = (list, opts2) => {
+      var _a;
+      sharer.setSharedStorage(keySelectedElementList, list);
+      if (list.length === 1) {
+        updateSelectedElemenetController();
         sharer.setSharedStorage(keySelectedElementPosition, getElementPositionFromList(list[0].uuid, ((_a = sharer.getActiveStorage("data")) === null || _a === void 0 ? void 0 : _a.elements) || []));
       } else {
         sharer.setSharedStorage(keySelectedElementController, null);
         sharer.setSharedStorage(keySelectedElementPosition, []);
       }
       if ((opts2 === null || opts2 === void 0 ? void 0 : opts2.triggerEvent) === true) {
-        eventHub.trigger(middlewareEventSelect, { uuids: list.map((elem) => elem.uuid) });
+        const uuids = list.map((elem) => elem.uuid);
+        const data = sharer.getActiveStorage("data");
+        const positionMap = getElementPositionMapFromList(uuids, (data === null || data === void 0 ? void 0 : data.elements) || []);
+        eventHub.trigger(coreEventKeys.SELECT, { uuids, positions: list.map((elem) => [...positionMap[elem.uuid]]) });
       }
     };
     const pointTargetBaseOptions = () => {
@@ -8254,7 +8521,7 @@ var __privateMethod = (obj, member, method) => {
       sharer.setSharedStorage(keyIsMoving, null);
     };
     clear();
-    const selectCallback = ({ uuids, positions }) => {
+    const selectCallback = ({ uuids = [], positions }) => {
       let elements = [];
       const actionType = sharer.getSharedStorage(keyActionType);
       const data = sharer.getActiveStorage("data");
@@ -8291,16 +8558,16 @@ var __privateMethod = (obj, member, method) => {
     return {
       name: "@middleware/selector",
       use() {
-        eventHub.on(middlewareEventSelect, selectCallback);
-        eventHub.on(middlewareEventSelectClear, selectClearCallback);
-        eventHub.on(middlewareEventSelectInGroup, selectInGroupCallback);
-        eventHub.on(middlewareEventSnapToGrid, setSnapToSnapCallback);
+        eventHub.on(coreEventKeys.SELECT, selectCallback);
+        eventHub.on(coreEventKeys.CLEAR_SELECT, selectClearCallback);
+        eventHub.on(coreEventKeys.SELECT_IN_GROUP, selectInGroupCallback);
+        eventHub.on(coreEventKeys.SNAP_TO_GRID, setSnapToSnapCallback);
       },
       disuse() {
-        eventHub.off(middlewareEventSelect, selectCallback);
-        eventHub.off(middlewareEventSelectClear, selectClearCallback);
-        eventHub.off(middlewareEventSelectInGroup, selectInGroupCallback);
-        eventHub.off(middlewareEventSnapToGrid, setSnapToSnapCallback);
+        eventHub.off(coreEventKeys.SELECT, selectCallback);
+        eventHub.off(coreEventKeys.CLEAR_SELECT, selectClearCallback);
+        eventHub.off(coreEventKeys.SELECT_IN_GROUP, selectInGroupCallback);
+        eventHub.off(coreEventKeys.SNAP_TO_GRID, setSnapToSnapCallback);
       },
       hover: (e) => {
         var _a, _b, _c, _d, _e;
@@ -8314,7 +8581,7 @@ var __privateMethod = (obj, member, method) => {
           }
           const cursor = target2.type;
           if (inBusyMode === null) {
-            eventHub.trigger("cursor", {
+            eventHub.trigger(coreEventKeys.CURSOR, {
               type: cursor,
               groupQueue: target2.groupQueue,
               element: target2.elements[0]
@@ -8404,15 +8671,14 @@ var __privateMethod = (obj, member, method) => {
             groupQueue
           })) {
             const target2 = getPointTarget(e.point, pointTargetBaseOptions());
-            if (((_a = target2 === null || target2 === void 0 ? void 0 : target2.elements) === null || _a === void 0 ? void 0 : _a.length) === 1 && ((_c = (_b = target2.elements[0]) === null || _b === void 0 ? void 0 : _b.operations) === null || _c === void 0 ? void 0 : _c.locked) === true) {
-              return;
-            } else {
-              updateHoverElement(null);
-            }
+            const isLockedElement2 = ((_a = target2 === null || target2 === void 0 ? void 0 : target2.elements) === null || _a === void 0 ? void 0 : _a.length) === 1 && ((_c = (_b = target2.elements[0]) === null || _b === void 0 ? void 0 : _b.operations) === null || _c === void 0 ? void 0 : _c.locked) === true;
+            updateHoverElement(null);
             if (((_d = target2 === null || target2 === void 0 ? void 0 : target2.elements) === null || _d === void 0 ? void 0 : _d.length) === 1) {
               moveOriginalStartElementSize = getElementSize(target2 === null || target2 === void 0 ? void 0 : target2.elements[0]);
             }
-            if (target2.type === "over-element" && ((_e = target2 === null || target2 === void 0 ? void 0 : target2.elements) === null || _e === void 0 ? void 0 : _e.length) === 1) {
+            if (isLockedElement2 === true) {
+              clear();
+            } else if (target2.type === "over-element" && ((_e = target2 === null || target2 === void 0 ? void 0 : target2.elements) === null || _e === void 0 ? void 0 : _e.length) === 1) {
               updateSelectedElementList([target2.elements[0]], { triggerEvent: true });
               sharer.setSharedStorage(keyActionType, "drag");
             } else if ((_f = target2.type) === null || _f === void 0 ? void 0 : _f.startsWith("resize-")) {
@@ -8434,27 +8700,23 @@ var __privateMethod = (obj, member, method) => {
         });
         const target = getPointTarget(e.point, Object.assign(Object.assign({}, pointTargetBaseOptions()), { areaSize: listAreaSize, groupQueue: [] }));
         const isLockedElement = ((_g = target === null || target === void 0 ? void 0 : target.elements) === null || _g === void 0 ? void 0 : _g.length) === 1 && ((_j = (_h = target.elements[0]) === null || _h === void 0 ? void 0 : _h.operations) === null || _j === void 0 ? void 0 : _j.locked) === true;
-        if (!isLockedElement) {
-          updateHoverElement(null);
-        }
+        updateHoverElement(null);
         if (((_k = target === null || target === void 0 ? void 0 : target.elements) === null || _k === void 0 ? void 0 : _k.length) === 1) {
           moveOriginalStartElementSize = getElementSize(target === null || target === void 0 ? void 0 : target.elements[0]);
         }
-        if (!isLockedElement) {
-          if (target.type === "list-area") {
-            sharer.setSharedStorage(keyActionType, "drag-list");
-          } else if (target.type === "over-element" && ((_l = target === null || target === void 0 ? void 0 : target.elements) === null || _l === void 0 ? void 0 : _l.length) === 1) {
-            updateSelectedElementList([target.elements[0]], { triggerEvent: true });
-            sharer.setSharedStorage(keyActionType, "drag");
-          } else if ((_m = target.type) === null || _m === void 0 ? void 0 : _m.startsWith("resize-")) {
-            sharer.setSharedStorage(keyResizeType, target.type);
-            sharer.setSharedStorage(keyActionType, "resize");
-          } else {
-            clear();
-            sharer.setSharedStorage(keyActionType, "area");
-            sharer.setSharedStorage(keyAreaStart, e.point);
-            updateSelectedElementList([], { triggerEvent: true });
-          }
+        if (isLockedElement === true) {
+          clear();
+          sharer.setSharedStorage(keyActionType, "area");
+          sharer.setSharedStorage(keyAreaStart, e.point);
+          updateSelectedElementList([], { triggerEvent: true });
+        } else if (target.type === "list-area") {
+          sharer.setSharedStorage(keyActionType, "drag-list");
+        } else if (target.type === "over-element" && ((_l = target === null || target === void 0 ? void 0 : target.elements) === null || _l === void 0 ? void 0 : _l.length) === 1) {
+          updateSelectedElementList([target.elements[0]], { triggerEvent: true });
+          sharer.setSharedStorage(keyActionType, "drag");
+        } else if ((_m = target.type) === null || _m === void 0 ? void 0 : _m.startsWith("resize-")) {
+          sharer.setSharedStorage(keyResizeType, target.type);
+          sharer.setSharedStorage(keyActionType, "resize");
         } else {
           clear();
           sharer.setSharedStorage(keyActionType, "area");
@@ -8479,7 +8741,9 @@ var __privateMethod = (obj, member, method) => {
         const groupQueue = sharer.getSharedStorage(keyGroupQueue);
         const enableSnapToGrid = sharer.getSharedStorage(keyEnableSnapToGrid);
         if (actionType === "drag") {
+          hasChangedData = true;
           inBusyMode = "drag";
+          eventHub.trigger(MIDDLEWARE_INTERNAL_EVENT_SHOW_INFO_ANGLE, { show: false });
           if (data && (elems === null || elems === void 0 ? void 0 : elems.length) === 1 && moveOriginalStartElementSize && originalStart && end && ((_b = (_a = elems[0]) === null || _a === void 0 ? void 0 : _a.operations) === null || _b === void 0 ? void 0 : _b.locked) !== true) {
             const { moveX, moveY } = calcMoveInGroup(originalStart, end, groupQueue);
             let totalMoveX = calculator.toGridNum(moveX / scale);
@@ -8522,6 +8786,7 @@ var __privateMethod = (obj, member, method) => {
           }
           viewer.drawFrame();
         } else if (actionType === "drag-list") {
+          hasChangedData = true;
           inBusyMode = "drag-list";
           if (data && originalStart && start && end && (elems === null || elems === void 0 ? void 0 : elems.length) > 1) {
             const moveX = (end.x - start.x) / scale;
@@ -8549,6 +8814,7 @@ var __privateMethod = (obj, member, method) => {
           viewer.drawFrame();
         } else if (actionType === "resize") {
           if (data && (elems === null || elems === void 0 ? void 0 : elems.length) === 1 && originalStart && moveOriginalStartElementSize && (resizeType === null || resizeType === void 0 ? void 0 : resizeType.startsWith("resize-"))) {
+            hasChangedData = true;
             inBusyMode = "resize";
             const pointGroupQueue = [];
             groupQueue.forEach((group) => {
@@ -8635,6 +8901,9 @@ var __privateMethod = (obj, member, method) => {
         prevPoint = null;
         moveOriginalStartPoint = null;
         moveOriginalStartElementSize = null;
+        if (actionType === "drag") {
+          eventHub.trigger(MIDDLEWARE_INTERNAL_EVENT_SHOW_INFO_ANGLE, { show: true });
+        }
         if (actionType === "resize" && resizeType) {
           sharer.setSharedStorage(keyResizeType, null);
           needDrawFrame = true;
@@ -8689,18 +8958,21 @@ var __privateMethod = (obj, member, method) => {
           }
           if (data && ["drag", "drag-list", "drag-list-end", "resize"].includes(actionType)) {
             let type = "dragElement";
-            eventHub.trigger(eventChange, { data, type, selectedElements, hoverElement });
+            if (hasChangedData) {
+              eventHub.trigger(coreEventKeys.CHANGE, { data, type, selectedElements, hoverElement });
+              hasChangedData = false;
+            }
           }
           viewer.drawFrame();
         };
         finalDrawFrame();
       },
       pointLeave() {
-        prevPoint = null;
-        moveOriginalStartPoint = null;
-        moveOriginalStartElementSize = null;
-        clear();
-        viewer.drawFrame();
+        inBusyMode = null;
+        sharer.setSharedStorage(keyResizeType, null);
+        eventHub.trigger(coreEventKeys.CURSOR, {
+          type: "default"
+        });
       },
       doubleClick(e) {
         var _a, _b, _c, _d, _e, _f, _g, _h;
@@ -8721,7 +8993,7 @@ var __privateMethod = (obj, member, method) => {
             return;
           }
         } else if (target.elements.length === 1 && ((_d = target.elements[0]) === null || _d === void 0 ? void 0 : _d.type) === "text" && !((_f = (_e = target.elements[0]) === null || _e === void 0 ? void 0 : _e.operations) === null || _f === void 0 ? void 0 : _f.invisible)) {
-          eventHub.trigger(middlewareEventTextEdit, {
+          eventHub.trigger(coreEventKeys.TEXT_EDIT, {
             element: target.elements[0],
             groupQueue: sharer.getSharedStorage(keyGroupQueue) || [],
             position: getElementPositionFromList((_g = target.elements[0]) === null || _g === void 0 ? void 0 : _g.uuid, ((_h = sharer.getActiveStorage("data")) === null || _h === void 0 ? void 0 : _h.elements) || []),
@@ -8729,6 +9001,48 @@ var __privateMethod = (obj, member, method) => {
           });
         }
         sharer.setSharedStorage(keyActionType, null);
+      },
+      wheel() {
+        updateSelectedElemenetController();
+      },
+      wheelScale() {
+        updateSelectedElemenetController();
+      },
+      contextMenu: (e) => {
+        var _a, _b, _c, _d, _e, _f, _g, _h;
+        const groupQueue = sharer.getSharedStorage(keyGroupQueue);
+        if ((groupQueue === null || groupQueue === void 0 ? void 0 : groupQueue.length) > 0) {
+          if (isPointInViewActiveGroup(e.point, {
+            ctx: overlayContext,
+            viewScaleInfo: sharer.getActiveViewScaleInfo(),
+            viewSizeInfo: sharer.getActiveViewSizeInfo(),
+            groupQueue
+          })) {
+            const target2 = getPointTarget(e.point, pointTargetBaseOptions());
+            if (((_a = target2 === null || target2 === void 0 ? void 0 : target2.elements) === null || _a === void 0 ? void 0 : _a.length) === 1 && ((_c = (_b = target2.elements[0]) === null || _b === void 0 ? void 0 : _b.operations) === null || _c === void 0 ? void 0 : _c.locked) !== true) {
+              clear();
+              updateSelectedElementList([target2.elements[0]], { triggerEvent: true });
+              viewer.drawFrame();
+            } else if (!((_d = target2 === null || target2 === void 0 ? void 0 : target2.elements) === null || _d === void 0 ? void 0 : _d.length)) {
+              clear();
+            }
+          }
+          return;
+        }
+        const listAreaSize = calcSelectedElementsArea(getActiveElements(), {
+          viewScaleInfo: sharer.getActiveViewScaleInfo(),
+          viewSizeInfo: sharer.getActiveViewSizeInfo(),
+          calculator
+        });
+        const target = getPointTarget(e.point, Object.assign(Object.assign({}, pointTargetBaseOptions()), { areaSize: listAreaSize, groupQueue: [] }));
+        if (((_e = target === null || target === void 0 ? void 0 : target.elements) === null || _e === void 0 ? void 0 : _e.length) === 1 && ((_g = (_f = target.elements[0]) === null || _f === void 0 ? void 0 : _f.operations) === null || _g === void 0 ? void 0 : _g.locked) !== true) {
+          clear();
+          updateSelectedElementList([target.elements[0]], { triggerEvent: true });
+          viewer.drawFrame();
+          return;
+        } else if (!((_h = target === null || target === void 0 ? void 0 : target.elements) === null || _h === void 0 ? void 0 : _h.length)) {
+          clear();
+        }
       },
       beforeDrawFrame({ snapshot }) {
         var _a;
@@ -8749,27 +9063,25 @@ var __privateMethod = (obj, member, method) => {
         const isMoving = sharedStore[keyIsMoving];
         const enableSnapToGrid = sharedStore[keyEnableSnapToGrid];
         const drawBaseOpts = { calculator, viewScaleInfo, viewSizeInfo, style };
-        const selectedElementController = elem ? calcElementSizeController(elem, {
-          groupQueue,
-          controllerSize: 10,
-          viewScaleInfo
-        }) : null;
-        const isLocked = !!((_a = hoverElement === null || hoverElement === void 0 ? void 0 : hoverElement.operations) === null || _a === void 0 ? void 0 : _a.locked);
+        const selectedElementController = sharedStore[keySelectedElementController];
+        const isHoverLocked = !!((_a = hoverElement === null || hoverElement === void 0 ? void 0 : hoverElement.operations) === null || _a === void 0 ? void 0 : _a.locked);
         if ((groupQueue === null || groupQueue === void 0 ? void 0 : groupQueue.length) > 0) {
           drawGroupQueueVertexesWrappers(overlayContext, groupQueueVertexesList, drawBaseOpts);
           if (hoverElement && actionType !== "drag") {
-            if (isLocked) {
-              drawLockedVertexesWrapper(overlayContext, hoverElementVertexes, Object.assign(Object.assign({}, drawBaseOpts), { controller: calcElementSizeController(hoverElement, {
-                groupQueue,
-                controllerSize: 10,
-                viewScaleInfo
-              }), style }));
+            if (isHoverLocked) {
+              drawLockedVertexesWrapper(overlayContext, hoverElementVertexes, Object.assign(Object.assign({}, drawBaseOpts), { controller: selectedElementController, style }));
             } else {
               drawHoverVertexesWrapper(overlayContext, hoverElementVertexes, drawBaseOpts);
             }
           }
-          if (!isLocked && elem && ["select", "drag", "resize"].includes(actionType)) {
-            drawSelectedElementControllersVertexes(overlayContext, selectedElementController, Object.assign(Object.assign({}, drawBaseOpts), { element: elem, calculator, hideControllers: !!isMoving && actionType === "drag", style }));
+          if (elem && ["select", "drag", "resize"].includes(actionType)) {
+            drawSelectedElementControllersVertexes(overlayContext, selectedElementController, Object.assign(Object.assign({}, drawBaseOpts), {
+              element: elem,
+              calculator,
+              hideControllers: !!isMoving && actionType === "drag",
+              rotateControllerPattern,
+              style
+            }));
             if (actionType === "drag") {
               if (enableSnapToGrid === true) {
                 const referenceInfo = calcReferenceInfo(elem.uuid, {
@@ -8794,18 +9106,20 @@ var __privateMethod = (obj, member, method) => {
           }
         } else {
           if (hoverElement && actionType !== "drag") {
-            if (isLocked) {
-              drawLockedVertexesWrapper(overlayContext, hoverElementVertexes, Object.assign(Object.assign({}, drawBaseOpts), { controller: calcElementSizeController(hoverElement, {
-                groupQueue,
-                controllerSize: 10,
-                viewScaleInfo
-              }), style }));
+            if (isHoverLocked) {
+              drawLockedVertexesWrapper(overlayContext, hoverElementVertexes, Object.assign(Object.assign({}, drawBaseOpts), { controller: selectedElementController, style }));
             } else {
               drawHoverVertexesWrapper(overlayContext, hoverElementVertexes, drawBaseOpts);
             }
           }
-          if (!isLocked && elem && ["select", "drag", "resize"].includes(actionType)) {
-            drawSelectedElementControllersVertexes(overlayContext, selectedElementController, Object.assign(Object.assign({}, drawBaseOpts), { element: elem, calculator, hideControllers: !!isMoving && actionType === "drag", style }));
+          if (elem && ["select", "drag", "resize"].includes(actionType)) {
+            drawSelectedElementControllersVertexes(overlayContext, selectedElementController, Object.assign(Object.assign({}, drawBaseOpts), {
+              element: elem,
+              calculator,
+              hideControllers: !!isMoving && actionType === "drag",
+              rotateControllerPattern,
+              style
+            }));
             if (actionType === "drag") {
               if (enableSnapToGrid === true) {
                 const referenceInfo = calcReferenceInfo(elem.uuid, {
@@ -9115,7 +9429,7 @@ var __privateMethod = (obj, member, method) => {
             sharer.setSharedStorage(keyHoverXThumbRect, false);
             sharer.setSharedStorage(keyHoverYThumbRect, true);
           }
-          eventHub.trigger("cursor", { type: "default" });
+          eventHub.trigger(coreEventKeys.CURSOR, { type: "default" });
           return false;
         }
         sharer.setSharedStorage(keyHoverXThumbRect, false);
@@ -9162,7 +9476,6 @@ var __privateMethod = (obj, member, method) => {
       }
     };
   };
-  const middlewareEventScale = "@middleware/scale";
   const MiddlewareScaler = (opts) => {
     const { viewer, sharer, eventHub } = opts;
     const maxScale = 50;
@@ -9185,7 +9498,7 @@ var __privateMethod = (obj, member, method) => {
         viewer.scroll({ moveX, moveY });
         viewer.drawFrame();
         const scaleNum = formatNumber(scale);
-        eventHub.trigger(middlewareEventScale, { scale: scaleNum });
+        eventHub.trigger(coreEventKeys.SCALE, { scale: scaleNum });
       }
     };
   };
@@ -9193,7 +9506,7 @@ var __privateMethod = (obj, member, method) => {
   const fontSize = 10;
   const fontWeight = 100;
   const lineSize = 1;
-  const fontFamily$1 = "monospace";
+  const fontFamily = "monospace";
   const background = "#FFFFFFA8";
   const borderColor = "#00000080";
   const scaleColor = "#000000";
@@ -9312,7 +9625,7 @@ var __privateMethod = (obj, member, method) => {
         ctx.$setFont({
           fontWeight,
           fontSize,
-          fontFamily: fontFamily$1
+          fontFamily
         });
         ctx.fillText(`${item.num}`, item.position + fontStart, fontStart);
       }
@@ -9349,7 +9662,7 @@ var __privateMethod = (obj, member, method) => {
           ctx.$setFont({
             fontWeight,
             fontSize,
-            fontFamily: fontFamily$1
+            fontFamily
           });
           ctx.fillText(numText, fontStart + fontSize, item.position + fontStart);
         });
@@ -9463,7 +9776,6 @@ var __privateMethod = (obj, member, method) => {
       ctx.fill();
     }
   }
-  const middlewareEventRuler = "@middleware/show-ruler";
   const MiddlewareRuler = (opts, config) => {
     const { boardContent, viewer, eventHub, calculator } = opts;
     const { overlayContext, underlayContext } = boardContent;
@@ -9494,10 +9806,10 @@ var __privateMethod = (obj, member, method) => {
     return {
       name: "@middleware/ruler",
       use() {
-        eventHub.on(middlewareEventRuler, rulerCallback);
+        eventHub.on(coreEventKeys.RULER, rulerCallback);
       },
       disuse() {
-        eventHub.off(middlewareEventRuler, rulerCallback);
+        eventHub.off(coreEventKeys.RULER, rulerCallback);
       },
       beforeDrawFrame: ({ snapshot }) => {
         if (show === true) {
@@ -9523,6 +9835,225 @@ var __privateMethod = (obj, member, method) => {
       }
     };
   };
+  const defaultElementDetail = getDefaultElementDetailConfig();
+  const MiddlewareTextEditor = (opts) => {
+    const { eventHub, boardContent, viewer, sharer } = opts;
+    const canvas = boardContent.boardContext.canvas;
+    const textarea = document.createElement("div");
+    textarea.setAttribute("contenteditable", "true");
+    const canvasWrapper = document.createElement("div");
+    const container = opts.container || document.body;
+    const mask = document.createElement("div");
+    let activeElem = null;
+    let activePosition = [];
+    const id = `idraw-middleware-text-editor-${Math.random().toString(26).substring(2)}`;
+    mask.setAttribute("id", id);
+    canvasWrapper.appendChild(textarea);
+    canvasWrapper.style.position = "absolute";
+    mask.appendChild(canvasWrapper);
+    mask.style.position = "fixed";
+    mask.style.top = "0";
+    mask.style.bottom = "0";
+    mask.style.left = "0";
+    mask.style.right = "0";
+    mask.style.display = "none";
+    container.appendChild(mask);
+    const showTextArea = (e) => {
+      resetCanvasWrapper();
+      resetTextArea(e);
+      mask.style.display = "block";
+      if (activeElem === null || activeElem === void 0 ? void 0 : activeElem.uuid) {
+        sharer.setActiveOverrideElemenentMap({
+          [activeElem.uuid]: {
+            operations: { invisible: true }
+          }
+        });
+        viewer.drawFrame();
+      }
+    };
+    const hideTextArea = () => {
+      if (activeElem === null || activeElem === void 0 ? void 0 : activeElem.uuid) {
+        const map = sharer.getActiveOverrideElemenentMap();
+        if (map) {
+          delete map[activeElem.uuid];
+        }
+        sharer.setActiveOverrideElemenentMap(map);
+        viewer.drawFrame();
+      }
+      mask.style.display = "none";
+      activeElem = null;
+      activePosition = [];
+    };
+    const getCanvasRect = () => {
+      const clientRect = canvas.getBoundingClientRect();
+      const { left, top, width, height } = clientRect;
+      return { left, top, width, height };
+    };
+    const createBox = (opts2) => {
+      const { size, parent } = opts2;
+      const div = document.createElement("div");
+      const { x: x2, y: y2, w: w2, h: h2 } = size;
+      const angle2 = limitAngle(size.angle || 0);
+      div.style.position = "absolute";
+      div.style.left = `${x2}px`;
+      div.style.top = `${y2}px`;
+      div.style.width = `${w2}px`;
+      div.style.height = `${h2}px`;
+      div.style.transform = `rotate(${angle2}deg)`;
+      parent.appendChild(div);
+      return div;
+    };
+    const resetTextArea = (e) => {
+      const { viewScaleInfo, element, groupQueue } = e;
+      const { scale, offsetTop, offsetLeft } = viewScaleInfo;
+      if (canvasWrapper.children) {
+        Array.from(canvasWrapper.children).forEach((child) => {
+          child.remove();
+        });
+      }
+      let parent = canvasWrapper;
+      for (let i = 0; i < groupQueue.length; i++) {
+        const group = groupQueue[i];
+        const { x: x2, y: y2, w: w2, h: h2 } = group;
+        const angle2 = limitAngle(group.angle || 0);
+        const size = {
+          x: x2 * scale,
+          y: y2 * scale,
+          w: w2 * scale,
+          h: h2 * scale,
+          angle: angle2
+        };
+        if (i === 0) {
+          size.x += offsetLeft;
+          size.y += offsetTop;
+        }
+        parent = createBox({ size, parent });
+      }
+      const detail = Object.assign(Object.assign({}, defaultElementDetail), element.detail);
+      let elemX = element.x * scale + offsetLeft;
+      let elemY = element.y * scale + offsetTop;
+      let elemW = element.w * scale;
+      let elemH = element.h * scale;
+      if (groupQueue.length > 0) {
+        elemX = element.x * scale;
+        elemY = element.y * scale;
+        elemW = element.w * scale;
+        elemH = element.h * scale;
+      }
+      let justifyContent = "center";
+      let alignItems = "center";
+      if (detail.textAlign === "left") {
+        justifyContent = "start";
+      } else if (detail.textAlign === "right") {
+        justifyContent = "end";
+      }
+      if (detail.verticalAlign === "top") {
+        alignItems = "start";
+      } else if (detail.verticalAlign === "bottom") {
+        alignItems = "end";
+      }
+      textarea.style.display = "inline-flex";
+      textarea.style.justifyContent = justifyContent;
+      textarea.style.alignItems = alignItems;
+      textarea.style.position = "absolute";
+      textarea.style.left = `${elemX - 1}px`;
+      textarea.style.top = `${elemY - 1}px`;
+      textarea.style.width = `${elemW + 2}px`;
+      textarea.style.height = `${elemH + 2}px`;
+      textarea.style.transform = `rotate(${limitAngle(element.angle || 0)}deg)`;
+      textarea.style.boxSizing = "border-box";
+      textarea.style.border = "1px solid #1973ba";
+      textarea.style.resize = "none";
+      textarea.style.overflow = "hidden";
+      textarea.style.wordBreak = "break-all";
+      textarea.style.borderRadius = `${(typeof detail.borderRadius === "number" ? detail.borderRadius : 0) * scale}px`;
+      textarea.style.background = `${detail.background || "transparent"}`;
+      textarea.style.color = `${detail.color || "#333333"}`;
+      textarea.style.fontSize = `${detail.fontSize * scale}px`;
+      textarea.style.lineHeight = `${(detail.lineHeight || detail.fontSize) * scale}px`;
+      textarea.style.fontFamily = enhanceFontFamliy(detail.fontFamily);
+      textarea.style.fontWeight = `${detail.fontWeight}`;
+      textarea.style.padding = "0";
+      textarea.style.margin = "0";
+      textarea.style.outline = "none";
+      textarea.innerText = detail.text || "";
+      parent.appendChild(textarea);
+    };
+    const resetCanvasWrapper = () => {
+      const { left, top, width, height } = getCanvasRect();
+      canvasWrapper.style.position = "absolute";
+      canvasWrapper.style.overflow = "hidden";
+      canvasWrapper.style.top = `${top}px`;
+      canvasWrapper.style.left = `${left}px`;
+      canvasWrapper.style.width = `${width}px`;
+      canvasWrapper.style.height = `${height}px`;
+    };
+    mask.addEventListener("click", () => {
+      hideTextArea();
+    });
+    textarea.addEventListener("click", (e) => {
+      e.stopPropagation();
+    });
+    textarea.addEventListener("input", () => {
+      if (activeElem && activePosition) {
+        activeElem.detail.text = textarea.innerText || "";
+        eventHub.trigger(coreEventKeys.TEXT_CHANGE, {
+          element: {
+            uuid: activeElem.uuid,
+            detail: {
+              text: activeElem.detail.text
+            }
+          },
+          position: [...activePosition || []]
+        });
+        viewer.drawFrame();
+      }
+    });
+    textarea.addEventListener("blur", () => {
+      if (activeElem && activePosition) {
+        eventHub.trigger(coreEventKeys.TEXT_CHANGE, {
+          element: {
+            uuid: activeElem.uuid,
+            detail: {
+              text: activeElem.detail.text
+            }
+          },
+          position: [...activePosition]
+        });
+      }
+      hideTextArea();
+    });
+    textarea.addEventListener("keydown", (e) => {
+      e.stopPropagation();
+    });
+    textarea.addEventListener("keypress", (e) => {
+      e.stopPropagation();
+    });
+    textarea.addEventListener("keyup", (e) => {
+      e.stopPropagation();
+    });
+    textarea.addEventListener("wheel", (e) => {
+      e.stopPropagation();
+      e.preventDefault();
+    });
+    const textEditCallback = (e) => {
+      var _a;
+      if ((e === null || e === void 0 ? void 0 : e.position) && (e === null || e === void 0 ? void 0 : e.element) && ((_a = e === null || e === void 0 ? void 0 : e.element) === null || _a === void 0 ? void 0 : _a.type) === "text") {
+        activeElem = e.element;
+        activePosition = e.position;
+      }
+      showTextArea(e);
+    };
+    return {
+      name: "@middleware/text-editor",
+      use() {
+        eventHub.on(coreEventKeys.TEXT_EDIT, textEditCallback);
+      },
+      disuse() {
+        eventHub.off(coreEventKeys.TEXT_EDIT, textEditCallback);
+      }
+    };
+  };
   const key = "DRAG";
   const keyPrevPoint = Symbol(`${key}_prevPoint`);
   const MiddlewareDragger = (opts) => {
@@ -9534,7 +10065,7 @@ var __privateMethod = (obj, member, method) => {
         if (isDragging === true) {
           return;
         }
-        eventHub.trigger("cursor", {
+        eventHub.trigger(coreEventKeys.CURSOR, {
           type: "drag-default"
         });
       },
@@ -9542,7 +10073,7 @@ var __privateMethod = (obj, member, method) => {
         const { point } = e;
         sharer.setSharedStorage(keyPrevPoint, point);
         isDragging = true;
-        eventHub.trigger("cursor", {
+        eventHub.trigger(coreEventKeys.CURSOR, {
           type: "drag-active"
         });
       },
@@ -9560,254 +10091,62 @@ var __privateMethod = (obj, member, method) => {
       pointEnd() {
         isDragging = false;
         sharer.setSharedStorage(keyPrevPoint, null);
-        eventHub.trigger("cursor", {
+        eventHub.trigger(coreEventKeys.CURSOR, {
           type: "drag-default"
         });
       }
     };
   };
-  const fontFamily = "monospace";
-  function drawSizeInfoText(ctx, opts) {
-    const { point, rotateCenter, angle: angle2, text: text2, style, fontSize: fontSize2, lineHeight: lineHeight2 } = opts;
-    const { textColor: textColor2, textBackground } = style;
-    rotateByCenter(ctx, angle2, rotateCenter, () => {
-      ctx.$setFont({
-        fontWeight: "300",
-        fontSize: fontSize2,
-        fontFamily
-      });
-      const padding = (lineHeight2 - fontSize2) / 2;
-      const textWidth = ctx.$undoPixelRatio(ctx.measureText(text2).width);
-      const bgStart = {
-        x: point.x - textWidth / 2 - padding,
-        y: point.y
-      };
-      const bgEnd = {
-        x: bgStart.x + textWidth + padding * 2,
-        y: bgStart.y + fontSize2 + padding
-      };
-      const textStart = {
-        x: point.x - textWidth / 2,
-        y: point.y
-      };
-      ctx.setLineDash([]);
-      ctx.fillStyle = textBackground;
-      ctx.beginPath();
-      ctx.moveTo(bgStart.x, bgStart.y);
-      ctx.lineTo(bgEnd.x, bgStart.y);
-      ctx.lineTo(bgEnd.x, bgEnd.y);
-      ctx.lineTo(bgStart.x, bgEnd.y);
-      ctx.closePath();
-      ctx.fill();
-      ctx.fillStyle = textColor2;
-      ctx.textBaseline = "top";
-      ctx.fillText(text2, textStart.x, textStart.y + padding);
-    });
-  }
-  function drawPositionInfoText(ctx, opts) {
-    const { point, rotateCenter, angle: angle2, text: text2, style, fontSize: fontSize2, lineHeight: lineHeight2 } = opts;
-    const { textBackground, textColor: textColor2 } = style;
-    rotateByCenter(ctx, angle2, rotateCenter, () => {
-      ctx.$setFont({
-        fontWeight: "300",
-        fontSize: fontSize2,
-        fontFamily
-      });
-      const padding = (lineHeight2 - fontSize2) / 2;
-      const textWidth = ctx.$undoPixelRatio(ctx.measureText(text2).width);
-      const bgStart = {
-        x: point.x,
-        y: point.y
-      };
-      const bgEnd = {
-        x: bgStart.x + textWidth + padding * 2,
-        y: bgStart.y + fontSize2 + padding
-      };
-      const textStart = {
-        x: point.x + padding,
-        y: point.y
-      };
-      ctx.setLineDash([]);
-      ctx.fillStyle = textBackground;
-      ctx.beginPath();
-      ctx.moveTo(bgStart.x, bgStart.y);
-      ctx.lineTo(bgEnd.x, bgStart.y);
-      ctx.lineTo(bgEnd.x, bgEnd.y);
-      ctx.lineTo(bgStart.x, bgEnd.y);
-      ctx.closePath();
-      ctx.fill();
-      ctx.fillStyle = textColor2;
-      ctx.textBaseline = "top";
-      ctx.fillText(text2, textStart.x, textStart.y + padding);
-    });
-  }
-  function drawAngleInfoText(ctx, opts) {
-    const { point, rotateCenter, angle: angle2, text: text2, style, fontSize: fontSize2, lineHeight: lineHeight2 } = opts;
-    const { textBackground, textColor: textColor2 } = style;
-    rotateByCenter(ctx, angle2, rotateCenter, () => {
-      ctx.$setFont({
-        fontWeight: "300",
-        fontSize: fontSize2,
-        fontFamily
-      });
-      const padding = (lineHeight2 - fontSize2) / 2;
-      const textWidth = ctx.$undoPixelRatio(ctx.measureText(text2).width);
-      const bgStart = {
-        x: point.x,
-        y: point.y
-      };
-      const bgEnd = {
-        x: bgStart.x + textWidth + padding * 2,
-        y: bgStart.y + fontSize2 + padding
-      };
-      const textStart = {
-        x: point.x + padding,
-        y: point.y
-      };
-      ctx.setLineDash([]);
-      ctx.fillStyle = textBackground;
-      ctx.beginPath();
-      ctx.moveTo(bgStart.x, bgStart.y);
-      ctx.lineTo(bgEnd.x, bgStart.y);
-      ctx.lineTo(bgEnd.x, bgEnd.y);
-      ctx.lineTo(bgStart.x, bgEnd.y);
-      ctx.closePath();
-      ctx.fill();
-      ctx.fillStyle = textColor2;
-      ctx.textBaseline = "top";
-      ctx.fillText(text2, textStart.x, textStart.y + padding);
-    });
-  }
-  const infoBackground = "#1973bac6";
-  const infoTextColor = "#ffffff";
-  const defaltStyle = {
-    textBackground: infoBackground,
-    textColor: infoTextColor
-  };
-  const infoFontSize = 10;
-  const infoLineHeight = 16;
-  const MiddlewareInfo = (opts, config) => {
-    const { boardContent, calculator } = opts;
-    const { overlayContext } = boardContent;
-    const innerConfig = Object.assign(Object.assign({}, defaltStyle), config);
-    const { textBackground, textColor: textColor2 } = innerConfig;
-    const style = {
-      textBackground,
-      textColor: textColor2
+  const MiddlewarePointer = (opts) => {
+    const { boardContent, eventHub, sharer } = opts;
+    const canvas = boardContent.boardContext.canvas;
+    const container = opts.container || document.body;
+    const id = `idraw-middleware-pointer-${Math.random().toString(26).substring(2)}`;
+    const getCanvasRect = () => {
+      const clientRect = canvas.getBoundingClientRect();
+      const { left, top, width, height } = clientRect;
+      return { left, top, width, height };
     };
+    const contextMenuPointer = document.createElement("div");
+    contextMenuPointer.setAttribute("id", id);
+    contextMenuPointer.style.position = "fixed";
+    contextMenuPointer.style.top = "0";
+    contextMenuPointer.style.bottom = "unset";
+    contextMenuPointer.style.left = "0";
+    contextMenuPointer.style.right = "unset";
+    container.appendChild(contextMenuPointer);
     return {
-      name: "@middleware/info",
-      beforeDrawFrame({ snapshot }) {
-        var _a;
-        const { sharedStore } = snapshot;
-        const selectedElementList = sharedStore[keySelectedElementList];
-        const hoverElement = sharedStore[keyHoverElement];
-        const actionType = sharedStore[keyActionType];
-        const groupQueue = sharedStore[keyGroupQueue] || [];
-        if (selectedElementList.length === 1 && !((_a = hoverElement === null || hoverElement === void 0 ? void 0 : hoverElement.operations) === null || _a === void 0 ? void 0 : _a.locked)) {
-          const elem = selectedElementList[0];
-          if (elem && ["select", "drag", "resize"].includes(actionType)) {
-            const viewScaleInfo = getViewScaleInfoFromSnapshot(snapshot);
-            const viewSizeInfo = getViewSizeInfoFromSnapshot(snapshot);
-            const { x: x2, y: y2, w: w2, h: h2, angle: angle2 } = elem;
-            const totalGroupQueue = [
-              ...groupQueue,
-              ...[
-                {
-                  uuid: createUUID(),
-                  x: x2,
-                  y: y2,
-                  w: w2,
-                  h: h2,
-                  angle: angle2,
-                  type: "group",
-                  detail: { children: [] }
-                }
-              ]
-            ];
-            const calcOpts = { viewScaleInfo, viewSizeInfo };
-            const rangeRectInfo = calculator.calcViewRectInfoFromOrigin(elem.uuid, calcOpts);
-            let totalAngle = 0;
-            totalGroupQueue.forEach((group) => {
-              totalAngle += group.angle || 0;
-            });
-            const totalRadian = parseAngleToRadian(limitAngle(0 - totalAngle));
-            if (rangeRectInfo) {
-              const elemCenter = rangeRectInfo === null || rangeRectInfo === void 0 ? void 0 : rangeRectInfo.center;
-              const rectInfo = {
-                topLeft: rotatePoint(elemCenter, rangeRectInfo.topLeft, totalRadian),
-                topRight: rotatePoint(elemCenter, rangeRectInfo.topRight, totalRadian),
-                bottomRight: rotatePoint(elemCenter, rangeRectInfo.bottomRight, totalRadian),
-                bottomLeft: rotatePoint(elemCenter, rangeRectInfo.bottomLeft, totalRadian),
-                center: rotatePoint(elemCenter, rangeRectInfo.center, totalRadian),
-                top: rotatePoint(elemCenter, rangeRectInfo.top, totalRadian),
-                right: rotatePoint(elemCenter, rangeRectInfo.right, totalRadian),
-                bottom: rotatePoint(elemCenter, rangeRectInfo.bottom, totalRadian),
-                left: rotatePoint(elemCenter, rangeRectInfo.left, totalRadian)
-              };
-              const x3 = formatNumber(elem.x, { decimalPlaces: 2 });
-              const y3 = formatNumber(elem.y, { decimalPlaces: 2 });
-              const w3 = formatNumber(elem.w, { decimalPlaces: 2 });
-              const h3 = formatNumber(elem.h, { decimalPlaces: 2 });
-              const xyText = `${formatNumber(x3, { decimalPlaces: 0 })},${formatNumber(y3, { decimalPlaces: 0 })}`;
-              const whText = `${formatNumber(w3, { decimalPlaces: 0 })}x${formatNumber(h3, { decimalPlaces: 0 })}`;
-              const angleText = `${formatNumber(elem.angle || 0, { decimalPlaces: 0 })}°`;
-              drawSizeInfoText(overlayContext, {
-                point: {
-                  x: rectInfo.bottom.x,
-                  y: rectInfo.bottom.y + infoFontSize
-                },
-                rotateCenter: rectInfo.center,
-                angle: totalAngle,
-                text: whText,
-                fontSize: infoFontSize,
-                lineHeight: infoLineHeight,
-                style
-              });
-              drawPositionInfoText(overlayContext, {
-                point: {
-                  x: rectInfo.topLeft.x,
-                  y: rectInfo.topLeft.y - infoFontSize * 2
-                },
-                rotateCenter: rectInfo.center,
-                angle: totalAngle,
-                text: xyText,
-                fontSize: infoFontSize,
-                lineHeight: infoLineHeight,
-                style
-              });
-              drawAngleInfoText(overlayContext, {
-                point: {
-                  x: rectInfo.top.x + infoFontSize,
-                  y: rectInfo.top.y - infoFontSize * 2
-                },
-                rotateCenter: rectInfo.center,
-                angle: totalAngle,
-                text: angleText,
-                fontSize: infoFontSize,
-                lineHeight: infoLineHeight,
-                style
-              });
-            }
-          }
-        }
+      name: "@middleware/pointer",
+      use() {
+      },
+      disuse() {
+      },
+      pointStart(e) {
+      },
+      pointEnd() {
+      },
+      contextMenu(e) {
+        const { point } = e;
+        const { left, top } = getCanvasRect();
+        contextMenuPointer.style.left = `${left + point.x}px`;
+        contextMenuPointer.style.top = `${top + point.y}px`;
+        const selectedElements = sharer.getSharedStorage(keySelectedElementList);
+        eventHub.trigger(coreEventKeys.CONTEXT_MENU, {
+          pointerContainer: contextMenuPointer,
+          selectedElements: selectedElements || []
+        });
       }
     };
   };
   var __classPrivateFieldSet = function(receiver, state, value, kind, f) {
-    if (kind === "m")
-      throw new TypeError("Private method is not writable");
-    if (kind === "a" && !f)
-      throw new TypeError("Private accessor was defined without a setter");
-    if (typeof state === "function" ? receiver !== state || !f : !state.has(receiver))
-      throw new TypeError("Cannot write private member to an object whose class did not declare it");
+    if (kind === "m") throw new TypeError("Private method is not writable");
+    if (kind === "a" && !f) throw new TypeError("Private accessor was defined without a setter");
+    if (typeof state === "function" ? receiver !== state || !f : !state.has(receiver)) throw new TypeError("Cannot write private member to an object whose class did not declare it");
     return kind === "a" ? f.call(receiver, value) : f ? f.value = value : state.set(receiver, value), value;
   };
   var __classPrivateFieldGet = function(receiver, state, kind, f) {
-    if (kind === "a" && !f)
-      throw new TypeError("Private accessor was defined without a getter");
-    if (typeof state === "function" ? receiver !== state || !f : !state.has(receiver))
-      throw new TypeError("Cannot read private member from an object whose class did not declare it");
+    if (kind === "a" && !f) throw new TypeError("Private accessor was defined without a getter");
+    if (typeof state === "function" ? receiver !== state || !f : !state.has(receiver)) throw new TypeError("Cannot read private member from an object whose class did not declare it");
     return kind === "m" ? f : kind === "a" ? f.call(receiver) : f ? f.value : state.get(receiver);
   };
   var _Core_instances, _Core_board, _Core_canvas, _Core_container, _Core_initContainer;
@@ -10044,23 +10383,6 @@ var __privateMethod = (obj, member, method) => {
       devicePixelRatio
     };
   }
-  const idrawEventChange = eventChange;
-  const innerEventKeys = {
-    change: idrawEventChange,
-    ruler: middlewareEventRuler,
-    scale: middlewareEventScale,
-    select: middlewareEventSelect,
-    clearSelect: middlewareEventSelectClear,
-    textEdit: middlewareEventTextEdit,
-    textChange: middlewareEventTextChange
-  };
-  const eventKeys = {};
-  Object.keys(innerEventKeys).forEach((keyName) => {
-    Object.defineProperty(eventKeys, keyName, {
-      value: innerEventKeys[keyName],
-      writable: false
-    });
-  });
   function isValidMode(mode) {
     return ["select", "drag", "readOnly"].includes(mode);
   }
@@ -10104,6 +10426,7 @@ var __privateMethod = (obj, member, method) => {
     } else if (enableInfo === false) {
       core.disuse(MiddlewareInfo);
     }
+    core.use(MiddlewarePointer);
   }
   function changeMode(mode, core, store) {
     let enableScale = false;
@@ -10154,10 +10477,9 @@ var __privateMethod = (obj, member, method) => {
   }
   class iDraw2 {
     constructor(mount, options) {
-      __privateAdd(this, _init);
-      __privateAdd(this, _setFeature);
-      __privateAdd(this, _core, void 0);
-      __privateAdd(this, _opts, void 0);
+      __privateAdd(this, _iDraw_instances);
+      __privateAdd(this, _core);
+      __privateAdd(this, _opts);
       __privateAdd(this, _store, new Store({
         defaultStorage: getDefaultStorage()
       }));
@@ -10167,7 +10489,7 @@ var __privateMethod = (obj, member, method) => {
       const core = new Core(mount, { width, height, devicePixelRatio, createCustomContext2D });
       __privateSet(this, _core, core);
       __privateSet(this, _opts, opts);
-      __privateMethod(this, _init, init_fn).call(this);
+      __privateMethod(this, _iDraw_instances, init_fn).call(this);
     }
     reset(opts) {
       const core = __privateGet(this, _core);
@@ -10187,15 +10509,15 @@ var __privateMethod = (obj, member, method) => {
       core.refresh();
     }
     enable(feat) {
-      __privateMethod(this, _setFeature, setFeature_fn).call(this, feat, true);
+      __privateMethod(this, _iDraw_instances, setFeature_fn).call(this, feat, true);
     }
     disable(feat) {
-      __privateMethod(this, _setFeature, setFeature_fn).call(this, feat, false);
+      __privateMethod(this, _iDraw_instances, setFeature_fn).call(this, feat, false);
     }
     setData(data) {
       const core = __privateGet(this, _core);
       core.setData(data);
-      core.trigger(eventKeys.change, { data, type: "setData" });
+      core.trigger(coreEventKeys.CHANGE, { data, type: "setData" });
     }
     getData(opts) {
       const data = __privateGet(this, _core).getData();
@@ -10241,16 +10563,16 @@ var __privateMethod = (obj, member, method) => {
       this.selectElements([uuid]);
     }
     selectElements(uuids) {
-      this.trigger(eventKeys.select, { uuids });
+      this.trigger(coreEventKeys.SELECT, { uuids });
     }
     selectElementByPosition(position) {
       this.selectElementsByPositions([position]);
     }
     selectElementsByPositions(positions) {
-      this.trigger(eventKeys.select, { positions });
+      this.trigger(coreEventKeys.SELECT, { positions });
     }
     cancelElements() {
-      this.trigger(eventKeys.clearSelect, { uuids: [] });
+      this.trigger(coreEventKeys.CLEAR_SELECT, { uuids: [] });
     }
     createElement(type, opts) {
       const { viewScaleInfo, viewSizeInfo } = __privateGet(this, _core).getViewInfo();
@@ -10269,7 +10591,7 @@ var __privateMethod = (obj, member, method) => {
       updateElementInList(element.uuid, element, data.elements);
       core.setData(data);
       core.refresh();
-      core.trigger(eventKeys.change, { data, type: "updateElement" });
+      core.trigger(coreEventKeys.CHANGE, { data, type: "updateElement" });
     }
     addElement(element, opts) {
       var _a;
@@ -10283,7 +10605,7 @@ var __privateMethod = (obj, member, method) => {
       }
       core.setData(data);
       core.refresh();
-      core.trigger(eventKeys.change, { data, type: "addElement" });
+      core.trigger(coreEventKeys.CHANGE, { data, type: "addElement" });
       return data;
     }
     deleteElement(uuid) {
@@ -10292,7 +10614,7 @@ var __privateMethod = (obj, member, method) => {
       deleteElementInList(uuid, data.elements);
       core.setData(data);
       core.refresh();
-      core.trigger(eventKeys.change, { data, type: "deleteElement" });
+      core.trigger(coreEventKeys.CHANGE, { data, type: "deleteElement" });
     }
     moveElement(uuid, to) {
       const core = __privateGet(this, _core);
@@ -10302,7 +10624,7 @@ var __privateMethod = (obj, member, method) => {
       data.elements = list;
       core.setData(data);
       core.refresh();
-      core.trigger(eventKeys.change, { data, type: "moveElement" });
+      core.trigger(coreEventKeys.CHANGE, { data, type: "moveElement" });
     }
     async getImageBlobURL(opts) {
       const data = this.getData() || { elements: [] };
@@ -10346,13 +10668,12 @@ var __privateMethod = (obj, member, method) => {
   _core = new WeakMap();
   _opts = new WeakMap();
   _store = new WeakMap();
-  _init = new WeakSet();
+  _iDraw_instances = new WeakSet();
   init_fn = function() {
     const core = __privateGet(this, _core);
     const store = __privateGet(this, _store);
     changeMode("select", core, store);
   };
-  _setFeature = new WeakSet();
   setFeature_fn = function(feat, status) {
     const store = __privateGet(this, _store);
     if (["ruler", "scroll", "scale", "info"].includes(feat)) {
@@ -10366,15 +10687,16 @@ var __privateMethod = (obj, member, method) => {
       runMiddlewares(__privateGet(this, _core), store);
       __privateGet(this, _core).refresh();
     } else if (feat === "selectInGroup") {
-      __privateGet(this, _core).trigger(middlewareEventSelectInGroup, {
+      __privateGet(this, _core).trigger(coreEventKeys.SELECT_IN_GROUP, {
         enable: !!status
       });
     } else if (feat === "snapToGrid") {
-      __privateGet(this, _core).trigger(middlewareEventSnapToGrid, {
+      __privateGet(this, _core).trigger(coreEventKeys.SNAP_TO_GRID, {
         enable: !!status
       });
     }
   };
+  const eventKeys = coreEventKeys;
   exports.Calculator = Calculator;
   exports.Context2D = Context2D;
   exports.Core = Core;
@@ -10414,6 +10736,7 @@ var __privateMethod = (obj, member, method) => {
   exports.colorToLinearGradientCSS = colorToLinearGradientCSS;
   exports.compose = compose;
   exports.compressImage = compressImage;
+  exports.coreEventKeys = coreEventKeys;
   exports.createAssetId = createAssetId;
   exports.createBoardContent = createBoardContent;
   exports.createContext2D = createContext2D;
@@ -10446,6 +10769,7 @@ var __privateMethod = (obj, member, method) => {
   exports.getDefaultElementDetailConfig = getDefaultElementDetailConfig;
   exports.getElemenetsAssetIds = getElemenetsAssetIds;
   exports.getElementPositionFromList = getElementPositionFromList;
+  exports.getElementPositionMapFromList = getElementPositionMapFromList;
   exports.getElementRotateVertexes = getElementRotateVertexes;
   exports.getElementSize = getElementSize;
   exports.getElementVertexes = getElementVertexes;
@@ -10471,10 +10795,6 @@ var __privateMethod = (obj, member, method) => {
   exports.matrixToRadian = matrixToRadian;
   exports.mergeElementAsset = mergeElementAsset;
   exports.mergeHexColorAlpha = mergeHexColorAlpha;
-  exports.middlewareEventRuler = middlewareEventRuler;
-  exports.middlewareEventScale = middlewareEventScale;
-  exports.middlewareEventSelect = middlewareEventSelect;
-  exports.middlewareEventSelectClear = middlewareEventSelectClear;
   exports.modifyElement = modifyElement;
   exports.moveElementPosition = moveElementPosition;
   exports.parseAngleToRadian = parseAngleToRadian;
