@@ -2087,6 +2087,9 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
     _loop(elements);
     return positionMap;
   }
+  function isSameElementSize(elem1, elem2) {
+    return elem1.x === elem2.x && elem1.y === elem2.y && elem1.h === elem2.h && elem1.w === elem2.w && limitAngle(elem1.angle || 0) === limitAngle(elem2.angle || 0);
+  }
   function checkRectIntersect(rect1, rect2) {
     const rect1MinX = rect1.x;
     const rect1MinY = rect1.y;
@@ -2683,6 +2686,8 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
     });
     const rotateVertexes2 = calcElementVertexes(rotateSize);
     const sizeController = {
+      originalElementCenter: calcElementCenter(elemSize),
+      originalElementSize: Object.assign({}, elemSize),
       elementWrapper: vertexes,
       left: {
         type: "left",
@@ -3831,6 +3836,31 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
       _walk(elem);
     }
     return elemeList;
+  }
+  function calcPointMoveElementInGroup(start, end, groupQueue) {
+    let moveX = end.x - start.x;
+    let moveY = end.y - start.y;
+    const pointGroupQueue = [];
+    groupQueue.forEach((group) => {
+      const { x: x2, y: y2, w: w2, h: h2, angle: angle2 = 0 } = group;
+      pointGroupQueue.push({
+        x: x2,
+        y: y2,
+        w: w2,
+        h: h2,
+        angle: 0 - angle2
+      });
+    });
+    if ((groupQueue === null || groupQueue === void 0 ? void 0 : groupQueue.length) > 0) {
+      const startInGroup = rotatePointInGroup(start, pointGroupQueue);
+      const endInGroup = rotatePointInGroup(end, pointGroupQueue);
+      moveX = endInGroup.x - startInGroup.x;
+      moveY = endInGroup.y - startInGroup.y;
+    }
+    return {
+      moveX,
+      moveY
+    };
   }
   function createColorStyle(ctx, color2, opts) {
     if (typeof color2 === "string") {
@@ -6484,10 +6514,11 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
     }
   }
   function drawSelectedElementControllersVertexes(ctx, controller, opts) {
+    var _a;
     if (!controller) {
       return;
     }
-    const { hideControllers, style, rotateControllerPattern, viewSizeInfo } = opts;
+    const { hideControllers, style, rotateControllerPattern, viewSizeInfo, element } = opts;
     const { devicePixelRatio = 1 } = viewSizeInfo;
     const { activeColor: activeColor2 } = style;
     const { elementWrapper, topLeft, topRight, bottomLeft, bottomRight, rotate } = controller;
@@ -6499,9 +6530,11 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
       drawVertexes(ctx, calcViewVertexes(topRight.vertexes, opts), ctrlOpts);
       drawVertexes(ctx, calcViewVertexes(bottomLeft.vertexes, opts), ctrlOpts);
       drawVertexes(ctx, calcViewVertexes(bottomRight.vertexes, opts), ctrlOpts);
-      drawCircleController(ctx, calcViewPointSize(rotate.center, opts), Object.assign(Object.assign({}, ctrlOpts), { size: rotate.size, borderWidth: 0 }));
-      const rotateCenter = calcViewPointSize(rotate.center, opts);
-      ctx.drawImage(rotateControllerPattern.canvas, 0, 0, rotateControllerPattern.canvas.width / devicePixelRatio, rotateControllerPattern.canvas.height / devicePixelRatio, rotateCenter.x - rotate.size / 2, rotateCenter.y - rotate.size / 2, rotate.size, rotate.size);
+      if (((_a = element === null || element === void 0 ? void 0 : element.operations) === null || _a === void 0 ? void 0 : _a.rotatable) !== false) {
+        drawCircleController(ctx, calcViewPointSize(rotate.center, opts), Object.assign(Object.assign({}, ctrlOpts), { size: rotate.size, borderWidth: 0 }));
+        const rotateCenter = calcViewPointSize(rotate.center, opts);
+        ctx.drawImage(rotateControllerPattern.canvas, 0, 0, rotateControllerPattern.canvas.width / devicePixelRatio, rotateControllerPattern.canvas.height / devicePixelRatio, rotateCenter.x - rotate.size / 2, rotateCenter.y - rotate.size / 2, rotate.size, rotate.size);
+      }
     }
   }
   function drawArea(ctx, opts) {
@@ -6616,7 +6649,7 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
     return isPointInViewActiveVertexes(p, { ctx, vertexes, viewScaleInfo, viewSizeInfo });
   }
   function getPointTarget(p, opts) {
-    var _a, _b, _c;
+    var _a, _b, _c, _d, _e;
     const target = {
       type: null,
       elements: [],
@@ -6627,7 +6660,10 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
     const { ctx, data, calculator, selectedElements, viewScaleInfo, viewSizeInfo, areaSize, groupQueue, selectedElementController } = opts;
     if (selectedElementController) {
       const { left, right, top, bottom, topLeft, topRight, bottomLeft, bottomRight, rotate } = selectedElementController;
-      const ctrls = [left, right, top, bottom, topLeft, topRight, bottomLeft, bottomRight, rotate];
+      const ctrls = [left, right, top, bottom, topLeft, topRight, bottomLeft, bottomRight];
+      if ((selectedElements === null || selectedElements === void 0 ? void 0 : selectedElements.length) === 1 && ((_b = (_a = selectedElements === null || selectedElements === void 0 ? void 0 : selectedElements[0]) === null || _a === void 0 ? void 0 : _a.operations) === null || _b === void 0 ? void 0 : _b.rotatable) !== false) {
+        ctrls.push(rotate);
+      }
       for (let i = 0; i < ctrls.length; i++) {
         const ctrl = ctrls[i];
         if (isPointInViewActiveVertexes(p, { ctx, vertexes: ctrl.vertexes, viewSizeInfo, viewScaleInfo })) {
@@ -6642,7 +6678,7 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
     }
     if (groupQueue && Array.isArray(groupQueue) && groupQueue.length > 0) {
       const lastGroup = groupQueue[groupQueue.length - 1];
-      if (((_a = lastGroup === null || lastGroup === void 0 ? void 0 : lastGroup.detail) === null || _a === void 0 ? void 0 : _a.children) && Array.isArray((_b = lastGroup === null || lastGroup === void 0 ? void 0 : lastGroup.detail) === null || _b === void 0 ? void 0 : _b.children)) {
+      if (((_c = lastGroup === null || lastGroup === void 0 ? void 0 : lastGroup.detail) === null || _c === void 0 ? void 0 : _c.children) && Array.isArray((_d = lastGroup === null || lastGroup === void 0 ? void 0 : lastGroup.detail) === null || _d === void 0 ? void 0 : _d.children)) {
         for (let i = lastGroup.detail.children.length - 1; i >= 0; i--) {
           const child = lastGroup.detail.children[i];
           const vertexes = calcElementVertexesInGroup(child, { groupQueue });
@@ -6671,7 +6707,7 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
     }
     if (data) {
       const { index, element } = calculator.getPointElement(p, { data, viewScaleInfo, viewSizeInfo });
-      if (index >= 0 && element && ((_c = element === null || element === void 0 ? void 0 : element.operations) === null || _c === void 0 ? void 0 : _c.invisible) !== true) {
+      if (index >= 0 && element && ((_e = element === null || element === void 0 ? void 0 : element.operations) === null || _e === void 0 ? void 0 : _e.invisible) !== true) {
         target.elements = [element];
         target.type = "over-element";
         return target;
@@ -7319,31 +7355,6 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
     }
     return false;
   }
-  function calcMoveInGroup(start, end, groupQueue) {
-    let moveX = end.x - start.x;
-    let moveY = end.y - start.y;
-    const pointGroupQueue = [];
-    groupQueue.forEach((group) => {
-      const { x: x2, y: y2, w: w2, h: h2, angle: angle2 = 0 } = group;
-      pointGroupQueue.push({
-        x: x2,
-        y: y2,
-        w: w2,
-        h: h2,
-        angle: 0 - angle2
-      });
-    });
-    if ((groupQueue === null || groupQueue === void 0 ? void 0 : groupQueue.length) > 0) {
-      const startInGroup = rotatePointInGroup(start, pointGroupQueue);
-      const endInGroup = rotatePointInGroup(end, pointGroupQueue);
-      moveX = endInGroup.x - startInGroup.x;
-      moveY = endInGroup.y - startInGroup.y;
-    }
-    return {
-      moveX,
-      moveY
-    };
-  }
   const unitSize = 2;
   function getViewBoxInfo(rectInfo) {
     const boxInfo = {
@@ -7608,8 +7619,10 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
   const keyLayoutActionType = Symbol(`${key$2}_layoutActionType`);
   const keyLayoutControlType = Symbol(`${key$2}_layoutControlType`);
   const keyLayoutController = Symbol(`${key$2}_layoutController`);
-  const keyLayoutIsHover = Symbol(`${key$2}_layoutIsHover`);
+  const keyLayoutIsHoverContent = Symbol(`${key$2}_layoutIsHoverContent`);
+  const keyLayoutIsHoverController = Symbol(`${key$2}_layoutIsHoverController`);
   const keyLayoutIsSelected = Symbol(`${key$2}_layoutIsSelected`);
+  const keyLayoutIsBusyMoving = Symbol(`${key$2}_layoutIsSelected`);
   const controllerSize = 10;
   const defaultStyle$2 = {
     activeColor: "#b331c9"
@@ -7684,27 +7697,19 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
     const { activeColor: activeColor2 } = innerConfig;
     const style = { activeColor: activeColor2 };
     let prevPoint = null;
-    let prevIsHover = null;
+    let prevIsHoverContent = null;
     let prevIsSelected = null;
-    let isBusy = null;
     const clear = () => {
       prevPoint = null;
       sharer.setSharedStorage(keyLayoutActionType, null);
       sharer.setSharedStorage(keyLayoutControlType, null);
       sharer.setSharedStorage(keyLayoutController, null);
-      sharer.setSharedStorage(keyLayoutIsHover, null);
+      sharer.setSharedStorage(keyLayoutIsHoverContent, null);
+      sharer.setSharedStorage(keyLayoutIsHoverController, null);
       sharer.setSharedStorage(keyLayoutIsSelected, null);
-      prevIsHover = null;
+      sharer.setSharedStorage(keyLayoutIsBusyMoving, null);
+      prevIsHoverContent = null;
       prevIsSelected = null;
-      isBusy = null;
-    };
-    const isInElementHover = () => {
-      const hoverElement = sharer.getSharedStorage(keyHoverElement);
-      if (hoverElement) {
-        clear();
-        return true;
-      }
-      return false;
     };
     const isInElementAction = () => {
       const elementActionType = sharer.getSharedStorage(keyActionType);
@@ -7750,6 +7755,7 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
     const resetControlType = (e) => {
       const data = sharer.getActiveStorage("data");
       const controller = sharer.getSharedStorage(keyLayoutController);
+      let controllerType = null;
       if (controller && (data === null || data === void 0 ? void 0 : data.layout) && (e === null || e === void 0 ? void 0 : e.point)) {
         let layoutControlType = null;
         if (controller) {
@@ -7765,14 +7771,19 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
           if (layoutControlType) {
             sharer.setSharedStorage(keyLayoutControlType, layoutControlType);
             eventHub.trigger(coreEventKeys.CLEAR_SELECT);
-            return layoutControlType;
+            controllerType = layoutControlType;
           }
         }
       }
-      return null;
+      if (controllerType) {
+        sharer.setSharedStorage(keyLayoutIsHoverController, true);
+      } else {
+        sharer.setSharedStorage(keyLayoutIsHoverController, false);
+      }
+      return controllerType;
     };
     const updateCursor = (controlType) => {
-      if (isBusy === true) {
+      if (sharer.getSharedStorage(keyLayoutIsBusyMoving) === true) {
         return;
       }
       eventHub.trigger(coreEventKeys.CURSOR, {
@@ -7788,22 +7799,19 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
         resetController();
       },
       hover: (e) => {
-        if (isBusy === true) {
+        if (sharer.getSharedStorage(keyLayoutIsBusyMoving) === true) {
           return;
         }
         if (isInElementAction()) {
           return;
         }
-        if (isInElementHover()) {
-          return;
-        }
         if (isInLayout(e.point)) {
-          sharer.setSharedStorage(keyLayoutIsHover, true);
+          sharer.setSharedStorage(keyLayoutIsHoverContent, true);
         } else {
-          sharer.setSharedStorage(keyLayoutIsHover, false);
-          if (prevIsHover === true) {
+          sharer.setSharedStorage(keyLayoutIsHoverContent, false);
+          if (prevIsHoverContent === true) {
             viewer.drawFrame();
-            prevIsHover = false;
+            prevIsHoverContent = false;
           }
         }
         if (sharer.getSharedStorage(keyLayoutIsSelected) === true) {
@@ -7824,12 +7832,18 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
               updateCursor(layoutControlType);
             }
           }
+          if (sharer.getSharedStorage(keyLayoutIsHoverController) === true) {
+            return false;
+          }
           return;
         }
-        if (sharer.getSharedStorage(keyLayoutIsHover) && !prevIsHover) {
+        if (sharer.getSharedStorage(keyLayoutIsHoverContent) && !prevIsHoverContent) {
           viewer.drawFrame();
         }
-        prevIsHover = sharer.getSharedStorage(keyLayoutIsHover);
+        prevIsHoverContent = sharer.getSharedStorage(keyLayoutIsHoverContent);
+        if (sharer.getSharedStorage(keyLayoutIsHoverController) === true) {
+          return false;
+        }
       },
       pointStart: (e) => {
         if (isInElementAction()) {
@@ -7854,6 +7868,9 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
           viewer.drawFrame();
         }
         prevIsSelected = sharer.getSharedStorage(keyLayoutIsSelected);
+        if (sharer.getSharedStorage(keyLayoutIsHoverController) === true) {
+          return false;
+        }
       },
       pointMove: (e) => {
         if (!sharer.getSharedStorage(keyLayoutIsSelected)) {
@@ -7866,7 +7883,7 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
         const data = sharer.getActiveStorage("data");
         if (layoutActionType === "resize" && layoutControlType && (data === null || data === void 0 ? void 0 : data.layout)) {
           if (prevPoint) {
-            isBusy = true;
+            sharer.setSharedStorage(keyLayoutIsBusyMoving, true);
             const scale = sharer.getActiveStorage("scale");
             const viewMoveX = e.point.x - prevPoint.x;
             const viewMoveY = e.point.y - prevPoint.y;
@@ -7944,7 +7961,7 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
         }
       },
       pointEnd: () => {
-        isBusy = false;
+        sharer.setSharedStorage(keyLayoutIsBusyMoving, false);
         const layoutActionType = sharer.getSharedStorage(keyLayoutActionType);
         const layoutControlType = sharer.getSharedStorage(keyLayoutControlType);
         const data = sharer.getActiveStorage("data");
@@ -7954,6 +7971,9 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
             data
           });
         }
+        if (sharer.getSharedStorage(keyLayoutIsHoverController) === true) {
+          return false;
+        }
       },
       beforeDrawFrame: ({ snapshot }) => {
         var _a;
@@ -7962,7 +7982,7 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
         }
         const { sharedStore, activeStore } = snapshot;
         const layoutActionType = sharedStore[keyLayoutActionType];
-        const layoutIsHover = sharedStore[keyLayoutIsHover];
+        const layoutIsHover = sharedStore[keyLayoutIsHoverContent];
         const layoutIsSelected = sharedStore[keyLayoutIsSelected];
         if ((_a = activeStore.data) === null || _a === void 0 ? void 0 : _a.layout) {
           const { x: x2, y: y2, w: w2, h: h2 } = activeStore.data.layout;
@@ -8316,6 +8336,7 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
         eventHub.off(MIDDLEWARE_INTERNAL_EVENT_SHOW_INFO_ANGLE, showInfoAngleCallback);
       },
       beforeDrawFrame({ snapshot }) {
+        var _a;
         const { sharedStore } = snapshot;
         const selectedElementList = sharedStore[keySelectedElementList];
         const actionType = sharedStore[keyActionType];
@@ -8393,18 +8414,20 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
                 style
               });
               if (showAngleInfo) {
-                drawAngleInfoText(overlayContext, {
-                  point: {
-                    x: rectInfo.top.x + infoFontSize + 4,
-                    y: rectInfo.top.y - infoFontSize * 2 - 18
-                  },
-                  rotateCenter: rectInfo.center,
-                  angle: totalAngle,
-                  text: angleText,
-                  fontSize: infoFontSize,
-                  lineHeight: infoLineHeight,
-                  style
-                });
+                if (((_a = elem.operations) === null || _a === void 0 ? void 0 : _a.rotatable) !== false) {
+                  drawAngleInfoText(overlayContext, {
+                    point: {
+                      x: rectInfo.top.x + infoFontSize + 4,
+                      y: rectInfo.top.y - infoFontSize * 2 - 18
+                    },
+                    rotateCenter: rectInfo.center,
+                    angle: totalAngle,
+                    text: angleText,
+                    fontSize: infoFontSize,
+                    lineHeight: infoLineHeight,
+                    style
+                  });
+                }
               }
             }
           }
@@ -8572,6 +8595,10 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
       hover: (e) => {
         var _a, _b, _c, _d, _e;
         const layoutIsSelected = sharer.getSharedStorage(keyLayoutIsSelected);
+        const layoutIsBusyMoving = sharer.getSharedStorage(keyLayoutIsBusyMoving);
+        if (layoutIsBusyMoving === true) {
+          return;
+        }
         const resizeType = sharer.getSharedStorage(keyResizeType);
         const actionType = sharer.getSharedStorage(keyActionType);
         const groupQueue = sharer.getSharedStorage(keyGroupQueue);
@@ -8745,7 +8772,7 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
           inBusyMode = "drag";
           eventHub.trigger(MIDDLEWARE_INTERNAL_EVENT_SHOW_INFO_ANGLE, { show: false });
           if (data && (elems === null || elems === void 0 ? void 0 : elems.length) === 1 && moveOriginalStartElementSize && originalStart && end && ((_b = (_a = elems[0]) === null || _a === void 0 ? void 0 : _a.operations) === null || _b === void 0 ? void 0 : _b.locked) !== true) {
-            const { moveX, moveY } = calcMoveInGroup(originalStart, end, groupQueue);
+            const { moveX, moveY } = calcPointMoveElementInGroup(originalStart, end, groupQueue);
             let totalMoveX = calculator.toGridNum(moveX / scale);
             let totalMoveY = calculator.toGridNum(moveY / scale);
             if (enableSnapToGrid === true) {
@@ -9063,7 +9090,19 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
         const isMoving = sharedStore[keyIsMoving];
         const enableSnapToGrid = sharedStore[keyEnableSnapToGrid];
         const drawBaseOpts = { calculator, viewScaleInfo, viewSizeInfo, style };
-        const selectedElementController = sharedStore[keySelectedElementController];
+        let selectedElementController = sharedStore[keySelectedElementController];
+        if (selectedElementController && selectedElements.length === 1 && elem) {
+          if (!isSameElementSize(elem, selectedElementController.originalElementSize)) {
+            selectedElementController = calcElementSizeController(elem, {
+              groupQueue: groupQueue || [],
+              controllerSize: controllerSize$1,
+              viewScaleInfo,
+              rotateControllerPosition,
+              rotateControllerSize
+            });
+            sharer2.setSharedStorage(keySelectedElementController, selectedElementController);
+          }
+        }
         const isHoverLocked = !!((_a = hoverElement === null || hoverElement === void 0 ? void 0 : hoverElement.operations) === null || _a === void 0 ? void 0 : _a.locked);
         if ((groupQueue === null || groupQueue === void 0 ? void 0 : groupQueue.length) > 0) {
           drawGroupQueueVertexesWrappers(overlayContext, groupQueueVertexesList, drawBaseOpts);
@@ -10159,6 +10198,7 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
       const { devicePixelRatio = 1, width, height, createCustomContext2D } = opts;
       __classPrivateFieldSet(this, _Core_container, container, "f");
       const canvas = document.createElement("canvas");
+      canvas.setAttribute("tabindex", "0");
       __classPrivateFieldSet(this, _Core_canvas, canvas, "f");
       __classPrivateFieldGet(this, _Core_instances, "m", _Core_initContainer).call(this);
       container.appendChild(canvas);
@@ -10722,6 +10762,7 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
   exports.calcElementViewRectInfoMap = calcElementViewRectInfoMap;
   exports.calcElementsContextSize = calcElementsContextSize;
   exports.calcElementsViewInfo = calcElementsViewInfo;
+  exports.calcPointMoveElementInGroup = calcPointMoveElementInGroup;
   exports.calcSpeed = calcSpeed;
   exports.calcViewBoxSize = calcViewBoxSize;
   exports.calcViewCenter = calcViewCenter;
