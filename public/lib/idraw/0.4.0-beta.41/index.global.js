@@ -144,13 +144,13 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
     downloadLink = null;
   }
   function toColorHexNum(color2) {
-    return parseInt(color2.replace(/^\#/, "0x"));
+    return parseInt(color2.replace(/^#/, "0x"));
   }
   function toColorHexStr(color2) {
     return "#" + color2.toString(16);
   }
   function isColorStr(color2) {
-    return typeof color2 === "string" && (/^\#([0-9a-f]{3}|[0-9a-f]{6}|[0-9a-f]{8})$/i.test(color2) || /^[a-z]{1,}$/i.test(color2));
+    return typeof color2 === "string" && (/^#([0-9a-f]{3}|[0-9a-f]{6}|[0-9a-f]{8})$/i.test(color2) || /^[a-z]{1,}$/i.test(color2));
   }
   const colorNameMap = {
     aliceblue: "#f0f8ff",
@@ -307,6 +307,8 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
     let css = "transparent";
     if (typeof color2 === "string") {
       css = color2;
+    } else if ((color2 === null || color2 === void 0 ? void 0 : color2.stops.length) === 1) {
+      css = color2.stops[0].color;
     } else if ((color2 === null || color2 === void 0 ? void 0 : color2.type) === "linear-gradient") {
       const items = [];
       if (typeof color2.angle === "number") {
@@ -354,13 +356,13 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
       return hex;
     }
     let hexAlpha = 1;
-    const regHex1 = /^\#[0-9a-f]{6,6}$/i;
-    const regHex2 = /^\#[0-9a-f]{8,8}$/i;
+    const regHex1 = /^#[0-9a-f]{6,6}$/i;
+    const regHex2 = /^#[0-9a-f]{8,8}$/i;
     let result = hex;
     if (regHex1.test(hex)) {
-      hexAlpha = parseInt(hex.substring(5, 7).replace(/^\#/, "0x"));
+      hexAlpha = parseInt(hex.substring(5, 7).replace(/^#/, "0x"));
     } else if (regHex2.test(hex)) {
-      hexAlpha = parseInt(hex.substring(7, 9).replace(/^\#/, "0x"));
+      hexAlpha = parseInt(hex.substring(7, 9).replace(/^#/, "0x"));
       result = hex.substring(0, 7);
     }
     hexAlpha = hexAlpha * alpha;
@@ -370,37 +372,62 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
     }
     return result;
   }
+  function generate32Base36Hash(str) {
+    const hash256 = generate256BitHash(str);
+    return bigIntToBase36(hash256).padStart(32, "0").slice(0, 32);
+  }
+  function generate256BitHash(str) {
+    let h1 = 0xcbf29ce484222325n, h2 = 0x84222325cbf29ce4n;
+    let h3 = 0x1b3n * h1, h4 = 0x1000000n * h2;
+    const prime = 0x100000001b3n;
+    const chunkSize = 4096;
+    for (let i = 0; i < str.length; i += chunkSize) {
+      const chunk = str.slice(i, i + chunkSize);
+      for (let j = 0; j < chunk.length; j++) {
+        const code = BigInt(chunk.charCodeAt(j) + i + j);
+        h1 = (h1 ^ code) * prime;
+        h2 = (h2 ^ h1) * prime ^ h3;
+        h3 = (h3 ^ h2) * prime + h4;
+        h4 = (h4 ^ h3) * prime | 0x1234567890abcdefn;
+      }
+    }
+    return h1 << 192n | h2 << 128n | h3 << 64n | h4;
+  }
+  function bigIntToBase36(num) {
+    const chars = "0123456789abcdefghijklmnopqrstuvwxyz";
+    if (num === 0n)
+      return "0";
+    let result = "";
+    while (num > 0n) {
+      const rem = num % 36n;
+      result = chars[Number(rem)] + result;
+      num = num / 36n;
+    }
+    return result;
+  }
   function createUUID() {
     function _createStr() {
       return ((1 + Math.random()) * 65536 | 0).toString(16).substring(1);
     }
     return `${_createStr()}${_createStr()}-${_createStr()}-${_createStr()}-${_createStr()}-${_createStr()}${_createStr()}${_createStr()}`;
   }
-  function limitHexStr(str) {
-    let count = 0;
-    for (let i = 0; i < str.length; i++) {
-      count += str.charCodeAt(i) * str.charCodeAt(i) * i * i;
-    }
-    return count.toString(16).substring(0, 4);
-  }
   function createAssetId(assetStr) {
-    const len = assetStr.length;
-    const mid = Math.floor(len / 2);
-    const start4 = assetStr.substring(0, 4).padEnd(4, "0");
-    const end4 = assetStr.substring(0, 4).padEnd(4, "0");
-    const str1 = limitHexStr(len.toString(16).padEnd(4, start4));
-    const str2 = limitHexStr(assetStr.substring(mid - 4, mid).padEnd(4, start4)).padEnd(4, "f");
-    const str3 = limitHexStr(assetStr.substring(mid - 8, mid - 4).padEnd(4, start4)).padEnd(4, "f");
-    const str4 = limitHexStr(assetStr.substring(mid - 12, mid - 8).padEnd(4, start4)).padEnd(4, "f");
-    const str5 = limitHexStr(assetStr.substring(mid - 16, mid - 12).padEnd(4, end4)).padEnd(4, "f");
-    const str6 = limitHexStr(assetStr.substring(mid, mid + 4).padEnd(4, end4)).padEnd(4, "f");
-    const str7 = limitHexStr(assetStr.substring(mid + 4, mid + 8).padEnd(4, end4)).padEnd(4, "f");
-    const str8 = limitHexStr(end4.padEnd(4, start4).padEnd(4, end4));
-    return `@assets/${str1}${str2}-${str3}-${str4}-${str5}-${str6}${str7}${str8}`;
+    return `@assets/${generate32Base36Hash(assetStr)}`;
   }
   function isAssetId(id) {
-    return /^@assets\/[0-9a-z]{8,8}\-[0-9a-z]{4,4}\-[0-9a-z]{4,4}\-[0-9a-z]{4,4}\-[0-9a-z]{12,12}$/.test(`${id}`);
+    return /^@assets\/[0-9a-z-]{0,}$/.test(`${id}`);
   }
+  var __rest$4 = function(s, e) {
+    var t = {};
+    for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p) && e.indexOf(p) < 0)
+      t[p] = s[p];
+    if (s != null && typeof Object.getOwnPropertySymbols === "function")
+      for (var i = 0, p = Object.getOwnPropertySymbols(s); i < p.length; i++) {
+        if (e.indexOf(p[i]) < 0 && Object.prototype.propertyIsEnumerable.call(s, p[i]))
+          t[p[i]] = s[p[i]];
+      }
+    return t;
+  };
   function deepClone(target) {
     function _clone(t) {
       const type = is$1(t);
@@ -439,6 +466,12 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
     };
     _resetUUID(elem);
     return elem;
+  }
+  function deepCloneData(data) {
+    const { elements } = data, restData = __rest$4(data, ["elements"]);
+    return Object.assign(Object.assign({}, deepClone(restData)), {
+      elements: elements.map((elem) => deepCloneElement(elem))
+    });
   }
   function is$1(target) {
     return Object.prototype.toString.call(target).replace(/[\]|\[]{1,1}/gi, "").split(" ")[1];
@@ -714,6 +747,9 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
       return image;
     });
   }
+  function positiveNum(value) {
+    return typeof value === "number" && value >= 0;
+  }
   function number(value) {
     return typeof value === "number" && (value > 0 || value <= 0);
   }
@@ -724,19 +760,19 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
     return number(value);
   }
   function w(value) {
-    return typeof value === "number" && value >= 0;
+    return positiveNum(value);
   }
   function h(value) {
-    return typeof value === "number" && value >= 0;
+    return positiveNum(value);
   }
   function angle(value) {
     return typeof value === "number" && value >= -360 && value <= 360;
   }
   function borderWidth(value) {
-    return w(value);
+    return positiveNum(value) || Array.isArray(value) && positiveNum(value[0]) && positiveNum(value[1]) && positiveNum(value[2]) && positiveNum(value[3]);
   }
   function borderRadius(value) {
-    return number(value) && value >= 0;
+    return positiveNum(value) || Array.isArray(value) && positiveNum(value[0]) && positiveNum(value[1]) && positiveNum(value[2]) && positiveNum(value[3]);
   }
   function color(value) {
     return isColorStr(value);
@@ -790,6 +826,7 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
     return /^(-?\d+(?:\.\d+)?)$/.test(`${value}`);
   }
   const is = {
+    positiveNum,
     x,
     y,
     w,
@@ -825,20 +862,20 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
   }
   function box(detail = {}) {
     const { borderColor: borderColor2, borderRadius: borderRadius2, borderWidth: borderWidth2 } = detail;
-    if (detail.hasOwnProperty("borderColor") && !is.color(borderColor2)) {
+    if (Object.prototype.hasOwnProperty.call(detail, "borderColor") && !is.color(borderColor2)) {
       return false;
     }
-    if (detail.hasOwnProperty("borderRadius") && !is.number(borderRadius2)) {
+    if (Object.prototype.hasOwnProperty.call(detail, "borderRadius") && !is.number(borderRadius2)) {
       return false;
     }
-    if (detail.hasOwnProperty("borderWidth") && !is.number(borderWidth2)) {
+    if (Object.prototype.hasOwnProperty.call(detail, "borderWidth") && !is.number(borderWidth2)) {
       return false;
     }
     return true;
   }
   function rectDesc(detail) {
     const { background: background2 } = detail;
-    if (detail.hasOwnProperty("background") && !is.color(background2)) {
+    if (Object.prototype.hasOwnProperty.call(detail, "background") && !is.color(background2)) {
       return false;
     }
     if (!box(detail)) {
@@ -848,13 +885,13 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
   }
   function circleDesc(detail) {
     const { background: background2, borderColor: borderColor2, borderWidth: borderWidth2 } = detail;
-    if (detail.hasOwnProperty("background") && !is.color(background2)) {
+    if (Object.prototype.hasOwnProperty.call(detail, "background") && !is.color(background2)) {
       return false;
     }
-    if (detail.hasOwnProperty("borderColor") && !is.color(borderColor2)) {
+    if (Object.prototype.hasOwnProperty.call(detail, "borderColor") && !is.color(borderColor2)) {
       return false;
     }
-    if (detail.hasOwnProperty("borderWidth") && !is.number(borderWidth2)) {
+    if (Object.prototype.hasOwnProperty.call(detail, "borderWidth") && !is.number(borderWidth2)) {
       return false;
     }
     return true;
@@ -891,25 +928,25 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
     if (!is.fontSize(fontSize2)) {
       return false;
     }
-    if (detail.hasOwnProperty("background") && !is.color(background2)) {
+    if (Object.prototype.hasOwnProperty.call(detail, "background") && !is.color(background2)) {
       return false;
     }
-    if (detail.hasOwnProperty("fontWeight") && !is.fontWeight(fontWeight2)) {
+    if (Object.prototype.hasOwnProperty.call(detail, "fontWeight") && !is.fontWeight(fontWeight2)) {
       return false;
     }
-    if (detail.hasOwnProperty("lineHeight") && !is.lineHeight(lineHeight2)) {
+    if (Object.prototype.hasOwnProperty.call(detail, "lineHeight") && !is.lineHeight(lineHeight2)) {
       return false;
     }
-    if (detail.hasOwnProperty("fontFamily") && !is.fontFamily(fontFamily2)) {
+    if (Object.prototype.hasOwnProperty.call(detail, "fontFamily") && !is.fontFamily(fontFamily2)) {
       return false;
     }
-    if (detail.hasOwnProperty("textAlign") && !is.textAlign(textAlign2)) {
+    if (Object.prototype.hasOwnProperty.call(detail, "textAlign") && !is.textAlign(textAlign2)) {
       return false;
     }
-    if (detail.hasOwnProperty("strokeWidth") && !is.strokeWidth(strokeWidth2)) {
+    if (Object.prototype.hasOwnProperty.call(detail, "strokeWidth") && !is.strokeWidth(strokeWidth2)) {
       return false;
     }
-    if (detail.hasOwnProperty("strokeColor") && !is.color(strokeColor)) {
+    if (Object.prototype.hasOwnProperty.call(detail, "strokeColor") && !is.color(strokeColor)) {
       return false;
     }
     if (!box(detail)) {
@@ -1107,6 +1144,12 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
     arcTo(x1, y1, x2, y2, radius) {
       return __classPrivateFieldGet$b(this, _Context2D_ctx, "f").arcTo(this.$doPixelRatio(x1), this.$doPixelRatio(y1), this.$doPixelRatio(x2), this.$doPixelRatio(y2), this.$doPixelRatio(radius));
     }
+    bezierCurveTo(cp1x, cp1y, cp2x, cp2y, x2, y2) {
+      return __classPrivateFieldGet$b(this, _Context2D_ctx, "f").bezierCurveTo(this.$doPixelRatio(cp1x), this.$doPixelRatio(cp1y), this.$doPixelRatio(cp2x), this.$doPixelRatio(cp2y), this.$doPixelRatio(x2), this.$doPixelRatio(y2));
+    }
+    quadraticCurveTo(cpx, cpy, x2, y2) {
+      return __classPrivateFieldGet$b(this, _Context2D_ctx, "f").quadraticCurveTo(this.$doPixelRatio(cpx), this.$doPixelRatio(cpy), this.$doPixelRatio(x2), this.$doPixelRatio(y2));
+    }
     getLineDash() {
       return __classPrivateFieldGet$b(this, _Context2D_ctx, "f").getLineDash();
     }
@@ -1219,83 +1262,37 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
     return context2d;
   }
   function createBoardContent(canvas, opts) {
-    const { width, height, devicePixelRatio, offscreen, createCustomContext2D } = opts;
+    const { width, height, devicePixelRatio } = opts;
     const ctxOpts = {
       width,
       height,
       devicePixelRatio
     };
     const ctx = canvas.getContext("2d");
-    if (createCustomContext2D) {
-      const viewContext = createCustomContext2D(ctxOpts);
-      const overlayContext = createCustomContext2D(ctxOpts);
-      const underlayContext = createCustomContext2D(ctxOpts);
-      const boardContext = createContext2D(Object.assign({ ctx }, ctxOpts));
-      const drawView = () => {
-        const { width: w2, height: h2 } = viewContext.$getSize();
-        boardContext.clearRect(0, 0, w2, h2);
-        boardContext.drawImage(underlayContext.canvas, 0, 0, w2, h2);
-        boardContext.drawImage(viewContext.canvas, 0, 0, w2, h2);
-        boardContext.drawImage(overlayContext.canvas, 0, 0, w2, h2);
-        underlayContext.clearRect(0, 0, w2, h2);
-        viewContext.clearRect(0, 0, w2, h2);
-        overlayContext.clearRect(0, 0, w2, h2);
-      };
-      const content = {
-        underlayContext,
-        viewContext,
-        overlayContext,
-        boardContext,
-        drawView
-      };
-      return content;
-    }
-    if (offscreen === true) {
-      const viewContext = createOffscreenContext2D(ctxOpts);
-      const overlayContext = createOffscreenContext2D(ctxOpts);
-      const underlayContext = createOffscreenContext2D(ctxOpts);
-      const boardContext = createContext2D(Object.assign({ ctx }, ctxOpts));
-      const drawView = () => {
-        const { width: w2, height: h2 } = viewContext.$getSize();
-        boardContext.clearRect(0, 0, w2, h2);
-        boardContext.drawImage(underlayContext.canvas, 0, 0, w2, h2);
-        boardContext.drawImage(viewContext.canvas, 0, 0, w2, h2);
-        boardContext.drawImage(overlayContext.canvas, 0, 0, w2, h2);
-        underlayContext.clearRect(0, 0, w2, h2);
-        viewContext.clearRect(0, 0, w2, h2);
-        overlayContext.clearRect(0, 0, w2, h2);
-      };
-      const content = {
-        underlayContext,
-        viewContext,
-        overlayContext,
-        boardContext,
-        drawView
-      };
-      return content;
-    } else {
-      const viewContext = createContext2D(ctxOpts);
-      const overlayContext = createContext2D(ctxOpts);
-      const underlayContext = createContext2D(ctxOpts);
-      const boardContext = createContext2D(Object.assign({ ctx }, ctxOpts));
-      const drawView = () => {
-        boardContext.clearRect(0, 0, width, height);
-        boardContext.drawImage(underlayContext.canvas, 0, 0, width, height);
-        boardContext.drawImage(viewContext.canvas, 0, 0, width, height);
-        boardContext.drawImage(overlayContext.canvas, 0, 0, width, height);
-        underlayContext.clearRect(0, 0, width, height);
-        viewContext.clearRect(0, 0, width, height);
-        overlayContext.clearRect(0, 0, width, height);
-      };
-      const content = {
-        underlayContext,
-        viewContext,
-        overlayContext,
-        boardContext,
-        drawView
-      };
-      return content;
-    }
+    const viewContext = createOffscreenContext2D(ctxOpts);
+    const overlayContext = createOffscreenContext2D(ctxOpts);
+    const underlayContext = createOffscreenContext2D(ctxOpts);
+    const boardContext = createContext2D(Object.assign({ ctx }, ctxOpts));
+    const tempContext = createOffscreenContext2D(ctxOpts);
+    const drawView = () => {
+      const { width: w2, height: h2 } = viewContext.$getSize();
+      boardContext.clearRect(0, 0, w2, h2);
+      boardContext.drawImage(underlayContext.canvas, 0, 0, w2, h2);
+      boardContext.drawImage(viewContext.canvas, 0, 0, w2, h2);
+      boardContext.drawImage(overlayContext.canvas, 0, 0, w2, h2);
+      underlayContext.clearRect(0, 0, w2, h2);
+      viewContext.clearRect(0, 0, w2, h2);
+      overlayContext.clearRect(0, 0, w2, h2);
+    };
+    const content = {
+      underlayContext,
+      viewContext,
+      overlayContext,
+      boardContext,
+      tempContext,
+      drawView
+    };
+    return content;
   }
   var __classPrivateFieldSet$a = function(receiver, state, value, kind, f) {
     if (kind === "m") throw new TypeError("Private method is not writable");
@@ -1603,7 +1600,7 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
       let resultY = point.y;
       groupQueue.forEach((group) => {
         const { x: x2, y: y2, w: w2, h: h2, angle: angle2 = 0 } = group;
-        const center = calcElementCenter({ x: x2, y: y2, w: w2, h: h2, angle: angle2 });
+        const center = calcElementCenter({ x: x2, y: y2, w: w2, h: h2 });
         const temp = rotatePoint(center, { x: resultX, y: resultY }, parseAngleToRadian(angle2));
         resultX = temp.x;
         resultY = temp.y;
@@ -1818,7 +1815,11 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
     return ctxSize;
   }
   function calcElementsViewInfo(elements, prevViewSize, options) {
-    const contextSize = calcElementsContextSize(elements, { viewWidth: prevViewSize.width, viewHeight: prevViewSize.height, extend: options === null || options === void 0 ? void 0 : options.extend });
+    const contextSize = calcElementsContextSize(elements, {
+      viewWidth: prevViewSize.width,
+      viewHeight: prevViewSize.height,
+      extend: options === null || options === void 0 ? void 0 : options.extend
+    });
     if ((options === null || options === void 0 ? void 0 : options.extend) === true) {
       contextSize.contextWidth = Math.max(contextSize.contextWidth, prevViewSize.contextWidth);
       contextSize.contextHeight = Math.max(contextSize.contextHeight, prevViewSize.contextHeight);
@@ -2002,7 +2003,7 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
     for (let i = 0; i < position.length; i++) {
       const pos = position[i];
       const item = tempList[pos];
-      if (i < position.length - 1 && item.type === "group") {
+      if (i < position.length - 1 && (item === null || item === void 0 ? void 0 : item.type) === "group") {
         tempList = item.detail.children;
       } else if (i === position.length - 1) {
         result = item;
@@ -2115,7 +2116,7 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
     if (angle2 === 0) {
       return getElementVertexes(elemSize);
     }
-    return getElementRotateVertexes(elemSize, calcElementCenter({ x: x2, y: y2, w: w2, h: h2, angle: angle2 }), angle2);
+    return getElementRotateVertexes(elemSize, calcElementCenter({ x: x2, y: y2, w: w2, h: h2 }), angle2);
   }
   function calcElementQueueVertexesQueueInGroup(groupQueue) {
     const vesList = [];
@@ -2129,7 +2130,7 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
       totalY += y2;
       let ves;
       if (i === 0) {
-        const elemSize = { x: totalX, y: totalY, w: w2, h: h2, angle: angle2 };
+        const elemSize = { x: totalX, y: totalY, w: w2, h: h2 };
         ves = calcElementVertexes({ x: x2, y: y2, w: w2, h: h2, angle: angle2 });
         rotateActionList.push({
           center: calcElementCenter(elemSize),
@@ -2137,7 +2138,7 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
           radian: parseAngleToRadian(angle2)
         });
       } else {
-        const elemSize = { x: totalX, y: totalY, w: w2, h: h2, angle: angle2 };
+        const elemSize = { x: totalX, y: totalY, w: w2, h: h2 };
         ves = getElementVertexes(elemSize);
         for (let aIdx = 0; aIdx < rotateActionList.length; aIdx++) {
           const { center, radian } = rotateActionList[aIdx];
@@ -2324,7 +2325,7 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
                 h: child.h,
                 angle: totalAngle + (child.angle || 0)
               };
-              if (isViewPointInElement(p, { context2d: ctx, element: elemSize, viewScaleInfo, viewSizeInfo })) {
+              if (isViewPointInElement(p, { context2d: ctx, element: elemSize, viewScaleInfo })) {
                 result.element = child;
                 if (gIdx < groupQueue.length - 1 || child.type !== "group") {
                   result.groupQueueIndex = gIdx;
@@ -2349,7 +2350,7 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
       if (((_c = elem === null || elem === void 0 ? void 0 : elem.operations) === null || _c === void 0 ? void 0 : _c.invisible) === true) {
         continue;
       }
-      if (isViewPointInElement(p, { context2d: ctx, element: elem, viewScaleInfo, viewSizeInfo })) {
+      if (isViewPointInElement(p, { context2d: ctx, element: elem, viewScaleInfo })) {
         result.index = i;
         result.element = elem;
         break;
@@ -2474,138 +2475,6 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
     }
     return viewRectInfo;
   }
-  function calcElementViewRectInfoMap(elemSize, opts) {
-    const { groupQueue, viewScaleInfo } = opts;
-    const originRectInfo = calcElementOriginRectInfo(elemSize, { groupQueue });
-    const { center, top, bottom, left, right, topLeft, topRight, bottomLeft, bottomRight } = originRectInfo;
-    const viewRectInfo = {
-      center: calcViewPointSize(center, { viewScaleInfo }),
-      topLeft: calcViewPointSize(topLeft, { viewScaleInfo }),
-      topRight: calcViewPointSize(topRight, { viewScaleInfo }),
-      bottomLeft: calcViewPointSize(bottomLeft, { viewScaleInfo }),
-      bottomRight: calcViewPointSize(bottomRight, { viewScaleInfo }),
-      top: calcViewPointSize(top, { viewScaleInfo }),
-      right: calcViewPointSize(right, { viewScaleInfo }),
-      left: calcViewPointSize(left, { viewScaleInfo }),
-      bottom: calcViewPointSize(bottom, { viewScaleInfo })
-    };
-    const viewMaxX = Math.max(viewRectInfo.topLeft.x, viewRectInfo.topRight.x, viewRectInfo.bottomRight.x, viewRectInfo.bottomLeft.x);
-    const viewMaxY = Math.max(viewRectInfo.topLeft.y, viewRectInfo.topRight.y, viewRectInfo.bottomRight.y, viewRectInfo.bottomLeft.y);
-    const viewMinX = Math.min(viewRectInfo.topLeft.x, viewRectInfo.topRight.x, viewRectInfo.bottomRight.x, viewRectInfo.bottomLeft.x);
-    const viewMinY = Math.min(viewRectInfo.topLeft.y, viewRectInfo.topRight.y, viewRectInfo.bottomRight.y, viewRectInfo.bottomLeft.y);
-    const rangeCenter = { x: viewRectInfo.center.x, y: viewRectInfo.center.y };
-    const rangeTopLeft = { x: viewMinX, y: viewMinY };
-    const rangeTopRight = { x: viewMaxX, y: viewMinY };
-    const rangeBottomRight = { x: viewMaxX, y: viewMaxY };
-    const rangeBottomLeft = { x: viewMinX, y: viewMaxY };
-    const rangeTop = getCenterFromTwoPoints(rangeTopLeft, rangeTopRight);
-    const rangeBottom = getCenterFromTwoPoints(rangeBottomLeft, rangeBottomRight);
-    const rangeLeft = getCenterFromTwoPoints(rangeTopLeft, rangeBottomLeft);
-    const rangeRight = getCenterFromTwoPoints(rangeTopRight, rangeBottomRight);
-    const rangeRectInfo = {
-      center: rangeCenter,
-      topLeft: rangeTopLeft,
-      topRight: rangeTopRight,
-      bottomLeft: rangeBottomLeft,
-      bottomRight: rangeBottomRight,
-      top: rangeTop,
-      right: rangeRight,
-      left: rangeLeft,
-      bottom: rangeBottom
-    };
-    return {
-      originRectInfo,
-      rangeRectInfo
-    };
-  }
-  function sortElementsViewVisiableInfoMap(elements, opts) {
-    const visibleInfoMap = {};
-    const currentPosition = [];
-    const _walk = (elem) => {
-      const baseInfo = {
-        isVisibleInView: true,
-        isGroup: elem.type === "group",
-        position: [...currentPosition]
-      };
-      let originRectInfo = null;
-      const groupQueue = getGroupQueueByElementPosition(elements, currentPosition);
-      originRectInfo = calcElementOriginRectInfo(elem, {
-        groupQueue: groupQueue || []
-      });
-      visibleInfoMap[elem.uuid] = Object.assign(Object.assign({}, baseInfo), {
-        originRectInfo,
-        rangeRectInfo: is.angle(elem.angle) ? originRectInfoToRangeRectInfo(originRectInfo) : originRectInfo
-      });
-      if (elem.type === "group") {
-        elem.detail.children.forEach((ele, i) => {
-          currentPosition.push(i);
-          _walk(ele);
-          currentPosition.pop();
-        });
-      }
-    };
-    elements.forEach((elem, index) => {
-      currentPosition.push(index);
-      _walk(elem);
-      currentPosition.pop();
-    });
-    return updateViewVisibleInfoMapStatus(visibleInfoMap, opts);
-  }
-  function isRangeRectInfoCollide(info1, info2) {
-    const rect1MinX = Math.min(info1.topLeft.x, info1.topRight.x, info1.bottomLeft.x, info1.bottomRight.x);
-    const rect1MaxX = Math.max(info1.topLeft.x, info1.topRight.x, info1.bottomLeft.x, info1.bottomRight.x);
-    const rect1MinY = Math.min(info1.topLeft.y, info1.topRight.y, info1.bottomLeft.y, info1.bottomRight.y);
-    const rect1MaxY = Math.max(info1.topLeft.y, info1.topRight.y, info1.bottomLeft.y, info1.bottomRight.y);
-    const rect2MinX = Math.min(info2.topLeft.x, info2.topRight.x, info2.bottomLeft.x, info2.bottomRight.x);
-    const rect2MaxX = Math.max(info2.topLeft.x, info2.topRight.x, info2.bottomLeft.x, info2.bottomRight.x);
-    const rect2MinY = Math.min(info2.topLeft.y, info2.topRight.y, info2.bottomLeft.y, info2.bottomRight.y);
-    const rect2MaxY = Math.max(info2.topLeft.y, info2.topRight.y, info2.bottomLeft.y, info2.bottomRight.y);
-    if (rect1MinX <= rect2MaxX && rect1MaxX >= rect2MinX && rect1MinY <= rect2MaxY && rect1MaxY >= rect2MinY || rect2MaxX <= rect1MaxY && rect2MaxX >= rect1MaxY && rect2MaxX <= rect1MaxY && rect2MaxX >= rect1MaxY) {
-      return true;
-    }
-    return false;
-  }
-  function updateViewVisibleInfoMapStatus(viewVisibleInfoMap, opts) {
-    const canvasRectInfo = calcVisibleOriginCanvasRectInfo(opts);
-    let visibleCount = 0;
-    let invisibleCount = 0;
-    Object.keys(viewVisibleInfoMap).forEach((uuid) => {
-      const info = viewVisibleInfoMap[uuid];
-      info.isVisibleInView = isRangeRectInfoCollide(info.rangeRectInfo, canvasRectInfo);
-      info.isVisibleInView ? visibleCount++ : invisibleCount++;
-    });
-    return { viewVisibleInfoMap, visibleCount, invisibleCount };
-  }
-  function calcVisibleOriginCanvasRectInfo(opts) {
-    const { viewScaleInfo, viewSizeInfo } = opts;
-    const { scale, offsetTop, offsetLeft } = viewScaleInfo;
-    const { width, height } = viewSizeInfo;
-    const x2 = 0 - offsetLeft / scale;
-    const y2 = 0 - offsetTop / scale;
-    const w2 = width / scale;
-    const h2 = height / scale;
-    const center = calcElementCenter({ x: x2, y: y2, w: w2, h: h2 });
-    const topLeft = { x: x2, y: y2 };
-    const topRight = { x: x2 + w2, y: y2 };
-    const bottomLeft = { x: x2, y: y2 + h2 };
-    const bottomRight = { x: x2 + w2, y: y2 + h2 };
-    const left = { x: x2, y: center.y };
-    const top = { x: center.x, y: y2 };
-    const right = { x: x2 + w2, y: center.y };
-    const bottom = { x: center.x, y: y2 + h2 };
-    const rectInfo = {
-      center,
-      topLeft,
-      topRight,
-      bottomLeft,
-      bottomRight,
-      left,
-      top,
-      right,
-      bottom
-    };
-    return rectInfo;
-  }
   function createControllerElementSizeFromCenter(center, opts) {
     const { x: x2, y: y2 } = center;
     const { size, angle: angle2 } = opts;
@@ -2665,15 +2534,38 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
     const topLeftSize = createControllerElementSizeFromCenter(topLeftCenter, { size: ctrlSize, angle: totalAngle });
     const topRightSize = createControllerElementSizeFromCenter(topRightCenter, { size: ctrlSize, angle: totalAngle });
     const bottomLeftSize = createControllerElementSizeFromCenter(bottomLeftCenter, { size: ctrlSize, angle: totalAngle });
-    const bottomRightSize = createControllerElementSizeFromCenter(bottomRightCenter, { size: ctrlSize, angle: totalAngle });
+    const bottomRightSize = createControllerElementSizeFromCenter(bottomRightCenter, {
+      size: ctrlSize,
+      angle: totalAngle
+    });
     const topLeftVertexes = calcElementVertexes(topLeftSize);
     const topRightVertexes = calcElementVertexes(topRightSize);
     const bottomLeftVertexes = calcElementVertexes(bottomLeftSize);
     const bottomRightVertexes = calcElementVertexes(bottomRightSize);
-    const topVertexes = [topLeftVertexes[1], topRightVertexes[0], topRightVertexes[3], topLeftVertexes[2]];
-    const rightVertexes = [topRightVertexes[3], topRightVertexes[2], bottomRightVertexes[1], bottomRightVertexes[0]];
-    const bottomVertexes = [bottomLeftVertexes[1], bottomRightVertexes[0], bottomRightVertexes[3], bottomLeftVertexes[2]];
-    const leftVertexes = [topLeftVertexes[3], topLeftVertexes[2], bottomLeftVertexes[1], bottomLeftVertexes[0]];
+    const topVertexes = [
+      topLeftVertexes[1],
+      topRightVertexes[0],
+      topRightVertexes[3],
+      topLeftVertexes[2]
+    ];
+    const rightVertexes = [
+      topRightVertexes[3],
+      topRightVertexes[2],
+      bottomRightVertexes[1],
+      bottomRightVertexes[0]
+    ];
+    const bottomVertexes = [
+      bottomLeftVertexes[1],
+      bottomRightVertexes[0],
+      bottomRightVertexes[3],
+      bottomLeftVertexes[2]
+    ];
+    const leftVertexes = [
+      topLeftVertexes[3],
+      topLeftVertexes[2],
+      bottomLeftVertexes[1],
+      bottomLeftVertexes[0]
+    ];
     const topMiddleVertexes = calcElementVertexes(topMiddleSize);
     const rightMiddleVertexes = calcElementVertexes(rightMiddleSize);
     const bottomMiddleVertexes = calcElementVertexes(bottomMiddleSize);
@@ -2795,10 +2687,30 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
     const topRightVertexes = calcElementVertexes(topRightSize);
     const bottomLeftVertexes = calcElementVertexes(bottomLeftSize);
     const bottomRightVertexes = calcElementVertexes(bottomRightSize);
-    const topVertexes = [topLeftVertexes[1], topRightVertexes[0], topRightVertexes[3], topLeftVertexes[2]];
-    const rightVertexes = [topRightVertexes[3], topRightVertexes[2], bottomRightVertexes[1], bottomRightVertexes[0]];
-    const bottomVertexes = [bottomLeftVertexes[1], bottomRightVertexes[0], bottomRightVertexes[3], bottomLeftVertexes[2]];
-    const leftVertexes = [topLeftVertexes[3], topLeftVertexes[2], bottomLeftVertexes[1], bottomLeftVertexes[0]];
+    const topVertexes = [
+      topLeftVertexes[1],
+      topRightVertexes[0],
+      topRightVertexes[3],
+      topLeftVertexes[2]
+    ];
+    const rightVertexes = [
+      topRightVertexes[3],
+      topRightVertexes[2],
+      bottomRightVertexes[1],
+      bottomRightVertexes[0]
+    ];
+    const bottomVertexes = [
+      bottomLeftVertexes[1],
+      bottomRightVertexes[0],
+      bottomRightVertexes[3],
+      bottomLeftVertexes[2]
+    ];
+    const leftVertexes = [
+      topLeftVertexes[3],
+      topLeftVertexes[2],
+      bottomLeftVertexes[1],
+      bottomLeftVertexes[0]
+    ];
     const topMiddleVertexes = calcElementVertexes(topMiddleSize);
     const rightMiddleVertexes = calcElementVertexes(rightMiddleSize);
     const bottomMiddleVertexes = calcElementVertexes(bottomMiddleSize);
@@ -2961,7 +2873,6 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
     const arr = [];
     let current;
     let level = -1;
-    let inComponent = false;
     html2.replace(elemRegExp, (element, index) => {
       const isOpen = element.charAt(1) !== "/";
       const isComment = element.startsWith("<!--");
@@ -2981,7 +2892,7 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
       if (isOpen) {
         level++;
         current = parseElement(element);
-        if (!current.isVoid && !inComponent && nextChar && nextChar !== "<") {
+        if (!current.isVoid && true && nextChar && nextChar !== "<") {
           const content = html2.slice(start, html2.indexOf("<", start));
           if (content.trim()) {
             current.children.push({
@@ -3035,7 +2946,7 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
   }
   function attrString(attrs2) {
     const buff = [];
-    for (let key2 in attrs2) {
+    for (const key2 in attrs2) {
       buff.push(key2 + '="' + attrs2[key2] + '"');
     }
     if (!buff.length) {
@@ -3188,7 +3099,8 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
   function calcViewBoxSize(viewElem, opts) {
     const { viewScaleInfo } = opts;
     const { scale } = viewScaleInfo;
-    let { borderRadius: borderRadius2, borderDash } = viewElem.detail;
+    let { borderRadius: borderRadius2 } = viewElem.detail;
+    const { borderDash } = viewElem.detail;
     const hasBorderDash = Array.isArray(borderDash) && borderDash.length > 0;
     const { boxSizing = defaultElemConfig$1.boxSizing, borderWidth: borderWidth2 } = viewElem.detail;
     if (Array.isArray(borderWidth2)) {
@@ -3234,6 +3146,107 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
       h: h2,
       radiusList
     };
+  }
+  function flattenObject(obj, parentKey = "", result = {}, opts) {
+    Object.keys(obj).forEach((key2) => {
+      var _a;
+      const currentKey = parentKey ? `${parentKey}${isArrayIndex$1(key2) ? `[${key2}]` : `.${key2}`}` : key2;
+      if (!((_a = opts === null || opts === void 0 ? void 0 : opts.ignorePaths) === null || _a === void 0 ? void 0 : _a.includes(currentKey))) {
+        const value = obj[key2];
+        if (isFlattenable(value)) {
+          flattenObject(value, Array.isArray(value) ? currentKey : currentKey, result, opts);
+        } else {
+          result[currentKey] = value;
+        }
+      }
+    });
+    return result;
+  }
+  function isFlattenable(value) {
+    return typeof value === "object" && value !== null && !(value instanceof Date) || Array.isArray(value);
+  }
+  function isArrayIndex$1(key2) {
+    return /^\d+$/.test(key2) && !isNaN(Number(key2));
+  }
+  function flatObject(obj, opts) {
+    if (typeof obj !== "object" || obj === null) {
+      return { "": obj };
+    }
+    return flattenObject(obj, "", {}, opts);
+  }
+  function toFlattenElement(elem) {
+    return flatObject(elem, { ignorePaths: ["detail.children"] });
+  }
+  function toFlattenLayout(layout) {
+    return flatObject(layout);
+  }
+  function toFlattenGlobal(global) {
+    return flatObject(global);
+  }
+  function toPath(path) {
+    if (Array.isArray(path))
+      return [...path];
+    return path.split(/\.|\[|\]/).filter((key2) => key2 !== "");
+  }
+  function get(obj, path, defaultValue) {
+    if (!path) {
+      return void 0;
+    }
+    const pathArray = toPath(path);
+    let current = obj;
+    for (const key2 of pathArray) {
+      if (current === null || current === void 0) {
+        return defaultValue;
+      }
+      current = current[key2];
+    }
+    return current !== void 0 ? current : defaultValue;
+  }
+  function set(obj, path, value) {
+    const pathArray = toPath(path);
+    if (pathArray.length === 0) {
+      return obj;
+    }
+    let current = obj;
+    if (current) {
+      for (let i = 0; i < pathArray.length; i++) {
+        const key2 = pathArray[i];
+        if (i === pathArray.length - 1) {
+          current[key2] = value;
+          break;
+        }
+        if (current && ((current === null || current === void 0 ? void 0 : current[key2]) === void 0 || typeof (current === null || current === void 0 ? void 0 : current[key2]) !== "object" || (current === null || current === void 0 ? void 0 : current[key2]) === null)) {
+          const nextKey = pathArray[i + 1];
+          const isNextNumeric = /^\d+$/.test(nextKey);
+          current[key2] = isNextNumeric ? [] : {};
+        }
+        current = current === null || current === void 0 ? void 0 : current[key2];
+      }
+    }
+    return obj;
+  }
+  function del(obj, path) {
+    const pathArray = toPath(path);
+    if (pathArray.length === 0) {
+      return obj;
+    }
+    let current = obj;
+    if (current) {
+      for (let i = 0; i < pathArray.length; i++) {
+        const key2 = pathArray[i];
+        if (i === pathArray.length - 1) {
+          delete current[key2];
+          break;
+        }
+        if (current && ((current === null || current === void 0 ? void 0 : current[key2]) === void 0 || typeof (current === null || current === void 0 ? void 0 : current[key2]) !== "object" || (current === null || current === void 0 ? void 0 : current[key2]) === null)) {
+          const nextKey = pathArray[i + 1];
+          const isNextNumeric = /^\d+$/.test(nextKey);
+          current[key2] = isNextNumeric ? [] : {};
+        }
+        current = current === null || current === void 0 ? void 0 : current[key2];
+      }
+    }
+    return obj;
   }
   const doNum = (n) => {
     return formatNumber(n, { decimalPlaces: 4 });
@@ -3367,7 +3380,7 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
     };
     return elemSize;
   }
-  function createElement(type, baseElem, opts) {
+  function createElement$1(type, baseElem, opts) {
     const elementSize = createElementSize(type, opts);
     let detail = {};
     if (type === "rect") {
@@ -3383,7 +3396,7 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
     } else if (type === "group") {
       detail = getDefaultElementGroupDetail();
     }
-    const elem = Object.assign(Object.assign(Object.assign({}, elementSize), baseElem), { uuid: createUUID(), type, detail: Object.assign(Object.assign({}, detail), baseElem.detail || {}) });
+    const elem = Object.assign(Object.assign(Object.assign({ uuid: createUUID() }, elementSize), baseElem), { type, detail: Object.assign(Object.assign({}, detail), baseElem.detail || {}) });
     return elem;
   }
   function insertElementToListByPosition(element, position, list) {
@@ -3522,33 +3535,29 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
     }
     return { elements, from, to };
   }
-  function mergeElement(originElem, updateContent) {
-    var _a;
-    const commonKeys = Object.keys(updateContent);
-    for (let i = 0; i < commonKeys.length; i++) {
-      const commonKey = commonKeys[i];
-      if (["x", "y", "w", "h", "angle", "name"].includes(commonKey)) {
-        originElem[commonKey] = updateContent[commonKey];
-      } else if (["detail", "operations"].includes(commonKey)) {
-        if (istype.json(updateContent[commonKey])) {
-          if (!(originElem === null || originElem === void 0 ? void 0 : originElem.hasOwnProperty(commonKey))) {
-            originElem[commonKey] = {};
-          }
-          if (istype.json(originElem[commonKey])) {
-            originElem[commonKey] = Object.assign(Object.assign({}, originElem[commonKey]), updateContent[commonKey]);
-          }
-        } else if (istype.array(updateContent[commonKey])) {
-          if (!(originElem === null || originElem === void 0 ? void 0 : originElem.hasOwnProperty(commonKey))) {
-            originElem[commonKey] = [];
-          }
-          if (istype.array(originElem[commonKey])) {
-            (_a = updateContent === null || updateContent === void 0 ? void 0 : updateContent[commonKey]) === null || _a === void 0 ? void 0 : _a.forEach((item, i2) => {
-              originElem[commonKey][i2] = item;
-            });
-            originElem[commonKey] = [...originElem[commonKey], ...updateContent[commonKey]];
-          }
+  function mergeElement(originElem, updateContent, opts) {
+    const updatedFlatten = toFlattenElement(updateContent);
+    const ignoreKeys = ["uuid", "type"];
+    const updatedKeys = Object.keys(updatedFlatten);
+    updatedKeys.forEach((key2) => {
+      if (!ignoreKeys.includes(key2)) {
+        const value = updatedFlatten[key2];
+        del(originElem, key2);
+        if (value !== void 0) {
+          set(originElem, key2, value);
         }
       }
+    });
+    if ((opts === null || opts === void 0 ? void 0 : opts.strict) === true) {
+      const originFlatten = toFlattenElement(originElem);
+      const originKeys = Object.keys(originFlatten);
+      originKeys.forEach((key2) => {
+        if (!ignoreKeys.includes(key2)) {
+          if (!updatedKeys.includes(key2)) {
+            del(originElem, key2);
+          }
+        }
+      });
     }
     return originElem;
   }
@@ -3575,7 +3584,7 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
     }
     return targetElement;
   }
-  function updateElementInListByPosition(position, updateContent, elements) {
+  function updateElementInListByPosition(position, updateContent, elements, opts) {
     var _a;
     const elem = findElementFromListByPosition(position, elements);
     if (elem) {
@@ -3587,7 +3596,7 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
           });
         }
       }
-      mergeElement(elem, updateContent);
+      mergeElement(elem, updateContent, opts);
     }
     return elem;
   }
@@ -3675,40 +3684,11 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
     };
     return p;
   }
-  function modifyElement(data, options) {
-    const { type } = options;
-    const content = Object.assign({}, options.content);
-    if (type === "addElement") {
-      const opts = options;
-      const { element, position } = opts.content;
-      if ((position === null || position === void 0 ? void 0 : position.length) > 0) {
-        insertElementToListByPosition(element, [...position], data.elements);
-      } else {
-        data.elements.push(element);
-      }
-    } else if (type === "deleteElement") {
-      const opts = options;
-      const { position } = opts.content;
-      deleteElementInListByPosition(position, data.elements);
-    } else if (type === "moveElement") {
-      const opts = options;
-      const { from, to } = opts.content;
-      const movedResult = moveElementPosition(data.elements, { from, to });
-      content.from = movedResult.from;
-      content.to = movedResult.to;
-      data.elements = movedResult.elements;
-    } else if (type === "updateElement") {
-      const opts = options;
-      const { position, afterModifiedElement } = opts.content;
-      updateElementInListByPosition(position, afterModifiedElement, data.elements);
-    }
-    return { data, content };
-  }
   const baseFontFamilyList = ["-apple-system", '"system-ui"', ' "Segoe UI"', " Roboto", '"Helvetica Neue"', "Arial", '"Noto Sans"', " sans-serif"];
   function enhanceFontFamliy(fontFamily2) {
     return [fontFamily2, ...baseFontFamilyList].join(", ");
   }
-  var __rest$1 = function(s, e) {
+  var __rest$3 = function(s, e) {
     var t = {};
     for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p) && e.indexOf(p) < 0)
       t[p] = s[p];
@@ -3721,7 +3701,8 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
   };
   function flatElementSize(elemSize, opts) {
     const { groupQueue } = opts;
-    let { x: x2, y: y2, w: w2, h: h2, angle: angle2 = 0 } = elemSize;
+    let { x: x2, y: y2 } = elemSize;
+    const { w: w2, h: h2, angle: angle2 = 0 } = elemSize;
     let totalAngle = 0;
     groupQueue.forEach((group) => {
       x2 += group.x;
@@ -3820,7 +3801,7 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
       }
       if (elem.type === "group") {
         const { detail } = elem;
-        const { children } = detail, restDetail = __rest$1(detail, ["children"]);
+        const { children } = detail, restDetail = __rest$3(detail, ["children"]);
         _resetElemSize(Object.assign(Object.assign({}, elem), { detail: Object.assign(Object.assign({}, restDetail), { children: [] }) }));
         currentGroupQueue.push(elem);
         children.forEach((child) => {
@@ -3861,6 +3842,217 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
       moveX,
       moveY
     };
+  }
+  function mergeLayout(originLayout, updateContent, opts) {
+    const updatedFlatten = toFlattenLayout(updateContent);
+    const ignoreKeys = [];
+    const updatedKeys = Object.keys(updatedFlatten);
+    updatedKeys.forEach((key2) => {
+      if (!ignoreKeys.includes(key2)) {
+        const value = updatedFlatten[key2];
+        del(originLayout, key2);
+        if (value !== void 0) {
+          set(originLayout, key2, value);
+        }
+      }
+    });
+    return originLayout;
+  }
+  function mergeGlobal(originGlobal, updateContent, opts) {
+    const updatedFlatten = toFlattenGlobal(updateContent);
+    const ignoreKeys = [];
+    const updatedKeys = Object.keys(updatedFlatten);
+    updatedKeys.forEach((key2) => {
+      if (!ignoreKeys.includes(key2)) {
+        const value = updatedFlatten[key2];
+        del(originGlobal, key2);
+        if (value !== void 0) {
+          set(originGlobal, key2, value);
+        }
+      }
+    });
+    return originGlobal;
+  }
+  function calcResultMovePosition(opts) {
+    const from = [...opts.from];
+    const to = [...opts.to];
+    if (from.length === 0 || to.length === 0) {
+      return null;
+    }
+    if (from.length <= to.length) {
+      for (let i = 0; i < from.length; i++) {
+        if (to[i] === from[i]) {
+          if (i === from.length - 1) {
+            return null;
+          }
+          continue;
+        }
+      }
+    }
+    let moveDirection = null;
+    if (from.length >= 1 && to.length >= 1) {
+      if (from.length <= to.length) {
+        if (from.length === 1) {
+          if (from[0] < to[0]) {
+            moveDirection = "up-down";
+          }
+        } else {
+          for (let i = 0; i < from.length; i++) {
+            if (from[i] === to[i]) {
+              if (from.length === from.length - 1) {
+                moveDirection = "up-down";
+                break;
+              }
+            } else {
+              break;
+            }
+          }
+        }
+      }
+      if (from.length >= to.length) {
+        if (to.length === 1) {
+          if (to[0] < from[0]) {
+            moveDirection = "down-up";
+          }
+        } else {
+          for (let i = 0; i < to.length; i++) {
+            if (i === to.length - 1 && to[i] < from[i]) {
+              moveDirection = "down-up";
+            }
+            if (from[i] === to[i]) {
+              continue;
+            } else {
+              break;
+            }
+          }
+        }
+      }
+    }
+    const startEffectIndex = from.length - 1;
+    const endEffectIndex = to.length - 1;
+    if (moveDirection === "up-down" && startEffectIndex >= 0) {
+      to[startEffectIndex] -= 1;
+    } else if (moveDirection === "down-up" && endEffectIndex >= 0) {
+      from[endEffectIndex] += 1;
+    }
+    return { from, to };
+  }
+  function calcRevertMovePosition(opts) {
+    const result = calcResultMovePosition(opts);
+    if (!result) {
+      return result;
+    }
+    return {
+      from: [...result.to],
+      to: [...result.from]
+    };
+  }
+  function merge(target, source) {
+    const result = target;
+    for (const key2 in source) {
+      if (Object.prototype.hasOwnProperty.call(source, key2)) {
+        if (typeof source[key2] === "object" && source[key2] !== null && typeof result[key2] === "object" && result[key2] !== null) {
+          result[key2] = merge(result[key2], source[key2]);
+        } else {
+          result[key2] = source[key2];
+        }
+      }
+    }
+    return target;
+  }
+  function omit(obj, keys) {
+    const result = Object.assign({}, obj);
+    for (const key2 of keys) {
+      delete result[key2];
+    }
+    return result;
+  }
+  function unflatObject(flatObj) {
+    const result = {};
+    for (const [flatKey, value] of Object.entries(flatObj)) {
+      const pathParts = parseKeyToPath(flatKey);
+      buildNestedStructure(result, pathParts, value);
+    }
+    return result;
+  }
+  function parseKeyToPath(flatKey) {
+    const regex = /([\w-]+)|\[(\d+)\]/g;
+    const pathParts = [];
+    let match;
+    while ((match = regex.exec(flatKey)) !== null) {
+      const prop = match[1] || match[2];
+      if (prop) {
+        pathParts.push(prop);
+      }
+    }
+    return pathParts;
+  }
+  function buildNestedStructure(currentObj, pathParts, value) {
+    let currentLevel = currentObj;
+    for (let i = 0; i < pathParts.length; i++) {
+      const part = pathParts[i];
+      const isArrayPart = isArrayIndex(part);
+      const isLast = i === pathParts.length - 1;
+      try {
+        if (isArrayPart) {
+          validateArrayPath(currentLevel, part);
+        } else {
+          validateObjectPath(currentLevel, part);
+        }
+      } catch (e) {
+        throw new Error(`Structure conflict at path '${pathParts.slice(0, i + 1).join(".")}': ${e.message}`);
+      }
+      if (isLast) {
+        assignValue(currentLevel, part, value);
+      } else {
+        currentLevel = prepareNextLevel(currentLevel, part, pathParts[i + 1]);
+      }
+    }
+  }
+  function isArrayIndex(key2) {
+    return /^\d+$/.test(key2);
+  }
+  function validateArrayPath(obj, index) {
+    if (!Array.isArray(obj)) {
+      throw new Error(`Expected array but found ${typeof obj}`);
+    }
+    const idx = Number(index);
+    if (idx > obj.length) {
+      obj.length = idx + 1;
+    }
+  }
+  function validateObjectPath(obj, key2) {
+    if (Array.isArray(obj)) {
+      throw new Error(`Cannot create object property '${key2}' on array`);
+    }
+    if (typeof obj !== "object" || obj === null) {
+      throw new Error(`Invalid structure for property '${key2}'`);
+    }
+  }
+  function prepareNextLevel(current, part, nextPart) {
+    const isNextArray = nextPart ? isArrayIndex(nextPart) : false;
+    if (Array.isArray(current)) {
+      const index = Number(part);
+      if (!current[index]) {
+        current[index] = isNextArray ? [] : {};
+      }
+      return current[index];
+    }
+    if (!current[part]) {
+      current[part] = isNextArray ? [] : {};
+    }
+    return current[part];
+  }
+  function assignValue(target, key2, value) {
+    if (Array.isArray(target)) {
+      const index = Number(key2);
+      if (index >= target.length) {
+        target.length = index + 1;
+      }
+      target[index] = value;
+    } else {
+      target[key2] = value;
+    }
   }
   function createColorStyle(ctx, color2, opts) {
     if (typeof color2 === "string") {
@@ -3923,14 +4115,13 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
       ctx.globalAlpha = opacity;
       drawBoxBackground(ctx, viewElem, { pattern, viewScaleInfo, viewSizeInfo });
       renderContent === null || renderContent === void 0 ? void 0 : renderContent();
-      drawBoxBorder(ctx, viewElem, { viewScaleInfo, viewSizeInfo });
+      drawBoxBorder(ctx, viewElem, { viewScaleInfo });
       ctx.globalAlpha = parentOpacity;
     };
     if (clipPath) {
       drawClipPath(ctx, viewElem, {
         originElem,
         calcElemSize,
-        viewScaleInfo,
         viewSizeInfo,
         renderContent: () => {
           mainRender();
@@ -3940,7 +4131,6 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
         drawClipPathStroke(ctx, viewElem, {
           originElem,
           calcElemSize,
-          viewScaleInfo,
           viewSizeInfo,
           parentOpacity
         });
@@ -3967,7 +4157,7 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
       ctx.scale(totalScale * scaleW, totalScale * scaleH);
       const pathStr = generateSVGPath(clipPath.commands || []);
       const path2d = new Path2D(pathStr);
-      ctx.clip(path2d);
+      ctx.clip(path2d, "nonzero");
       ctx.translate(0 - internalX, 0 - internalY);
       ctx.setTransform(1, 0, 0, 1, 0, 0);
       rotateElement$1(ctx, Object.assign({}, viewElem), () => {
@@ -4016,8 +4206,7 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
     const transform = [];
     if (viewElem.detail.background || pattern) {
       const { x: x2, y: y2, w: w2, h: h2, radiusList } = calcViewBoxSize(viewElem, {
-        viewScaleInfo,
-        viewSizeInfo
+        viewScaleInfo
       });
       ctx.beginPath();
       ctx.moveTo(x2 + radiusList[0], y2);
@@ -4059,7 +4248,7 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
           }
         }
       }
-      ctx.fill();
+      ctx.fill("nonzero");
       if (transform && transform.length > 0) {
         ctx.setTransform(1, 0, 0, 1, 0, 0);
       }
@@ -4078,12 +4267,16 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
     if (isColorStr(viewElem.detail.borderColor) === true) {
       borderColor2 = viewElem.detail.borderColor;
     }
-    const { borderWidth: borderWidth2, borderRadius: borderRadius2, borderDash, boxSizing = defaultElemConfig.boxSizing } = viewElem.detail;
-    let bw = 0;
-    if (typeof borderWidth2 === "number") {
-      bw = borderWidth2 || 1;
+    const { borderDash, borderWidth: borderWidth2, borderRadius: borderRadius2, boxSizing = defaultElemConfig.boxSizing } = viewElem.detail;
+    let viewBorderDash = [];
+    if (Array.isArray(borderDash) && borderDash.length > 0) {
+      viewBorderDash = borderDash.map((num) => Math.ceil(num * scale));
     }
-    bw = bw * scale;
+    if (viewBorderDash.length > 0) {
+      ctx.lineCap = "butt";
+    } else {
+      ctx.lineCap = "square";
+    }
     let radiusList = [0, 0, 0, 0];
     if (typeof borderRadius2 === "number") {
       const br = borderRadius2 * scale;
@@ -4091,11 +4284,12 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
     } else if (Array.isArray(borderRadius2) && (borderRadius2 === null || borderRadius2 === void 0 ? void 0 : borderRadius2.length) === 4) {
       radiusList = [borderRadius2[0] * scale, borderRadius2[1] * scale, borderRadius2[2] * scale, borderRadius2[3] * scale];
     }
-    ctx.strokeStyle = borderColor2;
-    let viewBorderDash = [];
-    if (Array.isArray(borderDash) && borderDash.length > 0) {
-      viewBorderDash = borderDash.map((num) => Math.ceil(num * scale));
+    let bw = 0;
+    if (typeof borderWidth2 === "number") {
+      bw = borderWidth2 || 1;
     }
+    bw = bw * scale;
+    ctx.strokeStyle = borderColor2;
     let borderTop = 0;
     let borderRight = 0;
     let borderBottom = 0;
@@ -4175,11 +4369,6 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
         w2 = viewElem.w;
         h2 = viewElem.h;
       }
-      if (viewBorderDash.length > 0) {
-        ctx.lineCap = "butt";
-      } else {
-        ctx.lineCap = "square";
-      }
       w2 = Math.max(w2, 1);
       h2 = Math.max(h2, 1);
       radiusList = radiusList.map((r) => {
@@ -4236,7 +4425,6 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
     rotateElement$1(ctx, { x: x2, y: y2, w: w2, h: h2, angle: angle2 }, () => {
       drawBoxShadow(ctx, viewElem, {
         viewScaleInfo,
-        viewSizeInfo,
         renderContent: () => {
           let a = w2 / 2;
           let b = h2 / 2;
@@ -4245,10 +4433,8 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
           const radiusA = a;
           const radiusB = b;
           if (bw > 0) {
-            if (boxSizing === "content-box") {
-              a = a;
-              b = b;
-            } else if (boxSizing === "center-line") {
+            if (boxSizing === "content-box") ;
+            else if (boxSizing === "center-line") {
               a = a - bw / 2;
               b = b - bw / 2;
             } else {
@@ -4268,7 +4454,7 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
             ctx.fillStyle = fillStyle;
             ctx.circle(centerX, centerY, radiusA, radiusB, 0, 0, 2 * Math.PI);
             ctx.closePath();
-            ctx.fill();
+            ctx.fill("nonzero");
             ctx.globalAlpha = parentOpacity;
             if (typeof bw === "number" && bw > 0) {
               const ba = bw / 2 + a;
@@ -4297,7 +4483,6 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
     rotateElement$1(ctx, { x: x2, y: y2, w: w2, h: h2, angle: angle2 }, () => {
       drawBoxShadow(ctx, viewElem, {
         viewScaleInfo,
-        viewSizeInfo,
         renderContent: () => {
           drawBox(ctx, viewElem, {
             originElem: elem,
@@ -4320,7 +4505,6 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
     rotateElement$1(ctx, { x: x2, y: y2, w: w2, h: h2, angle: angle2 }, () => {
       drawBoxShadow(ctx, viewElem, {
         viewScaleInfo,
-        viewSizeInfo,
         renderContent: () => {
           drawBox(ctx, viewElem, {
             originElem: elem,
@@ -4335,8 +4519,7 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
               if (elem.type === "image" && content) {
                 ctx.globalAlpha = getOpacity(elem) * parentOpacity;
                 const { x: x3, y: y3, w: w3, h: h3, radiusList } = calcViewBoxSize(viewElem, {
-                  viewScaleInfo,
-                  viewSizeInfo
+                  viewScaleInfo
                 });
                 const { detail } = elem;
                 const { scaleMode, originW = 0, originH = 0 } = detail;
@@ -4351,8 +4534,8 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
                 ctx.arcTo(x3, y3 + h3, x3, y3, radiusList[3]);
                 ctx.arcTo(x3, y3, x3 + w3, y3, radiusList[0]);
                 ctx.closePath();
-                ctx.fill();
-                ctx.clip();
+                ctx.fill("nonzero");
+                ctx.clip("nonzero");
                 if (scaleMode && originH && originW) {
                   let sx = 0;
                   let sy = 0;
@@ -4400,7 +4583,7 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
   function drawSVG(ctx, elem, opts) {
     const content = opts.loader.getContent(elem);
     const { viewScaleInfo, viewSizeInfo, parentOpacity } = opts;
-    const { x: x2, y: y2, w: w2, h: h2, angle: angle2 } = calcViewElementSize(elem, { viewScaleInfo, viewSizeInfo }) || elem;
+    const { x: x2, y: y2, w: w2, h: h2, angle: angle2 } = calcViewElementSize(elem, { viewScaleInfo }) || elem;
     rotateElement$1(ctx, { x: x2, y: y2, w: w2, h: h2, angle: angle2 }, () => {
       if (!content && !opts.loader.isDestroyed()) {
         opts.loader.load(elem, opts.elementAssets || {});
@@ -4415,7 +4598,7 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
   function drawHTML(ctx, elem, opts) {
     const content = opts.loader.getContent(elem);
     const { viewScaleInfo, viewSizeInfo, parentOpacity } = opts;
-    const { x: x2, y: y2, w: w2, h: h2, angle: angle2 } = calcViewElementSize(elem, { viewScaleInfo, viewSizeInfo }) || elem;
+    const { x: x2, y: y2, w: w2, h: h2, angle: angle2 } = calcViewElementSize(elem, { viewScaleInfo }) || elem;
     rotateElement$1(ctx, { x: x2, y: y2, w: w2, h: h2, angle: angle2 }, () => {
       if (!content && !opts.loader.isDestroyed()) {
         opts.loader.load(elem, opts.elementAssets || {});
@@ -4427,23 +4610,15 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
       }
     });
   }
-  const detailConfig = getDefaultElementDetailConfig();
-  function isTextWidthWithinErrorRange(w0, w1, scale) {
-    if (scale < 0.5) {
-      if (w0 < w1 && (w0 - w1) / w0 > -0.15) {
-        return true;
-      }
-    }
-    return w0 >= w1;
-  }
+  const detailConfig$1 = getDefaultElementDetailConfig();
   function drawText(ctx, elem, opts) {
-    const { viewScaleInfo, viewSizeInfo, parentOpacity } = opts;
+    const { viewScaleInfo, viewSizeInfo, parentOpacity, calculator } = opts;
     const { x: x2, y: y2, w: w2, h: h2, angle: angle2 } = calcViewElementSize(elem, { viewScaleInfo }) || elem;
     const viewElem = Object.assign(Object.assign({}, elem), { x: x2, y: y2, w: w2, h: h2, angle: angle2 });
     rotateElement$1(ctx, { x: x2, y: y2, w: w2, h: h2, angle: angle2 }, () => {
+      var _a, _b;
       drawBoxShadow(ctx, viewElem, {
         viewScaleInfo,
-        viewSizeInfo,
         renderContent: () => {
           drawBox(ctx, viewElem, {
             originElem: elem,
@@ -4455,135 +4630,43 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
         }
       });
       {
-        const detail = Object.assign(Object.assign({}, detailConfig), elem.detail);
-        const originFontSize = detail.fontSize || detailConfig.fontSize;
+        const detail = Object.assign(Object.assign({}, detailConfig$1), elem.detail);
+        const originFontSize = detail.fontSize || detailConfig$1.fontSize;
         const fontSize2 = originFontSize * viewScaleInfo.scale;
         if (fontSize2 < 2) {
           return;
         }
-        const originLineHeight = detail.lineHeight || originFontSize;
-        const lineHeight2 = originLineHeight * viewScaleInfo.scale;
-        ctx.fillStyle = elem.detail.color || detailConfig.color;
+        ctx.fillStyle = elem.detail.color || detailConfig$1.color;
         ctx.textBaseline = "top";
         ctx.$setFont({
           fontWeight: detail.fontWeight,
           fontSize: fontSize2,
           fontFamily: enhanceFontFamliy(detail.fontFamily)
         });
-        let detailText = detail.text.replace(/\r\n/gi, "\n");
-        if (detail.textTransform === "lowercase") {
-          detailText = detailText.toLowerCase();
-        } else if (detail.textTransform === "uppercase") {
-          detailText = detailText.toUpperCase();
-        }
-        const fontHeight = lineHeight2;
-        const detailTextList = detailText.split("\n");
-        const lines = [];
-        let lineNum = 0;
-        detailTextList.forEach((itemText, idx) => {
-          if (detail.minInlineSize === "maxContent") {
-            lines.push({
-              text: itemText,
-              width: ctx.$undoPixelRatio(ctx.measureText(itemText).width)
-            });
-          } else {
-            let lineText = "";
-            let splitStr = "";
-            let tempStrList = itemText.split(splitStr);
-            if (detail.wordBreak === "normal") {
-              const splitStr2 = " ";
-              const wordList = itemText.split(splitStr2);
-              tempStrList = [];
-              wordList.forEach((word, idx2) => {
-                tempStrList.push(word);
-                if (idx2 < wordList.length - 1) {
-                  tempStrList.push(splitStr2);
-                }
-              });
-            }
-            if (tempStrList.length === 1 && detail.overflow === "visible") {
-              lines.push({
-                text: tempStrList[0],
-                width: ctx.$undoPixelRatio(ctx.measureText(tempStrList[0]).width)
-              });
-            } else if (tempStrList.length > 0) {
-              for (let i = 0; i < tempStrList.length; i++) {
-                if (isTextWidthWithinErrorRange(ctx.$doPixelRatio(w2), ctx.measureText(lineText + tempStrList[i]).width, viewScaleInfo.scale)) {
-                  lineText += tempStrList[i] || "";
-                } else {
-                  lines.push({
-                    text: lineText,
-                    width: ctx.$undoPixelRatio(ctx.measureText(lineText).width)
-                  });
-                  lineText = tempStrList[i] || "";
-                  lineNum++;
-                }
-                if ((lineNum + 1) * fontHeight > h2 && detail.overflow === "hidden") {
-                  break;
-                }
-                if (tempStrList.length - 1 === i) {
-                  if ((lineNum + 1) * fontHeight <= h2) {
-                    lines.push({
-                      text: lineText,
-                      width: ctx.$undoPixelRatio(ctx.measureText(lineText).width)
-                    });
-                    if (idx < detailTextList.length - 1) {
-                      lineNum++;
-                    }
-                    break;
-                  }
-                }
-              }
-            } else {
-              lines.push({
-                text: "",
-                width: 0
-              });
-            }
-          }
-        });
-        let startY = 0;
-        let eachLineStartY = 0;
-        if (fontHeight > fontSize2) {
-          eachLineStartY = (fontHeight - fontSize2) / 2;
-        }
-        if (lines.length * fontHeight < h2) {
-          if (elem.detail.verticalAlign === "top") {
-            startY = 0;
-          } else if (elem.detail.verticalAlign === "bottom") {
-            startY += h2 - lines.length * fontHeight;
-          } else {
-            startY += (h2 - lines.length * fontHeight) / 2;
-          }
-        }
         {
-          const _y = y2 + startY;
-          if (detail.textShadowColor !== void 0 && isColorStr(detail.textShadowColor)) {
-            ctx.shadowColor = detail.textShadowColor;
-          }
-          if (detail.textShadowOffsetX !== void 0 && is.number(detail.textShadowOffsetX)) {
-            ctx.shadowOffsetX = detail.textShadowOffsetX;
-          }
-          if (detail.textShadowOffsetY !== void 0 && is.number(detail.textShadowOffsetY)) {
-            ctx.shadowOffsetY = detail.textShadowOffsetY;
-          }
-          if (detail.textShadowBlur !== void 0 && is.number(detail.textShadowBlur)) {
-            ctx.shadowBlur = detail.textShadowBlur;
-          }
-          lines.forEach((line, i) => {
-            let _x = x2;
-            if (detail.textAlign === "center") {
-              _x = x2 + (w2 - line.width) / 2;
-            } else if (detail.textAlign === "right") {
-              _x = x2 + (w2 - line.width);
+          const virtualTextDetail = calculator.getVirtualFlatItem(elem.uuid);
+          if (Array.isArray(virtualTextDetail === null || virtualTextDetail === void 0 ? void 0 : virtualTextDetail.textLines) && ((_a = virtualTextDetail === null || virtualTextDetail === void 0 ? void 0 : virtualTextDetail.textLines) === null || _a === void 0 ? void 0 : _a.length) > 0) {
+            if (detail.textShadowColor !== void 0 && isColorStr(detail.textShadowColor)) {
+              ctx.shadowColor = detail.textShadowColor;
             }
-            ctx.fillText(line.text, _x, _y + fontHeight * i + eachLineStartY);
-          });
+            if (detail.textShadowOffsetX !== void 0 && is.number(detail.textShadowOffsetX)) {
+              ctx.shadowOffsetX = detail.textShadowOffsetX;
+            }
+            if (detail.textShadowOffsetY !== void 0 && is.number(detail.textShadowOffsetY)) {
+              ctx.shadowOffsetY = detail.textShadowOffsetY;
+            }
+            if (detail.textShadowBlur !== void 0 && is.number(detail.textShadowBlur)) {
+              ctx.shadowBlur = detail.textShadowBlur;
+            }
+            (_b = virtualTextDetail === null || virtualTextDetail === void 0 ? void 0 : virtualTextDetail.textLines) === null || _b === void 0 ? void 0 : _b.forEach((line) => {
+              ctx.fillText(line.text, x2 + line.x * viewScaleInfo.scale, y2 + line.y * viewScaleInfo.scale);
+            });
+          }
         }
       }
     });
   }
-  var __rest = function(s, e) {
+  var __rest$2 = function(s, e) {
     var t = {};
     for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p) && e.indexOf(p) < 0)
       t[p] = s[p];
@@ -4606,7 +4689,7 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
     const viewOriginY = originY * scaleH;
     const internalX = x2 - viewOriginX;
     const internalY = y2 - viewOriginY;
-    const _c = elem.detail, restDetail = __rest(_c, ["clipPath", "clipPathStrokeColor", "clipPathStrokeWidth"]);
+    const _c = elem.detail, { clipPath, clipPathStrokeColor, clipPathStrokeWidth } = _c, restDetail = __rest$2(_c, ["clipPath", "clipPathStrokeColor", "clipPathStrokeWidth"]);
     const scaleNum = viewScaleInfo.scale * viewSizeInfo.devicePixelRatio;
     const viewElem = Object.assign(Object.assign({}, elem), { x: x2, y: y2, w: w2, h: h2, angle: angle2 });
     let boxViewElem = Object.assign({}, viewElem);
@@ -4638,7 +4721,6 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
         renderContent: () => {
           drawBoxShadow(ctx, viewElem, {
             viewScaleInfo,
-            viewSizeInfo,
             renderContent: () => {
               ctx.save();
               ctx.translate(internalX, internalY);
@@ -4653,7 +4735,7 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
                 }
               }
               if (detail.fill) {
-                ctx.fill(path2d, fillRule);
+                ctx.fill(path2d, fillRule || "nonzero");
               }
               if (detail.stroke && detail.strokeWidth !== 0) {
                 ctx.strokeStyle = detail.stroke;
@@ -4735,7 +4817,6 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
       ctx.globalAlpha = getOpacity(elem) * parentOpacity;
       drawBoxShadow(ctx, viewElem, {
         viewScaleInfo,
-        viewSizeInfo,
         renderContent: () => {
           drawBox(ctx, viewElem, {
             originElem: elem,
@@ -4745,8 +4826,7 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
             parentOpacity,
             renderContent: () => {
               const { x: x3, y: y3, w: w3, h: h3, radiusList } = calcViewBoxSize(viewElem, {
-                viewScaleInfo,
-                viewSizeInfo
+                viewScaleInfo
               });
               if (elem.detail.overflow === "hidden") {
                 ctx.save();
@@ -4758,8 +4838,8 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
                 ctx.arcTo(x3, y3 + h3, x3, y3, radiusList[3]);
                 ctx.arcTo(x3, y3, x3 + w3, y3, radiusList[0]);
                 ctx.closePath();
-                ctx.fill();
-                ctx.clip();
+                ctx.fill("nonzero");
+                ctx.clip("nonzero");
               }
               if (Array.isArray(elem.detail.children)) {
                 const { parentElementSize: parentSize } = opts;
@@ -4832,7 +4912,6 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
     ctx.globalAlpha = 1;
     drawBoxShadow(ctx, viewElem, {
       viewScaleInfo,
-      viewSizeInfo,
       renderContent: () => {
         drawBoxBackground(ctx, viewElem, { viewScaleInfo, viewSizeInfo });
       }
@@ -4843,8 +4922,7 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
       const viewElemSize = calcViewElementSize(elem2, { viewScaleInfo: viewScaleInfo2 }) || elem2;
       const viewElem2 = Object.assign(Object.assign({}, elem2), viewElemSize);
       const { x: x3, y: y3, w: w3, h: h3, radiusList } = calcViewBoxSize(viewElem2, {
-        viewScaleInfo: viewScaleInfo2,
-        viewSizeInfo: viewSizeInfo2
+        viewScaleInfo: viewScaleInfo2
       });
       ctx.save();
       ctx.fillStyle = "transparent";
@@ -4855,14 +4933,14 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
       ctx.arcTo(x3, y3 + h3, x3, y3, radiusList[3]);
       ctx.arcTo(x3, y3, x3 + w3, y3, radiusList[0]);
       ctx.closePath();
-      ctx.fill();
-      ctx.clip();
+      ctx.fill("nonzero");
+      ctx.clip("nonzero");
     }
     renderContent(ctx);
     if (layout.detail.overflow === "hidden") {
       ctx.restore();
     }
-    drawBoxBorder(ctx, viewElem, { viewScaleInfo, viewSizeInfo });
+    drawBoxBorder(ctx, viewElem, { viewScaleInfo });
     ctx.globalAlpha = parentOpacity;
   }
   function drawGlobalBackground(ctx, global, opts) {
@@ -5093,6 +5171,244 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
     }
     return false;
   };
+  const detailConfig = getDefaultElementDetailConfig();
+  function isTextWidthWithinErrorRange(w0, w1, scale) {
+    return w0 >= w1;
+  }
+  function calcVirtualTextDetail(elem, opts) {
+    const { w: w2, h: h2 } = elem;
+    const x2 = 0;
+    const y2 = 0;
+    const ctx = opts.tempContext;
+    const lines = [];
+    const detail = Object.assign(Object.assign({}, detailConfig), elem.detail);
+    const originFontSize = detail.fontSize || detailConfig.fontSize;
+    const fontSize2 = originFontSize;
+    if (fontSize2 < 2) {
+      return {};
+    }
+    const originLineHeight = detail.lineHeight || originFontSize;
+    const lineHeight2 = originLineHeight;
+    ctx.textBaseline = "top";
+    ctx.$setFont({
+      fontWeight: detail.fontWeight,
+      fontSize: fontSize2,
+      fontFamily: enhanceFontFamliy(detail.fontFamily)
+    });
+    let detailText = detail.text.replace(/\r\n/gi, "\n");
+    if (detail.textTransform === "lowercase") {
+      detailText = detailText.toLowerCase();
+    } else if (detail.textTransform === "uppercase") {
+      detailText = detailText.toUpperCase();
+    }
+    const fontHeight = lineHeight2;
+    const detailTextList = detailText.split("\n");
+    let lineNum = 0;
+    detailTextList.forEach((itemText, idx) => {
+      if (detail.minInlineSize === "maxContent") {
+        lines.push({
+          x: x2,
+          y: 0,
+          text: itemText,
+          width: ctx.$undoPixelRatio(ctx.measureText(itemText).width)
+        });
+      } else {
+        let lineText = "";
+        let splitStr = "";
+        let tempStrList = itemText.split(splitStr);
+        if (detail.wordBreak === "normal") {
+          splitStr = " ";
+          const wordList = itemText.split(splitStr);
+          tempStrList = [];
+          wordList.forEach((word, idx2) => {
+            tempStrList.push(word);
+            if (idx2 < wordList.length - 1) {
+              tempStrList.push(splitStr);
+            }
+          });
+        }
+        if (tempStrList.length === 1 && detail.overflow === "visible") {
+          lines.push({
+            x: x2,
+            y: 0,
+            text: tempStrList[0],
+            width: ctx.$undoPixelRatio(ctx.measureText(tempStrList[0]).width)
+          });
+        } else if (tempStrList.length > 0) {
+          for (let i = 0; i < tempStrList.length; i++) {
+            if (isTextWidthWithinErrorRange(ctx.$doPixelRatio(w2), ctx.measureText(lineText + tempStrList[i]).width)) {
+              lineText += tempStrList[i] || "";
+            } else {
+              lines.push({
+                x: x2,
+                y: 0,
+                text: lineText,
+                width: ctx.$undoPixelRatio(ctx.measureText(lineText).width)
+              });
+              lineText = tempStrList[i] || "";
+              lineNum++;
+            }
+            if ((lineNum + 1) * fontHeight > h2 && detail.overflow === "hidden") {
+              break;
+            }
+            if (tempStrList.length - 1 === i) {
+              if ((lineNum + 1) * fontHeight <= h2) {
+                lines.push({
+                  x: x2,
+                  y: 0,
+                  text: lineText,
+                  width: ctx.$undoPixelRatio(ctx.measureText(lineText).width)
+                });
+                if (idx < detailTextList.length - 1) {
+                  lineNum++;
+                }
+                break;
+              }
+            }
+          }
+        } else {
+          lines.push({
+            x: x2,
+            y: 0,
+            text: "",
+            width: 0
+          });
+        }
+      }
+    });
+    let startY = 0;
+    let eachLineStartY = 0;
+    if (fontHeight > fontSize2) {
+      eachLineStartY = (fontHeight - fontSize2) / 2;
+    }
+    if (lines.length * fontHeight < h2) {
+      if (detail.verticalAlign === "top") {
+        startY = 0;
+      } else if (detail.verticalAlign === "bottom") {
+        startY += h2 - lines.length * fontHeight;
+      } else {
+        startY += (h2 - lines.length * fontHeight) / 2;
+      }
+    }
+    {
+      const _y = y2 + startY;
+      lines.forEach((line, i) => {
+        let _x = x2;
+        if (detail.textAlign === "center") {
+          _x = x2 + (w2 - line.width) / 2;
+        } else if (detail.textAlign === "right") {
+          _x = x2 + (w2 - line.width);
+        }
+        lines[i].x = _x;
+        lines[i].y = _y + fontHeight * i + eachLineStartY;
+      });
+    }
+    const virtualTextDetail = {
+      textLines: lines
+    };
+    return virtualTextDetail;
+  }
+  function calcVirtualFlatDetail(elem, opts) {
+    let virtualDetail = {};
+    if (elem.type === "text") {
+      virtualDetail = calcVirtualTextDetail(elem, opts);
+    }
+    return virtualDetail;
+  }
+  function elementsToVirtualFlatMap(elements, opts) {
+    const virtualFlatMap = {};
+    const currentPosition = [];
+    const _walk = (elem) => {
+      const baseInfo = {
+        type: elem.type,
+        isVisibleInView: true,
+        position: [...currentPosition]
+      };
+      let originRectInfo = null;
+      const groupQueue = getGroupQueueByElementPosition(elements, currentPosition);
+      originRectInfo = calcElementOriginRectInfo(elem, {
+        groupQueue: groupQueue || []
+      });
+      const virtualItem = Object.assign(Object.assign(Object.assign({}, baseInfo), {
+        originRectInfo,
+        rangeRectInfo: is.angle(elem.angle) ? originRectInfoToRangeRectInfo(originRectInfo) : originRectInfo
+      }), calcVirtualFlatDetail(elem, opts));
+      virtualFlatMap[elem.uuid] = virtualItem;
+      if (elem.type === "group") {
+        elem.detail.children.forEach((ele, i) => {
+          currentPosition.push(i);
+          _walk(ele);
+          currentPosition.pop();
+        });
+      }
+    };
+    elements.forEach((elem, index) => {
+      currentPosition.push(index);
+      _walk(elem);
+      currentPosition.pop();
+    });
+    return virtualFlatMap;
+  }
+  function sortElementsViewVisiableInfoMap(elements, opts) {
+    const { viewScaleInfo, viewSizeInfo, tempContext } = opts;
+    const visibleInfoMap = elementsToVirtualFlatMap(elements, { tempContext });
+    return updateVirtualFlatItemMapStatus(visibleInfoMap, { viewScaleInfo, viewSizeInfo });
+  }
+  function isRangeRectInfoCollide(info1, info2) {
+    const rect1MinX = Math.min(info1.topLeft.x, info1.topRight.x, info1.bottomLeft.x, info1.bottomRight.x);
+    const rect1MaxX = Math.max(info1.topLeft.x, info1.topRight.x, info1.bottomLeft.x, info1.bottomRight.x);
+    const rect1MinY = Math.min(info1.topLeft.y, info1.topRight.y, info1.bottomLeft.y, info1.bottomRight.y);
+    const rect1MaxY = Math.max(info1.topLeft.y, info1.topRight.y, info1.bottomLeft.y, info1.bottomRight.y);
+    const rect2MinX = Math.min(info2.topLeft.x, info2.topRight.x, info2.bottomLeft.x, info2.bottomRight.x);
+    const rect2MaxX = Math.max(info2.topLeft.x, info2.topRight.x, info2.bottomLeft.x, info2.bottomRight.x);
+    const rect2MinY = Math.min(info2.topLeft.y, info2.topRight.y, info2.bottomLeft.y, info2.bottomRight.y);
+    const rect2MaxY = Math.max(info2.topLeft.y, info2.topRight.y, info2.bottomLeft.y, info2.bottomRight.y);
+    if (rect1MinX <= rect2MaxX && rect1MaxX >= rect2MinX && rect1MinY <= rect2MaxY && rect1MaxY >= rect2MinY || rect2MaxX <= rect1MaxY && rect2MaxX >= rect1MaxY && rect2MaxX <= rect1MaxY && rect2MaxX >= rect1MaxY) {
+      return true;
+    }
+    return false;
+  }
+  function updateVirtualFlatItemMapStatus(virtualFlatItemMap, opts) {
+    const canvasRectInfo = calcVisibleOriginCanvasRectInfo(opts);
+    let visibleCount = 0;
+    let invisibleCount = 0;
+    Object.keys(virtualFlatItemMap).forEach((uuid) => {
+      const info = virtualFlatItemMap[uuid];
+      info.isVisibleInView = isRangeRectInfoCollide(info.rangeRectInfo, canvasRectInfo);
+      info.isVisibleInView ? visibleCount++ : invisibleCount++;
+    });
+    return { virtualFlatItemMap, visibleCount, invisibleCount };
+  }
+  function calcVisibleOriginCanvasRectInfo(opts) {
+    const { viewScaleInfo, viewSizeInfo } = opts;
+    const { scale, offsetTop, offsetLeft } = viewScaleInfo;
+    const { width, height } = viewSizeInfo;
+    const x2 = 0 - offsetLeft / scale;
+    const y2 = 0 - offsetTop / scale;
+    const w2 = width / scale;
+    const h2 = height / scale;
+    const center = calcElementCenter({ x: x2, y: y2, w: w2, h: h2 });
+    const topLeft = { x: x2, y: y2 };
+    const topRight = { x: x2 + w2, y: y2 };
+    const bottomLeft = { x: x2, y: y2 + h2 };
+    const bottomRight = { x: x2 + w2, y: y2 + h2 };
+    const left = { x: x2, y: center.y };
+    const top = { x: center.x, y: y2 };
+    const right = { x: x2 + w2, y: center.y };
+    const bottom = { x: center.x, y: y2 + h2 };
+    const rectInfo = {
+      center,
+      topLeft,
+      topRight,
+      bottomLeft,
+      bottomRight,
+      left,
+      top,
+      right,
+      bottom
+    };
+    return rectInfo;
+  }
   var __classPrivateFieldSet$7 = function(receiver, state, value, kind, f) {
     if (kind === "m") throw new TypeError("Private method is not writable");
     if (kind === "a" && !f) throw new TypeError("Private accessor was defined without a setter");
@@ -5104,34 +5420,212 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
     if (typeof state === "function" ? receiver !== state || !f : !state.has(receiver)) throw new TypeError("Cannot read private member from an object whose class did not declare it");
     return kind === "m" ? f : kind === "a" ? f.call(receiver) : f ? f.value : state.get(receiver);
   };
-  var _Renderer_instances, _Renderer_opts, _Renderer_loader, _Renderer_hasDestroyed, _Renderer_init;
+  var _Calculator_opts, _Calculator_store;
+  class Calculator {
+    constructor(opts) {
+      _Calculator_opts.set(this, void 0);
+      _Calculator_store.set(this, void 0);
+      __classPrivateFieldSet$7(this, _Calculator_opts, opts, "f");
+      __classPrivateFieldSet$7(this, _Calculator_store, new Store({
+        defaultStorage: {
+          virtualFlatItemMap: {},
+          visibleCount: 0,
+          invisibleCount: 0
+        }
+      }), "f");
+    }
+    toGridNum(num, opts) {
+      if ((opts === null || opts === void 0 ? void 0 : opts.ignore) === true) {
+        return num;
+      }
+      return Math.round(num);
+    }
+    destroy() {
+      __classPrivateFieldSet$7(this, _Calculator_opts, null, "f");
+    }
+    needRender(elem) {
+      const virtualFlatItemMap = __classPrivateFieldGet$7(this, _Calculator_store, "f").get("virtualFlatItemMap");
+      const info = virtualFlatItemMap[elem.uuid];
+      if (!info) {
+        return true;
+      }
+      return info.isVisibleInView;
+    }
+    getPointElement(p, opts) {
+      const context2d = __classPrivateFieldGet$7(this, _Calculator_opts, "f").tempContext;
+      return getViewPointAtElement(p, Object.assign(Object.assign({}, opts), { context2d }));
+    }
+    resetVirtualFlatItemMap(data, opts) {
+      if (data) {
+        const { virtualFlatItemMap, invisibleCount, visibleCount } = sortElementsViewVisiableInfoMap(data.elements, Object.assign(Object.assign({}, opts), {
+          tempContext: __classPrivateFieldGet$7(this, _Calculator_opts, "f").tempContext
+        }));
+        __classPrivateFieldGet$7(this, _Calculator_store, "f").set("virtualFlatItemMap", virtualFlatItemMap);
+        __classPrivateFieldGet$7(this, _Calculator_store, "f").set("invisibleCount", invisibleCount);
+        __classPrivateFieldGet$7(this, _Calculator_store, "f").set("visibleCount", visibleCount);
+      }
+    }
+    updateVisiableStatus(opts) {
+      const { virtualFlatItemMap, invisibleCount, visibleCount } = updateVirtualFlatItemMapStatus(__classPrivateFieldGet$7(this, _Calculator_store, "f").get("virtualFlatItemMap"), opts);
+      __classPrivateFieldGet$7(this, _Calculator_store, "f").set("virtualFlatItemMap", virtualFlatItemMap);
+      __classPrivateFieldGet$7(this, _Calculator_store, "f").set("invisibleCount", invisibleCount);
+      __classPrivateFieldGet$7(this, _Calculator_store, "f").set("visibleCount", visibleCount);
+    }
+    calcViewRectInfoFromOrigin(uuid, opts) {
+      const infoData = __classPrivateFieldGet$7(this, _Calculator_store, "f").get("virtualFlatItemMap")[uuid];
+      if (!(infoData === null || infoData === void 0 ? void 0 : infoData.originRectInfo)) {
+        return null;
+      }
+      const { checkVisible, viewScaleInfo, viewSizeInfo } = opts;
+      const { center, left, right, bottom, top, topLeft, topRight, bottomLeft, bottomRight } = infoData.originRectInfo;
+      if (checkVisible === true && infoData.isVisibleInView === false) {
+        return null;
+      }
+      const calcOpts = { viewScaleInfo };
+      const viewRectInfo = {
+        center: calcViewPointSize(center, calcOpts),
+        left: calcViewPointSize(left, calcOpts),
+        right: calcViewPointSize(right, calcOpts),
+        bottom: calcViewPointSize(bottom, calcOpts),
+        top: calcViewPointSize(top, calcOpts),
+        topLeft: calcViewPointSize(topLeft, calcOpts),
+        topRight: calcViewPointSize(topRight, calcOpts),
+        bottomLeft: calcViewPointSize(bottomLeft, calcOpts),
+        bottomRight: calcViewPointSize(bottomRight, calcOpts)
+      };
+      return viewRectInfo;
+    }
+    calcViewRectInfoFromRange(uuid, opts) {
+      const infoData = __classPrivateFieldGet$7(this, _Calculator_store, "f").get("virtualFlatItemMap")[uuid];
+      if (!(infoData === null || infoData === void 0 ? void 0 : infoData.originRectInfo)) {
+        return null;
+      }
+      const { checkVisible, viewScaleInfo, viewSizeInfo } = opts;
+      const { center, left, right, bottom, top, topLeft, topRight, bottomLeft, bottomRight } = infoData.rangeRectInfo;
+      if (checkVisible === true && infoData.isVisibleInView === false) {
+        return null;
+      }
+      const calcOpts = { viewScaleInfo };
+      const viewRectInfo = {
+        center: calcViewPointSize(center, calcOpts),
+        left: calcViewPointSize(left, calcOpts),
+        right: calcViewPointSize(right, calcOpts),
+        bottom: calcViewPointSize(bottom, calcOpts),
+        top: calcViewPointSize(top, calcOpts),
+        topLeft: calcViewPointSize(topLeft, calcOpts),
+        topRight: calcViewPointSize(topRight, calcOpts),
+        bottomLeft: calcViewPointSize(bottomLeft, calcOpts),
+        bottomRight: calcViewPointSize(bottomRight, calcOpts)
+      };
+      return viewRectInfo;
+    }
+    modifyText(element) {
+      const virtualFlatItemMap = __classPrivateFieldGet$7(this, _Calculator_store, "f").get("virtualFlatItemMap");
+      const flatItem = virtualFlatItemMap[element.uuid];
+      if (element && element.type === "text") {
+        const newVirtualFlatItem = Object.assign(Object.assign({}, flatItem), calcVirtualTextDetail(element, {
+          tempContext: __classPrivateFieldGet$7(this, _Calculator_opts, "f").tempContext
+        }));
+        virtualFlatItemMap[element.uuid] = newVirtualFlatItem;
+        __classPrivateFieldGet$7(this, _Calculator_store, "f").set("virtualFlatItemMap", virtualFlatItemMap);
+      }
+    }
+    modifyVirtualFlatItemMap(data, opts) {
+      const { modifyInfo, viewScaleInfo, viewSizeInfo } = opts;
+      const { type, content } = modifyInfo;
+      const list = data.elements;
+      const virtualFlatItemMap = __classPrivateFieldGet$7(this, _Calculator_store, "f").get("virtualFlatItemMap");
+      if (type === "deleteElement") {
+        const { element } = content;
+        const uuids = [];
+        const _walk = (e) => {
+          uuids.push(e.uuid);
+          if (e.type === "group" && Array.isArray(e.detail.children)) {
+            e.detail.children.forEach((child) => {
+              _walk(child);
+            });
+          }
+        };
+        _walk(element);
+        uuids.forEach((uuid) => {
+          delete virtualFlatItemMap[uuid];
+        });
+        __classPrivateFieldGet$7(this, _Calculator_store, "f").set("virtualFlatItemMap", virtualFlatItemMap);
+      } else if (type === "addElement" || type === "updateElement") {
+        const { position } = content;
+        const element = findElementFromListByPosition(position, data.elements);
+        const groupQueue = getGroupQueueByElementPosition(list, position);
+        if (element) {
+          if (type === "updateElement" && element.type === "group") {
+            this.resetVirtualFlatItemMap(data, { viewScaleInfo, viewSizeInfo });
+          } else {
+            const originRectInfo = calcElementOriginRectInfo(element, {
+              groupQueue: groupQueue || []
+            });
+            const newVirtualFlatItem = Object.assign({ type: element.type, originRectInfo, rangeRectInfo: is.angle(element.angle) ? originRectInfoToRangeRectInfo(originRectInfo) : originRectInfo, isVisibleInView: true, position: [...position] }, calcVirtualFlatDetail(element, {
+              tempContext: __classPrivateFieldGet$7(this, _Calculator_opts, "f").tempContext
+            }));
+            virtualFlatItemMap[element.uuid] = newVirtualFlatItem;
+            __classPrivateFieldGet$7(this, _Calculator_store, "f").set("virtualFlatItemMap", virtualFlatItemMap);
+            if (type === "updateElement") {
+              this.updateVisiableStatus({ viewScaleInfo, viewSizeInfo });
+            }
+          }
+        }
+      } else if (type === "moveElement") {
+        this.resetVirtualFlatItemMap(data, { viewScaleInfo, viewSizeInfo });
+      }
+    }
+    getVirtualFlatItem(uuid) {
+      const itemMap = __classPrivateFieldGet$7(this, _Calculator_store, "f").get("virtualFlatItemMap");
+      return itemMap[uuid] || null;
+    }
+  }
+  _Calculator_opts = /* @__PURE__ */ new WeakMap(), _Calculator_store = /* @__PURE__ */ new WeakMap();
+  var __classPrivateFieldSet$6 = function(receiver, state, value, kind, f) {
+    if (kind === "m") throw new TypeError("Private method is not writable");
+    if (kind === "a" && !f) throw new TypeError("Private accessor was defined without a setter");
+    if (typeof state === "function" ? receiver !== state || !f : !state.has(receiver)) throw new TypeError("Cannot write private member to an object whose class did not declare it");
+    return kind === "a" ? f.call(receiver, value) : f ? f.value = value : state.set(receiver, value), value;
+  };
+  var __classPrivateFieldGet$6 = function(receiver, state, kind, f) {
+    if (kind === "a" && !f) throw new TypeError("Private accessor was defined without a getter");
+    if (typeof state === "function" ? receiver !== state || !f : !state.has(receiver)) throw new TypeError("Cannot read private member from an object whose class did not declare it");
+    return kind === "m" ? f : kind === "a" ? f.call(receiver) : f ? f.value : state.get(receiver);
+  };
+  var _Renderer_instances, _Renderer_opts, _Renderer_loader, _Renderer_calculator, _Renderer_hasDestroyed, _Renderer_init;
   class Renderer extends EventEmitter {
     constructor(opts) {
       super();
       _Renderer_instances.add(this);
       _Renderer_opts.set(this, void 0);
       _Renderer_loader.set(this, new Loader());
+      _Renderer_calculator.set(this, void 0);
       _Renderer_hasDestroyed.set(this, false);
-      __classPrivateFieldSet$7(this, _Renderer_opts, opts, "f");
-      __classPrivateFieldGet$7(this, _Renderer_instances, "m", _Renderer_init).call(this);
+      __classPrivateFieldSet$6(this, _Renderer_opts, opts, "f");
+      __classPrivateFieldSet$6(this, _Renderer_calculator, new Calculator({
+        tempContext: opts.tempContext
+      }), "f");
+      __classPrivateFieldGet$6(this, _Renderer_instances, "m", _Renderer_init).call(this);
     }
     isDestroyed() {
-      return __classPrivateFieldGet$7(this, _Renderer_hasDestroyed, "f");
+      return __classPrivateFieldGet$6(this, _Renderer_hasDestroyed, "f");
     }
     destroy() {
       this.clear();
-      __classPrivateFieldSet$7(this, _Renderer_opts, null, "f");
-      __classPrivateFieldGet$7(this, _Renderer_loader, "f").destroy();
-      __classPrivateFieldSet$7(this, _Renderer_loader, null, "f");
-      __classPrivateFieldSet$7(this, _Renderer_hasDestroyed, true, "f");
+      __classPrivateFieldSet$6(this, _Renderer_opts, null, "f");
+      __classPrivateFieldGet$6(this, _Renderer_loader, "f").destroy();
+      __classPrivateFieldSet$6(this, _Renderer_loader, null, "f");
+      __classPrivateFieldSet$6(this, _Renderer_hasDestroyed, true, "f");
     }
     updateOptions(opts) {
-      __classPrivateFieldSet$7(this, _Renderer_opts, opts, "f");
+      __classPrivateFieldSet$6(this, _Renderer_opts, opts, "f");
     }
     drawData(data, opts) {
-      const loader = __classPrivateFieldGet$7(this, _Renderer_loader, "f");
-      const { calculator, sharer } = __classPrivateFieldGet$7(this, _Renderer_opts, "f");
-      const viewContext = __classPrivateFieldGet$7(this, _Renderer_opts, "f").viewContext;
+      const loader = __classPrivateFieldGet$6(this, _Renderer_loader, "f");
+      const calculator = __classPrivateFieldGet$6(this, _Renderer_calculator, "f");
+      const { sharer } = __classPrivateFieldGet$6(this, _Renderer_opts, "f");
+      const viewContext = __classPrivateFieldGet$6(this, _Renderer_opts, "f").viewContext;
       viewContext.clearRect(0, 0, viewContext.canvas.width, viewContext.canvas.height);
       const parentElementSize = {
         x: 0,
@@ -5139,6 +5633,12 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
         w: opts.viewSizeInfo.width,
         h: opts.viewSizeInfo.height
       };
+      if (opts.forceDrawAll === true) {
+        __classPrivateFieldGet$6(this, _Renderer_calculator, "f").resetVirtualFlatItemMap(data, {
+          viewScaleInfo: opts.viewScaleInfo,
+          viewSizeInfo: opts.viewSizeInfo
+        });
+      }
       const drawOpts = Object.assign({
         loader,
         calculator,
@@ -5157,7 +5657,7 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
       }
     }
     scale(num) {
-      const { sharer } = __classPrivateFieldGet$7(this, _Renderer_opts, "f");
+      const { sharer } = __classPrivateFieldGet$6(this, _Renderer_opts, "f");
       if (!sharer) {
         return;
       }
@@ -5182,17 +5682,20 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
       }
     }
     setLoadItemMap(itemMap) {
-      __classPrivateFieldGet$7(this, _Renderer_loader, "f").setLoadItemMap(itemMap);
+      __classPrivateFieldGet$6(this, _Renderer_loader, "f").setLoadItemMap(itemMap);
     }
     getLoadItemMap() {
-      return __classPrivateFieldGet$7(this, _Renderer_loader, "f").getLoadItemMap();
+      return __classPrivateFieldGet$6(this, _Renderer_loader, "f").getLoadItemMap();
     }
     getLoader() {
-      return __classPrivateFieldGet$7(this, _Renderer_loader, "f");
+      return __classPrivateFieldGet$6(this, _Renderer_loader, "f");
+    }
+    getCalculator() {
+      return __classPrivateFieldGet$6(this, _Renderer_calculator, "f");
     }
   }
-  _Renderer_opts = /* @__PURE__ */ new WeakMap(), _Renderer_loader = /* @__PURE__ */ new WeakMap(), _Renderer_hasDestroyed = /* @__PURE__ */ new WeakMap(), _Renderer_instances = /* @__PURE__ */ new WeakSet(), _Renderer_init = function _Renderer_init2() {
-    const loader = __classPrivateFieldGet$7(this, _Renderer_loader, "f");
+  _Renderer_opts = /* @__PURE__ */ new WeakMap(), _Renderer_loader = /* @__PURE__ */ new WeakMap(), _Renderer_calculator = /* @__PURE__ */ new WeakMap(), _Renderer_hasDestroyed = /* @__PURE__ */ new WeakMap(), _Renderer_instances = /* @__PURE__ */ new WeakSet(), _Renderer_init = function _Renderer_init2() {
+    const loader = __classPrivateFieldGet$6(this, _Renderer_loader, "f");
     loader.on("load", (e) => {
       this.trigger("load", e);
     });
@@ -5200,175 +5703,6 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
       console.error(e);
     });
   };
-  var __classPrivateFieldSet$6 = function(receiver, state, value, kind, f) {
-    if (kind === "m") throw new TypeError("Private method is not writable");
-    if (kind === "a" && !f) throw new TypeError("Private accessor was defined without a setter");
-    if (typeof state === "function" ? receiver !== state || !f : !state.has(receiver)) throw new TypeError("Cannot write private member to an object whose class did not declare it");
-    return kind === "a" ? f.call(receiver, value) : f ? f.value = value : state.set(receiver, value), value;
-  };
-  var __classPrivateFieldGet$6 = function(receiver, state, kind, f) {
-    if (kind === "a" && !f) throw new TypeError("Private accessor was defined without a getter");
-    if (typeof state === "function" ? receiver !== state || !f : !state.has(receiver)) throw new TypeError("Cannot read private member from an object whose class did not declare it");
-    return kind === "m" ? f : kind === "a" ? f.call(receiver) : f ? f.value : state.get(receiver);
-  };
-  var _Calculator_opts, _Calculator_store;
-  class Calculator {
-    constructor(opts) {
-      _Calculator_opts.set(this, void 0);
-      _Calculator_store.set(this, void 0);
-      __classPrivateFieldSet$6(this, _Calculator_opts, opts, "f");
-      __classPrivateFieldSet$6(this, _Calculator_store, new Store({
-        defaultStorage: {
-          viewVisibleInfoMap: {},
-          visibleCount: 0,
-          invisibleCount: 0
-        }
-      }), "f");
-    }
-    toGridNum(num, opts) {
-      if ((opts === null || opts === void 0 ? void 0 : opts.ignore) === true) {
-        return num;
-      }
-      return Math.round(num);
-    }
-    destroy() {
-      __classPrivateFieldSet$6(this, _Calculator_opts, null, "f");
-    }
-    needRender(elem) {
-      const viewVisibleInfoMap = __classPrivateFieldGet$6(this, _Calculator_store, "f").get("viewVisibleInfoMap");
-      const info = viewVisibleInfoMap[elem.uuid];
-      if (!info) {
-        return true;
-      }
-      return info.isVisibleInView;
-    }
-    isPointInElement(p, elem, viewScaleInfo, viewSizeInfo) {
-      const context2d = __classPrivateFieldGet$6(this, _Calculator_opts, "f").viewContext;
-      return isViewPointInElement(p, {
-        context2d,
-        element: elem,
-        viewScaleInfo,
-        viewSizeInfo
-      });
-    }
-    getPointElement(p, opts) {
-      const context2d = __classPrivateFieldGet$6(this, _Calculator_opts, "f").viewContext;
-      return getViewPointAtElement(p, Object.assign(Object.assign({}, opts), { context2d }));
-    }
-    resetViewVisibleInfoMap(data, opts) {
-      if (data) {
-        const { viewVisibleInfoMap, invisibleCount, visibleCount } = sortElementsViewVisiableInfoMap(data.elements, opts);
-        __classPrivateFieldGet$6(this, _Calculator_store, "f").set("viewVisibleInfoMap", viewVisibleInfoMap);
-        __classPrivateFieldGet$6(this, _Calculator_store, "f").set("invisibleCount", invisibleCount);
-        __classPrivateFieldGet$6(this, _Calculator_store, "f").set("visibleCount", visibleCount);
-      }
-    }
-    updateVisiableStatus(opts) {
-      const { viewVisibleInfoMap, invisibleCount, visibleCount } = updateViewVisibleInfoMapStatus(__classPrivateFieldGet$6(this, _Calculator_store, "f").get("viewVisibleInfoMap"), opts);
-      __classPrivateFieldGet$6(this, _Calculator_store, "f").set("viewVisibleInfoMap", viewVisibleInfoMap);
-      __classPrivateFieldGet$6(this, _Calculator_store, "f").set("invisibleCount", invisibleCount);
-      __classPrivateFieldGet$6(this, _Calculator_store, "f").set("visibleCount", visibleCount);
-    }
-    calcViewRectInfoFromOrigin(uuid, opts) {
-      const infoData = __classPrivateFieldGet$6(this, _Calculator_store, "f").get("viewVisibleInfoMap")[uuid];
-      if (!(infoData === null || infoData === void 0 ? void 0 : infoData.originRectInfo)) {
-        return null;
-      }
-      const { checkVisible, viewScaleInfo, viewSizeInfo } = opts;
-      const { center, left, right, bottom, top, topLeft, topRight, bottomLeft, bottomRight } = infoData.originRectInfo;
-      if (checkVisible === true && infoData.isVisibleInView === false) {
-        return null;
-      }
-      const calcOpts = { viewScaleInfo, viewSizeInfo };
-      const viewRectInfo = {
-        center: calcViewPointSize(center, calcOpts),
-        left: calcViewPointSize(left, calcOpts),
-        right: calcViewPointSize(right, calcOpts),
-        bottom: calcViewPointSize(bottom, calcOpts),
-        top: calcViewPointSize(top, calcOpts),
-        topLeft: calcViewPointSize(topLeft, calcOpts),
-        topRight: calcViewPointSize(topRight, calcOpts),
-        bottomLeft: calcViewPointSize(bottomLeft, calcOpts),
-        bottomRight: calcViewPointSize(bottomRight, calcOpts)
-      };
-      return viewRectInfo;
-    }
-    calcViewRectInfoFromRange(uuid, opts) {
-      const infoData = __classPrivateFieldGet$6(this, _Calculator_store, "f").get("viewVisibleInfoMap")[uuid];
-      if (!(infoData === null || infoData === void 0 ? void 0 : infoData.originRectInfo)) {
-        return null;
-      }
-      const { checkVisible, viewScaleInfo, viewSizeInfo } = opts;
-      const { center, left, right, bottom, top, topLeft, topRight, bottomLeft, bottomRight } = infoData.rangeRectInfo;
-      if (checkVisible === true && infoData.isVisibleInView === false) {
-        return null;
-      }
-      const calcOpts = { viewScaleInfo, viewSizeInfo };
-      const viewRectInfo = {
-        center: calcViewPointSize(center, calcOpts),
-        left: calcViewPointSize(left, calcOpts),
-        right: calcViewPointSize(right, calcOpts),
-        bottom: calcViewPointSize(bottom, calcOpts),
-        top: calcViewPointSize(top, calcOpts),
-        topLeft: calcViewPointSize(topLeft, calcOpts),
-        topRight: calcViewPointSize(topRight, calcOpts),
-        bottomLeft: calcViewPointSize(bottomLeft, calcOpts),
-        bottomRight: calcViewPointSize(bottomRight, calcOpts)
-      };
-      return viewRectInfo;
-    }
-    modifyViewVisibleInfoMap(data, opts) {
-      const { modifyOptions, viewScaleInfo, viewSizeInfo } = opts;
-      const { type, content } = modifyOptions;
-      const list = data.elements;
-      const viewVisibleInfoMap = __classPrivateFieldGet$6(this, _Calculator_store, "f").get("viewVisibleInfoMap");
-      if (type === "deleteElement") {
-        const { element } = content;
-        const uuids = [];
-        const _walk = (e) => {
-          uuids.push(e.uuid);
-          if (e.type === "group" && Array.isArray(e.detail.children)) {
-            e.detail.children.forEach((child) => {
-              _walk(child);
-            });
-          }
-        };
-        _walk(element);
-        uuids.forEach((uuid) => {
-          delete viewVisibleInfoMap[uuid];
-        });
-        __classPrivateFieldGet$6(this, _Calculator_store, "f").set("viewVisibleInfoMap", viewVisibleInfoMap);
-      } else if (type === "addElement" || type === "updateElement") {
-        const { position } = content;
-        const element = findElementFromListByPosition(position, data.elements);
-        const groupQueue = getGroupQueueByElementPosition(list, position);
-        if (element) {
-          if (type === "updateElement" && element.type === "group") {
-            this.resetViewVisibleInfoMap(data, { viewScaleInfo, viewSizeInfo });
-          } else {
-            const originRectInfo = calcElementOriginRectInfo(element, {
-              groupQueue: groupQueue || []
-            });
-            const newViewVisibleInfo = {
-              originRectInfo,
-              rangeRectInfo: is.angle(element.angle) ? originRectInfoToRangeRectInfo(originRectInfo) : originRectInfo,
-              isVisibleInView: true,
-              isGroup: (element === null || element === void 0 ? void 0 : element.type) === "group",
-              position: [...position]
-            };
-            viewVisibleInfoMap[element.uuid] = newViewVisibleInfo;
-            __classPrivateFieldGet$6(this, _Calculator_store, "f").set("viewVisibleInfoMap", viewVisibleInfoMap);
-            if (type === "updateElement") {
-              this.updateVisiableStatus({ viewScaleInfo, viewSizeInfo });
-            }
-          }
-        }
-      } else if (type === "moveElement") {
-        this.resetViewVisibleInfoMap(data, { viewScaleInfo, viewSizeInfo });
-      }
-    }
-  }
-  _Calculator_opts = /* @__PURE__ */ new WeakMap(), _Calculator_store = /* @__PURE__ */ new WeakMap();
   var __classPrivateFieldSet$5 = function(receiver, state, value, kind, f) {
     if (kind === "m") throw new TypeError("Private method is not writable");
     if (kind === "a" && !f) throw new TypeError("Private accessor was defined without a setter");
@@ -5506,7 +5840,9 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
         }
         this.trigger("hover", { point });
       });
-      const store = new Store({ defaultStorage: { hasPointDown: false, prevClickPoint: null, inCanvas: true } });
+      const store = new Store({
+        defaultStorage: { hasPointDown: false, prevClickPoint: null, inCanvas: true }
+      });
       __classPrivateFieldSet$5(this, _BoardWatcher_store, store, "f");
       __classPrivateFieldSet$5(this, _BoardWatcher_opts, opts, "f");
       __classPrivateFieldGet$5(this, _BoardWatcher_instances, "m", _BoardWatcher_init).call(this);
@@ -5515,23 +5851,25 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
       if (__classPrivateFieldGet$5(this, _BoardWatcher_hasDestroyed, "f")) {
         return;
       }
+      const canvas = __classPrivateFieldGet$5(this, _BoardWatcher_opts, "f").boardContent.boardContext.canvas;
       const container = window;
       container.addEventListener("mousemove", __classPrivateFieldGet$5(this, _BoardWatcher_onHover, "f"));
       container.addEventListener("mousedown", __classPrivateFieldGet$5(this, _BoardWatcher_onPointStart, "f"));
       container.addEventListener("mousemove", __classPrivateFieldGet$5(this, _BoardWatcher_onPointMove, "f"));
       container.addEventListener("mouseup", __classPrivateFieldGet$5(this, _BoardWatcher_onPointEnd, "f"));
-      container.addEventListener("wheel", __classPrivateFieldGet$5(this, _BoardWatcher_onWheel, "f"), { passive: false });
+      canvas.addEventListener("wheel", __classPrivateFieldGet$5(this, _BoardWatcher_onWheel, "f"), { passive: false });
       container.addEventListener("click", __classPrivateFieldGet$5(this, _BoardWatcher_onClick, "f"));
       container.addEventListener("contextmenu", __classPrivateFieldGet$5(this, _BoardWatcher_onContextMenu, "f"));
     }
     offEvents() {
       const container = window;
+      const canvas = __classPrivateFieldGet$5(this, _BoardWatcher_opts, "f").boardContent.boardContext.canvas;
       container.removeEventListener("mousemove", __classPrivateFieldGet$5(this, _BoardWatcher_onHover, "f"));
       container.removeEventListener("mousedown", __classPrivateFieldGet$5(this, _BoardWatcher_onPointStart, "f"));
       container.removeEventListener("mousemove", __classPrivateFieldGet$5(this, _BoardWatcher_onPointMove, "f"));
       container.removeEventListener("mouseup", __classPrivateFieldGet$5(this, _BoardWatcher_onPointEnd, "f"));
       container.removeEventListener("mouseleave", __classPrivateFieldGet$5(this, _BoardWatcher_onPointLeave, "f"));
-      container.removeEventListener("wheel", __classPrivateFieldGet$5(this, _BoardWatcher_onWheel, "f"));
+      canvas.removeEventListener("wheel", __classPrivateFieldGet$5(this, _BoardWatcher_onWheel, "f"));
       container.removeEventListener("click", __classPrivateFieldGet$5(this, _BoardWatcher_onClick, "f"));
       container.removeEventListener("contextmenu", __classPrivateFieldGet$5(this, _BoardWatcher_onContextMenu, "f"));
     }
@@ -5685,9 +6023,9 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
       __classPrivateFieldSet$3(this, _Viewer_opts, opts, "f");
       __classPrivateFieldGet$3(this, _Viewer_instances, "m", _Viewer_init).call(this);
     }
-    resetViewVisibleInfoMap(data, opts) {
+    resetVirtualFlatItemMap(data, opts) {
       if (data) {
-        __classPrivateFieldGet$3(this, _Viewer_opts, "f").calculator.resetViewVisibleInfoMap(data, opts);
+        __classPrivateFieldGet$3(this, _Viewer_opts, "f").calculator.resetVirtualFlatItemMap(data, opts);
       }
     }
     drawFrame() {
@@ -5836,13 +6174,12 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
     if (typeof state === "function" ? receiver !== state || !f : !state.has(receiver)) throw new TypeError("Cannot read private member from an object whose class did not declare it");
     return kind === "m" ? f : kind === "a" ? f.call(receiver) : f ? f.value : state.get(receiver);
   };
-  var _Board_instances, _Board_opts, _Board_middlewareMap, _Board_middlewares, _Board_activeMiddlewareObjs, _Board_watcher, _Board_renderer, _Board_sharer, _Board_viewer, _Board_calculator, _Board_eventHub, _Board_hasDestroyed, _Board_init, _Board_handlePointStart, _Board_handlePointEnd, _Board_handlePointMove, _Board_handlePointLeave, _Board_handleHover, _Board_handleDoubleClick, _Board_handleContextMenu, _Board_handleWheel, _Board_handleWheelScale, _Board_handleScrollX, _Board_handleScrollY, _Board_handleResize, _Board_handleClear, _Board_handleBeforeDrawFrame, _Board_handleAfterDrawFrame, _Board_resetActiveMiddlewareObjs;
+  var _Board_instances, _Board_opts, _Board_middlewareMap, _Board_activeMiddlewareObjs, _Board_watcher, _Board_renderer, _Board_sharer, _Board_viewer, _Board_calculator, _Board_eventHub, _Board_hasDestroyed, _Board_init, _Board_handlePointStart, _Board_handlePointEnd, _Board_handlePointMove, _Board_handlePointLeave, _Board_handleHover, _Board_handleDoubleClick, _Board_handleContextMenu, _Board_handleWheel, _Board_handleWheelScale, _Board_handleScrollX, _Board_handleScrollY, _Board_handleResize, _Board_handleClear, _Board_handleBeforeDrawFrame, _Board_handleAfterDrawFrame, _Board_resetActiveMiddlewareObjs;
   class Board {
     constructor(opts) {
       _Board_instances.add(this);
       _Board_opts.set(this, void 0);
-      _Board_middlewareMap.set(this, /* @__PURE__ */ new WeakMap());
-      _Board_middlewares.set(this, []);
+      _Board_middlewareMap.set(this, /* @__PURE__ */ new Map());
       _Board_activeMiddlewareObjs.set(this, []);
       _Board_watcher.set(this, void 0);
       _Board_renderer.set(this, void 0);
@@ -5853,16 +6190,16 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
       _Board_hasDestroyed.set(this, false);
       const { boardContent } = opts;
       const sharer = new Sharer();
-      const calculator = new Calculator({ viewContext: boardContent.viewContext });
       const watcher = new BoardWatcher({
         boardContent,
         sharer
       });
       const renderer = new Renderer({
         viewContext: boardContent.viewContext,
-        sharer,
-        calculator
+        tempContext: boardContent.tempContext,
+        sharer
       });
+      const calculator = renderer.getCalculator();
       __classPrivateFieldSet$2(this, _Board_opts, opts, "f");
       __classPrivateFieldSet$2(this, _Board_sharer, sharer, "f");
       __classPrivateFieldSet$2(this, _Board_watcher, watcher, "f");
@@ -5902,8 +6239,7 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
     getRenderer() {
       return __classPrivateFieldGet$2(this, _Board_renderer, "f");
     }
-    setData(data, opts) {
-      const { modifiedOptions } = opts || {};
+    setData(data) {
       const sharer = __classPrivateFieldGet$2(this, _Board_sharer, "f");
       __classPrivateFieldGet$2(this, _Board_sharer, "f").setActiveStorage("data", data);
       const viewSizeInfo = sharer.getActiveViewSizeInfo();
@@ -5913,17 +6249,10 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
         viewHeight: viewSizeInfo.height,
         extend: true
       });
-      if (modifiedOptions) {
-        __classPrivateFieldGet$2(this, _Board_viewer, "f").resetViewVisibleInfoMap(data, {
-          viewSizeInfo,
-          viewScaleInfo
-        });
-      } else {
-        __classPrivateFieldGet$2(this, _Board_viewer, "f").resetViewVisibleInfoMap(data, {
-          viewSizeInfo,
-          viewScaleInfo
-        });
-      }
+      __classPrivateFieldGet$2(this, _Board_viewer, "f").resetVirtualFlatItemMap(data, {
+        viewSizeInfo,
+        viewScaleInfo
+      });
       __classPrivateFieldGet$2(this, _Board_viewer, "f").drawFrame();
       const newViewSizeInfo = Object.assign(Object.assign({}, viewSizeInfo), newViewContextSize);
       __classPrivateFieldGet$2(this, _Board_sharer, "f").setActiveViewSizeInfo(newViewSizeInfo);
@@ -5937,13 +6266,12 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
       var _a, _b, _c;
       if (__classPrivateFieldGet$2(this, _Board_middlewareMap, "f").has(middleware)) {
         const item = __classPrivateFieldGet$2(this, _Board_middlewareMap, "f").get(middleware);
-        if (item) {
-          (_b = (_a = item.middlewareObject).use) === null || _b === void 0 ? void 0 : _b.call(_a);
+        if (item && item.status !== "enable") {
           item.status = "enable";
-          __classPrivateFieldGet$2(this, _Board_middlewareMap, "f").set(middleware, item);
+          (_b = (_a = item.middlewareObject).use) === null || _b === void 0 ? void 0 : _b.call(_a);
           __classPrivateFieldGet$2(this, _Board_instances, "m", _Board_resetActiveMiddlewareObjs).call(this);
-          return;
         }
+        return;
       }
       const { boardContent, container } = __classPrivateFieldGet$2(this, _Board_opts, "f");
       const sharer = __classPrivateFieldGet$2(this, _Board_sharer, "f");
@@ -5952,8 +6280,6 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
       const eventHub = __classPrivateFieldGet$2(this, _Board_eventHub, "f");
       const obj = middleware({ boardContent, sharer, viewer, calculator, eventHub, container }, config);
       (_c = obj.use) === null || _c === void 0 ? void 0 : _c.call(obj);
-      __classPrivateFieldGet$2(this, _Board_middlewares, "f").push(middleware);
-      __classPrivateFieldGet$2(this, _Board_activeMiddlewareObjs, "f").push(obj);
       __classPrivateFieldGet$2(this, _Board_middlewareMap, "f").set(middleware, {
         status: "enable",
         middlewareObject: obj,
@@ -5963,12 +6289,23 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
     }
     disuse(middleware) {
       var _a, _b;
-      const item = __classPrivateFieldGet$2(this, _Board_middlewareMap, "f").get(middleware);
-      if (item) {
-        (_b = (_a = item.middlewareObject).disuse) === null || _b === void 0 ? void 0 : _b.call(_a);
-        item.status = "disable";
-        __classPrivateFieldGet$2(this, _Board_middlewareMap, "f").set(middleware, item);
+      if (__classPrivateFieldGet$2(this, _Board_middlewareMap, "f").has(middleware)) {
+        const item = __classPrivateFieldGet$2(this, _Board_middlewareMap, "f").get(middleware);
+        if (item) {
+          (_b = (_a = item.middlewareObject).disuse) === null || _b === void 0 ? void 0 : _b.call(_a);
+          item.status = "disable";
+        }
+        __classPrivateFieldGet$2(this, _Board_middlewareMap, "f").delete(middleware);
         __classPrivateFieldGet$2(this, _Board_instances, "m", _Board_resetActiveMiddlewareObjs).call(this);
+      }
+    }
+    resetMiddlewareConfig(middleware, config) {
+      var _a, _b;
+      if (__classPrivateFieldGet$2(this, _Board_middlewareMap, "f").has(middleware)) {
+        const item = __classPrivateFieldGet$2(this, _Board_middlewareMap, "f").get(middleware);
+        if (item) {
+          (_b = (_a = item.middlewareObject).resetConfig) === null || _b === void 0 ? void 0 : _b.call(_a, config);
+        }
       }
     }
     scale(opts) {
@@ -6018,7 +6355,7 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
       __classPrivateFieldGet$2(this, _Board_watcher, "f").offEvents();
     }
   }
-  _Board_opts = /* @__PURE__ */ new WeakMap(), _Board_middlewareMap = /* @__PURE__ */ new WeakMap(), _Board_middlewares = /* @__PURE__ */ new WeakMap(), _Board_activeMiddlewareObjs = /* @__PURE__ */ new WeakMap(), _Board_watcher = /* @__PURE__ */ new WeakMap(), _Board_renderer = /* @__PURE__ */ new WeakMap(), _Board_sharer = /* @__PURE__ */ new WeakMap(), _Board_viewer = /* @__PURE__ */ new WeakMap(), _Board_calculator = /* @__PURE__ */ new WeakMap(), _Board_eventHub = /* @__PURE__ */ new WeakMap(), _Board_hasDestroyed = /* @__PURE__ */ new WeakMap(), _Board_instances = /* @__PURE__ */ new WeakSet(), _Board_init = function _Board_init2() {
+  _Board_opts = /* @__PURE__ */ new WeakMap(), _Board_middlewareMap = /* @__PURE__ */ new WeakMap(), _Board_activeMiddlewareObjs = /* @__PURE__ */ new WeakMap(), _Board_watcher = /* @__PURE__ */ new WeakMap(), _Board_renderer = /* @__PURE__ */ new WeakMap(), _Board_sharer = /* @__PURE__ */ new WeakMap(), _Board_viewer = /* @__PURE__ */ new WeakMap(), _Board_calculator = /* @__PURE__ */ new WeakMap(), _Board_eventHub = /* @__PURE__ */ new WeakMap(), _Board_hasDestroyed = /* @__PURE__ */ new WeakMap(), _Board_instances = /* @__PURE__ */ new WeakSet(), _Board_init = function _Board_init2() {
     __classPrivateFieldGet$2(this, _Board_watcher, "f").on("pointStart", __classPrivateFieldGet$2(this, _Board_instances, "m", _Board_handlePointStart).bind(this));
     __classPrivateFieldGet$2(this, _Board_watcher, "f").on("pointEnd", __classPrivateFieldGet$2(this, _Board_instances, "m", _Board_handlePointEnd).bind(this));
     __classPrivateFieldGet$2(this, _Board_watcher, "f").on("pointMove", __classPrivateFieldGet$2(this, _Board_instances, "m", _Board_handlePointMove).bind(this));
@@ -6171,13 +6508,11 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
     }
   }, _Board_resetActiveMiddlewareObjs = function _Board_resetActiveMiddlewareObjs2() {
     const activeMiddlewareObjs = [];
-    const middlewareMap = __classPrivateFieldGet$2(this, _Board_middlewareMap, "f");
-    __classPrivateFieldGet$2(this, _Board_middlewares, "f").forEach((middleware) => {
-      const item = middlewareMap.get(middleware);
+    for (const [_, item] of __classPrivateFieldGet$2(this, _Board_middlewareMap, "f")) {
       if ((item === null || item === void 0 ? void 0 : item.status) === "enable" && (item === null || item === void 0 ? void 0 : item.middlewareObject)) {
         activeMiddlewareObjs.push(item.middlewareObject);
       }
-    });
+    }
     __classPrivateFieldSet$2(this, _Board_activeMiddlewareObjs, activeMiddlewareObjs, "f");
   };
   const CURSOR = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACgAAAAoCAYAAACM/rhtAAAACXBIWXMAAAsTAAALEwEAmpwYAAAF92lUWHRYTUw6Y29tLmFkb2JlLnhtcAAAAAAAPD94cGFja2V0IGJlZ2luPSLvu78iIGlkPSJXNU0wTXBDZWhpSHpyZVN6TlRjemtjOWQiPz4gPHg6eG1wbWV0YSB4bWxuczp4PSJhZG9iZTpuczptZXRhLyIgeDp4bXB0az0iQWRvYmUgWE1QIENvcmUgNi4wLWMwMDYgNzkuMTY0NzUzLCAyMDIxLzAyLzE1LTExOjUyOjEzICAgICAgICAiPiA8cmRmOlJERiB4bWxuczpyZGY9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkvMDIvMjItcmRmLXN5bnRheC1ucyMiPiA8cmRmOkRlc2NyaXB0aW9uIHJkZjphYm91dD0iIiB4bWxuczp4bXA9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC8iIHhtbG5zOmRjPSJodHRwOi8vcHVybC5vcmcvZGMvZWxlbWVudHMvMS4xLyIgeG1sbnM6cGhvdG9zaG9wPSJodHRwOi8vbnMuYWRvYmUuY29tL3Bob3Rvc2hvcC8xLjAvIiB4bWxuczp4bXBNTT0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wL21tLyIgeG1sbnM6c3RFdnQ9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9zVHlwZS9SZXNvdXJjZUV2ZW50IyIgeG1wOkNyZWF0b3JUb29sPSJBZG9iZSBQaG90b3Nob3AgMjIuMyAoTWFjaW50b3NoKSIgeG1wOkNyZWF0ZURhdGU9IjIwMjMtMDktMTdUMTY6MDc6MjYrMDg6MDAiIHhtcDpNb2RpZnlEYXRlPSIyMDIzLTA5LTE3VDE2OjEyOjUwKzA4OjAwIiB4bXA6TWV0YWRhdGFEYXRlPSIyMDIzLTA5LTE3VDE2OjEyOjUwKzA4OjAwIiBkYzpmb3JtYXQ9ImltYWdlL3BuZyIgcGhvdG9zaG9wOkNvbG9yTW9kZT0iMyIgcGhvdG9zaG9wOklDQ1Byb2ZpbGU9InNSR0IgSUVDNjE5NjYtMi4xIiB4bXBNTTpJbnN0YW5jZUlEPSJ4bXAuaWlkOjliMGM0MzI2LWU4ZTQtNDlkNy04MmUzLTgxODkwYTE2ZmU1YSIgeG1wTU06RG9jdW1lbnRJRD0iYWRvYmU6ZG9jaWQ6cGhvdG9zaG9wOjMzOGFhZDBmLWZkZjMtODE0MS1iMTZmLWNiZWIzNTQyYTJhMCIgeG1wTU06T3JpZ2luYWxEb2N1bWVudElEPSJ4bXAuZGlkOjUwODAxNzc1LWZlNGEtNDQyMy05NDQ3LThkYWRhNzZhYTllOSI+IDx4bXBNTTpIaXN0b3J5PiA8cmRmOlNlcT4gPHJkZjpsaSBzdEV2dDphY3Rpb249ImNyZWF0ZWQiIHN0RXZ0Omluc3RhbmNlSUQ9InhtcC5paWQ6NTA4MDE3NzUtZmU0YS00NDIzLTk0NDctOGRhZGE3NmFhOWU5IiBzdEV2dDp3aGVuPSIyMDIzLTA5LTE3VDE2OjA3OjI2KzA4OjAwIiBzdEV2dDpzb2Z0d2FyZUFnZW50PSJBZG9iZSBQaG90b3Nob3AgMjIuMyAoTWFjaW50b3NoKSIvPiA8cmRmOmxpIHN0RXZ0OmFjdGlvbj0ic2F2ZWQiIHN0RXZ0Omluc3RhbmNlSUQ9InhtcC5paWQ6OWIwYzQzMjYtZThlNC00OWQ3LTgyZTMtODE4OTBhMTZmZTVhIiBzdEV2dDp3aGVuPSIyMDIzLTA5LTE3VDE2OjEyOjUwKzA4OjAwIiBzdEV2dDpzb2Z0d2FyZUFnZW50PSJBZG9iZSBQaG90b3Nob3AgMjIuMyAoTWFjaW50b3NoKSIgc3RFdnQ6Y2hhbmdlZD0iLyIvPiA8L3JkZjpTZXE+IDwveG1wTU06SGlzdG9yeT4gPC9yZGY6RGVzY3JpcHRpb24+IDwvcmRmOlJERj4gPC94OnhtcG1ldGE+IDw/eHBhY2tldCBlbmQ9InIiPz7W6XrzAAAGLklEQVRYhb2Xf2iUdRzHX/txtfXLplZ6Wblm6fzRmG6r7Uou1AxKRjQKYUqgaLBACFogppcK1h8aLRkMSYaJIA5hYMomZpskEfPOufCaDpZ6t7rbre263U3vzn3643meu+eu3XNzvz7w4bbdc/e89nl/Pu/v50HUCAQCx1tbW0uAx4CHgSwggxkKERkziUQif2mQ0WjU53a7vwSeBB4BTEDmTICmBBwYGDivVlDjlFAo9KvT6dwIPAHkANkq6MwDXr169bCISENDg9TX14s+BgcHf2hubi5mBmRPCXj06NFPREQ6OjoEkPLycrl06VIMMhKJeFwu1xdMs+wpAYuLi9eIiIyOjkpeXp4AAsj27dvF7/fHQIPB4C9dXV0fME2ypwQEXvX7/bdFRNauXRsDBMRkMsnhw4cTZB8YGGhsamp6hSmW3Qhw1Y0bN86LiNTW1iYAallWViZtbW162ftcLtdO/i/7tAAWtba2ficicvLkyTEBtdy6dasMDg7GQIeHh9s7OzvfBx5nkrIbAS7du3fvxyIiPT09hoBa1tXVJcv+fWNj4zLgUeAhJiC7EeDLwOsiMioisnDhwnFBrlixQi5evKiX/c6tW7c+R5E9lweU3QjwReDV/v7+bhGRqqqqcQFquWnTJvH5fHrZLzocjkoSZU9bTSPA54GV165daxYROXDgwAMBannw4MFk2RsaGhqWME7ZjQDNwIrTp09/JSLS0tIyIUBACgoK5MKFCzHIcDj85+3btz8FZpFGdiPAZ4DCmpqaTSIiPp9vwoBaVlVVidfr1ct+/sqVK+9iILsR4FzgJcASDoeHRUSKioomDQnI/v37E2T3+Xz1hw4dWjSW7EaAeUA+UNbX12cXEdmyZcuUAAJiNpvlzJkzetl73G53rVrN2EmUCjATuA9EgYjL5eoGKCkpGatNHijmz5/Pxo0b2blzJ2azOfZ3k8lUYDabv45Go/Y7d+6sIY0VZQOjGqDT6bxeWlrKqlWrJgRlsVhYv349FRUVWCwWcnJyEt4PBoOuoaEhu9frvdzR0fHTtm3buolvRpLqe3OBp4EllZWV74mIRKNRyc3NTSvf7Nmzpbq6Wk6cOCFut1uSY2RkJOB0Ou3Nzc3Ha2trPwPWAGXAEuBZFFPPAbKMevBhYA6wCKgIBoP9IiKrV682hLPZbP8DEpH7vb29N1paWn602WwHFyxYsAX4EKgE3gIsQBFQgOIeT6j3z0wFqEkc60OPx9Odn58/t6SkhPb29jFLbrVa2bNnDwBer7fv5s2bPQ6Ho7upqcnZ1tbmASJq3gPC6utdYESXYfWeo6mkBaUHRQ/odrv/yM/Pt5SWlqb8kAbncDh+W7lyZYN683u6DOvAwipsOOnniA4wZf9lqhdoVYzY7fbrQMpBsdlsWK1WRkZGAtXV1d8D/wA+wKNLr5o+YEC9ZggIAEHiFbyfDhCUCcoFngIWFxYWrtMaat68eQl9V15eHmu2+vr6OuAd4A2gGFgMLERp/mdQ+noWyuadi9Jr2aQ4k42GBPXDs1Ga97WhoaFbIiIbNmxIANTWq87Ozp9VuApgGfACihPkoRjwI+p3mlSgtA9ZRkYNYwwKJBr2rl27sFqthEKhwZqamqOAX5f/AsPE5btLvM/GJWO6yFb/82eBonPnztWJiJw9e1YAWb58eUzaI0eOfAO8CbwCPIfiZZN+eEoncSaKLPOApbt3794uIuL1ehOktdvtF4C3gRKURXcOSn9lTRRsvIAZKI4+l/gjQFREZMeOHSIiEggE+tetW/cRitkuRhmERxnnxjxZQFDWnzzURwCv1+vUHxHHjh37lri0C1Am9KGpgDMC1G8SQnxxCHs8Hqf2RldX10+bN28+i+JjwyT62KSaP13oAfWTHO7t7f0dIBQK/b1v375GlEnVjPYuyoQaHlNTDahVMALca29vdwBcvnz5+KlTp26OATft1UuODBS7yEOxj0K/329HOSWWopjxlE1tchhtM7FriPfgXSDDbrfXo0gbJr4QzIi0WiRPYBbKZJrUV23b0dYn7XSYcsBkS9EiO/k6lApq1cwiPjzaAM1Y9cYC1G6uAWrPCtrvMwoHqU02Q5caIEzj1KaS+D+vIjxtLug31gAAAABJRU5ErkJggg==";
@@ -6190,6 +6525,7 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
   const EVENT_KEY_RULER = "ruler";
   const EVENT_KEY_SCALE = "scale";
   const EVENT_KEY_SELECT = "select";
+  const EVENT_KEY_SELECT_LAYOUT = "selectLayout";
   const EVENT_KEY_CLEAR_SELECT = "clearSelect";
   const EVENT_KEY_TEXT_EDIT = "textEdit";
   const EVENT_KEY_TEXT_CHANGE = "textChange";
@@ -6200,6 +6536,7 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
     CHANGE: EVENT_KEY_CHANGE,
     RULER: EVENT_KEY_RULER,
     SCALE: EVENT_KEY_SCALE,
+    SELECT_LAYOUT: EVENT_KEY_SELECT_LAYOUT,
     SELECT: EVENT_KEY_SELECT,
     CLEAR_SELECT: EVENT_KEY_CLEAR_SELECT,
     TEXT_EDIT: EVENT_KEY_TEXT_EDIT,
@@ -6350,6 +6687,43 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
     }
     return key2;
   };
+  var __rest$1 = function(s, e) {
+    var t = {};
+    for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p) && e.indexOf(p) < 0)
+      t[p] = s[p];
+    if (s != null && typeof Object.getOwnPropertySymbols === "function")
+      for (var i = 0, p = Object.getOwnPropertySymbols(s); i < p.length; i++) {
+        if (e.indexOf(p[i]) < 0 && Object.prototype.propertyIsEnumerable.call(s, p[i]))
+          t[p[i]] = s[p[i]];
+      }
+    return t;
+  };
+  function getModifyElementRecord(opts) {
+    const { modifiedElement, beforeElement } = opts;
+    const { uuid } = modifiedElement, restElement = __rest$1(modifiedElement, ["uuid"]);
+    const after = toFlattenElement(restElement);
+    let before = {};
+    Object.keys(after).forEach((key2) => {
+      let val = get(beforeElement, key2);
+      if (val === void 0 && /(borderRadius|borderWidth)\[[0-9]{1,}\]$/.test(key2)) {
+        key2 = key2.replace(/\[[0-9]{1,}\]$/, "");
+        val = get(beforeElement, key2);
+      }
+      before[key2] = val;
+    });
+    before = toFlattenElement(before);
+    const record = {
+      type: "modifyElement",
+      time: Date.now(),
+      content: {
+        method: "modifyElement",
+        uuid,
+        before,
+        after
+      }
+    };
+    return record;
+  }
   const key$3 = "SELECT";
   const keyActionType = Symbol(`${key$3}_actionType`);
   const keyResizeType = Symbol(`${key$3}_resizeType`);
@@ -6397,7 +6771,7 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
     ctx.lineTo(vertexes[0].x, vertexes[0].y);
     ctx.closePath();
     ctx.stroke();
-    ctx.fill();
+    ctx.fill("nonzero");
   }
   function drawLine(ctx, start, end, opts) {
     const { borderColor: borderColor2, borderWidth: borderWidth2, lineDash } = opts;
@@ -6432,7 +6806,7 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
       ctx.fillStyle = background2;
       ctx.circle(center.x, center.y, a, b, 0, 0, 2 * Math.PI);
       ctx.closePath();
-      ctx.fill();
+      ctx.fill("nonzero");
     }
   }
   function drawCrossVertexes(ctx, vertexes, opts) {
@@ -6522,7 +6896,12 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
     const { devicePixelRatio = 1 } = viewSizeInfo;
     const { activeColor: activeColor2 } = style;
     const { elementWrapper, topLeft, topRight, bottomLeft, bottomRight, rotate } = controller;
-    const wrapperOpts = { borderColor: activeColor2, borderWidth: selectWrapperBorderWidth, background: "transparent", lineDash: [] };
+    const wrapperOpts = {
+      borderColor: activeColor2,
+      borderWidth: selectWrapperBorderWidth,
+      background: "transparent",
+      lineDash: []
+    };
     const ctrlOpts = Object.assign(Object.assign({}, wrapperOpts), { borderWidth: resizeControllerBorderWidth, background: "#FFFFFF" });
     drawVertexes(ctx, calcViewVertexes(elementWrapper, opts), wrapperOpts);
     if (!hideControllers) {
@@ -6551,7 +6930,7 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
     ctx.lineTo(start.x, end.y);
     ctx.closePath();
     ctx.stroke();
-    ctx.fill();
+    ctx.fill("nonzero");
   }
   function drawListArea(ctx, opts) {
     const { areaSize, style } = opts;
@@ -6568,14 +6947,19 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
     ctx.lineTo(x2, y2 + h2);
     ctx.closePath();
     ctx.stroke();
-    ctx.fill();
+    ctx.fill("nonzero");
   }
   function drawGroupQueueVertexesWrappers(ctx, vertexesList, opts) {
     const { style } = opts;
     const { activeColor: activeColor2 } = style;
     for (let i = 0; i < vertexesList.length; i++) {
       const vertexes = vertexesList[i];
-      const wrapperOpts = { borderColor: activeColor2, borderWidth: selectWrapperBorderWidth, background: "transparent", lineDash: [4, 4] };
+      const wrapperOpts = {
+        borderColor: activeColor2,
+        borderWidth: selectWrapperBorderWidth,
+        background: "transparent",
+        lineDash: [4, 4]
+      };
       drawVertexes(ctx, calcViewVertexes(vertexes, opts), wrapperOpts);
     }
   }
@@ -6646,7 +7030,7 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
     if (!vertexes) {
       return false;
     }
-    return isPointInViewActiveVertexes(p, { ctx, vertexes, viewScaleInfo, viewSizeInfo });
+    return isPointInViewActiveVertexes(p, { ctx, vertexes, viewScaleInfo });
   }
   function getPointTarget(p, opts) {
     var _a, _b, _c, _d, _e;
@@ -6666,7 +7050,7 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
       }
       for (let i = 0; i < ctrls.length; i++) {
         const ctrl = ctrls[i];
-        if (isPointInViewActiveVertexes(p, { ctx, vertexes: ctrl.vertexes, viewSizeInfo, viewScaleInfo })) {
+        if (isPointInViewActiveVertexes(p, { ctx, vertexes: ctrl.vertexes, viewScaleInfo })) {
           target.type = `resize-${ctrl.type}`;
           if (selectedElements && (selectedElements === null || selectedElements === void 0 ? void 0 : selectedElements.length) > 0) {
             target.groupQueue = groupQueue || [];
@@ -6682,7 +7066,7 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
         for (let i = lastGroup.detail.children.length - 1; i >= 0; i--) {
           const child = lastGroup.detail.children[i];
           const vertexes = calcElementVertexesInGroup(child, { groupQueue });
-          if (vertexes && isPointInViewActiveVertexes(p, { ctx, vertexes, viewScaleInfo, viewSizeInfo })) {
+          if (vertexes && isPointInViewActiveVertexes(p, { ctx, vertexes, viewScaleInfo })) {
             if (!target.type) {
               target.type = "over-element";
             }
@@ -6718,7 +7102,7 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
   function resizeElement(elem, opts) {
     var _a, _b, _c, _d, _e, _f, _g, _h, _j;
     let { x: x2, y: y2, w: w2, h: h2, angle: angle2 = 0 } = elem;
-    const elemCenter = calcElementCenter({ x: x2, y: y2, w: w2, h: h2, angle: angle2 });
+    const elemCenter = calcElementCenter({ x: x2, y: y2, w: w2, h: h2 });
     angle2 = limitAngle(angle2);
     const radian = parseAngleToRadian(angle2);
     const limitRatio = !!((_a = elem === null || elem === void 0 ? void 0 : elem.operations) === null || _a === void 0 ? void 0 : _a.limitRatio);
@@ -7265,7 +7649,7 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
     const indexes = [];
     const uuids = [];
     const elements = [];
-    const { viewScaleInfo, viewSizeInfo, start, end } = opts;
+    const { viewScaleInfo, start, end } = opts;
     if (!(Array.isArray(data.elements) && start && end)) {
       return { indexes, uuids, elements };
     }
@@ -7637,7 +8021,7 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
     ctx.lineTo(boxVertexes[2].x, boxVertexes[2].y);
     ctx.lineTo(boxVertexes[3].x, boxVertexes[3].y);
     ctx.closePath();
-    ctx.fill();
+    ctx.fill("nonzero");
     ctx.strokeStyle = activeColor2;
     ctx.lineWidth = 2;
     ctx.beginPath();
@@ -7666,9 +8050,24 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
     const { controller, style } = opts;
     const { topLeft, topRight, bottomLeft, bottomRight, topMiddle, rightMiddle, bottomMiddle, leftMiddle } = controller;
     drawControllerLine(ctx, { start: topLeft.center, end: topRight.center, centerVertexes: topMiddle.vertexes, style });
-    drawControllerLine(ctx, { start: topRight.center, end: bottomRight.center, centerVertexes: rightMiddle.vertexes, style });
-    drawControllerLine(ctx, { start: bottomRight.center, end: bottomLeft.center, centerVertexes: bottomMiddle.vertexes, style });
-    drawControllerLine(ctx, { start: bottomLeft.center, end: topLeft.center, centerVertexes: leftMiddle.vertexes, style });
+    drawControllerLine(ctx, {
+      start: topRight.center,
+      end: bottomRight.center,
+      centerVertexes: rightMiddle.vertexes,
+      style
+    });
+    drawControllerLine(ctx, {
+      start: bottomRight.center,
+      end: bottomLeft.center,
+      centerVertexes: bottomMiddle.vertexes,
+      style
+    });
+    drawControllerLine(ctx, {
+      start: bottomLeft.center,
+      end: topLeft.center,
+      centerVertexes: leftMiddle.vertexes,
+      style
+    });
     drawControllerBox(ctx, topLeft.vertexes, style);
     drawControllerBox(ctx, topRight.vertexes, style);
     drawControllerBox(ctx, bottomRight.vertexes, style);
@@ -7693,12 +8092,11 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
   const MiddlewareLayoutSelector = (opts, config) => {
     const { sharer, boardContent, calculator, viewer, eventHub } = opts;
     const { overlayContext } = boardContent;
-    const innerConfig = Object.assign(Object.assign({}, defaultStyle$2), config);
-    const { activeColor: activeColor2 } = innerConfig;
-    const style = { activeColor: activeColor2 };
+    let innerConfig = Object.assign(Object.assign({}, defaultStyle$2), config);
     let prevPoint = null;
     let prevIsHoverContent = null;
     let prevIsSelected = null;
+    let pointStartLayoutSize = null;
     const clear = () => {
       prevPoint = null;
       sharer.setSharedStorage(keyLayoutActionType, null);
@@ -7798,6 +8196,9 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
         clear();
         resetController();
       },
+      resetConfig(config2) {
+        innerConfig = Object.assign(Object.assign({}, innerConfig), config2);
+      },
       hover: (e) => {
         if (sharer.getSharedStorage(keyLayoutIsBusyMoving) === true) {
           return;
@@ -7858,6 +8259,12 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
           }
           sharer.setSharedStorage(keyLayoutIsSelected, false);
         }
+        const data = sharer.getActiveStorage("data");
+        if (data === null || data === void 0 ? void 0 : data.layout) {
+          pointStartLayoutSize = getElementSize(data.layout);
+        } else {
+          pointStartLayoutSize = null;
+        }
         resetController();
         const layoutControlType = resetControlType(e);
         prevPoint = e.point;
@@ -7866,6 +8273,7 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
         }
         if (sharer.getSharedStorage(keyLayoutIsSelected) === true && !prevIsSelected) {
           viewer.drawFrame();
+          eventHub.trigger(coreEventKeys.SELECT_LAYOUT);
         }
         prevIsSelected = sharer.getSharedStorage(keyLayoutIsSelected);
         if (sharer.getSharedStorage(keyLayoutIsHoverController) === true) {
@@ -7966,11 +8374,27 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
         const layoutControlType = sharer.getSharedStorage(keyLayoutControlType);
         const data = sharer.getActiveStorage("data");
         if (data && layoutActionType === "resize" && layoutControlType) {
+          let modifyRecord = void 0;
+          if (pointStartLayoutSize) {
+            modifyRecord = {
+              type: "modifyLayout",
+              time: Date.now(),
+              content: {
+                method: "modifyLayout",
+                before: toFlattenLayout(pointStartLayoutSize),
+                after: toFlattenLayout(getElementSize(data.layout))
+              }
+            };
+          }
           eventHub.trigger(coreEventKeys.CHANGE, {
-            type: "changeLayout",
-            data
+            type: "dragLayout",
+            data,
+            modifyRecord
           });
         }
+        pointStartLayoutSize = null;
+        sharer.setSharedStorage(keyLayoutActionType, null);
+        sharer.setSharedStorage(keyLayoutControlType, null);
         if (sharer.getSharedStorage(keyLayoutIsHoverController) === true) {
           return false;
         }
@@ -7980,6 +8404,8 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
         if (isInElementAction()) {
           return;
         }
+        const { activeColor: activeColor2 } = innerConfig;
+        const style = { activeColor: activeColor2 };
         const { sharedStore, activeStore } = snapshot;
         const layoutActionType = sharedStore[keyLayoutActionType];
         const layoutIsHover = sharedStore[keyLayoutIsHoverContent];
@@ -8191,7 +8617,7 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
       },
       parentOpacity: 1
     });
-    return context2d;
+    return { context2d, fill };
   }
   const fontFamily$1 = "monospace";
   function drawSizeInfoText(ctx, opts) {
@@ -8225,7 +8651,7 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
       ctx.lineTo(bgEnd.x, bgEnd.y);
       ctx.lineTo(bgStart.x, bgEnd.y);
       ctx.closePath();
-      ctx.fill();
+      ctx.fill("nonzero");
       ctx.fillStyle = textColor2;
       ctx.textBaseline = "top";
       ctx.fillText(text2, textStart.x, textStart.y + padding);
@@ -8262,7 +8688,7 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
       ctx.lineTo(bgEnd.x, bgEnd.y);
       ctx.lineTo(bgStart.x, bgEnd.y);
       ctx.closePath();
-      ctx.fill();
+      ctx.fill("nonzero");
       ctx.fillStyle = textColor2;
       ctx.textBaseline = "top";
       ctx.fillText(text2, textStart.x, textStart.y + padding);
@@ -8299,7 +8725,7 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
       ctx.lineTo(bgEnd.x, bgEnd.y);
       ctx.lineTo(bgStart.x, bgEnd.y);
       ctx.closePath();
-      ctx.fill();
+      ctx.fill("nonzero");
       ctx.fillStyle = textColor2;
       ctx.textBaseline = "top";
       ctx.fillText(text2, textStart.x, textStart.y + padding);
@@ -8317,12 +8743,7 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
   const MiddlewareInfo = (opts, config) => {
     const { boardContent, calculator, eventHub } = opts;
     const { overlayContext } = boardContent;
-    const innerConfig = Object.assign(Object.assign({}, defaltStyle), config);
-    const { textBackground, textColor: textColor2 } = innerConfig;
-    const style = {
-      textBackground,
-      textColor: textColor2
-    };
+    let innerConfig = Object.assign(Object.assign({}, defaltStyle), config);
     let showAngleInfo = true;
     const showInfoAngleCallback = ({ show }) => {
       showAngleInfo = show;
@@ -8335,8 +8756,16 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
       disuse() {
         eventHub.off(MIDDLEWARE_INTERNAL_EVENT_SHOW_INFO_ANGLE, showInfoAngleCallback);
       },
+      resetConfig(config2) {
+        innerConfig = Object.assign(Object.assign({}, innerConfig), config2);
+      },
       beforeDrawFrame({ snapshot }) {
         var _a;
+        const { textBackground, textColor: textColor2 } = innerConfig;
+        const style = {
+          textBackground,
+          textColor: textColor2
+        };
         const { sharedStore } = snapshot;
         const selectedElementList = sharedStore[keySelectedElementList];
         const actionType = sharedStore[keyActionType];
@@ -8436,18 +8865,17 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
     };
   };
   const MiddlewareSelector = (opts, config) => {
-    const innerConfig = Object.assign(Object.assign({}, defaultStyle$3), config);
-    const { activeColor: activeColor2, activeAreaColor: activeAreaColor2, lockedColor: lockedColor2, referenceColor: referenceColor2 } = innerConfig;
-    const style = { activeColor: activeColor2, activeAreaColor: activeAreaColor2, lockedColor: lockedColor2, referenceColor: referenceColor2 };
+    let innerConfig = Object.assign(Object.assign({}, defaultStyle$3), config);
     const { viewer, sharer, boardContent, calculator, eventHub } = opts;
     const { overlayContext } = boardContent;
     let prevPoint = null;
+    let pointStartElementSizeList = [];
     let moveOriginalStartPoint = null;
     let moveOriginalStartElementSize = null;
     let inBusyMode = null;
     let hasChangedData = null;
-    const rotateControllerPattern = createRotateControllerPattern({
-      fill: style.activeColor,
+    let rotateControllerPattern = createRotateControllerPattern({
+      fill: innerConfig.activeColor,
       devicePixelRatio: sharer.getActiveViewSizeInfo().devicePixelRatio
     });
     sharer.setSharedStorage(keyActionType, null);
@@ -8511,7 +8939,11 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
         const uuids = list.map((elem) => elem.uuid);
         const data = sharer.getActiveStorage("data");
         const positionMap = getElementPositionMapFromList(uuids, (data === null || data === void 0 ? void 0 : data.elements) || []);
-        eventHub.trigger(coreEventKeys.SELECT, { uuids, positions: list.map((elem) => [...positionMap[elem.uuid]]) });
+        eventHub.trigger(coreEventKeys.SELECT, {
+          type: "clickCanvas",
+          uuids,
+          positions: list.map((elem) => [...positionMap[elem.uuid]])
+        });
       }
     };
     const pointTargetBaseOptions = () => {
@@ -8591,6 +9023,11 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
         eventHub.off(coreEventKeys.CLEAR_SELECT, selectClearCallback);
         eventHub.off(coreEventKeys.SELECT_IN_GROUP, selectInGroupCallback);
         eventHub.off(coreEventKeys.SNAP_TO_GRID, setSnapToSnapCallback);
+        clear();
+        innerConfig = null;
+      },
+      resetConfig(config2) {
+        innerConfig = Object.assign(Object.assign({}, innerConfig), config2);
       },
       hover: (e) => {
         var _a, _b, _c, _d, _e;
@@ -8653,11 +9090,9 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
         }
         const selectedElements = getActiveElements();
         const viewScaleInfo = sharer.getActiveViewScaleInfo();
-        const viewSizeInfo = sharer.getActiveViewSizeInfo();
+        sharer.getActiveViewSizeInfo();
         const target = getPointTarget(e.point, Object.assign(Object.assign({}, pointTargetBaseOptions()), { areaSize: calcSelectedElementsArea(selectedElements, {
-          viewScaleInfo,
-          viewSizeInfo,
-          calculator
+          viewScaleInfo
         }) }));
         triggerCursor(target);
         if (target.type === null) {
@@ -8708,6 +9143,7 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
             } else if (target2.type === "over-element" && ((_e = target2 === null || target2 === void 0 ? void 0 : target2.elements) === null || _e === void 0 ? void 0 : _e.length) === 1) {
               updateSelectedElementList([target2.elements[0]], { triggerEvent: true });
               sharer.setSharedStorage(keyActionType, "drag");
+              pointStartElementSizeList = [Object.assign(Object.assign({}, getElementSize(target2 === null || target2 === void 0 ? void 0 : target2.elements[0])), { uuid: target2 === null || target2 === void 0 ? void 0 : target2.elements[0].uuid })];
             } else if ((_f = target2.type) === null || _f === void 0 ? void 0 : _f.startsWith("resize-")) {
               sharer.setSharedStorage(keyResizeType, target2.type);
               sharer.setSharedStorage(keyActionType, "resize");
@@ -8722,8 +9158,7 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
         }
         const listAreaSize = calcSelectedElementsArea(getActiveElements(), {
           viewScaleInfo: sharer.getActiveViewScaleInfo(),
-          viewSizeInfo: sharer.getActiveViewSizeInfo(),
-          calculator
+          viewSizeInfo: sharer.getActiveViewSizeInfo()
         });
         const target = getPointTarget(e.point, Object.assign(Object.assign({}, pointTargetBaseOptions()), { areaSize: listAreaSize, groupQueue: [] }));
         const isLockedElement = ((_g = target === null || target === void 0 ? void 0 : target.elements) === null || _g === void 0 ? void 0 : _g.length) === 1 && ((_j = (_h = target.elements[0]) === null || _h === void 0 ? void 0 : _h.operations) === null || _j === void 0 ? void 0 : _j.locked) === true;
@@ -8741,6 +9176,7 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
         } else if (target.type === "over-element" && ((_l = target === null || target === void 0 ? void 0 : target.elements) === null || _l === void 0 ? void 0 : _l.length) === 1) {
           updateSelectedElementList([target.elements[0]], { triggerEvent: true });
           sharer.setSharedStorage(keyActionType, "drag");
+          pointStartElementSizeList = [Object.assign(Object.assign({}, getElementSize(target === null || target === void 0 ? void 0 : target.elements[0])), { uuid: target === null || target === void 0 ? void 0 : target.elements[0].uuid })];
         } else if ((_m = target.type) === null || _m === void 0 ? void 0 : _m.startsWith("resize-")) {
           sharer.setSharedStorage(keyResizeType, target.type);
           sharer.setSharedStorage(keyActionType, "resize");
@@ -8799,8 +9235,8 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
             elems[0].x = calculator.toGridNum(moveOriginalStartElementSize.x + totalMoveX);
             elems[0].y = calculator.toGridNum(moveOriginalStartElementSize.y + totalMoveY);
             updateSelectedElementList([elems[0]]);
-            calculator.modifyViewVisibleInfoMap(data, {
-              modifyOptions: {
+            calculator.modifyVirtualFlatItemMap(data, {
+              modifyInfo: {
                 type: "updateElement",
                 content: {
                   element: elems[0],
@@ -8823,8 +9259,8 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
               if (elem && ((_a2 = elem === null || elem === void 0 ? void 0 : elem.operations) === null || _a2 === void 0 ? void 0 : _a2.locked) !== true) {
                 elem.x = calculator.toGridNum(elem.x + moveX);
                 elem.y = calculator.toGridNum(elem.y + moveY);
-                calculator.modifyViewVisibleInfoMap(data, {
-                  modifyOptions: {
+                calculator.modifyVirtualFlatItemMap(data, {
+                  modifyInfo: {
                     type: "updateElement",
                     content: {
                       element: elem,
@@ -8872,15 +9308,12 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
               const resizedElemSize = rotateElement(moveOriginalStartElementSize, {
                 center: viewCenter,
                 viewScaleInfo,
-                viewSizeInfo,
                 start: originalStart,
-                end,
-                resizeType,
-                sharer
+                end
               });
               elems[0].angle = calculator.toGridNum(resizedElemSize.angle || 0);
             } else {
-              const resizedElemSize = resizeElement(moveOriginalStartElementSize, { scale, start: resizeStart, end: resizeEnd, resizeType, sharer });
+              const resizedElemSize = resizeElement(Object.assign(Object.assign({}, moveOriginalStartElementSize), { operations: elems[0].operations }), { scale, start: resizeStart, end: resizeEnd, resizeType });
               const calcOpts = { ignore: !!moveOriginalStartElementSize.angle };
               elems[0].x = calculator.toGridNum(resizedElemSize.x, calcOpts);
               elems[0].y = calculator.toGridNum(resizedElemSize.y, calcOpts);
@@ -8895,8 +9328,8 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
               }
             }
             updateSelectedElementList([elems[0]]);
-            calculator.modifyViewVisibleInfoMap(data, {
-              modifyOptions: {
+            calculator.modifyVirtualFlatItemMap(data, {
+              modifyInfo: {
                 type: "updateElement",
                 content: {
                   element: elems[0],
@@ -8943,7 +9376,6 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
               const { elements } = getSelectedListArea(data, {
                 start,
                 end,
-                calculator,
                 viewScaleInfo: sharer.getActiveViewScaleInfo(),
                 viewSizeInfo: sharer.getActiveViewSizeInfo()
               });
@@ -8986,7 +9418,31 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
           if (data && ["drag", "drag-list", "drag-list-end", "resize"].includes(actionType)) {
             let type = "dragElement";
             if (hasChangedData) {
-              eventHub.trigger(coreEventKeys.CHANGE, { data, type, selectedElements, hoverElement });
+              const startSize = pointStartElementSizeList[0];
+              let modifyRecord = void 0;
+              if (selectedElements.length === 1) {
+                modifyRecord = {
+                  type: "dragElement",
+                  time: 0,
+                  content: {
+                    method: "modifyElement",
+                    uuid: startSize.uuid,
+                    before: toFlattenElement(startSize),
+                    after: toFlattenElement(getElementSize(selectedElements[0]))
+                  }
+                };
+              } else if (selectedElements.length > 1) {
+                modifyRecord = {
+                  type: "dragElements",
+                  time: 0,
+                  content: {
+                    method: "modifyElements",
+                    before: pointStartElementSizeList.map((item) => Object.assign(Object.assign({}, toFlattenElement(item)), { uuid: item.uuid })),
+                    after: selectedElements.map((item) => Object.assign(Object.assign({}, toFlattenElement(getElementSize(item))), { uuid: item.uuid }))
+                  }
+                };
+              }
+              eventHub.trigger(coreEventKeys.CHANGE, { data, type, selectedElements, hoverElement, modifyRecord });
               hasChangedData = false;
             }
           }
@@ -9058,8 +9514,7 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
         }
         const listAreaSize = calcSelectedElementsArea(getActiveElements(), {
           viewScaleInfo: sharer.getActiveViewScaleInfo(),
-          viewSizeInfo: sharer.getActiveViewSizeInfo(),
-          calculator
+          viewSizeInfo: sharer.getActiveViewSizeInfo()
         });
         const target = getPointTarget(e.point, Object.assign(Object.assign({}, pointTargetBaseOptions()), { areaSize: listAreaSize, groupQueue: [] }));
         if (((_e = target === null || target === void 0 ? void 0 : target.elements) === null || _e === void 0 ? void 0 : _e.length) === 1 && ((_g = (_f = target.elements[0]) === null || _f === void 0 ? void 0 : _f.operations) === null || _g === void 0 ? void 0 : _g.locked) !== true) {
@@ -9073,8 +9528,16 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
       },
       beforeDrawFrame({ snapshot }) {
         var _a;
+        const { activeColor: activeColor2, activeAreaColor: activeAreaColor2, lockedColor: lockedColor2, referenceColor: referenceColor2 } = innerConfig;
+        const style = { activeColor: activeColor2, activeAreaColor: activeAreaColor2, lockedColor: lockedColor2, referenceColor: referenceColor2 };
         const { activeStore, sharedStore } = snapshot;
         const { scale, offsetLeft, offsetTop, offsetRight, offsetBottom, width, height, contextHeight, contextWidth, devicePixelRatio } = activeStore;
+        if (rotateControllerPattern.fill !== activeColor2) {
+          rotateControllerPattern = createRotateControllerPattern({
+            fill: innerConfig.activeColor,
+            devicePixelRatio
+          });
+        }
         const sharer2 = opts.sharer;
         const viewScaleInfo = { scale, offsetLeft, offsetTop, offsetRight, offsetBottom };
         const viewSizeInfo = { width, height, contextHeight, contextWidth, devicePixelRatio };
@@ -9114,13 +9577,7 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
             }
           }
           if (elem && ["select", "drag", "resize"].includes(actionType)) {
-            drawSelectedElementControllersVertexes(overlayContext, selectedElementController, Object.assign(Object.assign({}, drawBaseOpts), {
-              element: elem,
-              calculator,
-              hideControllers: !!isMoving && actionType === "drag",
-              rotateControllerPattern,
-              style
-            }));
+            drawSelectedElementControllersVertexes(overlayContext, selectedElementController, Object.assign(Object.assign({}, drawBaseOpts), { element: elem, calculator, hideControllers: !!isMoving && actionType === "drag", rotateControllerPattern: rotateControllerPattern.context2d, style }));
             if (actionType === "drag") {
               if (enableSnapToGrid === true) {
                 const referenceInfo = calcReferenceInfo(elem.uuid, {
@@ -9152,13 +9609,7 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
             }
           }
           if (elem && ["select", "drag", "resize"].includes(actionType)) {
-            drawSelectedElementControllersVertexes(overlayContext, selectedElementController, Object.assign(Object.assign({}, drawBaseOpts), {
-              element: elem,
-              calculator,
-              hideControllers: !!isMoving && actionType === "drag",
-              rotateControllerPattern,
-              style
-            }));
+            drawSelectedElementControllersVertexes(overlayContext, selectedElementController, Object.assign(Object.assign({}, drawBaseOpts), { element: elem, calculator, hideControllers: !!isMoving && actionType === "drag", rotateControllerPattern: rotateControllerPattern.context2d, style }));
             if (actionType === "drag") {
               if (enableSnapToGrid === true) {
                 const referenceInfo = calcReferenceInfo(elem.uuid, {
@@ -9185,8 +9636,7 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
           } else if (["drag-list", "drag-list-end"].includes(actionType)) {
             const listAreaSize = calcSelectedElementsArea(getActiveElements(), {
               viewScaleInfo: sharer2.getActiveViewScaleInfo(),
-              viewSizeInfo: sharer2.getActiveViewSizeInfo(),
-              calculator
+              viewSizeInfo: sharer2.getActiveViewSizeInfo()
             });
             if (listAreaSize) {
               drawListArea(overlayContext, { areaSize: listAreaSize, style });
@@ -9315,7 +9765,8 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
     return scrollWrapper;
   }
   function drawScrollerThumb(ctx, opts) {
-    let { x: x2, y: y2, h: h2, w: w2, background: background2, borderColor: borderColor2 } = opts;
+    let { x: x2, y: y2, h: h2, w: w2 } = opts;
+    const { background: background2, borderColor: borderColor2 } = opts;
     ctx.save();
     ctx.shadowColor = "#FFFFFF";
     ctx.shadowOffsetX = 0;
@@ -9344,7 +9795,7 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
       ctx.arcTo(x2, y2, x2 + w2, y2, r);
       ctx.closePath();
       ctx.fillStyle = background2;
-      ctx.fill();
+      ctx.fill("nonzero");
       ctx.beginPath();
       ctx.lineWidth = 1;
       ctx.strokeStyle = borderColor2;
@@ -9396,16 +9847,7 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
     sharer.setSharedStorage(keyXThumbRect, null);
     sharer.setSharedStorage(keyYThumbRect, null);
     let isBusy = false;
-    const innerConfig = Object.assign(Object.assign({}, defaultStyle$1), config);
-    const { thumbBackground, thumbBorderColor, hoverThumbBackground, hoverThumbBorderColor, activeThumbBackground, activeThumbBorderColor } = innerConfig;
-    const style = {
-      thumbBackground,
-      thumbBorderColor,
-      hoverThumbBackground,
-      hoverThumbBorderColor,
-      activeThumbBackground,
-      activeThumbBorderColor
-    };
+    let innerConfig = Object.assign(Object.assign({}, defaultStyle$1), config);
     const clear = () => {
       sharer.setSharedStorage(keyPrevPoint$1, null);
       sharer.setSharedStorage(keyActivePoint, null);
@@ -9447,6 +9889,9 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
     };
     return {
       name: "@middleware/scroller",
+      resetConfig(config2) {
+        innerConfig = Object.assign(Object.assign({}, innerConfig), config2);
+      },
       wheel: (e) => {
         viewer.scroll({
           moveX: 0 - e.deltaX,
@@ -9509,6 +9954,15 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
         }
       },
       beforeDrawFrame({ snapshot }) {
+        const { thumbBackground, thumbBorderColor, hoverThumbBackground, hoverThumbBorderColor, activeThumbBackground, activeThumbBorderColor } = innerConfig;
+        const style = {
+          thumbBackground,
+          thumbBorderColor,
+          hoverThumbBackground,
+          hoverThumbBorderColor,
+          activeThumbBackground,
+          activeThumbBorderColor
+        };
         const { xThumbRect, yThumbRect } = drawScroller(overlayContext, { snapshot, style });
         sharer.setSharedStorage(keyXThumbRect, xThumbRect);
         sharer.setSharedStorage(keyYThumbRect, yThumbRect);
@@ -9552,7 +10006,7 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
   const textColor = "#00000080";
   const gridColor = "#AAAAAA20";
   const gridPrimaryColor = "#AAAAAA40";
-  const selectedAreaColor = "#196097";
+  const selectedAreaColor = "#19609780";
   const defaultStyle = {
     background,
     borderColor,
@@ -9620,7 +10074,6 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
     const { scale, offsetLeft } = viewScaleInfo;
     const { width } = viewSizeInfo;
     return calcRulerScaleList({
-      axis: "X",
       scale,
       viewLength: width,
       viewOffset: offsetLeft
@@ -9631,7 +10084,6 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
     const { scale, offsetTop } = viewScaleInfo;
     const { height } = viewSizeInfo;
     return calcRulerScaleList({
-      axis: "Y",
       scale,
       viewLength: height,
       viewOffset: offsetTop
@@ -9713,16 +10165,17 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
     const { width, height } = viewSizeInfo;
     const { background: background2, borderColor: borderColor2 } = style;
     ctx.beginPath();
-    ctx.moveTo(0, 0);
-    ctx.lineTo(width + 1, 0);
+    const basePosition = -1;
+    ctx.moveTo(basePosition, basePosition);
+    ctx.lineTo(width + 1, basePosition);
     ctx.lineTo(width + 1, rulerSize);
     ctx.lineTo(rulerSize, rulerSize);
     ctx.lineTo(rulerSize, height + 1);
-    ctx.lineTo(0, height + 1);
-    ctx.lineTo(0, 0);
+    ctx.lineTo(basePosition, height + 1);
+    ctx.lineTo(basePosition, basePosition);
     ctx.closePath();
     ctx.fillStyle = background2;
-    ctx.fill();
+    ctx.fill("nonzero");
     ctx.lineWidth = lineSize;
     ctx.setLineDash([]);
     ctx.strokeStyle = borderColor2;
@@ -9804,7 +10257,7 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
       ctx.lineTo(xAreaStart, rulerSize);
       ctx.fillStyle = selectedAreaColor2;
       ctx.closePath();
-      ctx.fill();
+      ctx.fill("nonzero");
       ctx.beginPath();
       ctx.moveTo(0, yAreaStart);
       ctx.lineTo(rulerSize, yAreaStart);
@@ -9812,23 +10265,13 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
       ctx.lineTo(0, yAreaEnd);
       ctx.fillStyle = selectedAreaColor2;
       ctx.closePath();
-      ctx.fill();
+      ctx.fill("nonzero");
     }
   }
   const MiddlewareRuler = (opts, config) => {
     const { boardContent, viewer, eventHub, calculator } = opts;
     const { overlayContext, underlayContext } = boardContent;
-    const innerConfig = Object.assign(Object.assign({}, defaultStyle), config);
-    const { background: background2, borderColor: borderColor2, scaleColor: scaleColor2, textColor: textColor2, gridColor: gridColor2, gridPrimaryColor: gridPrimaryColor2, selectedAreaColor: selectedAreaColor2 } = innerConfig;
-    const style = {
-      background: background2,
-      borderColor: borderColor2,
-      scaleColor: scaleColor2,
-      textColor: textColor2,
-      gridColor: gridColor2,
-      gridPrimaryColor: gridPrimaryColor2,
-      selectedAreaColor: selectedAreaColor2
-    };
+    let innerConfig = Object.assign(Object.assign({}, defaultStyle), config);
     let show = true;
     let showGrid = true;
     const rulerCallback = (e) => {
@@ -9850,12 +10293,25 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
       disuse() {
         eventHub.off(coreEventKeys.RULER, rulerCallback);
       },
+      resetConfig(config2) {
+        innerConfig = Object.assign(Object.assign({}, innerConfig), config2);
+      },
       beforeDrawFrame: ({ snapshot }) => {
+        const { background: background2, borderColor: borderColor2, scaleColor: scaleColor2, textColor: textColor2, gridColor: gridColor2, gridPrimaryColor: gridPrimaryColor2, selectedAreaColor: selectedAreaColor2 } = innerConfig;
+        const style = {
+          background: background2,
+          borderColor: borderColor2,
+          scaleColor: scaleColor2,
+          textColor: textColor2,
+          gridColor: gridColor2,
+          gridPrimaryColor: gridPrimaryColor2,
+          selectedAreaColor: selectedAreaColor2
+        };
         if (show === true) {
           const viewScaleInfo = getViewScaleInfoFromSnapshot(snapshot);
           const viewSizeInfo = getViewSizeInfoFromSnapshot(snapshot);
+          drawRulerBackground(overlayContext, { viewSizeInfo, style });
           drawScrollerSelectedArea(overlayContext, { snapshot, calculator, style });
-          drawRulerBackground(overlayContext, { viewScaleInfo, viewSizeInfo, style });
           const { list: xList, rulerUnit } = calcXRulerScaleList({ viewScaleInfo, viewSizeInfo });
           drawXRuler(overlayContext, { scaleList: xList, style });
           const { list: yList } = calcYRulerScaleList({ viewScaleInfo, viewSizeInfo });
@@ -9865,7 +10321,6 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
             drawGrid(ctx, {
               xList,
               yList,
-              viewScaleInfo,
               viewSizeInfo,
               style
             });
@@ -9876,15 +10331,16 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
   };
   const defaultElementDetail = getDefaultElementDetailConfig();
   const MiddlewareTextEditor = (opts) => {
-    const { eventHub, boardContent, viewer, sharer } = opts;
+    const { eventHub, boardContent, viewer, sharer, calculator } = opts;
     const canvas = boardContent.boardContext.canvas;
-    const textarea = document.createElement("div");
-    textarea.setAttribute("contenteditable", "true");
-    const canvasWrapper = document.createElement("div");
     const container = opts.container || document.body;
-    const mask = document.createElement("div");
+    let textarea = document.createElement("div");
+    textarea.setAttribute("contenteditable", "true");
+    let canvasWrapper = document.createElement("div");
+    let mask = document.createElement("div");
     let activeElem = null;
     let activePosition = [];
+    let originText = "";
     const id = `idraw-middleware-text-editor-${Math.random().toString(26).substring(2)}`;
     mask.setAttribute("id", id);
     canvasWrapper.appendChild(textarea);
@@ -9901,12 +10357,14 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
       resetCanvasWrapper();
       resetTextArea(e);
       mask.style.display = "block";
+      originText = "";
       if (activeElem === null || activeElem === void 0 ? void 0 : activeElem.uuid) {
         sharer.setActiveOverrideElemenentMap({
           [activeElem.uuid]: {
             operations: { invisible: true }
           }
         });
+        originText = activeElem.detail.text || "";
         viewer.drawFrame();
       }
     };
@@ -10027,13 +10485,13 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
       canvasWrapper.style.width = `${width}px`;
       canvasWrapper.style.height = `${height}px`;
     };
-    mask.addEventListener("click", () => {
+    const maskClickEvent = () => {
       hideTextArea();
-    });
-    textarea.addEventListener("click", (e) => {
+    };
+    const textareaClickEvent = (e) => {
       e.stopPropagation();
-    });
-    textarea.addEventListener("input", () => {
+    };
+    const textareaInputEvent = () => {
       if (activeElem && activePosition) {
         activeElem.detail.text = textarea.innerText || "";
         eventHub.trigger(coreEventKeys.TEXT_CHANGE, {
@@ -10045,11 +10503,13 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
           },
           position: [...activePosition || []]
         });
+        calculator.modifyText(activeElem);
         viewer.drawFrame();
       }
-    });
-    textarea.addEventListener("blur", () => {
+    };
+    const textareaBlurEvent = () => {
       if (activeElem && activePosition) {
+        activeElem.detail.text = textarea.innerText || "";
         eventHub.trigger(coreEventKeys.TEXT_CHANGE, {
           element: {
             uuid: activeElem.uuid,
@@ -10059,22 +10519,60 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
           },
           position: [...activePosition]
         });
+        const data = sharer.getActiveStorage("data") || { elements: [] };
+        const updateContent = {
+          detail: {
+            text: activeElem.detail.text
+          }
+        };
+        updateElementInList(activeElem.uuid, updateContent, data.elements);
+        eventHub.trigger(coreEventKeys.CHANGE, {
+          selectedElements: [
+            Object.assign(Object.assign({}, activeElem), { detail: Object.assign(Object.assign({}, activeElem.detail), updateContent.detail) })
+          ],
+          data,
+          type: "modifyElement",
+          modifyRecord: {
+            type: "modifyElement",
+            time: Date.now(),
+            content: {
+              method: "modifyElement",
+              uuid: activeElem.uuid,
+              before: {
+                "detail.text": originText
+              },
+              after: {
+                "detail.text": activeElem.detail.text
+              }
+            }
+          }
+        });
+        calculator.modifyText(activeElem);
+        viewer.drawFrame();
       }
       hideTextArea();
-    });
-    textarea.addEventListener("keydown", (e) => {
+    };
+    const textareaKeyDownEvent = (e) => {
       e.stopPropagation();
-    });
-    textarea.addEventListener("keypress", (e) => {
+    };
+    const textareaKeyPressEvent = (e) => {
       e.stopPropagation();
-    });
-    textarea.addEventListener("keyup", (e) => {
+    };
+    const textareaKeyUpEvent = (e) => {
       e.stopPropagation();
-    });
-    textarea.addEventListener("wheel", (e) => {
+    };
+    const textareaWheelEvent = (e) => {
       e.stopPropagation();
       e.preventDefault();
-    });
+    };
+    mask.addEventListener("click", maskClickEvent);
+    textarea.addEventListener("click", textareaClickEvent);
+    textarea.addEventListener("input", textareaInputEvent);
+    textarea.addEventListener("blur", textareaBlurEvent);
+    textarea.addEventListener("keydown", textareaKeyDownEvent);
+    textarea.addEventListener("keypress", textareaKeyPressEvent);
+    textarea.addEventListener("keyup", textareaKeyUpEvent);
+    textarea.addEventListener("wheel", textareaWheelEvent);
     const textEditCallback = (e) => {
       var _a;
       if ((e === null || e === void 0 ? void 0 : e.position) && (e === null || e === void 0 ? void 0 : e.element) && ((_a = e === null || e === void 0 ? void 0 : e.element) === null || _a === void 0 ? void 0 : _a.type) === "text") {
@@ -10090,6 +10588,26 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
       },
       disuse() {
         eventHub.off(coreEventKeys.TEXT_EDIT, textEditCallback);
+        mask.removeEventListener("click", maskClickEvent);
+        textarea.removeEventListener("click", textareaClickEvent);
+        textarea.removeEventListener("input", textareaInputEvent);
+        textarea.removeEventListener("blur", textareaBlurEvent);
+        textarea.removeEventListener("keydown", textareaKeyDownEvent);
+        textarea.removeEventListener("keypress", textareaKeyPressEvent);
+        textarea.removeEventListener("keyup", textareaKeyUpEvent);
+        textarea.removeEventListener("wheel", textareaWheelEvent);
+        canvasWrapper.removeChild(textarea);
+        mask.removeChild(canvasWrapper);
+        container.removeChild(mask);
+        textarea.remove();
+        canvasWrapper.remove();
+        mask = null;
+        textarea = null;
+        canvasWrapper = null;
+        mask = null;
+        activeElem = null;
+        activePosition = null;
+        originText = null;
       }
     };
   };
@@ -10146,23 +10664,22 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
       const { left, top, width, height } = clientRect;
       return { left, top, width, height };
     };
-    const contextMenuPointer = document.createElement("div");
-    contextMenuPointer.setAttribute("id", id);
-    contextMenuPointer.style.position = "fixed";
-    contextMenuPointer.style.top = "0";
-    contextMenuPointer.style.bottom = "unset";
-    contextMenuPointer.style.left = "0";
-    contextMenuPointer.style.right = "unset";
-    container.appendChild(contextMenuPointer);
+    let contextMenuPointer = document.createElement("div");
     return {
       name: "@middleware/pointer",
       use() {
+        contextMenuPointer.setAttribute("id", id);
+        contextMenuPointer.style.position = "fixed";
+        contextMenuPointer.style.top = "0";
+        contextMenuPointer.style.bottom = "unset";
+        contextMenuPointer.style.left = "0";
+        contextMenuPointer.style.right = "unset";
+        container.appendChild(contextMenuPointer);
       },
       disuse() {
-      },
-      pointStart(e) {
-      },
-      pointEnd() {
+        container.removeChild(contextMenuPointer);
+        contextMenuPointer.remove();
+        contextMenuPointer = null;
       },
       contextMenu(e) {
         const { point } = e;
@@ -10188,6 +10705,17 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
     if (typeof state === "function" ? receiver !== state || !f : !state.has(receiver)) throw new TypeError("Cannot read private member from an object whose class did not declare it");
     return kind === "m" ? f : kind === "a" ? f.call(receiver) : f ? f.value : state.get(receiver);
   };
+  var __rest = function(s, e) {
+    var t = {};
+    for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p) && e.indexOf(p) < 0)
+      t[p] = s[p];
+    if (s != null && typeof Object.getOwnPropertySymbols === "function")
+      for (var i = 0, p = Object.getOwnPropertySymbols(s); i < p.length; i++) {
+        if (e.indexOf(p[i]) < 0 && Object.prototype.propertyIsEnumerable.call(s, p[i]))
+          t[p[i]] = s[p[i]];
+      }
+    return t;
+  };
   var _Core_instances, _Core_board, _Core_canvas, _Core_container, _Core_initContainer;
   class Core {
     constructor(container, opts) {
@@ -10195,14 +10723,14 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
       _Core_board.set(this, void 0);
       _Core_canvas.set(this, void 0);
       _Core_container.set(this, void 0);
-      const { devicePixelRatio = 1, width, height, createCustomContext2D } = opts;
+      const { devicePixelRatio = 1, width, height } = opts;
       __classPrivateFieldSet(this, _Core_container, container, "f");
       const canvas = document.createElement("canvas");
       canvas.setAttribute("tabindex", "0");
       __classPrivateFieldSet(this, _Core_canvas, canvas, "f");
       __classPrivateFieldGet(this, _Core_instances, "m", _Core_initContainer).call(this);
       container.appendChild(canvas);
-      const boardContent = createBoardContent(canvas, { width, height, devicePixelRatio, offscreen: true, createCustomContext2D });
+      const boardContent = createBoardContent(canvas, { width, height, devicePixelRatio });
       const board = new Board({ boardContent, container });
       const sharer = board.getSharer();
       sharer.setActiveViewSizeInfo({
@@ -10232,9 +10760,12 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
     disuse(middleware) {
       __classPrivateFieldGet(this, _Core_board, "f").disuse(middleware);
     }
-    setData(data, opts) {
+    resetMiddlewareConfig(middleware, config) {
+      __classPrivateFieldGet(this, _Core_board, "f").resetMiddlewareConfig(middleware, config);
+    }
+    setData(data) {
       validateElements((data === null || data === void 0 ? void 0 : data.elements) || []);
-      __classPrivateFieldGet(this, _Core_board, "f").setData(data, opts);
+      __classPrivateFieldGet(this, _Core_board, "f").setData(data);
     }
     getData() {
       return __classPrivateFieldGet(this, _Core_board, "f").getData();
@@ -10290,6 +10821,217 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
     offBoardWatcherEvents() {
       __classPrivateFieldGet(this, _Core_board, "f").offWatcherEvents();
     }
+    createElement(type, element, opts) {
+      const { viewScaleInfo, viewSizeInfo } = this.getViewInfo();
+      return createElement$1(type, element || {}, (opts === null || opts === void 0 ? void 0 : opts.viewCenter) === true ? {
+        viewScaleInfo,
+        viewSizeInfo
+      } : void 0);
+    }
+    updateElement(element) {
+      const data = this.getData() || { elements: [] };
+      const uuid = element.uuid;
+      const position = getElementPositionFromList(uuid, data.elements);
+      const beforeElem = findElementFromListByPosition(position, data.elements);
+      if (!beforeElem) {
+        return null;
+      }
+      const before = toFlattenElement(beforeElem);
+      const updatedElement = updateElementInListByPosition(position, element, data.elements, { strict: true });
+      const after = toFlattenElement(updatedElement);
+      this.setData(data);
+      this.refresh();
+      const modifyRecord = {
+        type: "updateElement",
+        time: Date.now(),
+        content: { method: "updateElement", uuid, before, after }
+      };
+      return modifyRecord;
+    }
+    modifyElement(element) {
+      const { uuid } = element, restElement = __rest(element, ["uuid"]);
+      const data = this.getData() || { elements: [] };
+      const position = getElementPositionFromList(uuid, data.elements);
+      const beforeElem = findElementFromListByPosition(position, data.elements);
+      if (!beforeElem) {
+        return null;
+      }
+      const modifyRecord = getModifyElementRecord({
+        modifiedElement: element,
+        beforeElement: beforeElem
+      });
+      updateElementInListByPosition(position, restElement, data.elements);
+      this.setData(data);
+      this.refresh();
+      return modifyRecord;
+    }
+    modifyElements(elements) {
+      const data = this.getData() || { elements: [] };
+      let modifyRecord = null;
+      const before = [];
+      const after = [];
+      elements.forEach((element) => {
+        const { uuid } = element, restElement = __rest(element, ["uuid"]);
+        const position = getElementPositionFromList(uuid, data.elements);
+        const beforeElem = findElementFromListByPosition(position, data.elements);
+        if (!beforeElem) {
+          return null;
+        }
+        const tempRecord = getModifyElementRecord({
+          modifiedElement: element,
+          beforeElement: beforeElem
+        });
+        if (tempRecord.content) {
+          before.push(Object.assign(Object.assign({}, tempRecord.content.before), { uuid }));
+          after.push(Object.assign(Object.assign({}, tempRecord.content.after), { uuid }));
+        }
+        updateElementInListByPosition(position, restElement, data.elements);
+      });
+      modifyRecord = {
+        type: "modifyElements",
+        time: Date.now(),
+        content: {
+          method: "modifyElements",
+          before,
+          after
+        }
+      };
+      this.setData(data);
+      this.refresh();
+      return modifyRecord;
+    }
+    addElement(element, opts) {
+      var _a;
+      const data = this.getData() || { elements: [] };
+      if (!opts || !((_a = opts === null || opts === void 0 ? void 0 : opts.position) === null || _a === void 0 ? void 0 : _a.length)) {
+        data.elements.push(element);
+      } else if (opts === null || opts === void 0 ? void 0 : opts.position) {
+        const position2 = [...(opts === null || opts === void 0 ? void 0 : opts.position) || []];
+        insertElementToListByPosition(element, position2, data.elements);
+      }
+      const position = getElementPositionFromList(element.uuid, data.elements);
+      const modifyRecord = {
+        type: "addElement",
+        time: Date.now(),
+        content: { method: "addElement", uuid: element.uuid, position, element: deepClone(element) }
+      };
+      this.setData(data);
+      this.refresh();
+      return modifyRecord;
+    }
+    deleteElement(uuid) {
+      const data = this.getData() || { elements: [] };
+      const position = getElementPositionFromList(uuid, data.elements);
+      const element = findElementFromListByPosition(position, data.elements);
+      const modifyRecord = {
+        type: "deleteElement",
+        time: Date.now(),
+        content: { method: "deleteElement", uuid, position, element: element ? deepClone(element) : null }
+      };
+      deleteElementInList(uuid, data.elements);
+      this.setData(data);
+      this.refresh();
+      return modifyRecord;
+    }
+    moveElement(uuid, to) {
+      const data = this.getData() || { elements: [] };
+      const from = getElementPositionFromList(uuid, data.elements);
+      const modifyRecord = {
+        type: "moveElement",
+        time: Date.now(),
+        content: { method: "moveElement", uuid, from: [...from], to: [...to] }
+      };
+      const { elements: list } = moveElementPosition(data.elements, { from, to });
+      data.elements = list;
+      this.setData(data);
+      this.refresh();
+      return modifyRecord;
+    }
+    modifyLayout(layout) {
+      const data = this.getData() || { elements: [] };
+      const modifyRecord = {
+        type: "modifyLayout",
+        time: Date.now(),
+        content: {
+          method: "modifyLayout",
+          before: null,
+          after: null
+        }
+      };
+      if (layout === null) {
+        if (data.layout) {
+          modifyRecord.content.before = toFlattenLayout(data.layout);
+          delete data["layout"];
+          this.setData(data);
+          this.refresh();
+          return modifyRecord;
+        } else {
+          return modifyRecord;
+        }
+      }
+      const beforeLayout = data.layout;
+      let before = {};
+      const after = toFlattenLayout(layout);
+      if (data.layout) {
+        Object.keys(after).forEach((key2) => {
+          let val = get(beforeLayout, key2);
+          if (val === void 0 && /(borderRadius|borderWidth)\[[0-9]{1,}\]$/.test(key2)) {
+            key2 = key2.replace(/\[[0-9]{1,}\]$/, "");
+            val = get(beforeLayout, key2);
+          }
+          before[key2] = val;
+        });
+        before = toFlattenLayout(before);
+        modifyRecord.content.before = before;
+      } else {
+        data.layout = {};
+      }
+      modifyRecord.content.after = after;
+      mergeLayout(data.layout, layout);
+      this.setData(data);
+      this.refresh();
+      return modifyRecord;
+    }
+    modifyGlobal(global) {
+      const data = this.getData() || { elements: [] };
+      const modifyRecord = {
+        type: "modifyGlobal",
+        time: Date.now(),
+        content: {
+          method: "modifyGlobal",
+          before: null,
+          after: null
+        }
+      };
+      if (global === null) {
+        if (data.global) {
+          modifyRecord.content.before = toFlattenGlobal(data.global);
+          delete data["global"];
+          this.setData(data);
+          this.refresh();
+          return modifyRecord;
+        } else {
+          return modifyRecord;
+        }
+      }
+      const beforeGlobal = data.global;
+      let before = {};
+      const after = toFlattenGlobal(global);
+      if (data.global) {
+        Object.keys(after).forEach((key2) => {
+          before[key2] = get(beforeGlobal, key2);
+        });
+        before = toFlattenGlobal(before);
+        modifyRecord.content.before = before;
+      } else {
+        data.global = {};
+      }
+      modifyRecord.content.after = after;
+      mergeGlobal(data.global, global);
+      this.setData(data);
+      this.refresh();
+      return modifyRecord;
+    }
   }
   _Core_board = /* @__PURE__ */ new WeakMap(), _Core_canvas = /* @__PURE__ */ new WeakMap(), _Core_container = /* @__PURE__ */ new WeakMap(), _Core_instances = /* @__PURE__ */ new WeakSet(), _Core_initContainer = function _Core_initContainer2() {
     const container = __classPrivateFieldGet(this, _Core_container, "f");
@@ -10297,7 +11039,11 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
   };
   const defaultMode = "select";
   const defaultSettings = {
-    mode: defaultMode
+    mode: defaultMode,
+    history: false
+  };
+  const defaultOptions = {
+    devicePixelRatio: window.devicePixelRatio
   };
   function getDefaultStorage() {
     const storage = {
@@ -10319,7 +11065,39 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
     };
     return storage;
   }
-  function parseStyles(opts) {
+  function parseSettings(opts) {
+    const { mode, styles } = opts;
+    const settings = {};
+    if (istype.string(mode)) {
+      settings.mode = mode;
+    }
+    if (styles) {
+      settings.styles = parseStrictStyles(opts);
+    }
+    return settings;
+  }
+  function parseStrictStyles(settings) {
+    const styles = parseStyles(settings);
+    const strictStyles = {};
+    const { selector, info, ruler, scroller, layoutSelector } = styles;
+    if (Object.keys(selector).length > 0) {
+      strictStyles.selector = selector;
+    }
+    if (Object.keys(info).length > 0) {
+      strictStyles.info = info;
+    }
+    if (Object.keys(ruler).length > 0) {
+      strictStyles.ruler = ruler;
+    }
+    if (Object.keys(scroller).length > 0) {
+      strictStyles.scroller = scroller;
+    }
+    if (Object.keys(layoutSelector).length > 0) {
+      strictStyles.layoutSelector = layoutSelector;
+    }
+    return strictStyles;
+  }
+  function parseStyles(settings) {
     const styles = {
       selector: {},
       ruler: {},
@@ -10327,8 +11105,8 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
       scroller: {},
       layoutSelector: {}
     };
-    if (opts.styles) {
-      const { selector, info, ruler, scroller, layoutSelector } = opts.styles;
+    if (settings.styles) {
+      const { selector, info, ruler, scroller, layoutSelector } = settings.styles;
       if (istype.string(selector == null ? void 0 : selector.activeColor)) {
         styles.selector.activeColor = selector == null ? void 0 : selector.activeColor;
       }
@@ -10391,37 +11169,6 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
       }
     }
     return styles;
-  }
-  async function exportImageFileBlobURL(opts) {
-    const { data, width, height, devicePixelRatio, viewScaleInfo, viewSizeInfo, loadItemMap } = opts;
-    let viewContext = createOffscreenContext2D({ width, height, devicePixelRatio });
-    let calculator = new Calculator({ viewContext });
-    let renderer = new Renderer({
-      viewContext,
-      calculator
-    });
-    renderer.setLoadItemMap(loadItemMap);
-    renderer.drawData(data, {
-      viewScaleInfo,
-      viewSizeInfo,
-      forceDrawAll: true
-    });
-    let blobURL = null;
-    let offScreenCanvas = viewContext.$getOffscreenCanvas();
-    if (offScreenCanvas) {
-      const blob = await offScreenCanvas.convertToBlob();
-      blobURL = window.URL.createObjectURL(blob);
-    }
-    offScreenCanvas = null;
-    viewContext = null;
-    calculator = null;
-    renderer = null;
-    return {
-      blobURL,
-      width,
-      height,
-      devicePixelRatio
-    };
   }
   function isValidMode(mode) {
     return ["select", "drag", "readOnly"].includes(mode);
@@ -10515,6 +11262,180 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
     store.set("enableInfo", enableInfo);
     runMiddlewares(core, store);
   }
+  function createElement(depOptions, type, element, opts) {
+    const { core } = depOptions;
+    return core.createElement(type, element, opts);
+  }
+  function updateElement(depOptions, element) {
+    const { core } = depOptions;
+    const modifyRecord = core.updateElement(element);
+    if (!modifyRecord) {
+      return;
+    }
+    const data = core.getData();
+    if (!data) {
+      return;
+    }
+    core.trigger(coreEventKeys.CHANGE, { data, type: "updateElement", modifyRecord });
+  }
+  function modifyElement(depOptions, element) {
+    const { core } = depOptions;
+    const modifyRecord = core.modifyElement(element);
+    if (!modifyRecord) {
+      return;
+    }
+    const data = core.getData();
+    if (!data) {
+      return;
+    }
+    core.trigger(coreEventKeys.CHANGE, { data, type: "updateElement", modifyRecord });
+  }
+  function addElement(depOptions, element, opts) {
+    const { core } = depOptions;
+    const modifyRecord = core.addElement(element, opts);
+    const data = core.getData();
+    core.trigger(coreEventKeys.CHANGE, { data, type: "addElement", modifyRecord });
+    return data;
+  }
+  function deleteElement(depOptions, uuid) {
+    const { core } = depOptions;
+    const modifyRecord = core.deleteElement(uuid);
+    const data = core.getData();
+    core.trigger(coreEventKeys.CHANGE, { data, type: "deleteElement", modifyRecord });
+  }
+  function moveElement(depOptions, uuid, to) {
+    const { core } = depOptions;
+    const modifyRecord = core.moveElement(uuid, to);
+    const data = core.getData();
+    core.trigger(coreEventKeys.CHANGE, { data, type: "moveElement", modifyRecord });
+  }
+  function modifyLayout(depOptions, layout) {
+    const { core } = depOptions;
+    const modifyRecord = core.modifyLayout(layout);
+    const data = core.getData();
+    core.trigger(coreEventKeys.CHANGE, { data, type: "modifyLayout", modifyRecord });
+  }
+  function modifyGlobal(depOptions, global) {
+    const { core } = depOptions;
+    const modifyRecord = core.modifyGlobal(global);
+    const data = core.getData();
+    core.trigger(coreEventKeys.CHANGE, { data, type: "modifyGlobal", modifyRecord });
+  }
+  function changeStyles(styles, core, store) {
+    const { selector, info, ruler, scroller, layoutSelector } = styles;
+    const middlewareStyles = store.get("middlewareStyles");
+    if (selector) {
+      core.resetMiddlewareConfig(MiddlewareSelector, selector);
+      middlewareStyles.selector = { ...middlewareStyles.selector, ...selector };
+    }
+    if (info) {
+      core.resetMiddlewareConfig(MiddlewareInfo, info);
+      middlewareStyles.info = { ...middlewareStyles.info, ...info };
+    }
+    if (ruler) {
+      core.resetMiddlewareConfig(MiddlewareRuler, ruler);
+      middlewareStyles.ruler = { ...middlewareStyles.ruler, ...ruler };
+    }
+    if (scroller) {
+      core.resetMiddlewareConfig(MiddlewareScroller, scroller);
+      middlewareStyles.scroller = { ...middlewareStyles.scroller, ...scroller };
+    }
+    if (layoutSelector) {
+      core.resetMiddlewareConfig(MiddlewareLayoutSelector, layoutSelector);
+      middlewareStyles.layoutSelector = { ...middlewareStyles.layoutSelector, ...layoutSelector };
+    }
+  }
+  function reset(depOptions, opts) {
+    const { core, store } = depOptions;
+    const { mode, styles } = parseSettings(opts);
+    let needFresh = false;
+    const newOpts = {};
+    store.clear();
+    if (mode) {
+      changeMode(mode, core, store);
+      newOpts.mode = mode;
+      needFresh = true;
+    }
+    if (styles) {
+      changeStyles(styles, core, store);
+      newOpts.styles = styles;
+      needFresh = true;
+    }
+    if (needFresh === true) {
+      core.refresh();
+    }
+    return newOpts;
+  }
+  function setFeature(depOptions, feat, status) {
+    const { core, store } = depOptions;
+    if (["ruler", "scroll", "scale", "info"].includes(feat)) {
+      const map = {
+        ruler: "enableRuler",
+        scroll: "enableScroll",
+        scale: "enableScale",
+        info: "enableInfo"
+      };
+      store.set(map[feat], !!status);
+      runMiddlewares(core, store);
+      core.refresh();
+    } else if (feat === "selectInGroup") {
+      core.trigger(coreEventKeys.SELECT_IN_GROUP, {
+        enable: !!status
+      });
+    } else if (feat === "snapToGrid") {
+      core.trigger(coreEventKeys.SNAP_TO_GRID, {
+        enable: !!status
+      });
+    }
+  }
+  async function exportImageFileBlobURL(opts) {
+    const { data, width, height, devicePixelRatio, viewScaleInfo, viewSizeInfo, loadItemMap } = opts;
+    let viewContext = createOffscreenContext2D({ width, height, devicePixelRatio });
+    let tempContext = createOffscreenContext2D({ width, height, devicePixelRatio });
+    let renderer = new Renderer({
+      viewContext,
+      tempContext
+    });
+    renderer.setLoadItemMap(loadItemMap);
+    renderer.drawData(data, {
+      viewScaleInfo,
+      viewSizeInfo,
+      forceDrawAll: true
+    });
+    let blobURL = null;
+    let offScreenCanvas = viewContext.$getOffscreenCanvas();
+    if (offScreenCanvas) {
+      const blob = await offScreenCanvas.convertToBlob();
+      blobURL = window.URL.createObjectURL(blob);
+    }
+    offScreenCanvas = null;
+    viewContext = null;
+    tempContext = null;
+    renderer = null;
+    return {
+      blobURL,
+      width,
+      height,
+      devicePixelRatio
+    };
+  }
+  async function getImageBlobURL(depOptions, opts) {
+    const { data, viewSizeInfo, core } = depOptions;
+    const { devicePixelRatio } = opts || { devicePixelRatio: 1 };
+    const outputSize = calcElementListSize(data.elements);
+    return await exportImageFileBlobURL({
+      width: outputSize.w,
+      height: outputSize.h,
+      devicePixelRatio,
+      data,
+      viewScaleInfo: { scale: 1, offsetLeft: -outputSize.x, offsetTop: -outputSize.y, offsetBottom: 0, offsetRight: 0 },
+      viewSizeInfo: {
+        ...viewSizeInfo,
+        ...{ devicePixelRatio }
+      },
+      loadItemMap: core.getLoadItemMap()
+    });
+  }
   class iDraw2 {
     constructor(mount, options) {
       __privateAdd(this, _iDraw_instances);
@@ -10523,24 +11444,23 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
       __privateAdd(this, _store, new Store({
         defaultStorage: getDefaultStorage()
       }));
-      const opts = { ...defaultSettings, ...options };
+      const opts = { ...defaultSettings, ...defaultOptions, ...options };
       __privateGet(this, _store).set("middlewareStyles", parseStyles(opts));
-      const { width, height, devicePixelRatio, createCustomContext2D } = opts;
-      const core = new Core(mount, { width, height, devicePixelRatio, createCustomContext2D });
+      const { width, height, devicePixelRatio } = opts;
+      const core = new Core(mount, { width, height, devicePixelRatio });
       __privateSet(this, _core, core);
       __privateSet(this, _opts, opts);
       __privateMethod(this, _iDraw_instances, init_fn).call(this);
     }
+    use(middleware, config) {
+      __privateGet(this, _core).use(middleware, config);
+    }
+    disuse(middleware) {
+      __privateGet(this, _core).disuse(middleware);
+    }
     reset(opts) {
-      const core = __privateGet(this, _core);
-      const store = __privateGet(this, _store);
-      store.clear();
-      changeMode(opts.mode || defaultMode, core, store);
-      core.refresh();
-      __privateSet(this, _opts, {
-        ...__privateGet(this, _opts),
-        ...opts
-      });
+      const newOpts = reset({ core: __privateGet(this, _core), store: __privateGet(this, _store) }, opts);
+      __privateSet(this, _opts, { ...__privateGet(this, _opts), ...newOpts });
     }
     setMode(mode) {
       const core = __privateGet(this, _core);
@@ -10599,110 +11519,70 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
     trigger(name, e) {
       __privateGet(this, _core).trigger(name, e);
     }
-    selectElement(uuid) {
-      this.selectElements([uuid]);
+    selectElement(uuid, opts) {
+      this.trigger(coreEventKeys.SELECT, { uuids: [uuid], type: (opts == null ? void 0 : opts.type) || "selectElement" });
     }
-    selectElements(uuids) {
-      this.trigger(coreEventKeys.SELECT, { uuids });
+    selectElements(uuids, opts) {
+      this.trigger(coreEventKeys.SELECT, { uuids, type: (opts == null ? void 0 : opts.type) || "selectElements" });
     }
-    selectElementByPosition(position) {
-      this.selectElementsByPositions([position]);
+    selectElementByPosition(position, opts) {
+      this.trigger(coreEventKeys.SELECT, { positions: [position], type: (opts == null ? void 0 : opts.type) || "selectElementByPosition" });
     }
-    selectElementsByPositions(positions) {
-      this.trigger(coreEventKeys.SELECT, { positions });
+    selectElementsByPositions(positions, opts) {
+      this.trigger(coreEventKeys.SELECT, { positions, type: (opts == null ? void 0 : opts.type) || "selectElementsByPositions" });
     }
     cancelElements() {
       this.trigger(coreEventKeys.CLEAR_SELECT, { uuids: [] });
     }
-    createElement(type, opts) {
-      const { viewScaleInfo, viewSizeInfo } = __privateGet(this, _core).getViewInfo();
-      return createElement(
-        type,
-        (opts == null ? void 0 : opts.element) || {},
-        (opts == null ? void 0 : opts.viewCenter) === true ? {
-          viewScaleInfo,
-          viewSizeInfo
-        } : void 0
-      );
+    createElement(type, element, opts) {
+      return createElement({ core: __privateGet(this, _core) }, type, element, opts);
     }
     updateElement(element) {
-      const core = __privateGet(this, _core);
-      const data = core.getData() || { elements: [] };
-      updateElementInList(element.uuid, element, data.elements);
-      core.setData(data);
-      core.refresh();
-      core.trigger(coreEventKeys.CHANGE, { data, type: "updateElement" });
+      return updateElement({ core: __privateGet(this, _core) }, element);
+    }
+    modifyElement(element) {
+      return modifyElement({ core: __privateGet(this, _core) }, element);
     }
     addElement(element, opts) {
-      var _a;
-      const core = __privateGet(this, _core);
-      const data = core.getData() || { elements: [] };
-      if (!opts || !((_a = opts == null ? void 0 : opts.position) == null ? void 0 : _a.length)) {
-        data.elements.push(element);
-      } else if (opts == null ? void 0 : opts.position) {
-        const position = [...opts == null ? void 0 : opts.position];
-        insertElementToListByPosition(element, position, data.elements);
-      }
-      core.setData(data);
-      core.refresh();
-      core.trigger(coreEventKeys.CHANGE, { data, type: "addElement" });
-      return data;
+      return addElement({ core: __privateGet(this, _core) }, element, opts);
     }
     deleteElement(uuid) {
-      const core = __privateGet(this, _core);
-      const data = core.getData() || { elements: [] };
-      deleteElementInList(uuid, data.elements);
-      core.setData(data);
-      core.refresh();
-      core.trigger(coreEventKeys.CHANGE, { data, type: "deleteElement" });
+      return deleteElement({ core: __privateGet(this, _core) }, uuid);
     }
     moveElement(uuid, to) {
-      const core = __privateGet(this, _core);
-      const data = core.getData() || { elements: [] };
-      const from = getElementPositionFromList(uuid, data.elements);
-      const { elements: list } = moveElementPosition(data.elements, { from, to });
-      data.elements = list;
-      core.setData(data);
-      core.refresh();
-      core.trigger(coreEventKeys.CHANGE, { data, type: "moveElement" });
+      return moveElement({ core: __privateGet(this, _core) }, uuid, to);
+    }
+    modifyLayout(layout) {
+      return modifyLayout({ core: __privateGet(this, _core) }, layout);
+    }
+    modifyGlobal(global) {
+      return modifyGlobal({ core: __privateGet(this, _core) }, global);
     }
     async getImageBlobURL(opts) {
       const data = this.getData() || { elements: [] };
-      const { devicePixelRatio } = opts || { devicePixelRatio: 1 };
-      const outputSize = calcElementListSize(data.elements);
       const { viewSizeInfo } = this.getViewInfo();
-      return await exportImageFileBlobURL({
-        width: outputSize.w,
-        height: outputSize.h,
-        devicePixelRatio,
-        data,
-        viewScaleInfo: { scale: 1, offsetLeft: -outputSize.x, offsetTop: -outputSize.y, offsetBottom: 0, offsetRight: 0 },
-        viewSizeInfo: {
-          ...viewSizeInfo,
-          ...{ devicePixelRatio }
-        },
-        loadItemMap: __privateGet(this, _core).getLoadItemMap()
-      });
+      return await getImageBlobURL({ data, viewSizeInfo, core: __privateGet(this, _core) }, opts);
     }
     isDestroyed() {
       return __privateGet(this, _core).isDestroyed();
     }
     destroy() {
-      const core = __privateGet(this, _core);
-      const store = __privateGet(this, _store);
-      core.destroy();
-      store.destroy();
+      __privateGet(this, _core).destroy();
+      __privateGet(this, _store).destroy();
     }
     getViewCenter() {
       const { viewScaleInfo, viewSizeInfo } = this.getViewInfo();
       const pointSize = calcViewCenter({ viewScaleInfo, viewSizeInfo });
       return pointSize;
     }
-    $onBoardWatcherEvents() {
-      __privateGet(this, _core).onBoardWatcherEvents();
-    }
-    $offBoardWatcherEvents() {
-      __privateGet(this, _core).offBoardWatcherEvents();
+    // $onBoardWatcherEvents() {
+    //   this.#core.onBoardWatcherEvents();
+    // }
+    // $offBoardWatcherEvents() {
+    //   this.#core.offBoardWatcherEvents();
+    // }
+    getCore() {
+      return __privateGet(this, _core);
     }
   }
   _core = new WeakMap();
@@ -10715,28 +11595,188 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
     changeMode("select", core, store);
   };
   setFeature_fn = function(feat, status) {
-    const store = __privateGet(this, _store);
-    if (["ruler", "scroll", "scale", "info"].includes(feat)) {
-      const map = {
-        ruler: "enableRuler",
-        scroll: "enableScroll",
-        scale: "enableScale",
-        info: "enableInfo"
-      };
-      store.set(map[feat], !!status);
-      runMiddlewares(__privateGet(this, _core), store);
-      __privateGet(this, _core).refresh();
-    } else if (feat === "selectInGroup") {
-      __privateGet(this, _core).trigger(coreEventKeys.SELECT_IN_GROUP, {
-        enable: !!status
-      });
-    } else if (feat === "snapToGrid") {
-      __privateGet(this, _core).trigger(coreEventKeys.SNAP_TO_GRID, {
-        enable: !!status
-      });
-    }
+    return setFeature({ core: __privateGet(this, _core), store: __privateGet(this, _store) }, feat, status);
   };
   const eventKeys = coreEventKeys;
+  const supportRecordTypes = [
+    "updateElement",
+    "modifyElement",
+    "deleteElement",
+    "moveElement",
+    "addElement",
+    "dragElement",
+    "resizeElement",
+    "dragLayout",
+    "modifyLayout",
+    "modifyGlobal"
+  ];
+  const useHistory = (opts) => {
+    const { instance } = opts;
+    const core = instance.getCore();
+    let doRecords = [];
+    let undoRecords = [];
+    const doAction = (record) => {
+      doRecords.push(record);
+    };
+    const undoAction = () => {
+      var _a;
+      if ((doRecords == null ? void 0 : doRecords.length) > 0) {
+        const record = doRecords.pop();
+        if (!record) {
+          return;
+        }
+        let undoRecord = { ...record };
+        if (record.content.method === "modifyElement") {
+          const info = unflatObject(record.content.before || {});
+          undoRecord = core.modifyElement({
+            ...info,
+            uuid: (_a = record.content) == null ? void 0 : _a.uuid
+          });
+        } else if (record.content.method === "updateElement") {
+          const info = unflatObject(record.content.before || {});
+          undoRecord = core.updateElement({ ...info, uuid: record.content.uuid });
+        } else if (record.content.method === "addElement") {
+          const uuid = record.content.uuid;
+          undoRecord = core.deleteElement(uuid);
+        } else if (record.content.method === "deleteElement") {
+          const { element, position } = record.content;
+          if (!element) {
+            return;
+          }
+          if (!element) {
+            return;
+          }
+          undoRecord = core.addElement(element, { position });
+        } else if (record.content.method === "moveElement") {
+          const uuid = record.content.uuid;
+          const moveResult = calcResultMovePosition({
+            from: record.content.from,
+            to: record.content.to
+          });
+          if (!moveResult) {
+            return;
+          }
+          undoRecord = core.moveElement(uuid, moveResult.from);
+        } else if (record.content.method === "modifyLayout") {
+          const info = record.content.before === null ? null : unflatObject(record.content.before || {});
+          undoRecord = core.modifyLayout(info);
+        } else if (record.content.method === "modifyGlobal") {
+          const info = record.content.before === null ? null : unflatObject(record.content.before || {});
+          undoRecord = core.modifyGlobal(info);
+        } else if (record.content.method === "modifyElements") {
+          undoRecord = core.modifyElements(
+            record.content.before.forEach((item) => unflatObject(item))
+          );
+        }
+        undoRecord = { ...undoRecord, type: "undo" };
+        undoRecords.push(undoRecord);
+      }
+    };
+    const redoAction = () => {
+      if ((undoRecords == null ? void 0 : undoRecords.length) > 0) {
+        const record = undoRecords.pop();
+        if (!record) {
+          return;
+        }
+        let redoRecord = { ...record };
+        if (record.content.method === "modifyElement") {
+          const info = unflatObject(record.content.before || {});
+          redoRecord = core.modifyElement({
+            ...info,
+            uuid: record.content.uuid
+          });
+        } else if (record.content.method === "updateElement") {
+          const info = unflatObject(record.content.before || {});
+          redoRecord = core.updateElement({ ...info, uuid: record.content.uuid });
+        } else if (record.content.method === "addElement") {
+          const uuid = record.content.uuid;
+          redoRecord = core.deleteElement(uuid);
+        } else if (record.content.method === "deleteElement") {
+          const { element, position } = record.content;
+          if (!element) {
+            return;
+          }
+          redoRecord = core.addElement(element, { position });
+        } else if (record.content.method === "moveElement") {
+          const uuid = record.content.uuid;
+          const moveResult = calcResultMovePosition({
+            from: record.content.from,
+            to: record.content.to
+          });
+          if (!moveResult) {
+            return;
+          }
+          redoRecord = core.moveElement(uuid, moveResult.from);
+        } else if (record.content.method === "modifyLayout") {
+          const info = record.content.before === null ? null : unflatObject(record.content.before || {});
+          redoRecord = core.modifyLayout(info);
+        } else if (record.content.method === "modifyGlobal") {
+          const info = record.content.before === null ? null : unflatObject(record.content.before || {});
+          redoRecord = core.modifyGlobal(info);
+        } else if (record.content.method === "modifyElements") {
+          redoRecord = core.modifyElements(
+            record.content.before.forEach((item) => unflatObject(item))
+          );
+        }
+        redoRecord = { ...redoRecord, type: "redo" };
+        doRecords.push(redoRecord);
+      }
+    };
+    const MiddlewareHistory = (opts2) => {
+      const { eventHub } = opts2;
+      const changeEvent = (e) => {
+        const { modifyRecord } = e;
+        if (modifyRecord && supportRecordTypes.includes(modifyRecord == null ? void 0 : modifyRecord.type)) {
+          doAction(modifyRecord);
+        }
+      };
+      const onEvents = () => {
+        eventHub.on(eventKeys.CHANGE, changeEvent);
+      };
+      const offEvents = () => {
+        eventHub.off(eventKeys.CHANGE, changeEvent);
+      };
+      return {
+        name: "@middleware/history",
+        use() {
+          onEvents();
+        },
+        disuse() {
+          offEvents();
+        }
+      };
+    };
+    const destroy = () => {
+      clear();
+      doRecords = null;
+      undoRecords = null;
+    };
+    const clear = () => {
+      while ((doRecords == null ? void 0 : doRecords.length) > 0) {
+        doRecords.pop();
+      }
+      while ((undoRecords == null ? void 0 : undoRecords.length) > 0) {
+        undoRecords.pop();
+      }
+    };
+    const getDoRecords = () => doRecords;
+    const getUndoRecords = () => undoRecords;
+    const history = {
+      undo: undoAction,
+      redo: redoAction,
+      destroy,
+      clear,
+      canUndo: () => doRecords.length > 0,
+      canRedo: () => undoRecords.length > 0,
+      __getDoRecords: getDoRecords,
+      __getUndoRecords: getUndoRecords
+    };
+    return {
+      MiddlewareHistory,
+      history
+    };
+  };
+  exports.Board = Board;
   exports.Calculator = Calculator;
   exports.Context2D = Context2D;
   exports.Core = Core;
@@ -10759,10 +11799,11 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
   exports.calcElementVertexesInGroup = calcElementVertexesInGroup;
   exports.calcElementVertexesQueueInGroup = calcElementVertexesQueueInGroup;
   exports.calcElementViewRectInfo = calcElementViewRectInfo;
-  exports.calcElementViewRectInfoMap = calcElementViewRectInfoMap;
   exports.calcElementsContextSize = calcElementsContextSize;
   exports.calcElementsViewInfo = calcElementsViewInfo;
   exports.calcPointMoveElementInGroup = calcPointMoveElementInGroup;
+  exports.calcResultMovePosition = calcResultMovePosition;
+  exports.calcRevertMovePosition = calcRevertMovePosition;
   exports.calcSpeed = calcSpeed;
   exports.calcViewBoxSize = calcViewBoxSize;
   exports.calcViewCenter = calcViewCenter;
@@ -10781,11 +11822,12 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
   exports.createAssetId = createAssetId;
   exports.createBoardContent = createBoardContent;
   exports.createContext2D = createContext2D;
-  exports.createElement = createElement;
+  exports.createElement = createElement$1;
   exports.createOffscreenContext2D = createOffscreenContext2D;
   exports.createUUID = createUUID;
   exports.debounce = debounce;
   exports.deepClone = deepClone;
+  exports.deepCloneData = deepCloneData;
   exports.deepCloneElement = deepCloneElement;
   exports.deepResizeGroupElement = deepResizeGroupElement;
   exports.delay = delay;
@@ -10803,9 +11845,11 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
   exports.findElementsFromList = findElementsFromList;
   exports.findElementsFromListByPositions = findElementsFromListByPositions;
   exports.flatElementList = flatElementList;
+  exports.flatObject = flatObject;
   exports.formatNumber = formatNumber;
   exports.generateHTML = generateHTML;
   exports.generateSVGPath = generateSVGPath;
+  exports.get = get;
   exports.getCenterFromTwoPoints = getCenterFromTwoPoints;
   exports.getDefaultElementDetailConfig = getDefaultElementDetailConfig;
   exports.getElemenetsAssetIds = getElemenetsAssetIds;
@@ -10834,10 +11878,12 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
   exports.loadSVG = loadSVG;
   exports.matrixToAngle = matrixToAngle;
   exports.matrixToRadian = matrixToRadian;
+  exports.merge = merge;
+  exports.mergeElement = mergeElement;
   exports.mergeElementAsset = mergeElementAsset;
   exports.mergeHexColorAlpha = mergeHexColorAlpha;
-  exports.modifyElement = modifyElement;
   exports.moveElementPosition = moveElementPosition;
+  exports.omit = omit;
   exports.parseAngleToRadian = parseAngleToRadian;
   exports.parseFileToBase64 = parseFileToBase64;
   exports.parseFileToText = parseFileToText;
@@ -10850,12 +11896,17 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
   exports.rotatePoint = rotatePoint;
   exports.rotatePointInGroup = rotatePointInGroup;
   exports.rotateVertexes = rotateVertexes;
+  exports.set = set;
   exports.sortDataAsserts = sortDataAsserts;
-  exports.sortElementsViewVisiableInfoMap = sortElementsViewVisiableInfoMap;
   exports.throttle = throttle;
   exports.toColorHexNum = toColorHexNum;
   exports.toColorHexStr = toColorHexStr;
+  exports.toFlattenElement = toFlattenElement;
+  exports.toFlattenGlobal = toFlattenGlobal;
+  exports.toFlattenLayout = toFlattenLayout;
+  exports.unflatObject = unflatObject;
   exports.updateElementInList = updateElementInList;
+  exports.useHistory = useHistory;
   exports.vaildPoint = vaildPoint;
   exports.vaildTouchPoint = vaildTouchPoint;
   exports.validateElements = validateElements;
