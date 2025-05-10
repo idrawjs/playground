@@ -372,47 +372,41 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
     }
     return result;
   }
-  function generate32Base36Hash(str) {
-    const hash256 = generate256BitHash(str);
-    return bigIntToBase36(hash256).padStart(32, "0").slice(0, 32);
-  }
-  function generate256BitHash(str) {
-    let h1 = 0xcbf29ce484222325n, h2 = 0x84222325cbf29ce4n;
-    let h3 = 0x1b3n * h1, h4 = 0x1000000n * h2;
-    const prime = 0x100000001b3n;
-    const chunkSize = 4096;
-    for (let i = 0; i < str.length; i += chunkSize) {
-      const chunk = str.slice(i, i + chunkSize);
-      for (let j = 0; j < chunk.length; j++) {
-        const code = BigInt(chunk.charCodeAt(j) + i + j);
-        h1 = (h1 ^ code) * prime;
-        h2 = (h2 ^ h1) * prime ^ h3;
-        h3 = (h3 ^ h2) * prime + h4;
-        h4 = (h4 ^ h3) * prime | 0x1234567890abcdefn;
-      }
-    }
-    return h1 << 192n | h2 << 128n | h3 << 64n | h4;
-  }
-  function bigIntToBase36(num) {
-    const chars = "0123456789abcdefghijklmnopqrstuvwxyz";
-    if (num === 0n)
-      return "0";
-    let result = "";
-    while (num > 0n) {
-      const rem = num % 36n;
-      result = chars[Number(rem)] + result;
-      num = num / 36n;
-    }
-    return result;
-  }
   function createUUID() {
     function _createStr() {
       return ((1 + Math.random()) * 65536 | 0).toString(16).substring(1);
     }
     return `${_createStr()}${_createStr()}-${_createStr()}-${_createStr()}-${_createStr()}-${_createStr()}${_createStr()}${_createStr()}`;
   }
-  function createAssetId(assetStr) {
-    return `@assets/${generate32Base36Hash(assetStr)}`;
+  function limitHexStr(str, seed) {
+    let count = 0;
+    for (let i = 0; i < str.length; i++) {
+      count += str.charCodeAt(i);
+    }
+    return (count + seed).toString(16).substring(0, 4);
+  }
+  function sumCharCodes(str) {
+    let sum = 0;
+    for (let i = 0; i < str.length; i++) {
+      sum += str.charCodeAt(i);
+    }
+    return sum;
+  }
+  function createAssetId(assetStr, elemUUID) {
+    const len = assetStr.length;
+    const seed = sumCharCodes(elemUUID);
+    const mid = Math.floor(len / 2);
+    const start4 = assetStr.substring(0, 4).padStart(4, "0");
+    const end4 = assetStr.substring(0, 4).padStart(4, "0");
+    const str1 = limitHexStr(len.toString(16).padStart(4, start4), seed).padStart(4, "0");
+    const str2 = limitHexStr(assetStr.substring(mid - 4, mid).padStart(4, start4), seed).padStart(4, "0");
+    const str3 = limitHexStr(assetStr.substring(mid - 8, mid - 4).padStart(4, start4), seed).padStart(4, "0");
+    const str4 = limitHexStr(assetStr.substring(mid - 12, mid - 8).padStart(4, start4), seed).padStart(4, "0");
+    const str5 = limitHexStr(assetStr.substring(mid - 16, mid - 12).padStart(4, end4), seed).padStart(4, "0");
+    const str6 = limitHexStr(assetStr.substring(mid, mid + 4).padStart(4, end4), seed).padStart(4, "0");
+    const str7 = limitHexStr(assetStr.substring(mid + 4, mid + 8).padStart(4, end4), seed).padStart(4, "0");
+    const str8 = limitHexStr(end4.padStart(4, start4).padStart(4, end4), seed);
+    return `@assets/${str1}${str2}-${str3}-${str4}-${str5}-${str6}${str7}${str8}`;
   }
   function isAssetId(id) {
     return /^@assets\/[0-9a-z-]{0,}$/.test(`${id}`);
@@ -486,7 +480,7 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
       elems.forEach((elem) => {
         if (elem.type === "image" && elem.detail.src) {
           const src = elem.detail.src;
-          const assetUUID = createAssetId(src);
+          const assetUUID = createAssetId(src, elem.uuid);
           if (!assets[assetUUID]) {
             assets[assetUUID] = {
               type: "image",
@@ -496,7 +490,7 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
           elem.detail.src = assetUUID;
         } else if (elem.type === "svg") {
           const svg2 = elem.detail.svg;
-          const assetUUID = createAssetId(svg2);
+          const assetUUID = createAssetId(svg2, elem.uuid);
           if (!assets[assetUUID]) {
             assets[assetUUID] = {
               type: "svg",
@@ -506,7 +500,7 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
           elem.detail.svg = assetUUID;
         } else if (elem.type === "html") {
           const html2 = elem.detail.html;
-          const assetUUID = createAssetId(html2);
+          const assetUUID = createAssetId(html2, elem.uuid);
           if (!assets[assetUUID]) {
             assets[assetUUID] = {
               type: "html",
@@ -545,7 +539,7 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
               value: loadItemMap[src].source
             };
           } else if (!assets[src]) {
-            const assetUUID = createAssetId(src);
+            const assetUUID = createAssetId(src, elem.uuid);
             if (!assets[assetUUID]) {
               assets[assetUUID] = {
                 type: "image",
@@ -562,7 +556,7 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
               value: loadItemMap[svg2].source
             };
           } else if (!assets[svg2]) {
-            const assetUUID = createAssetId(svg2);
+            const assetUUID = createAssetId(svg2, elem.uuid);
             if (!assets[assetUUID]) {
               assets[assetUUID] = {
                 type: "svg",
@@ -579,7 +573,7 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
               value: loadItemMap[html2].source
             };
           } else if (!assets[html2]) {
-            const assetUUID = createAssetId(html2);
+            const assetUUID = createAssetId(html2, elem.uuid);
             if (!assets[assetUUID]) {
               assets[assetUUID] = {
                 type: "html",
@@ -1965,7 +1959,7 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
       resource = element.detail.html;
     }
     if (typeof resource === "string" && !isAssetId(resource)) {
-      assetId = createAssetId(resource);
+      assetId = createAssetId(resource, element.uuid);
       assetItem = {
         type: element.type,
         value: resource
@@ -5006,9 +5000,9 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
       if (isAssetId(source)) {
         return source;
       }
-      return createAssetId(source);
+      return createAssetId(source, element.uuid);
     }
-    return createAssetId(`${createUUID()}-${element.uuid}-${createUUID()}-${createUUID()}`);
+    return createAssetId(`${createUUID()}-${element.uuid}-${createUUID()}-${createUUID()}`, element.uuid);
   };
   class Loader extends EventEmitter {
     constructor() {
