@@ -4576,7 +4576,7 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
   }
   function drawSVG(ctx, elem, opts) {
     const content = opts.loader.getContent(elem);
-    const { viewScaleInfo, viewSizeInfo, parentOpacity } = opts;
+    const { viewScaleInfo, parentOpacity } = opts;
     const { x: x2, y: y2, w: w2, h: h2, angle: angle2 } = calcViewElementSize(elem, { viewScaleInfo }) || elem;
     rotateElement$1(ctx, { x: x2, y: y2, w: w2, h: h2, angle: angle2 }, () => {
       if (!content && !opts.loader.isDestroyed()) {
@@ -4591,7 +4591,7 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
   }
   function drawHTML(ctx, elem, opts) {
     const content = opts.loader.getContent(elem);
-    const { viewScaleInfo, viewSizeInfo, parentOpacity } = opts;
+    const { viewScaleInfo, parentOpacity } = opts;
     const { x: x2, y: y2, w: w2, h: h2, angle: angle2 } = calcViewElementSize(elem, { viewScaleInfo }) || elem;
     rotateElement$1(ctx, { x: x2, y: y2, w: w2, h: h2, angle: angle2 }, () => {
       if (!content && !opts.loader.isDestroyed()) {
@@ -5048,6 +5048,38 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
     }
     isDestroyed() {
       return __classPrivateFieldGet$8(this, _Loader_hasDestroyed, "f");
+    }
+    reset() {
+      if (__classPrivateFieldGet$8(this, _Loader_hasDestroyed, "f") === true) {
+        return;
+      }
+      __classPrivateFieldSet$8(this, _Loader_currentLoadItemMap, {}, "f");
+      __classPrivateFieldSet$8(this, _Loader_storageLoadItemMap, {}, "f");
+    }
+    resetElementAsset(element) {
+      if (supportElementTypes.includes(element.type)) {
+        let assetId = null;
+        let resource = null;
+        if (element.type === "image" && typeof element.detail.src === "string") {
+          resource = element.detail.src;
+        } else if (element.type === "svg" && typeof element.detail.svg === "string") {
+          resource = element.detail.svg;
+        } else if (element.type === "html" && typeof element.detail.html === "string") {
+          resource = element.detail.html;
+        }
+        if (typeof resource === "string") {
+          this.load(element, {});
+          if (isAssetId(resource)) {
+            assetId = resource;
+          } else if (element.uuid) {
+            assetId = createAssetId(resource, element.uuid);
+          }
+        }
+        if (assetId && isAssetId(assetId)) {
+          delete __classPrivateFieldGet$8(this, _Loader_storageLoadItemMap, "f")[assetId];
+          delete __classPrivateFieldGet$8(this, _Loader_currentLoadItemMap, "f")[assetId];
+        }
+      }
     }
     destroy() {
       __classPrivateFieldSet$8(this, _Loader_hasDestroyed, true, "f");
@@ -10710,7 +10742,7 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
       }
     return t;
   };
-  var _Core_instances, _Core_board, _Core_canvas, _Core_container, _Core_initContainer;
+  var _Core_instances, _Core_board, _Core_canvas, _Core_container, _Core_initContainer, _Core_resetData;
   class Core {
     constructor(container, opts) {
       _Core_instances.add(this);
@@ -10758,8 +10790,9 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
       __classPrivateFieldGet(this, _Core_board, "f").resetMiddlewareConfig(middleware, config);
     }
     setData(data) {
-      validateElements((data === null || data === void 0 ? void 0 : data.elements) || []);
-      __classPrivateFieldGet(this, _Core_board, "f").setData(data);
+      const loader = __classPrivateFieldGet(this, _Core_board, "f").getRenderer().getLoader();
+      loader.reset();
+      __classPrivateFieldGet(this, _Core_instances, "m", _Core_resetData).call(this, data);
     }
     getData() {
       return __classPrivateFieldGet(this, _Core_board, "f").getData();
@@ -10833,7 +10866,9 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
       const before = toFlattenElement(beforeElem);
       const updatedElement = updateElementInListByPosition(position, element, data.elements, { strict: true });
       const after = toFlattenElement(updatedElement);
-      this.setData(data);
+      const loader = __classPrivateFieldGet(this, _Core_board, "f").getRenderer().getLoader();
+      loader.resetElementAsset(element);
+      __classPrivateFieldGet(this, _Core_instances, "m", _Core_resetData).call(this, data);
       this.refresh();
       const modifyRecord = {
         type: "updateElement",
@@ -10855,7 +10890,9 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
         beforeElement: beforeElem
       });
       updateElementInListByPosition(position, restElement, data.elements);
-      this.setData(data);
+      const loader = __classPrivateFieldGet(this, _Core_board, "f").getRenderer().getLoader();
+      loader.resetElementAsset(Object.assign(Object.assign({}, element), { type: beforeElem.type }));
+      __classPrivateFieldGet(this, _Core_instances, "m", _Core_resetData).call(this, data);
       this.refresh();
       return modifyRecord;
     }
@@ -10890,7 +10927,7 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
           after
         }
       };
-      this.setData(data);
+      __classPrivateFieldGet(this, _Core_instances, "m", _Core_resetData).call(this, data);
       this.refresh();
       return modifyRecord;
     }
@@ -10909,7 +10946,7 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
         time: Date.now(),
         content: { method: "addElement", uuid: element.uuid, position, element: deepClone(element) }
       };
-      this.setData(data);
+      __classPrivateFieldGet(this, _Core_instances, "m", _Core_resetData).call(this, data);
       this.refresh();
       return modifyRecord;
     }
@@ -10922,8 +10959,12 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
         time: Date.now(),
         content: { method: "deleteElement", uuid, position, element: element ? deepClone(element) : null }
       };
+      if (element) {
+        const loader = __classPrivateFieldGet(this, _Core_board, "f").getRenderer().getLoader();
+        loader.resetElementAsset(element);
+      }
       deleteElementInList(uuid, data.elements);
-      this.setData(data);
+      __classPrivateFieldGet(this, _Core_instances, "m", _Core_resetData).call(this, data);
       this.refresh();
       return modifyRecord;
     }
@@ -10937,7 +10978,7 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
       };
       const { elements: list } = moveElementPosition(data.elements, { from, to });
       data.elements = list;
-      this.setData(data);
+      __classPrivateFieldGet(this, _Core_instances, "m", _Core_resetData).call(this, data);
       this.refresh();
       return modifyRecord;
     }
@@ -10956,7 +10997,7 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
         if (data.layout) {
           modifyRecord.content.before = toFlattenLayout(data.layout);
           delete data["layout"];
-          this.setData(data);
+          __classPrivateFieldGet(this, _Core_instances, "m", _Core_resetData).call(this, data);
           this.refresh();
           return modifyRecord;
         } else {
@@ -10982,7 +11023,7 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
       }
       modifyRecord.content.after = after;
       mergeLayout(data.layout, layout);
-      this.setData(data);
+      __classPrivateFieldGet(this, _Core_instances, "m", _Core_resetData).call(this, data);
       this.refresh();
       return modifyRecord;
     }
@@ -11001,7 +11042,7 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
         if (data.global) {
           modifyRecord.content.before = toFlattenGlobal(data.global);
           delete data["global"];
-          this.setData(data);
+          __classPrivateFieldGet(this, _Core_instances, "m", _Core_resetData).call(this, data);
           this.refresh();
           return modifyRecord;
         } else {
@@ -11022,7 +11063,7 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
       }
       modifyRecord.content.after = after;
       mergeGlobal(data.global, global);
-      this.setData(data);
+      __classPrivateFieldGet(this, _Core_instances, "m", _Core_resetData).call(this, data);
       this.refresh();
       return modifyRecord;
     }
@@ -11030,6 +11071,9 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
   _Core_board = /* @__PURE__ */ new WeakMap(), _Core_canvas = /* @__PURE__ */ new WeakMap(), _Core_container = /* @__PURE__ */ new WeakMap(), _Core_instances = /* @__PURE__ */ new WeakSet(), _Core_initContainer = function _Core_initContainer2() {
     const container = __classPrivateFieldGet(this, _Core_container, "f");
     container.style.position = "relative";
+  }, _Core_resetData = function _Core_resetData2(data) {
+    validateElements((data === null || data === void 0 ? void 0 : data.elements) || []);
+    __classPrivateFieldGet(this, _Core_board, "f").setData(data);
   };
   const defaultMode = "select";
   const defaultSettings = {
@@ -11282,7 +11326,7 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
     if (!data) {
       return;
     }
-    core.trigger(coreEventKeys.CHANGE, { data, type: "updateElement", modifyRecord });
+    core.trigger(coreEventKeys.CHANGE, { data, type: "modifyElement", modifyRecord });
   }
   function addElement(depOptions, element, opts) {
     const { core } = depOptions;
