@@ -14,7 +14,7 @@ const elem1 = idraw.getData().elements[1];
 elem1.detail = {
   ...elem1.detail,
   ...{
-    color: '#f7d3c1',
+    background: '#f7d3c1',
     borderColor: '#ff6032'
   }
 };

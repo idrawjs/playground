@@ -8,7 +8,7 @@ var __privateAdd = (obj, member, value) => member.has(obj) ? __typeError("Cannot
 var __privateSet = (obj, member, value, setter) => (__accessCheck(obj, member, "write to private field"), setter ? setter.call(obj, value) : member.set(obj, value), value);
 var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "access private method"), method);
 
-  var _core, _opts, _store, _iDraw_instances, init_fn, setFeature_fn;
+  var _core, _opts, _store, _historyHandler, _iDraw_instances, init_fn, setFeature_fn;
   function compose(middleware) {
     return function(context, next) {
       return dispatch(0);
@@ -3245,94 +3245,247 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
   const doNum = (n) => {
     return formatNumber(n, { decimalPlaces: 4 });
   };
-  function resizeElementBaseDetail(elem, opts) {
+  function resizeElementBaseDetailByRatio(elem, opts) {
+    const beforeElem = { detail: {} };
+    const afterElem = { detail: {} };
+    const record = {
+      type: "modifyElement",
+      time: Date.now(),
+      content: {
+        method: "modifyElement",
+        uuid: elem.uuid,
+        before: null,
+        after: null
+      }
+    };
     const { detail } = elem;
     const { xRatio, yRatio, maxRatio } = opts;
     const middleRatio = (xRatio + yRatio) / 2;
     const { borderWidth: borderWidth2, borderRadius: borderRadius2, borderDash, shadowOffsetX, shadowOffsetY, shadowBlur } = detail;
     if (typeof borderWidth2 === "number") {
       detail.borderWidth = doNum(borderWidth2 * middleRatio);
+      beforeElem.detail.borderWidth = borderWidth2;
+      afterElem.detail.borderWidth = detail.borderWidth;
     } else if (Array.isArray(detail.borderWidth)) {
       const bw = borderWidth2;
       detail.borderWidth = [doNum(bw[0] * yRatio), doNum(bw[1] * xRatio), doNum(bw[2] * yRatio), doNum(bw[3] * xRatio)];
+      beforeElem.detail.borderWidth = [...bw];
+      afterElem.detail.borderWidth = [...detail.borderWidth];
     }
     if (typeof borderRadius2 === "number") {
       detail.borderRadius = doNum(borderRadius2 * middleRatio);
+      beforeElem.detail.borderRadius = borderRadius2;
+      afterElem.detail.borderRadius = detail.borderRadius;
     } else if (Array.isArray(detail.borderRadius)) {
       const br = borderRadius2;
       detail.borderRadius = [br[0] * xRatio, br[1] * xRatio, br[2] * yRatio, br[3] * yRatio];
+      beforeElem.detail.borderRadius = [...br];
+      afterElem.detail.borderRadius = [...detail.borderRadius];
     }
     if (Array.isArray(borderDash)) {
       borderDash.forEach((dash, i) => {
         detail.borderDash[i] = doNum(dash * maxRatio);
       });
+      beforeElem.detail.borderDash = [...borderDash];
+      afterElem.detail.borderDash = [...detail.borderDash];
     }
     if (typeof shadowOffsetX === "number") {
       detail.shadowOffsetX = doNum(shadowOffsetX * maxRatio);
+      beforeElem.detail.shadowOffsetX = shadowOffsetX;
+      afterElem.detail.shadowOffsetX = detail.shadowOffsetX;
     }
     if (typeof shadowOffsetY === "number") {
-      detail.shadowOffsetX = doNum(shadowOffsetY * maxRatio);
+      detail.shadowOffsetY = doNum(shadowOffsetY * maxRatio);
+      beforeElem.detail.shadowOffsetY = shadowOffsetY;
+      afterElem.detail.shadowOffsetY = detail.shadowOffsetY;
     }
     if (typeof shadowBlur === "number") {
-      detail.shadowOffsetX = doNum(shadowBlur * maxRatio);
+      detail.shadowBlur = doNum(shadowBlur * maxRatio);
+      beforeElem.detail.shadowBlur = shadowBlur;
+      afterElem.detail.shadowBlur = detail.shadowBlur;
     }
+    record.content.before = toFlattenElement(beforeElem);
+    record.content.after = toFlattenElement(afterElem);
+    return record;
   }
-  function resizeElementBase(elem, opts) {
+  function resizeElementBaseByRatio(elem, opts) {
     const { xRatio, yRatio } = opts;
-    const { x: x2, y: y2, w: w2, h: h2 } = elem;
+    const { uuid, x: x2, y: y2, w: w2, h: h2 } = elem;
+    const record = {
+      type: "modifyElement",
+      time: Date.now(),
+      content: {
+        method: "modifyElement",
+        uuid,
+        before: { x: x2, y: y2, w: w2, h: h2 },
+        after: { x: x2, y: y2, w: w2, h: h2 }
+      }
+    };
     elem.x = doNum(x2 * xRatio);
     elem.y = doNum(y2 * yRatio);
     elem.w = doNum(w2 * xRatio);
     elem.h = doNum(h2 * yRatio);
-    resizeElementBaseDetail(elem, opts);
+    const detailRecord = resizeElementBaseDetailByRatio(elem, opts);
+    record.content.before = Object.assign(Object.assign({}, record.content.before), detailRecord.content.before);
+    record.content.after = Object.assign(Object.assign({}, record.content.after), detailRecord.content.after);
+    return record;
   }
-  function resizeTextElementDetail(elem, opts) {
+  function resizeTextElementDetailByRatio(elem, opts) {
     const { minRatio, maxRatio } = opts;
     const { fontSize: fontSize2, lineHeight: lineHeight2 } = elem.detail;
     const ratio = (minRatio + maxRatio) / 2;
+    const beforeFlattenElem = {};
+    const afterFlattenElem = {};
     if (fontSize2 && fontSize2 > 0) {
       elem.detail.fontSize = doNum(fontSize2 * ratio);
+      beforeFlattenElem["detail.fontSize"] = fontSize2;
+      afterFlattenElem["detail.fontSize"] = elem.detail.fontSize;
     }
     if (lineHeight2 && lineHeight2 > 0) {
       elem.detail.lineHeight = doNum(lineHeight2 * ratio);
+      beforeFlattenElem["detail.lineHeight"] = lineHeight2;
+      afterFlattenElem["detail.lineHeight"] = elem.detail.lineHeight;
     }
+    const record = {
+      type: "modifyElement",
+      time: Date.now(),
+      content: {
+        method: "modifyElement",
+        uuid: elem.uuid,
+        before: beforeFlattenElem,
+        after: afterFlattenElem
+      }
+    };
+    return record;
   }
-  function resizeElement$1(elem, opts) {
-    const { type } = elem;
-    resizeElementBase(elem, opts);
+  function deepResizeElementByRatio(elem, opts, record) {
+    const { type, uuid } = elem;
+    const rootRecord = resizeElementBaseByRatio(elem, opts);
+    const rootRecordBefore = Object.assign(Object.assign({}, rootRecord.content.before), { uuid });
+    const rootRecordAfter = Object.assign(Object.assign({}, rootRecord.content.after), { uuid });
+    record === null || record === void 0 ? void 0 : record.content.before.push(rootRecordBefore);
+    record === null || record === void 0 ? void 0 : record.content.after.push(rootRecordAfter);
     if (type === "circle") ;
     else if (type === "text") {
-      resizeTextElementDetail(elem, opts);
+      const textRecord = resizeTextElementDetailByRatio(elem, opts);
+      Object.keys(textRecord.content.before || {}).forEach((key2) => {
+        var _a;
+        rootRecordBefore[key2] = (_a = textRecord.content.before) === null || _a === void 0 ? void 0 : _a[key2];
+      });
+      Object.keys(textRecord.content.after || {}).forEach((key2) => {
+        var _a;
+        rootRecordAfter[key2] = (_a = textRecord.content.after) === null || _a === void 0 ? void 0 : _a[key2];
+      });
     } else if (type === "image") ;
     else if (type === "svg") ;
     else if (type === "html") ;
     else if (type === "path") ;
     else if (type === "group" && Array.isArray(elem.detail.children)) {
       elem.detail.children.forEach((child) => {
-        resizeElement$1(child, opts);
+        deepResizeElementByRatio(child, opts, record);
       });
     }
   }
-  function deepResizeGroupElement(elem, size) {
-    const resizeW = size.w && size.w > 0 ? size.w : elem.w;
-    const resizeH = size.h && size.h > 0 ? size.h : elem.h;
-    const xRatio = resizeW / elem.w;
-    const yRatio = resizeH / elem.h;
-    if (xRatio === yRatio && xRatio === 1) {
-      return elem;
+  function fixedResizeGroupElementChildren(elem, opts, record) {
+    if (!(elem.type === "group" && Array.isArray(elem.detail.children))) {
+      return;
     }
-    const minRatio = Math.min(xRatio, yRatio);
-    const maxRatio = Math.max(xRatio, yRatio);
+    const { moveX, moveY, moveH, moveW } = opts;
+    let childChangedX = 0;
+    let childChangedY = 0;
+    let needReszieChildren = false;
+    if ((moveX !== 0 || moveY !== 0) && (moveH !== 0 || moveW !== 0)) {
+      needReszieChildren = true;
+      childChangedX = -moveX;
+      childChangedY = -moveY;
+    }
+    if (needReszieChildren !== true) {
+      return;
+    }
+    elem.detail.children.forEach((child) => {
+      const { uuid, x: x2, y: y2 } = child;
+      const afterX = x2 + childChangedX;
+      const afterY = y2 + childChangedY;
+      const before = { uuid, x: x2, y: y2 };
+      const after = { uuid, x: afterX, y: afterY };
+      child.x = afterX;
+      child.y = afterY;
+      record === null || record === void 0 ? void 0 : record.content.before.push(before);
+      record === null || record === void 0 ? void 0 : record.content.after.push(after);
+    });
+  }
+  function resizeEffectGroupElement(elem, size, opts) {
+    if (!istype.number(size.x) && !istype.number(size.y)) {
+      return null;
+    }
+    const record = {
+      type: "modifyElements",
+      time: Date.now(),
+      content: {
+        method: "modifyElements",
+        before: [],
+        after: []
+      }
+    };
+    const uuid = elem.uuid;
+    const originX = elem.x;
+    const originY = elem.y;
+    const originW = elem.w;
+    const originH = elem.h;
+    const resizeX = istype.number(size.x) ? size.x : elem.x;
+    const resizeY = istype.number(size.y) ? size.y : elem.y;
+    const resizeW = (size.w && size.w > 0 ? size.w : elem.w) || 0;
+    const resizeH = (size.h && size.h > 0 ? size.h : elem.h) || 0;
+    const beforeGroupElem = { uuid, x: originX, y: originY, w: originW, h: originH };
+    const afterGroupElem = { uuid, x: resizeX, y: resizeY, w: resizeW, h: resizeH };
+    if ((opts === null || opts === void 0 ? void 0 : opts.resizeEffect) === "deepResize") {
+      const xRatio = resizeW / elem.w;
+      const yRatio = resizeH / elem.h;
+      if (xRatio === yRatio && xRatio === 1) {
+        return record;
+      }
+      const minRatio = Math.min(xRatio, yRatio);
+      const maxRatio = Math.max(xRatio, yRatio);
+      elem.w = resizeW;
+      elem.h = resizeH;
+      const resizeRadioOpts = { xRatio, yRatio, minRatio, maxRatio };
+      if (elem.type === "group" && Array.isArray(elem.detail.children)) {
+        elem.detail.children.forEach((child) => {
+          deepResizeElementByRatio(child, resizeRadioOpts, record);
+        });
+      }
+      const groupDetailRecord = resizeElementBaseDetailByRatio(elem, resizeRadioOpts);
+      Object.keys(groupDetailRecord.content.before || {}).forEach((key2) => {
+        var _a;
+        beforeGroupElem[key2] = (_a = groupDetailRecord.content.before) === null || _a === void 0 ? void 0 : _a[key2];
+      });
+      Object.keys(groupDetailRecord.content.after || {}).forEach((key2) => {
+        var _a;
+        afterGroupElem[key2] = (_a = groupDetailRecord.content.after) === null || _a === void 0 ? void 0 : _a[key2];
+      });
+      return record;
+    }
+    if ((opts === null || opts === void 0 ? void 0 : opts.resizeEffect) === "fixed") {
+      record.content.before.push(beforeGroupElem);
+      record.content.after.push(afterGroupElem);
+      const moveX = resizeX - elem.x;
+      const moveY = resizeY - elem.y;
+      const moveW = resizeW - elem.w;
+      const moveH = resizeH - elem.h;
+      fixedResizeGroupElementChildren(elem, { moveX, moveY, moveH, moveW }, record);
+      elem.w = resizeW;
+      elem.h = resizeH;
+      elem.x = resizeX;
+      elem.y = resizeY;
+      return record;
+    }
     elem.w = resizeW;
     elem.h = resizeH;
-    const opts = { xRatio, yRatio, minRatio, maxRatio };
-    if (elem.type === "group" && Array.isArray(elem.detail.children)) {
-      elem.detail.children.forEach((child) => {
-        resizeElement$1(child, opts);
-      });
-    }
-    resizeElementBaseDetail(elem, opts);
-    return elem;
+    elem.x = resizeX;
+    elem.y = resizeY;
+    record.content.before.push(beforeGroupElem);
+    record.content.after.push(afterGroupElem);
+    return record;
   }
   const defaultViewWidth = 200;
   const defaultViewHeight = 200;
@@ -3556,39 +3709,33 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
     return originElem;
   }
   function updateElementInList(uuid, updateContent, elements) {
-    var _a, _b;
+    var _a, _b, _c;
     let targetElement = null;
     for (let i = 0; i < elements.length; i++) {
       const elem = elements[i];
       if (elem.uuid === uuid) {
-        if (elem.type === "group" && ((_a = elem.operations) === null || _a === void 0 ? void 0 : _a.deepResize) === true) {
-          if (updateContent.w && updateContent.w > 0 || updateContent.h && updateContent.h > 0) {
-            deepResizeGroupElement(elem, {
-              w: updateContent.w,
-              h: updateContent.h
-            });
-          }
+        if (elem.type === "group" && ((_a = elem.operations) === null || _a === void 0 ? void 0 : _a.resizeEffect)) {
+          resizeEffectGroupElement(elem, Object.assign({}, updateContent), {
+            resizeEffect: (_b = elem.operations) === null || _b === void 0 ? void 0 : _b.resizeEffect
+          });
         }
         mergeElement(elem, updateContent);
         targetElement = elem;
         break;
       } else if (elem.type === "group") {
-        targetElement = updateElementInList(uuid, updateContent, ((_b = elem === null || elem === void 0 ? void 0 : elem.detail) === null || _b === void 0 ? void 0 : _b.children) || []);
+        targetElement = updateElementInList(uuid, updateContent, ((_c = elem === null || elem === void 0 ? void 0 : elem.detail) === null || _c === void 0 ? void 0 : _c.children) || []);
       }
     }
     return targetElement;
   }
   function updateElementInListByPosition(position, updateContent, elements, opts) {
-    var _a;
+    var _a, _b;
     const elem = findElementFromListByPosition(position, elements);
     if (elem) {
-      if (elem.type === "group" && ((_a = elem.operations) === null || _a === void 0 ? void 0 : _a.deepResize) === true) {
-        if (updateContent.w && updateContent.w > 0 || updateContent.h && updateContent.h > 0) {
-          deepResizeGroupElement(elem, {
-            w: updateContent.w,
-            h: updateContent.h
-          });
-        }
+      if (elem.type === "group" && ((_a = elem.operations) === null || _a === void 0 ? void 0 : _a.resizeEffect)) {
+        resizeEffectGroupElement(elem, Object.assign({}, updateContent), {
+          resizeEffect: (_b = elem.operations) === null || _b === void 0 ? void 0 : _b.resizeEffect
+        });
       }
       mergeElement(elem, updateContent, opts);
     }
@@ -5057,14 +5204,15 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
       __classPrivateFieldSet$8(this, _Loader_storageLoadItemMap, {}, "f");
     }
     resetElementAsset(element) {
+      var _a, _b, _c;
       if (supportElementTypes.includes(element.type)) {
         let assetId = null;
         let resource = null;
-        if (element.type === "image" && typeof element.detail.src === "string") {
+        if (element.type === "image" && typeof ((_a = element === null || element === void 0 ? void 0 : element.detail) === null || _a === void 0 ? void 0 : _a.src) === "string") {
           resource = element.detail.src;
-        } else if (element.type === "svg" && typeof element.detail.svg === "string") {
+        } else if (element.type === "svg" && typeof ((_b = element === null || element === void 0 ? void 0 : element.detail) === null || _b === void 0 ? void 0 : _b.svg) === "string") {
           resource = element.detail.svg;
-        } else if (element.type === "html" && typeof element.detail.html === "string") {
+        } else if (element.type === "html" && typeof ((_c = element === null || element === void 0 ? void 0 : element.detail) === null || _c === void 0 ? void 0 : _c.html) === "string") {
           resource = element.detail.html;
         }
         if (typeof resource === "string") {
@@ -6183,7 +6331,7 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
       __classPrivateFieldSet$3(this, _Viewer_drawFrameStatus, "COMPLETE", "f");
       return;
     }
-    if (__classPrivateFieldSet$3(this, _Viewer_drawFrameStatus, "DRAWING", "f")) {
+    if (__classPrivateFieldGet$3(this, _Viewer_drawFrameStatus, "f") === "DRAWING") {
       requestAnimationFrame(() => {
         __classPrivateFieldGet$3(this, _Viewer_instances, "m", _Viewer_drawAnimationFrame2).call(this);
       });
@@ -6375,25 +6523,33 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
       return __classPrivateFieldGet$2(this, _Board_eventHub, "f");
     }
     onWatcherEvents() {
+      if (__classPrivateFieldGet$2(this, _Board_opts, "f").disableWatcher === true) {
+        return;
+      }
       __classPrivateFieldGet$2(this, _Board_watcher, "f").onEvents();
     }
     offWatcherEvents() {
+      if (__classPrivateFieldGet$2(this, _Board_opts, "f").disableWatcher === true) {
+        return;
+      }
       __classPrivateFieldGet$2(this, _Board_watcher, "f").offEvents();
     }
   }
   _Board_opts = /* @__PURE__ */ new WeakMap(), _Board_middlewareMap = /* @__PURE__ */ new WeakMap(), _Board_activeMiddlewareObjs = /* @__PURE__ */ new WeakMap(), _Board_watcher = /* @__PURE__ */ new WeakMap(), _Board_renderer = /* @__PURE__ */ new WeakMap(), _Board_sharer = /* @__PURE__ */ new WeakMap(), _Board_viewer = /* @__PURE__ */ new WeakMap(), _Board_calculator = /* @__PURE__ */ new WeakMap(), _Board_eventHub = /* @__PURE__ */ new WeakMap(), _Board_hasDestroyed = /* @__PURE__ */ new WeakMap(), _Board_instances = /* @__PURE__ */ new WeakSet(), _Board_init = function _Board_init2() {
-    __classPrivateFieldGet$2(this, _Board_watcher, "f").on("pointStart", __classPrivateFieldGet$2(this, _Board_instances, "m", _Board_handlePointStart).bind(this));
-    __classPrivateFieldGet$2(this, _Board_watcher, "f").on("pointEnd", __classPrivateFieldGet$2(this, _Board_instances, "m", _Board_handlePointEnd).bind(this));
-    __classPrivateFieldGet$2(this, _Board_watcher, "f").on("pointMove", __classPrivateFieldGet$2(this, _Board_instances, "m", _Board_handlePointMove).bind(this));
-    __classPrivateFieldGet$2(this, _Board_watcher, "f").on("pointLeave", __classPrivateFieldGet$2(this, _Board_instances, "m", _Board_handlePointLeave).bind(this));
-    __classPrivateFieldGet$2(this, _Board_watcher, "f").on("hover", __classPrivateFieldGet$2(this, _Board_instances, "m", _Board_handleHover).bind(this));
-    __classPrivateFieldGet$2(this, _Board_watcher, "f").on("wheel", __classPrivateFieldGet$2(this, _Board_instances, "m", _Board_handleWheel).bind(this));
-    __classPrivateFieldGet$2(this, _Board_watcher, "f").on("wheelScale", __classPrivateFieldGet$2(this, _Board_instances, "m", _Board_handleWheelScale).bind(this));
-    __classPrivateFieldGet$2(this, _Board_watcher, "f").on("scrollX", __classPrivateFieldGet$2(this, _Board_instances, "m", _Board_handleScrollX).bind(this));
-    __classPrivateFieldGet$2(this, _Board_watcher, "f").on("scrollY", __classPrivateFieldGet$2(this, _Board_instances, "m", _Board_handleScrollY).bind(this));
-    __classPrivateFieldGet$2(this, _Board_watcher, "f").on("resize", __classPrivateFieldGet$2(this, _Board_instances, "m", _Board_handleResize).bind(this));
-    __classPrivateFieldGet$2(this, _Board_watcher, "f").on("doubleClick", __classPrivateFieldGet$2(this, _Board_instances, "m", _Board_handleDoubleClick).bind(this));
-    __classPrivateFieldGet$2(this, _Board_watcher, "f").on("contextMenu", __classPrivateFieldGet$2(this, _Board_instances, "m", _Board_handleContextMenu).bind(this));
+    if (__classPrivateFieldGet$2(this, _Board_opts, "f").disableWatcher !== true) {
+      __classPrivateFieldGet$2(this, _Board_watcher, "f").on("pointStart", __classPrivateFieldGet$2(this, _Board_instances, "m", _Board_handlePointStart).bind(this));
+      __classPrivateFieldGet$2(this, _Board_watcher, "f").on("pointEnd", __classPrivateFieldGet$2(this, _Board_instances, "m", _Board_handlePointEnd).bind(this));
+      __classPrivateFieldGet$2(this, _Board_watcher, "f").on("pointMove", __classPrivateFieldGet$2(this, _Board_instances, "m", _Board_handlePointMove).bind(this));
+      __classPrivateFieldGet$2(this, _Board_watcher, "f").on("pointLeave", __classPrivateFieldGet$2(this, _Board_instances, "m", _Board_handlePointLeave).bind(this));
+      __classPrivateFieldGet$2(this, _Board_watcher, "f").on("hover", __classPrivateFieldGet$2(this, _Board_instances, "m", _Board_handleHover).bind(this));
+      __classPrivateFieldGet$2(this, _Board_watcher, "f").on("wheel", __classPrivateFieldGet$2(this, _Board_instances, "m", _Board_handleWheel).bind(this));
+      __classPrivateFieldGet$2(this, _Board_watcher, "f").on("wheelScale", __classPrivateFieldGet$2(this, _Board_instances, "m", _Board_handleWheelScale).bind(this));
+      __classPrivateFieldGet$2(this, _Board_watcher, "f").on("scrollX", __classPrivateFieldGet$2(this, _Board_instances, "m", _Board_handleScrollX).bind(this));
+      __classPrivateFieldGet$2(this, _Board_watcher, "f").on("scrollY", __classPrivateFieldGet$2(this, _Board_instances, "m", _Board_handleScrollY).bind(this));
+      __classPrivateFieldGet$2(this, _Board_watcher, "f").on("resize", __classPrivateFieldGet$2(this, _Board_instances, "m", _Board_handleResize).bind(this));
+      __classPrivateFieldGet$2(this, _Board_watcher, "f").on("doubleClick", __classPrivateFieldGet$2(this, _Board_instances, "m", _Board_handleDoubleClick).bind(this));
+      __classPrivateFieldGet$2(this, _Board_watcher, "f").on("contextMenu", __classPrivateFieldGet$2(this, _Board_instances, "m", _Board_handleContextMenu).bind(this));
+    }
     __classPrivateFieldGet$2(this, _Board_renderer, "f").on("load", () => {
       __classPrivateFieldGet$2(this, _Board_eventHub, "f").trigger("loadResource");
     });
@@ -7081,6 +7237,7 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
           if (selectedElements && (selectedElements === null || selectedElements === void 0 ? void 0 : selectedElements.length) > 0) {
             target.groupQueue = groupQueue || [];
             target.elements = [selectedElements[0]];
+            return target;
           }
           break;
         }
@@ -9150,6 +9307,11 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
         var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m;
         prevPoint = e.point;
         moveOriginalStartPoint = e.point;
+        sharer.setSharedStorage(keyActionType, null);
+        sharer.setSharedStorage(keyResizeType, null);
+        sharer.setSharedStorage(keyAreaStart, null);
+        sharer.setSharedStorage(keyAreaEnd, null);
+        sharer.setSharedStorage(keyHoverElement, null);
         const groupQueue = sharer.getSharedStorage(keyGroupQueue);
         if ((groupQueue === null || groupQueue === void 0 ? void 0 : groupQueue.length) > 0) {
           if (isPointInViewActiveGroup(e.point, {
@@ -9341,16 +9503,24 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
             } else {
               const resizedElemSize = resizeElement(Object.assign(Object.assign({}, moveOriginalStartElementSize), { operations: elems[0].operations }), { scale, start: resizeStart, end: resizeEnd, resizeType });
               const calcOpts = { ignore: !!moveOriginalStartElementSize.angle };
-              elems[0].x = calculator.toGridNum(resizedElemSize.x, calcOpts);
-              elems[0].y = calculator.toGridNum(resizedElemSize.y, calcOpts);
-              if (elems[0].type === "group" && ((_c = elems[0].operations) === null || _c === void 0 ? void 0 : _c.deepResize) === true) {
-                deepResizeGroupElement(elems[0], {
-                  w: calculator.toGridNum(resizedElemSize.w, calcOpts),
-                  h: calculator.toGridNum(resizedElemSize.h, calcOpts)
-                });
+              const gridX = calculator.toGridNum(resizedElemSize.x, calcOpts);
+              const gridY = calculator.toGridNum(resizedElemSize.y, calcOpts);
+              const gridW = calculator.toGridNum(resizedElemSize.w, calcOpts);
+              const gridH = calculator.toGridNum(resizedElemSize.h, calcOpts);
+              if (elems[0].type === "group") {
+                resizeEffectGroupElement(elems[0], {
+                  x: gridX,
+                  y: gridY,
+                  w: gridW,
+                  h: gridH
+                }, { resizeEffect: (_c = elems[0].operations) === null || _c === void 0 ? void 0 : _c.resizeEffect });
+                elems[0].x = gridX;
+                elems[0].y = gridY;
               } else {
-                elems[0].w = calculator.toGridNum(resizedElemSize.w, calcOpts);
-                elems[0].h = calculator.toGridNum(resizedElemSize.h, calcOpts);
+                elems[0].x = gridX;
+                elems[0].y = gridY;
+                elems[0].w = gridW;
+                elems[0].h = gridH;
               }
             }
             updateSelectedElementList([elems[0]]);
@@ -10749,7 +10919,7 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
       _Core_board.set(this, void 0);
       _Core_canvas.set(this, void 0);
       _Core_container.set(this, void 0);
-      const { devicePixelRatio = 1, width, height } = opts;
+      const { devicePixelRatio = 1, width, height, disableWatcher = false } = opts;
       __classPrivateFieldSet(this, _Core_container, container, "f");
       const canvas = document.createElement("canvas");
       canvas.setAttribute("tabindex", "0");
@@ -10757,7 +10927,7 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
       __classPrivateFieldGet(this, _Core_instances, "m", _Core_initContainer).call(this);
       container.appendChild(canvas);
       const boardContent = createBoardContent(canvas, { width, height, devicePixelRatio });
-      const board = new Board({ boardContent, container });
+      const board = new Board({ boardContent, container, disableWatcher });
       const sharer = board.getSharer();
       sharer.setActiveViewSizeInfo({
         width,
@@ -10835,6 +11005,21 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
     }
     refresh() {
       __classPrivateFieldGet(this, _Core_board, "f").getViewer().drawFrame();
+    }
+    forceRender() {
+      const renderer = __classPrivateFieldGet(this, _Core_board, "f").getRenderer();
+      const calculator = renderer.getCalculator();
+      const loader = renderer.getLoader();
+      const data = this.getData();
+      if (data) {
+        const { viewScaleInfo, viewSizeInfo } = this.getViewInfo();
+        calculator.resetVirtualFlatItemMap(data, {
+          viewScaleInfo,
+          viewSizeInfo
+        });
+      }
+      loader.reset();
+      this.refresh();
     }
     setViewScale(opts) {
       __classPrivateFieldGet(this, _Core_board, "f").updateViewScaleInfo(opts);
@@ -11474,6 +11659,192 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
       loadItemMap: core.getLoadItemMap()
     });
   }
+  const eventKeys = coreEventKeys;
+  const supportRecordTypes = [
+    "updateElement",
+    "modifyElement",
+    "deleteElement",
+    "moveElement",
+    "addElement",
+    "dragElement",
+    "resizeElement",
+    "dragLayout",
+    "modifyLayout",
+    "modifyGlobal"
+  ];
+  const LIMIT = 100;
+  const useHistory = (opts) => {
+    const { core, limit } = opts;
+    const historyLimit = limit && limit > 0 ? limit : LIMIT;
+    let doRecords = [];
+    let undoRecords = [];
+    const doAction = (record) => {
+      doRecords.push(record);
+    };
+    const undoAction = () => {
+      var _a;
+      if ((doRecords == null ? void 0 : doRecords.length) > 0) {
+        const record = doRecords.pop();
+        if (!record) {
+          return;
+        }
+        let undoRecord = { ...record };
+        if (record.content.method === "modifyElement") {
+          const info = unflatObject(record.content.before || {});
+          undoRecord = core.modifyElement({
+            ...info,
+            uuid: (_a = record.content) == null ? void 0 : _a.uuid
+          });
+        } else if (record.content.method === "updateElement") {
+          const info = unflatObject(record.content.before || {});
+          undoRecord = core.updateElement({ ...info, uuid: record.content.uuid });
+        } else if (record.content.method === "addElement") {
+          const uuid = record.content.uuid;
+          undoRecord = core.deleteElement(uuid);
+        } else if (record.content.method === "deleteElement") {
+          const { element, position } = record.content;
+          if (!element) {
+            return;
+          }
+          if (!element) {
+            return;
+          }
+          undoRecord = core.addElement(element, { position });
+        } else if (record.content.method === "moveElement") {
+          const uuid = record.content.uuid;
+          const moveResult = calcResultMovePosition({
+            from: record.content.from,
+            to: record.content.to
+          });
+          if (!moveResult) {
+            return;
+          }
+          undoRecord = core.moveElement(uuid, moveResult.from);
+        } else if (record.content.method === "modifyLayout") {
+          const info = record.content.before === null ? null : unflatObject(record.content.before || {});
+          undoRecord = core.modifyLayout(info);
+        } else if (record.content.method === "modifyGlobal") {
+          const info = record.content.before === null ? null : unflatObject(record.content.before || {});
+          undoRecord = core.modifyGlobal(info);
+        } else if (record.content.method === "modifyElements") {
+          undoRecord = core.modifyElements(
+            record.content.before.forEach((item) => unflatObject(item))
+          );
+        }
+        undoRecord = { ...undoRecord, type: "undo" };
+        undoRecords.push(undoRecord);
+        if (undoRecords.length > historyLimit) {
+          undoRecords.splice(historyLimit - undoRecords.length, undoRecords.length);
+        }
+      }
+    };
+    const redoAction = () => {
+      if ((undoRecords == null ? void 0 : undoRecords.length) > 0) {
+        const record = undoRecords.pop();
+        if (!record) {
+          return;
+        }
+        let redoRecord = { ...record };
+        if (record.content.method === "modifyElement") {
+          const info = unflatObject(record.content.before || {});
+          redoRecord = core.modifyElement({
+            ...info,
+            uuid: record.content.uuid
+          });
+        } else if (record.content.method === "updateElement") {
+          const info = unflatObject(record.content.before || {});
+          redoRecord = core.updateElement({ ...info, uuid: record.content.uuid });
+        } else if (record.content.method === "addElement") {
+          const uuid = record.content.uuid;
+          redoRecord = core.deleteElement(uuid);
+        } else if (record.content.method === "deleteElement") {
+          const { element, position } = record.content;
+          if (!element) {
+            return;
+          }
+          redoRecord = core.addElement(element, { position });
+        } else if (record.content.method === "moveElement") {
+          const uuid = record.content.uuid;
+          const moveResult = calcResultMovePosition({
+            from: record.content.from,
+            to: record.content.to
+          });
+          if (!moveResult) {
+            return;
+          }
+          redoRecord = core.moveElement(uuid, moveResult.from);
+        } else if (record.content.method === "modifyLayout") {
+          const info = record.content.before === null ? null : unflatObject(record.content.before || {});
+          redoRecord = core.modifyLayout(info);
+        } else if (record.content.method === "modifyGlobal") {
+          const info = record.content.before === null ? null : unflatObject(record.content.before || {});
+          redoRecord = core.modifyGlobal(info);
+        } else if (record.content.method === "modifyElements") {
+          redoRecord = core.modifyElements(
+            record.content.before.forEach((item) => unflatObject(item))
+          );
+        }
+        redoRecord = { ...redoRecord, type: "redo" };
+        doRecords.push(redoRecord);
+        if (doRecords.length > historyLimit) {
+          doRecords.splice(historyLimit - doRecords.length, doRecords.length);
+        }
+      }
+    };
+    const MiddlewareHistory = (opts2) => {
+      const { eventHub } = opts2;
+      const changeEvent = (e) => {
+        const { modifyRecord } = e;
+        if (modifyRecord && supportRecordTypes.includes(modifyRecord == null ? void 0 : modifyRecord.type)) {
+          doAction(modifyRecord);
+        }
+      };
+      const onEvents = () => {
+        eventHub.on(eventKeys.CHANGE, changeEvent);
+      };
+      const offEvents = () => {
+        eventHub.off(eventKeys.CHANGE, changeEvent);
+      };
+      return {
+        name: "@middleware/history",
+        use() {
+          onEvents();
+        },
+        disuse() {
+          offEvents();
+        }
+      };
+    };
+    const destroy = () => {
+      clear();
+      doRecords = null;
+      undoRecords = null;
+    };
+    const clear = () => {
+      while ((doRecords == null ? void 0 : doRecords.length) > 0) {
+        doRecords.pop();
+      }
+      while ((undoRecords == null ? void 0 : undoRecords.length) > 0) {
+        undoRecords.pop();
+      }
+    };
+    const getDoRecords = () => doRecords;
+    const getUndoRecords = () => undoRecords;
+    const historyHandler = {
+      undo: undoAction,
+      redo: redoAction,
+      destroy,
+      clear,
+      canUndo: () => doRecords.length > 0,
+      canRedo: () => undoRecords.length > 0,
+      __getDoRecords: getDoRecords,
+      __getUndoRecords: getUndoRecords
+    };
+    return {
+      MiddlewareHistory,
+      historyHandler
+    };
+  };
   class iDraw2 {
     constructor(mount, options) {
       __privateAdd(this, _iDraw_instances);
@@ -11482,6 +11853,7 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
       __privateAdd(this, _store, new Store({
         defaultStorage: getDefaultStorage()
       }));
+      __privateAdd(this, _historyHandler, null);
       const opts = { ...defaultSettings, ...defaultOptions, ...options };
       __privateGet(this, _store).set("middlewareStyles", parseStyles(opts));
       const { width, height, devicePixelRatio } = opts;
@@ -11605,214 +11977,53 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
       return __privateGet(this, _core).isDestroyed();
     }
     destroy() {
+      var _a;
       __privateGet(this, _core).destroy();
       __privateGet(this, _store).destroy();
+      (_a = __privateGet(this, _historyHandler)) == null ? void 0 : _a.destroy();
+      __privateSet(this, _core, null);
+      __privateSet(this, _store, null);
+      __privateSet(this, _historyHandler, null);
     }
     getViewCenter() {
       const { viewScaleInfo, viewSizeInfo } = this.getViewInfo();
       const pointSize = calcViewCenter({ viewScaleInfo, viewSizeInfo });
       return pointSize;
     }
-    // $onBoardWatcherEvents() {
-    //   this.#core.onBoardWatcherEvents();
-    // }
-    // $offBoardWatcherEvents() {
-    //   this.#core.offBoardWatcherEvents();
-    // }
     getCore() {
       return __privateGet(this, _core);
     }
+    forceRender() {
+      return __privateGet(this, _core).forceRender();
+    }
+    // getHistoryHandler() {
+    //   return this.#historyHandler;
+    // }
+    // redo() {
+    //   this.#historyHandler?.redo();
+    // }
+    // undo() {
+    //   this.#historyHandler?.undo();
+    // }
   }
   _core = new WeakMap();
   _opts = new WeakMap();
   _store = new WeakMap();
+  _historyHandler = new WeakMap();
   _iDraw_instances = new WeakSet();
   init_fn = function() {
     const core = __privateGet(this, _core);
     const store = __privateGet(this, _store);
+    if (__privateGet(this, _opts).history === true) {
+      const { historyLimit } = __privateGet(this, _opts);
+      const { historyHandler, MiddlewareHistory } = useHistory({ core, limit: historyLimit });
+      __privateSet(this, _historyHandler, historyHandler);
+      core.use(MiddlewareHistory);
+    }
     changeMode("select", core, store);
   };
   setFeature_fn = function(feat, status) {
     return setFeature({ core: __privateGet(this, _core), store: __privateGet(this, _store) }, feat, status);
-  };
-  const eventKeys = coreEventKeys;
-  const supportRecordTypes = [
-    "updateElement",
-    "modifyElement",
-    "deleteElement",
-    "moveElement",
-    "addElement",
-    "dragElement",
-    "resizeElement",
-    "dragLayout",
-    "modifyLayout",
-    "modifyGlobal"
-  ];
-  const useHistory = (opts) => {
-    const { instance } = opts;
-    const core = instance.getCore();
-    let doRecords = [];
-    let undoRecords = [];
-    const doAction = (record) => {
-      doRecords.push(record);
-    };
-    const undoAction = () => {
-      var _a;
-      if ((doRecords == null ? void 0 : doRecords.length) > 0) {
-        const record = doRecords.pop();
-        if (!record) {
-          return;
-        }
-        let undoRecord = { ...record };
-        if (record.content.method === "modifyElement") {
-          const info = unflatObject(record.content.before || {});
-          undoRecord = core.modifyElement({
-            ...info,
-            uuid: (_a = record.content) == null ? void 0 : _a.uuid
-          });
-        } else if (record.content.method === "updateElement") {
-          const info = unflatObject(record.content.before || {});
-          undoRecord = core.updateElement({ ...info, uuid: record.content.uuid });
-        } else if (record.content.method === "addElement") {
-          const uuid = record.content.uuid;
-          undoRecord = core.deleteElement(uuid);
-        } else if (record.content.method === "deleteElement") {
-          const { element, position } = record.content;
-          if (!element) {
-            return;
-          }
-          if (!element) {
-            return;
-          }
-          undoRecord = core.addElement(element, { position });
-        } else if (record.content.method === "moveElement") {
-          const uuid = record.content.uuid;
-          const moveResult = calcResultMovePosition({
-            from: record.content.from,
-            to: record.content.to
-          });
-          if (!moveResult) {
-            return;
-          }
-          undoRecord = core.moveElement(uuid, moveResult.from);
-        } else if (record.content.method === "modifyLayout") {
-          const info = record.content.before === null ? null : unflatObject(record.content.before || {});
-          undoRecord = core.modifyLayout(info);
-        } else if (record.content.method === "modifyGlobal") {
-          const info = record.content.before === null ? null : unflatObject(record.content.before || {});
-          undoRecord = core.modifyGlobal(info);
-        } else if (record.content.method === "modifyElements") {
-          undoRecord = core.modifyElements(
-            record.content.before.forEach((item) => unflatObject(item))
-          );
-        }
-        undoRecord = { ...undoRecord, type: "undo" };
-        undoRecords.push(undoRecord);
-      }
-    };
-    const redoAction = () => {
-      if ((undoRecords == null ? void 0 : undoRecords.length) > 0) {
-        const record = undoRecords.pop();
-        if (!record) {
-          return;
-        }
-        let redoRecord = { ...record };
-        if (record.content.method === "modifyElement") {
-          const info = unflatObject(record.content.before || {});
-          redoRecord = core.modifyElement({
-            ...info,
-            uuid: record.content.uuid
-          });
-        } else if (record.content.method === "updateElement") {
-          const info = unflatObject(record.content.before || {});
-          redoRecord = core.updateElement({ ...info, uuid: record.content.uuid });
-        } else if (record.content.method === "addElement") {
-          const uuid = record.content.uuid;
-          redoRecord = core.deleteElement(uuid);
-        } else if (record.content.method === "deleteElement") {
-          const { element, position } = record.content;
-          if (!element) {
-            return;
-          }
-          redoRecord = core.addElement(element, { position });
-        } else if (record.content.method === "moveElement") {
-          const uuid = record.content.uuid;
-          const moveResult = calcResultMovePosition({
-            from: record.content.from,
-            to: record.content.to
-          });
-          if (!moveResult) {
-            return;
-          }
-          redoRecord = core.moveElement(uuid, moveResult.from);
-        } else if (record.content.method === "modifyLayout") {
-          const info = record.content.before === null ? null : unflatObject(record.content.before || {});
-          redoRecord = core.modifyLayout(info);
-        } else if (record.content.method === "modifyGlobal") {
-          const info = record.content.before === null ? null : unflatObject(record.content.before || {});
-          redoRecord = core.modifyGlobal(info);
-        } else if (record.content.method === "modifyElements") {
-          redoRecord = core.modifyElements(
-            record.content.before.forEach((item) => unflatObject(item))
-          );
-        }
-        redoRecord = { ...redoRecord, type: "redo" };
-        doRecords.push(redoRecord);
-      }
-    };
-    const MiddlewareHistory = (opts2) => {
-      const { eventHub } = opts2;
-      const changeEvent = (e) => {
-        const { modifyRecord } = e;
-        if (modifyRecord && supportRecordTypes.includes(modifyRecord == null ? void 0 : modifyRecord.type)) {
-          doAction(modifyRecord);
-        }
-      };
-      const onEvents = () => {
-        eventHub.on(eventKeys.CHANGE, changeEvent);
-      };
-      const offEvents = () => {
-        eventHub.off(eventKeys.CHANGE, changeEvent);
-      };
-      return {
-        name: "@middleware/history",
-        use() {
-          onEvents();
-        },
-        disuse() {
-          offEvents();
-        }
-      };
-    };
-    const destroy = () => {
-      clear();
-      doRecords = null;
-      undoRecords = null;
-    };
-    const clear = () => {
-      while ((doRecords == null ? void 0 : doRecords.length) > 0) {
-        doRecords.pop();
-      }
-      while ((undoRecords == null ? void 0 : undoRecords.length) > 0) {
-        undoRecords.pop();
-      }
-    };
-    const getDoRecords = () => doRecords;
-    const getUndoRecords = () => undoRecords;
-    const history = {
-      undo: undoAction,
-      redo: redoAction,
-      destroy,
-      clear,
-      canUndo: () => doRecords.length > 0,
-      canRedo: () => undoRecords.length > 0,
-      __getDoRecords: getDoRecords,
-      __getUndoRecords: getUndoRecords
-    };
-    return {
-      MiddlewareHistory,
-      history
-    };
   };
   exports.Board = Board;
   exports.Calculator = Calculator;
@@ -11867,7 +12078,6 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
   exports.deepClone = deepClone;
   exports.deepCloneData = deepCloneData;
   exports.deepCloneElement = deepCloneElement;
-  exports.deepResizeGroupElement = deepResizeGroupElement;
   exports.delay = delay;
   exports.deleteElementInList = deleteElementInList;
   exports.deleteElementInListByPosition = deleteElementInListByPosition;

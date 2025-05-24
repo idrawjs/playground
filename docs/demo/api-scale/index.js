@@ -1,21 +1,24 @@
 import { iDraw } from 'idraw';
 import data from './data';
 
+const width = 320;
+const height = 320;
+
 const app = document.querySelector('#app');
 const options = {
-  width: 320,
-  height: 320,
+  width,
+  height,
   devicePixelRatio: 2
 };
 const idraw = new iDraw(app, options);
 idraw.setData(data);
 
-const elem1 = idraw.getData().elements[1];
-elem1.detail = {
-  ...elem1.detail,
-  ...{
-    background: '#f7d3c1',
-    borderColor: '#ff6032'
-  }
-};
-idraw.updateElement(elem1);
+setTimeout(() => {
+  idraw.scale({
+    scale: 0.5,
+    point: {
+      x: width / 2,
+      y: height / 2
+    }
+  });
+}, 1000);
