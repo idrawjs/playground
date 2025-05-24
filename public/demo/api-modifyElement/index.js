@@ -11,11 +11,11 @@ const idraw = new iDraw(app, options);
 idraw.setData(data);
 
 const elem1 = idraw.getData().elements[1];
-elem1.detail = {
-  ...elem1.detail,
-  ...{
+
+idraw.modifyElement({
+  uuid: elem1.uuid,
+  detail: {
     background: '#f7d3c1',
     borderColor: '#ff6032'
   }
-};
-idraw.updateElement(elem1);
+});

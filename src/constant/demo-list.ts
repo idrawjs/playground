@@ -163,6 +163,10 @@ const demoList: TypeDemoList = [
         key: 'api-addElement'
       },
       {
+        name: 'modifyElement',
+        key: 'api-modifyElement'
+      },
+      {
         name: 'updateElement',
         key: 'api-updateElement'
       },
