@@ -179,6 +179,10 @@ const demoList: TypeDemoList = [
         key: 'api-moveElement'
       },
       {
+        name: 'scale',
+        key: 'api-scale'
+      },
+      {
         name: 'resize',
         key: 'api-resize'
       },
@@ -201,6 +205,10 @@ const demoList: TypeDemoList = [
       {
         name: 'getImageBlobURL',
         key: 'api-getImageBlobURL'
+      },
+      {
+        name: 'event',
+        key: 'api-event'
       }
       // {
       //   name: 'moveDownElement',
