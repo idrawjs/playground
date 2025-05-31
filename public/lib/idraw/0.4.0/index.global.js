@@ -3062,7 +3062,6 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
       color: detailConfig2.color,
       fontFamily: detailConfig2.fontFamily,
       fontWeight: detailConfig2.fontWeight,
-      lineHeight: elementSize.w / defaultText.length,
       fontSize: elementSize.w / defaultText.length,
       textAlign: "center",
       verticalAlign: "middle"
@@ -3311,6 +3310,10 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
   function resizeElementBaseByRatio(elem, opts) {
     const { xRatio, yRatio } = opts;
     const { uuid, x: x2, y: y2, w: w2, h: h2 } = elem;
+    elem.x = doNum(x2 * xRatio);
+    elem.y = doNum(y2 * yRatio);
+    elem.w = doNum(w2 * xRatio);
+    elem.h = doNum(h2 * yRatio);
     const record = {
       type: "modifyElement",
       time: Date.now(),
@@ -3318,13 +3321,9 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
         method: "modifyElement",
         uuid,
         before: { x: x2, y: y2, w: w2, h: h2 },
-        after: { x: x2, y: y2, w: w2, h: h2 }
+        after: { x: elem.x, y: elem.y, w: elem.w, h: elem.h }
       }
     };
-    elem.x = doNum(x2 * xRatio);
-    elem.y = doNum(y2 * yRatio);
-    elem.w = doNum(w2 * xRatio);
-    elem.h = doNum(h2 * yRatio);
     const detailRecord = resizeElementBaseDetailByRatio(elem, opts);
     record.content.before = Object.assign(Object.assign({}, record.content.before), detailRecord.content.before);
     record.content.after = Object.assign(Object.assign({}, record.content.after), detailRecord.content.after);
@@ -3415,11 +3414,8 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
     });
   }
   function resizeEffectGroupElement(elem, size, opts) {
-    if (!istype.number(size.x) && !istype.number(size.y)) {
-      return null;
-    }
     const record = {
-      type: "modifyElements",
+      type: "resizeElements",
       time: Date.now(),
       content: {
         method: "modifyElements",
@@ -3439,6 +3435,8 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
     const beforeGroupElem = { uuid, x: originX, y: originY, w: originW, h: originH };
     const afterGroupElem = { uuid, x: resizeX, y: resizeY, w: resizeW, h: resizeH };
     if ((opts === null || opts === void 0 ? void 0 : opts.resizeEffect) === "deepResize") {
+      record.content.before.push(beforeGroupElem);
+      record.content.after.push(afterGroupElem);
       const xRatio = resizeW / elem.w;
       const yRatio = resizeH / elem.h;
       if (xRatio === yRatio && xRatio === 1) {
@@ -4777,6 +4775,9 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
         if (fontSize2 < 2) {
           return;
         }
+        const { parentOpacity: parentOpacity2 } = opts;
+        const opacity = getOpacity(elem) * parentOpacity2;
+        ctx.globalAlpha = opacity;
         ctx.fillStyle = elem.detail.color || detailConfig$1.color;
         ctx.textBaseline = "top";
         ctx.$setFont({
@@ -4804,6 +4805,7 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
             });
           }
         }
+        ctx.globalAlpha = parentOpacity2;
       }
     });
   }
@@ -8570,7 +8572,7 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
             };
           }
           eventHub.trigger(coreEventKeys.CHANGE, {
-            type: "dragLayout",
+            type: "resizeLayout",
             data,
             modifyRecord
           });
@@ -9061,6 +9063,8 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
       fill: innerConfig.activeColor,
       devicePixelRatio: sharer.getActiveViewSizeInfo().devicePixelRatio
     });
+    let startResizeGroupRecord = null;
+    let endResizeGroupRecord = null;
     sharer.setSharedStorage(keyActionType, null);
     sharer.setSharedStorage(keyEnableSnapToGrid, true);
     const getActiveElements = () => {
@@ -9144,6 +9148,8 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
       };
     };
     const clear = () => {
+      startResizeGroupRecord = null;
+      endResizeGroupRecord = null;
       sharer.setSharedStorage(keyActionType, null);
       sharer.setSharedStorage(keyResizeType, null);
       sharer.setSharedStorage(keyAreaStart, null);
@@ -9307,6 +9313,8 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
         var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m;
         prevPoint = e.point;
         moveOriginalStartPoint = e.point;
+        startResizeGroupRecord = null;
+        endResizeGroupRecord = null;
         sharer.setSharedStorage(keyActionType, null);
         sharer.setSharedStorage(keyResizeType, null);
         sharer.setSharedStorage(keyAreaStart, null);
@@ -9508,12 +9516,15 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
               const gridW = calculator.toGridNum(resizedElemSize.w, calcOpts);
               const gridH = calculator.toGridNum(resizedElemSize.h, calcOpts);
               if (elems[0].type === "group") {
-                resizeEffectGroupElement(elems[0], {
+                endResizeGroupRecord = resizeEffectGroupElement(elems[0], {
                   x: gridX,
                   y: gridY,
                   w: gridW,
                   h: gridH
                 }, { resizeEffect: (_c = elems[0].operations) === null || _c === void 0 ? void 0 : _c.resizeEffect });
+                if (!startResizeGroupRecord) {
+                  startResizeGroupRecord = endResizeGroupRecord;
+                }
                 elems[0].x = gridX;
                 elems[0].y = gridY;
               } else {
@@ -9612,13 +9623,13 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
             sharer.setActiveStorage("contextWidth", viewInfo.contextSize.contextWidth);
           }
           if (data && ["drag", "drag-list", "drag-list-end", "resize"].includes(actionType)) {
-            let type = "dragElement";
+            let type = "resizeElement";
             if (hasChangedData) {
               const startSize = pointStartElementSizeList[0];
-              let modifyRecord = void 0;
+              let modifyRecord = null;
               if (selectedElements.length === 1) {
                 modifyRecord = {
-                  type: "dragElement",
+                  type: "resizeElement",
                   time: 0,
                   content: {
                     method: "modifyElement",
@@ -9627,9 +9638,12 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
                     after: toFlattenElement(getElementSize(selectedElements[0]))
                   }
                 };
+                if (selectedElements[0].type === "group" && startResizeGroupRecord && endResizeGroupRecord) {
+                  modifyRecord = Object.assign(Object.assign({}, endResizeGroupRecord), { content: Object.assign(Object.assign({}, endResizeGroupRecord.content), { before: startResizeGroupRecord.content.before }) });
+                }
               } else if (selectedElements.length > 1) {
                 modifyRecord = {
-                  type: "dragElements",
+                  type: "resizeElements",
                   time: 0,
                   content: {
                     method: "modifyElements",
@@ -11666,9 +11680,9 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
     "deleteElement",
     "moveElement",
     "addElement",
-    "dragElement",
     "resizeElement",
-    "dragLayout",
+    "resizeElements",
+    "resizeLayout",
     "modifyLayout",
     "modifyGlobal"
   ];
@@ -11728,7 +11742,7 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
           undoRecord = core.modifyGlobal(info);
         } else if (record.content.method === "modifyElements") {
           undoRecord = core.modifyElements(
-            record.content.before.forEach((item) => unflatObject(item))
+            record.content.before.map((item) => unflatObject(item))
           );
         }
         undoRecord = { ...undoRecord, type: "undo" };
@@ -11781,7 +11795,7 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
           redoRecord = core.modifyGlobal(info);
         } else if (record.content.method === "modifyElements") {
           redoRecord = core.modifyElements(
-            record.content.before.forEach((item) => unflatObject(item))
+            record.content.before.map((item) => unflatObject(item))
           );
         }
         redoRecord = { ...redoRecord, type: "redo" };
@@ -11996,15 +12010,17 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
     forceRender() {
       return __privateGet(this, _core).forceRender();
     }
-    // getHistoryHandler() {
-    //   return this.#historyHandler;
-    // }
-    // redo() {
-    //   this.#historyHandler?.redo();
-    // }
-    // undo() {
-    //   this.#historyHandler?.undo();
-    // }
+    getHistoryHandler() {
+      return __privateGet(this, _historyHandler);
+    }
+    redo() {
+      var _a;
+      (_a = __privateGet(this, _historyHandler)) == null ? void 0 : _a.redo();
+    }
+    undo() {
+      var _a;
+      (_a = __privateGet(this, _historyHandler)) == null ? void 0 : _a.undo();
+    }
   }
   _core = new WeakMap();
   _opts = new WeakMap();
