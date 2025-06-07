@@ -59,8 +59,8 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
     };
   }
   function downloadImageFromCanvas(canvas, opts) {
-    const { fileName, type = "image/jpeg" } = opts;
-    const stream = canvas.toDataURL(type);
+    const { fileName, type: type2 = "image/jpeg" } = opts;
+    const stream = canvas.toDataURL(type2);
     let downloadLink = document.createElement("a");
     downloadLink.href = stream;
     downloadLink.download = fileName;
@@ -424,16 +424,16 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
   };
   function deepClone(target) {
     function _clone(t) {
-      const type = is$1(t);
-      if (["Null", "Number", "String", "Boolean", "Undefined"].indexOf(type) >= 0) {
+      const type2 = is$1(t);
+      if (["Null", "Number", "String", "Boolean", "Undefined"].indexOf(type2) >= 0) {
         return t;
-      } else if (type === "Array") {
+      } else if (type2 === "Array") {
         const arr = [];
         t.forEach((item) => {
           arr.push(_clone(item));
         });
         return arr;
-      } else if (type === "Object") {
+      } else if (type2 === "Object") {
         const obj = {};
         const keys = Object.keys(t);
         keys.forEach((key2) => {
@@ -448,8 +448,8 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
     }
     return _clone(target);
   }
-  function deepCloneElement(element) {
-    const elem = deepClone(element);
+  function deepCloneElement(element2) {
+    const elem = deepClone(element2);
     const _resetUUID = (e) => {
       e.uuid = createUUID();
       if (e.type === "group" && e.detail.children) {
@@ -461,8 +461,8 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
     _resetUUID(elem);
     return elem;
   }
-  function deepCloneData(data) {
-    const { elements } = data, restData = __rest$4(data, ["elements"]);
+  function deepCloneData(data2) {
+    const { elements } = data2, restData = __rest$4(data2, ["elements"]);
     return Object.assign(Object.assign({}, deepClone(restData)), {
       elements: elements.map((elem) => deepCloneElement(elem))
     });
@@ -470,11 +470,11 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
   function is$1(target) {
     return Object.prototype.toString.call(target).replace(/[\]|\[]{1,1}/gi, "").split(" ")[1];
   }
-  function sortDataAsserts(data, opts) {
-    const assets = data.assets || {};
-    let sortedData = data;
+  function sortDataAsserts(data2, opts) {
+    const assets = data2.assets || {};
+    let sortedData = data2;
     if ((opts === null || opts === void 0 ? void 0 : opts.clone) === true) {
-      sortedData = deepClone(data);
+      sortedData = deepClone(data2);
     }
     const _scanElements = (elems) => {
       elems.forEach((elem) => {
@@ -524,9 +524,9 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
     sortedData.assets = assets;
     return sortedData;
   }
-  function filterCompactData(data, opts) {
-    const assets = data.assets || {};
-    const sortedData = deepClone(data);
+  function filterCompactData(data2, opts) {
+    const assets = data2.assets || {};
+    const sortedData = deepClone(data2);
     const loadItemMap = (opts === null || opts === void 0 ? void 0 : opts.loadItemMap) || {};
     const _scanElements = (elems) => {
       elems.forEach((elem) => {
@@ -598,45 +598,45 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
     sortedData.assets = assets;
     return sortedData;
   }
-  function parsePrototype(data) {
-    const typeStr = Object.prototype.toString.call(data) || "";
+  function parsePrototype(data2) {
+    const typeStr = Object.prototype.toString.call(data2) || "";
     const result = typeStr.replace(/(\[object|\])/gi, "").trim();
     return result;
   }
   const istype = {
-    type(data, lowerCase) {
-      const result = parsePrototype(data);
+    type(data2, lowerCase) {
+      const result = parsePrototype(data2);
       return lowerCase === true ? result.toLocaleLowerCase() : result;
     },
-    array(data) {
-      return parsePrototype(data) === "Array";
+    array(data2) {
+      return parsePrototype(data2) === "Array";
     },
-    json(data) {
-      return parsePrototype(data) === "Object";
+    json(data2) {
+      return parsePrototype(data2) === "Object";
     },
-    function(data) {
-      return parsePrototype(data) === "Function";
+    function(data2) {
+      return parsePrototype(data2) === "Function";
     },
-    asyncFunction(data) {
-      return parsePrototype(data) === "AsyncFunction";
+    asyncFunction(data2) {
+      return parsePrototype(data2) === "AsyncFunction";
     },
-    boolean(data) {
-      return parsePrototype(data) === "Boolean";
+    boolean(data2) {
+      return parsePrototype(data2) === "Boolean";
     },
-    string(data) {
-      return parsePrototype(data) === "String";
+    string(data2) {
+      return parsePrototype(data2) === "String";
     },
-    number(data) {
-      return parsePrototype(data) === "Number";
+    number(data2) {
+      return parsePrototype(data2) === "Number";
     },
-    undefined(data) {
-      return parsePrototype(data) === "Undefined";
+    undefined(data2) {
+      return parsePrototype(data2) === "Undefined";
     },
-    null(data) {
-      return parsePrototype(data) === "Null";
+    null(data2) {
+      return parsePrototype(data2) === "Null";
     },
-    promise(data) {
-      return parsePrototype(data) === "Promise";
+    promise(data2) {
+      return parsePrototype(data2) === "Promise";
     }
   };
   function parseHTMLToDataURL(html2, opts) {
@@ -819,8 +819,33 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
   function numberStr(value) {
     return /^(-?\d+(?:\.\d+)?)$/.test(`${value}`);
   }
+  function type(value) {
+    return ["rect", "circle", "text", "image", "svg", "html", "group"].includes(value);
+  }
+  function element(elem) {
+    if (!elem) {
+      return false;
+    }
+    return type(elem === null || elem === void 0 ? void 0 : elem.type) && x(elem === null || elem === void 0 ? void 0 : elem.x) && y(elem === null || elem === void 0 ? void 0 : elem.y) && w(elem === null || elem === void 0 ? void 0 : elem.w) && h(elem === null || elem === void 0 ? void 0 : elem.h);
+  }
+  function layout(value) {
+    if (!value) {
+      return false;
+    }
+    return x(value === null || value === void 0 ? void 0 : value.x) && y(value === null || value === void 0 ? void 0 : value.y) && w(value === null || value === void 0 ? void 0 : value.w) && h(value === null || value === void 0 ? void 0 : value.h);
+  }
+  function data(d) {
+    if (Array(d === null || d === void 0 ? void 0 : d.elements) && (d === null || d === void 0 ? void 0 : d.elements.length) >= 0) {
+      return true;
+    }
+    return false;
+  }
   const is = {
     positiveNum,
+    data,
+    element,
+    layout,
+    type,
     x,
     y,
     w,
@@ -1667,18 +1692,18 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
     }
     return uuids;
   }
-  function getSelectedElementUUIDs(data, indexes) {
+  function getSelectedElementUUIDs(data2, indexes) {
     var _a;
     let uuids = [];
-    if (Array.isArray(data === null || data === void 0 ? void 0 : data.elements) && ((_a = data === null || data === void 0 ? void 0 : data.elements) === null || _a === void 0 ? void 0 : _a.length) > 0 && Array.isArray(indexes) && indexes.length > 0) {
+    if (Array.isArray(data2 === null || data2 === void 0 ? void 0 : data2.elements) && ((_a = data2 === null || data2 === void 0 ? void 0 : data2.elements) === null || _a === void 0 ? void 0 : _a.length) > 0 && Array.isArray(indexes) && indexes.length > 0) {
       indexes.forEach((idx) => {
         var _a2;
         if (typeof idx === "number") {
-          if ((_a2 = data === null || data === void 0 ? void 0 : data.elements) === null || _a2 === void 0 ? void 0 : _a2[idx]) {
-            uuids.push(data.elements[idx].uuid);
+          if ((_a2 = data2 === null || data2 === void 0 ? void 0 : data2.elements) === null || _a2 === void 0 ? void 0 : _a2[idx]) {
+            uuids.push(data2.elements[idx].uuid);
           }
         } else if (typeof idx === "string") {
-          uuids = uuids.concat(getGroupUUIDs(data.elements, idx));
+          uuids = uuids.concat(getGroupUUIDs(data2.elements, idx));
         }
       });
     }
@@ -1922,8 +1947,8 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
     const size = { x: x2, y: y2, w: w2, h: h2, angle: angle2 };
     return size;
   }
-  function mergeElementAsset(element, assets) {
-    const elem = element;
+  function mergeElementAsset(element2, assets) {
+    const elem = element2;
     let assetId = null;
     let assetItem = null;
     if (elem.type === "image") {
@@ -1947,33 +1972,33 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
     }
     return elem;
   }
-  function filterElementAsset(element) {
+  function filterElementAsset(element2) {
     let assetId = null;
     let assetItem = null;
     let resource = null;
-    if (element.type === "image") {
-      resource = element.detail.src;
-    } else if (element.type === "svg") {
-      resource = element.detail.svg;
-    } else if (element.type === "html") {
-      resource = element.detail.html;
+    if (element2.type === "image") {
+      resource = element2.detail.src;
+    } else if (element2.type === "svg") {
+      resource = element2.detail.svg;
+    } else if (element2.type === "html") {
+      resource = element2.detail.html;
     }
     if (typeof resource === "string" && !isAssetId(resource)) {
-      assetId = createAssetId(resource, element.uuid);
+      assetId = createAssetId(resource, element2.uuid);
       assetItem = {
-        type: element.type,
+        type: element2.type,
         value: resource
       };
-      if (element.type === "image") {
-        element.detail.src = assetId;
-      } else if (element.type === "svg") {
-        element.detail.svg = assetId;
-      } else if (element.type === "html") {
-        element.detail.html = assetId;
+      if (element2.type === "image") {
+        element2.detail.src = assetId;
+      } else if (element2.type === "svg") {
+        element2.detail.svg = assetId;
+      } else if (element2.type === "html") {
+        element2.detail.html = assetId;
       }
     }
     return {
-      element,
+      element: element2,
       assetId,
       assetItem
     };
@@ -2288,7 +2313,7 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
   }
   function getViewPointAtElement(p, opts) {
     var _a, _b, _c;
-    const { context2d: ctx, data, viewScaleInfo, viewSizeInfo, groupQueue } = opts;
+    const { context2d: ctx, data: data2, viewScaleInfo, viewSizeInfo, groupQueue } = opts;
     const result = {
       index: -1,
       element: null,
@@ -2339,8 +2364,8 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
     if (result.element) {
       return result;
     }
-    for (let i = data.elements.length - 1; i >= 0; i--) {
-      const elem = data.elements[i];
+    for (let i = data2.elements.length - 1; i >= 0; i--) {
+      const elem = data2.elements[i];
       if (((_c = elem === null || elem === void 0 ? void 0 : elem.operations) === null || _c === void 0 ? void 0 : _c.invisible) === true) {
         continue;
       }
@@ -2812,7 +2837,7 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
   const elemRegExp = /<[a-zA-Z0-9\-\!\/](?:"[^"]*"|'[^']*'|[^'">])*>/g;
   const whitespaceReg = /^\s*$/;
   const singleElements = {};
-  function parseElement(element) {
+  function parseElement(element2) {
     const node = {
       type: "element",
       name: "",
@@ -2820,28 +2845,28 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
       attributes: {},
       children: []
     };
-    const elementMatch = element.match(/<\/?([^\s]+?)[/\s>]/);
+    const elementMatch = element2.match(/<\/?([^\s]+?)[/\s>]/);
     if (elementMatch) {
       node.name = elementMatch[1];
-      if (singleElements[elementMatch[1]] || element.charAt(element.length - 2) === "/") {
+      if (singleElements[elementMatch[1]] || element2.charAt(element2.length - 2) === "/") {
         node.isVoid = true;
       }
       if (node.name.startsWith("!--")) {
-        const endIndex = element.indexOf("-->");
+        const endIndex = element2.indexOf("-->");
         return {
           type: "comment",
           name: null,
           attributes: {},
           children: [],
           isVoid: false,
-          comment: endIndex !== -1 ? element.slice(4, endIndex) : ""
+          comment: endIndex !== -1 ? element2.slice(4, endIndex) : ""
         };
       }
     }
     const reg = new RegExp(attrRegExp);
     let result = null;
     while (true) {
-      result = reg.exec(element);
+      result = reg.exec(element2);
       if (result === null) {
         break;
       }
@@ -2867,25 +2892,25 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
     const arr = [];
     let current;
     let level = -1;
-    html2.replace(elemRegExp, (element, index) => {
-      const isOpen = element.charAt(1) !== "/";
-      const isComment = element.startsWith("<!--");
-      const start = index + element.length;
+    html2.replace(elemRegExp, (element2, index) => {
+      const isOpen = element2.charAt(1) !== "/";
+      const isComment = element2.startsWith("<!--");
+      const start = index + element2.length;
       const nextChar = html2.charAt(start);
       let parent;
       if (isComment) {
-        const comment = parseElement(element);
+        const comment = parseElement(element2);
         if (level < 0) {
           result.push(comment);
-          return element;
+          return element2;
         }
         parent = arr[level];
         parent.children.push(comment);
-        return element;
+        return element2;
       }
       if (isOpen) {
         level++;
-        current = parseElement(element);
+        current = parseElement(element2);
         if (!current.isVoid && true && nextChar && nextChar !== "<") {
           const content = html2.slice(start, html2.indexOf("<", start));
           if (content.trim()) {
@@ -2909,7 +2934,7 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
         arr[level] = current;
       }
       if (!isOpen || !Array.isArray(current) && current.isVoid) {
-        if (level > -1 && !Array.isArray(current) && (current.isVoid || current.name === element.slice(2, -1))) {
+        if (level > -1 && !Array.isArray(current) && (current.isVoid || current.name === element2.slice(2, -1))) {
           level--;
           current = level === -1 ? result : arr[level];
         }
@@ -2934,7 +2959,7 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
           }
         }
       }
-      return element;
+      return element2;
     });
     return result;
   }
@@ -2970,7 +2995,7 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
   }
   function compressImage(src, opts) {
     let radio = 0.5;
-    const type = (opts === null || opts === void 0 ? void 0 : opts.type) || "image/png";
+    const type2 = (opts === null || opts === void 0 ? void 0 : opts.type) || "image/png";
     if ((opts === null || opts === void 0 ? void 0 : opts.radio) && (opts === null || opts === void 0 ? void 0 : opts.radio) > 0 && (opts === null || opts === void 0 ? void 0 : opts.radio) <= 1) {
       radio = opts === null || opts === void 0 ? void 0 : opts.radio;
     }
@@ -2985,7 +3010,7 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
         canvas.height = resultH;
         const ctx = canvas.getContext("2d");
         ctx.drawImage(image, 0, 0, resultW, resultH);
-        const base64 = canvas.toDataURL(type);
+        const base64 = canvas.toDataURL(type2);
         canvas = null;
         resolve(base64);
       });
@@ -3140,6 +3165,24 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
       radiusList
     };
   }
+  function calcVisiableViewSize(data2) {
+    var _a, _b;
+    const outputSize = calcElementListSize(data2.elements);
+    if (data2.layout) {
+      if (((_b = (_a = data2.layout) === null || _a === void 0 ? void 0 : _a.detail) === null || _b === void 0 ? void 0 : _b.overflow) === "hidden") {
+        outputSize.x = data2.layout.x;
+        outputSize.y = data2.layout.y;
+        outputSize.w = data2.layout.w;
+        outputSize.h = data2.layout.h;
+      } else {
+        outputSize.x = Math.min(outputSize.x, data2.layout.x);
+        outputSize.y = Math.min(outputSize.y, data2.layout.y);
+        outputSize.w = Math.max(outputSize.w, data2.layout.w);
+        outputSize.h = Math.max(outputSize.h, data2.layout.h);
+      }
+    }
+    return outputSize;
+  }
   function flattenObject(obj, parentKey = "", result = {}, opts) {
     Object.keys(obj).forEach((key2) => {
       var _a;
@@ -3170,8 +3213,8 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
   function toFlattenElement(elem) {
     return flatObject(elem, { ignorePaths: ["detail.children"] });
   }
-  function toFlattenLayout(layout) {
-    return flatObject(layout);
+  function toFlattenLayout(layout2) {
+    return flatObject(layout2);
   }
   function toFlattenGlobal(global) {
     return flatObject(global);
@@ -3358,14 +3401,14 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
     return record;
   }
   function deepResizeElementByRatio(elem, opts, record) {
-    const { type, uuid } = elem;
+    const { type: type2, uuid } = elem;
     const rootRecord = resizeElementBaseByRatio(elem, opts);
     const rootRecordBefore = Object.assign(Object.assign({}, rootRecord.content.before), { uuid });
     const rootRecordAfter = Object.assign(Object.assign({}, rootRecord.content.after), { uuid });
     record === null || record === void 0 ? void 0 : record.content.before.push(rootRecordBefore);
     record === null || record === void 0 ? void 0 : record.content.after.push(rootRecordAfter);
-    if (type === "circle") ;
-    else if (type === "text") {
+    if (type2 === "circle") ;
+    else if (type2 === "text") {
       const textRecord = resizeTextElementDetailByRatio(elem, opts);
       Object.keys(textRecord.content.before || {}).forEach((key2) => {
         var _a;
@@ -3375,11 +3418,11 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
         var _a;
         rootRecordAfter[key2] = (_a = textRecord.content.after) === null || _a === void 0 ? void 0 : _a[key2];
       });
-    } else if (type === "image") ;
-    else if (type === "svg") ;
-    else if (type === "html") ;
-    else if (type === "path") ;
-    else if (type === "group" && Array.isArray(elem.detail.children)) {
+    } else if (type2 === "image") ;
+    else if (type2 === "svg") ;
+    else if (type2 === "html") ;
+    else if (type2 === "path") ;
+    else if (type2 === "group" && Array.isArray(elem.detail.children)) {
       elem.detail.children.forEach((child) => {
         deepResizeElementByRatio(child, opts, record);
       });
@@ -3487,7 +3530,7 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
   }
   const defaultViewWidth = 200;
   const defaultViewHeight = 200;
-  function createElementSize(type, opts) {
+  function createElementSize(type2, opts) {
     let x2 = 0;
     let y2 = 0;
     let w2 = defaultViewWidth;
@@ -3508,9 +3551,9 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
       } else {
         h2 = defaultViewHeight / scale;
       }
-      if (["circle", "svg", "image"].includes(type)) {
+      if (["circle", "svg", "image"].includes(type2)) {
         w2 = h2 = Math.max(w2, h2);
-      } else if (type === "text") {
+      } else if (type2 === "text") {
         const fontSize2 = w2 / defaultText.length;
         h2 = fontSize2 * 2;
       }
@@ -3525,30 +3568,30 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
     };
     return elemSize;
   }
-  function createElement$1(type, baseElem, opts) {
-    const elementSize = createElementSize(type, opts);
+  function createElement$1(type2, baseElem, opts) {
+    const elementSize = createElementSize(type2, opts);
     let detail = {};
-    if (type === "rect") {
+    if (type2 === "rect") {
       detail = getDefaultElementRectDetail();
-    } else if (type === "circle") {
+    } else if (type2 === "circle") {
       detail = getDefaultElementCircleDetail();
-    } else if (type === "text") {
+    } else if (type2 === "text") {
       detail = getDefaultElementTextDetail(elementSize);
-    } else if (type === "svg") {
+    } else if (type2 === "svg") {
       detail = getDefaultElementSVGDetail();
-    } else if (type === "image") {
+    } else if (type2 === "image") {
       detail = getDefaultElementImageDetail();
-    } else if (type === "group") {
+    } else if (type2 === "group") {
       detail = getDefaultElementGroupDetail();
     }
-    const elem = Object.assign(Object.assign(Object.assign({ uuid: createUUID() }, elementSize), baseElem), { type, detail: Object.assign(Object.assign({}, detail), baseElem.detail || {}) });
+    const elem = Object.assign(Object.assign(Object.assign({ uuid: createUUID() }, elementSize), baseElem), { type: type2, detail: Object.assign(Object.assign({}, detail), baseElem.detail || {}) });
     return elem;
   }
-  function insertElementToListByPosition(element, position, list) {
+  function insertElementToListByPosition(element2, position, list) {
     let result = false;
     if (position.length === 1) {
       const pos = position[0];
-      list.splice(pos, 0, element);
+      list.splice(pos, 0, element2);
       result = true;
     } else if (position.length > 1) {
       let tempList = list;
@@ -3557,7 +3600,7 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
         const item = tempList[pos];
         if (i === position.length - 1) {
           const pos2 = position[i];
-          tempList.splice(pos2, 0, element);
+          tempList.splice(pos2, 0, element2);
           result = true;
         } else if (i < position.length - 1 && item.type === "group") {
           tempList = item.detail.children;
@@ -3739,23 +3782,23 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
     }
     return elem;
   }
-  function calcViewCenterContent(data, opts) {
-    var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k;
+  function calcViewCenterContent(data2, opts) {
+    var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m;
     let offsetX = 0;
     let offsetY = 0;
     let scale = 1;
-    let contentX = ((_b = (_a = data === null || data === void 0 ? void 0 : data.elements) === null || _a === void 0 ? void 0 : _a[0]) === null || _b === void 0 ? void 0 : _b.x) || 0;
-    let contentY = ((_d = (_c = data === null || data === void 0 ? void 0 : data.elements) === null || _c === void 0 ? void 0 : _c[0]) === null || _d === void 0 ? void 0 : _d.y) || 0;
-    let contentW = ((_f = (_e = data === null || data === void 0 ? void 0 : data.elements) === null || _e === void 0 ? void 0 : _e[0]) === null || _f === void 0 ? void 0 : _f.w) || 0;
-    let contentH = ((_h = (_g = data === null || data === void 0 ? void 0 : data.elements) === null || _g === void 0 ? void 0 : _g[0]) === null || _h === void 0 ? void 0 : _h.h) || 0;
+    let contentX = ((_b = (_a = data2 === null || data2 === void 0 ? void 0 : data2.elements) === null || _a === void 0 ? void 0 : _a[0]) === null || _b === void 0 ? void 0 : _b.x) || 0;
+    let contentY = ((_d = (_c = data2 === null || data2 === void 0 ? void 0 : data2.elements) === null || _c === void 0 ? void 0 : _c[0]) === null || _d === void 0 ? void 0 : _d.y) || 0;
+    let contentW = ((_f = (_e = data2 === null || data2 === void 0 ? void 0 : data2.elements) === null || _e === void 0 ? void 0 : _e[0]) === null || _f === void 0 ? void 0 : _f.w) || 0;
+    let contentH = ((_h = (_g = data2 === null || data2 === void 0 ? void 0 : data2.elements) === null || _g === void 0 ? void 0 : _g[0]) === null || _h === void 0 ? void 0 : _h.h) || 0;
     const { width, height } = opts.viewSizeInfo;
-    if (data.layout && ((_k = (_j = data.layout) === null || _j === void 0 ? void 0 : _j.detail) === null || _k === void 0 ? void 0 : _k.overflow) === "hidden") {
-      contentX = 0;
-      contentY = 0;
-      contentW = data.layout.w || 0;
-      contentH = data.layout.h || 0;
+    if (is.layout(data2.layout) && ((_k = (_j = data2.layout) === null || _j === void 0 ? void 0 : _j.detail) === null || _k === void 0 ? void 0 : _k.overflow) === "hidden") {
+      contentX = data2.layout.x;
+      contentY = data2.layout.y;
+      contentW = data2.layout.w || 0;
+      contentH = data2.layout.h || 0;
     } else {
-      data.elements.forEach((elem) => {
+      data2.elements.forEach((elem) => {
         const elemSize = {
           x: elem.x,
           y: elem.y,
@@ -3784,9 +3827,14 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
         contentH = Math.abs(areaEndY - areaStartY);
       });
     }
-    if (data.layout) {
-      const { x: x2, y: y2, w: w2, h: h2 } = data.layout;
-      if (is.x(x2) && is.y(y2) && is.w(w2) && is.h(h2)) {
+    if ((data2 === null || data2 === void 0 ? void 0 : data2.layout) && is.layout(data2.layout)) {
+      const { x: x2, y: y2, w: w2, h: h2 } = data2.layout;
+      if (((_m = (_l = data2.layout) === null || _l === void 0 ? void 0 : _l.detail) === null || _m === void 0 ? void 0 : _m.overflow) === "hidden") {
+        contentX = Math.min(contentX, x2);
+        contentY = Math.min(contentY, y2);
+        contentW = Math.min(contentW, w2);
+        contentH = Math.min(contentH, h2);
+      } else {
         contentX = Math.min(contentX, x2);
         contentY = Math.min(contentY, y2);
         contentW = Math.max(contentW, w2);
@@ -5023,14 +5071,14 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
     });
   }
   const defaultDetail = getDefaultElementDetailConfig();
-  function drawElementList(ctx, data, opts) {
+  function drawElementList(ctx, data2, opts) {
     var _a;
-    const { elements = [] } = data;
+    const { elements = [] } = data2;
     const { parentOpacity } = opts;
     for (let i = 0; i < elements.length; i++) {
-      const element = elements[i];
-      const elem = Object.assign(Object.assign({}, element), {
-        detail: Object.assign(Object.assign({}, defaultDetail), element === null || element === void 0 ? void 0 : element.detail)
+      const element2 = elements[i];
+      const elem = Object.assign(Object.assign({}, element2), {
+        detail: Object.assign(Object.assign({}, defaultDetail), element2 === null || element2 === void 0 ? void 0 : element2.detail)
       });
       if (opts.forceDrawAll !== true) {
         if (!((_a = opts.calculator) === null || _a === void 0 ? void 0 : _a.needRender(elem))) {
@@ -5046,9 +5094,9 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
       }
     }
   }
-  function drawLayout(ctx, layout, opts, renderContent) {
+  function drawLayout(ctx, layout2, opts, renderContent) {
     const { viewScaleInfo, viewSizeInfo, parentOpacity } = opts;
-    const elem = Object.assign({ uuid: "layout", type: "group" }, layout);
+    const elem = Object.assign({ uuid: "layout", type: "group" }, layout2);
     const { x: x2, y: y2, w: w2, h: h2 } = calcViewElementSize(elem, { viewScaleInfo }) || elem;
     const angle2 = 0;
     const viewElem = Object.assign(Object.assign({}, elem), { x: x2, y: y2, w: w2, h: h2, angle: angle2 });
@@ -5059,9 +5107,9 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
         drawBoxBackground(ctx, viewElem, { viewScaleInfo, viewSizeInfo });
       }
     });
-    if (layout.detail.overflow === "hidden") {
+    if (layout2.detail.overflow === "hidden") {
       const { viewScaleInfo: viewScaleInfo2, viewSizeInfo: viewSizeInfo2 } = opts;
-      const elem2 = Object.assign({ uuid: "layout", type: "group" }, layout);
+      const elem2 = Object.assign({ uuid: "layout", type: "group" }, layout2);
       const viewElemSize = calcViewElementSize(elem2, { viewScaleInfo: viewScaleInfo2 }) || elem2;
       const viewElem2 = Object.assign(Object.assign({}, elem2), viewElemSize);
       const { x: x3, y: y3, w: w3, h: h3, radiusList } = calcViewBoxSize(viewElem2, {
@@ -5080,7 +5128,7 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
       ctx.clip("nonzero");
     }
     renderContent(ctx);
-    if (layout.detail.overflow === "hidden") {
+    if (layout2.detail.overflow === "hidden") {
       ctx.restore();
     }
     drawBoxBorder(ctx, viewElem, { viewScaleInfo });
@@ -5135,23 +5183,23 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
   };
   var _Loader_instances, _Loader_loadFuncMap, _Loader_currentLoadItemMap, _Loader_storageLoadItemMap, _Loader_hasDestroyed, _Loader_registerLoadFunc, _Loader_getLoadElementSource, _Loader_createLoadItem, _Loader_emitLoad, _Loader_emitError, _Loader_loadResource, _Loader_isExistingErrorStorage;
   const supportElementTypes = ["image", "svg", "html"];
-  const getAssetIdFromElement = (element) => {
+  const getAssetIdFromElement = (element2) => {
     var _a, _b, _c;
     let source = null;
-    if (element.type === "image") {
-      source = ((_a = element === null || element === void 0 ? void 0 : element.detail) === null || _a === void 0 ? void 0 : _a.src) || null;
-    } else if (element.type === "svg") {
-      source = ((_b = element === null || element === void 0 ? void 0 : element.detail) === null || _b === void 0 ? void 0 : _b.svg) || null;
-    } else if (element.type === "html") {
-      source = ((_c = element === null || element === void 0 ? void 0 : element.detail) === null || _c === void 0 ? void 0 : _c.html) || null;
+    if (element2.type === "image") {
+      source = ((_a = element2 === null || element2 === void 0 ? void 0 : element2.detail) === null || _a === void 0 ? void 0 : _a.src) || null;
+    } else if (element2.type === "svg") {
+      source = ((_b = element2 === null || element2 === void 0 ? void 0 : element2.detail) === null || _b === void 0 ? void 0 : _b.svg) || null;
+    } else if (element2.type === "html") {
+      source = ((_c = element2 === null || element2 === void 0 ? void 0 : element2.detail) === null || _c === void 0 ? void 0 : _c.html) || null;
     }
     if (typeof source === "string" && source) {
       if (isAssetId(source)) {
         return source;
       }
-      return createAssetId(source, element.uuid);
+      return createAssetId(source, element2.uuid);
     }
-    return createAssetId(`${createUUID()}-${element.uuid}-${createUUID()}-${createUUID()}`, element.uuid);
+    return createAssetId(`${createUUID()}-${element2.uuid}-${createUUID()}-${createUUID()}`, element2.uuid);
   };
   class Loader extends EventEmitter {
     constructor() {
@@ -5205,24 +5253,24 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
       __classPrivateFieldSet$8(this, _Loader_currentLoadItemMap, {}, "f");
       __classPrivateFieldSet$8(this, _Loader_storageLoadItemMap, {}, "f");
     }
-    resetElementAsset(element) {
+    resetElementAsset(element2) {
       var _a, _b, _c;
-      if (supportElementTypes.includes(element.type)) {
+      if (supportElementTypes.includes(element2.type)) {
         let assetId = null;
         let resource = null;
-        if (element.type === "image" && typeof ((_a = element === null || element === void 0 ? void 0 : element.detail) === null || _a === void 0 ? void 0 : _a.src) === "string") {
-          resource = element.detail.src;
-        } else if (element.type === "svg" && typeof ((_b = element === null || element === void 0 ? void 0 : element.detail) === null || _b === void 0 ? void 0 : _b.svg) === "string") {
-          resource = element.detail.svg;
-        } else if (element.type === "html" && typeof ((_c = element === null || element === void 0 ? void 0 : element.detail) === null || _c === void 0 ? void 0 : _c.html) === "string") {
-          resource = element.detail.html;
+        if (element2.type === "image" && typeof ((_a = element2 === null || element2 === void 0 ? void 0 : element2.detail) === null || _a === void 0 ? void 0 : _a.src) === "string") {
+          resource = element2.detail.src;
+        } else if (element2.type === "svg" && typeof ((_b = element2 === null || element2 === void 0 ? void 0 : element2.detail) === null || _b === void 0 ? void 0 : _b.svg) === "string") {
+          resource = element2.detail.svg;
+        } else if (element2.type === "html" && typeof ((_c = element2 === null || element2 === void 0 ? void 0 : element2.detail) === null || _c === void 0 ? void 0 : _c.html) === "string") {
+          resource = element2.detail.html;
         }
         if (typeof resource === "string") {
-          this.load(element, {});
+          this.load(element2, {});
           if (isAssetId(resource)) {
             assetId = resource;
-          } else if (element.uuid) {
-            assetId = createAssetId(resource, element.uuid);
+          } else if (element2.uuid) {
+            assetId = createAssetId(resource, element2.uuid);
           }
         }
         if (assetId && isAssetId(assetId)) {
@@ -5238,20 +5286,20 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
       __classPrivateFieldSet$8(this, _Loader_currentLoadItemMap, null, "f");
       __classPrivateFieldSet$8(this, _Loader_storageLoadItemMap, null, "f");
     }
-    load(element, assets) {
+    load(element2, assets) {
       if (__classPrivateFieldGet$8(this, _Loader_hasDestroyed, "f") === true) {
         return;
       }
-      if (__classPrivateFieldGet$8(this, _Loader_instances, "m", _Loader_isExistingErrorStorage).call(this, element)) {
+      if (__classPrivateFieldGet$8(this, _Loader_instances, "m", _Loader_isExistingErrorStorage).call(this, element2)) {
         return;
       }
-      if (supportElementTypes.includes(element.type)) {
-        __classPrivateFieldGet$8(this, _Loader_instances, "m", _Loader_loadResource).call(this, element, assets);
+      if (supportElementTypes.includes(element2.type)) {
+        __classPrivateFieldGet$8(this, _Loader_instances, "m", _Loader_loadResource).call(this, element2, assets);
       }
     }
-    getContent(element) {
+    getContent(element2) {
       var _a, _b;
-      const assetId = getAssetIdFromElement(element);
+      const assetId = getAssetIdFromElement(element2);
       return ((_b = (_a = __classPrivateFieldGet$8(this, _Loader_storageLoadItemMap, "f")) === null || _a === void 0 ? void 0 : _a[assetId]) === null || _b === void 0 ? void 0 : _b.content) || null;
     }
     getLoadItemMap() {
@@ -5261,28 +5309,28 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
       __classPrivateFieldSet$8(this, _Loader_storageLoadItemMap, itemMap, "f");
     }
   }
-  _Loader_loadFuncMap = /* @__PURE__ */ new WeakMap(), _Loader_currentLoadItemMap = /* @__PURE__ */ new WeakMap(), _Loader_storageLoadItemMap = /* @__PURE__ */ new WeakMap(), _Loader_hasDestroyed = /* @__PURE__ */ new WeakMap(), _Loader_instances = /* @__PURE__ */ new WeakSet(), _Loader_registerLoadFunc = function _Loader_registerLoadFunc2(type, func) {
-    __classPrivateFieldGet$8(this, _Loader_loadFuncMap, "f")[type] = func;
-  }, _Loader_getLoadElementSource = function _Loader_getLoadElementSource2(element) {
+  _Loader_loadFuncMap = /* @__PURE__ */ new WeakMap(), _Loader_currentLoadItemMap = /* @__PURE__ */ new WeakMap(), _Loader_storageLoadItemMap = /* @__PURE__ */ new WeakMap(), _Loader_hasDestroyed = /* @__PURE__ */ new WeakMap(), _Loader_instances = /* @__PURE__ */ new WeakSet(), _Loader_registerLoadFunc = function _Loader_registerLoadFunc2(type2, func) {
+    __classPrivateFieldGet$8(this, _Loader_loadFuncMap, "f")[type2] = func;
+  }, _Loader_getLoadElementSource = function _Loader_getLoadElementSource2(element2) {
     var _a, _b, _c;
     let source = null;
-    if (element.type === "image") {
-      source = ((_a = element === null || element === void 0 ? void 0 : element.detail) === null || _a === void 0 ? void 0 : _a.src) || null;
-    } else if (element.type === "svg") {
-      source = ((_b = element === null || element === void 0 ? void 0 : element.detail) === null || _b === void 0 ? void 0 : _b.svg) || null;
-    } else if (element.type === "html") {
-      source = ((_c = element === null || element === void 0 ? void 0 : element.detail) === null || _c === void 0 ? void 0 : _c.html) || null;
+    if (element2.type === "image") {
+      source = ((_a = element2 === null || element2 === void 0 ? void 0 : element2.detail) === null || _a === void 0 ? void 0 : _a.src) || null;
+    } else if (element2.type === "svg") {
+      source = ((_b = element2 === null || element2 === void 0 ? void 0 : element2.detail) === null || _b === void 0 ? void 0 : _b.svg) || null;
+    } else if (element2.type === "html") {
+      source = ((_c = element2 === null || element2 === void 0 ? void 0 : element2.detail) === null || _c === void 0 ? void 0 : _c.html) || null;
     }
     return source;
-  }, _Loader_createLoadItem = function _Loader_createLoadItem2(element) {
+  }, _Loader_createLoadItem = function _Loader_createLoadItem2(element2) {
     return {
-      element,
+      element: element2,
       status: "null",
       content: null,
       error: null,
       startTime: -1,
       endTime: -1,
-      source: __classPrivateFieldGet$8(this, _Loader_instances, "m", _Loader_getLoadElementSource).call(this, element)
+      source: __classPrivateFieldGet$8(this, _Loader_instances, "m", _Loader_getLoadElementSource).call(this, element2)
     };
   }, _Loader_emitLoad = function _Loader_emitLoad2(item) {
     const assetId = getAssetIdFromElement(item.element);
@@ -5313,17 +5361,17 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
         this.trigger("error", Object.assign(Object.assign({}, item), { countTime: item.endTime - item.startTime }));
       }
     }
-  }, _Loader_loadResource = function _Loader_loadResource2(element, assets) {
-    const item = __classPrivateFieldGet$8(this, _Loader_instances, "m", _Loader_createLoadItem).call(this, element);
-    const assetId = getAssetIdFromElement(element);
+  }, _Loader_loadResource = function _Loader_loadResource2(element2, assets) {
+    const item = __classPrivateFieldGet$8(this, _Loader_instances, "m", _Loader_createLoadItem).call(this, element2);
+    const assetId = getAssetIdFromElement(element2);
     if (__classPrivateFieldGet$8(this, _Loader_currentLoadItemMap, "f")[assetId]) {
       return;
     }
     __classPrivateFieldGet$8(this, _Loader_currentLoadItemMap, "f")[assetId] = item;
-    const loadFunc = __classPrivateFieldGet$8(this, _Loader_loadFuncMap, "f")[element.type];
+    const loadFunc = __classPrivateFieldGet$8(this, _Loader_loadFuncMap, "f")[element2.type];
     if (typeof loadFunc === "function" && !__classPrivateFieldGet$8(this, _Loader_hasDestroyed, "f")) {
       item.startTime = Date.now();
-      loadFunc(element, assets).then((result) => {
+      loadFunc(element2, assets).then((result) => {
         if (!__classPrivateFieldGet$8(this, _Loader_hasDestroyed, "f")) {
           item.content = result.content;
           item.endTime = Date.now();
@@ -5331,18 +5379,18 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
           __classPrivateFieldGet$8(this, _Loader_instances, "m", _Loader_emitLoad).call(this, item);
         }
       }).catch((err) => {
-        console.warn(`Load element source "${item.source}" fail`, err, element);
+        console.warn(`Load element source "${item.source}" fail`, err, element2);
         item.endTime = Date.now();
         item.status = "error";
         item.error = err;
         __classPrivateFieldGet$8(this, _Loader_instances, "m", _Loader_emitError).call(this, item);
       });
     }
-  }, _Loader_isExistingErrorStorage = function _Loader_isExistingErrorStorage2(element) {
+  }, _Loader_isExistingErrorStorage = function _Loader_isExistingErrorStorage2(element2) {
     var _a;
-    const assetId = getAssetIdFromElement(element);
+    const assetId = getAssetIdFromElement(element2);
     const existItem = (_a = __classPrivateFieldGet$8(this, _Loader_currentLoadItemMap, "f")) === null || _a === void 0 ? void 0 : _a[assetId];
-    if (existItem && existItem.status === "error" && existItem.source && existItem.source === __classPrivateFieldGet$8(this, _Loader_instances, "m", _Loader_getLoadElementSource).call(this, element)) {
+    if (existItem && existItem.status === "error" && existItem.source && existItem.source === __classPrivateFieldGet$8(this, _Loader_instances, "m", _Loader_getLoadElementSource).call(this, element2)) {
       return true;
     }
     return false;
@@ -5631,9 +5679,9 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
       const context2d = __classPrivateFieldGet$7(this, _Calculator_opts, "f").tempContext;
       return getViewPointAtElement(p, Object.assign(Object.assign({}, opts), { context2d }));
     }
-    resetVirtualFlatItemMap(data, opts) {
-      if (data) {
-        const { virtualFlatItemMap, invisibleCount, visibleCount } = sortElementsViewVisiableInfoMap(data.elements, Object.assign(Object.assign({}, opts), {
+    resetVirtualFlatItemMap(data2, opts) {
+      if (data2) {
+        const { virtualFlatItemMap, invisibleCount, visibleCount } = sortElementsViewVisiableInfoMap(data2.elements, Object.assign(Object.assign({}, opts), {
           tempContext: __classPrivateFieldGet$7(this, _Calculator_opts, "f").tempContext
         }));
         __classPrivateFieldGet$7(this, _Calculator_store, "f").set("virtualFlatItemMap", virtualFlatItemMap);
@@ -5695,24 +5743,24 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
       };
       return viewRectInfo;
     }
-    modifyText(element) {
+    modifyText(element2) {
       const virtualFlatItemMap = __classPrivateFieldGet$7(this, _Calculator_store, "f").get("virtualFlatItemMap");
-      const flatItem = virtualFlatItemMap[element.uuid];
-      if (element && element.type === "text") {
-        const newVirtualFlatItem = Object.assign(Object.assign({}, flatItem), calcVirtualTextDetail(element, {
+      const flatItem = virtualFlatItemMap[element2.uuid];
+      if (element2 && element2.type === "text") {
+        const newVirtualFlatItem = Object.assign(Object.assign({}, flatItem), calcVirtualTextDetail(element2, {
           tempContext: __classPrivateFieldGet$7(this, _Calculator_opts, "f").tempContext
         }));
-        virtualFlatItemMap[element.uuid] = newVirtualFlatItem;
+        virtualFlatItemMap[element2.uuid] = newVirtualFlatItem;
         __classPrivateFieldGet$7(this, _Calculator_store, "f").set("virtualFlatItemMap", virtualFlatItemMap);
       }
     }
-    modifyVirtualFlatItemMap(data, opts) {
+    modifyVirtualFlatItemMap(data2, opts) {
       const { modifyInfo, viewScaleInfo, viewSizeInfo } = opts;
-      const { type, content } = modifyInfo;
-      const list = data.elements;
+      const { type: type2, content } = modifyInfo;
+      const list = data2.elements;
       const virtualFlatItemMap = __classPrivateFieldGet$7(this, _Calculator_store, "f").get("virtualFlatItemMap");
-      if (type === "deleteElement") {
-        const { element } = content;
+      if (type2 === "deleteElement") {
+        const { element: element2 } = content;
         const uuids = [];
         const _walk = (e) => {
           uuids.push(e.uuid);
@@ -5722,34 +5770,34 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
             });
           }
         };
-        _walk(element);
+        _walk(element2);
         uuids.forEach((uuid) => {
           delete virtualFlatItemMap[uuid];
         });
         __classPrivateFieldGet$7(this, _Calculator_store, "f").set("virtualFlatItemMap", virtualFlatItemMap);
-      } else if (type === "addElement" || type === "updateElement") {
+      } else if (type2 === "addElement" || type2 === "updateElement") {
         const { position } = content;
-        const element = findElementFromListByPosition(position, data.elements);
+        const element2 = findElementFromListByPosition(position, data2.elements);
         const groupQueue = getGroupQueueByElementPosition(list, position);
-        if (element) {
-          if (type === "updateElement" && element.type === "group") {
-            this.resetVirtualFlatItemMap(data, { viewScaleInfo, viewSizeInfo });
+        if (element2) {
+          if (type2 === "updateElement" && element2.type === "group") {
+            this.resetVirtualFlatItemMap(data2, { viewScaleInfo, viewSizeInfo });
           } else {
-            const originRectInfo = calcElementOriginRectInfo(element, {
+            const originRectInfo = calcElementOriginRectInfo(element2, {
               groupQueue: groupQueue || []
             });
-            const newVirtualFlatItem = Object.assign({ type: element.type, originRectInfo, rangeRectInfo: is.angle(element.angle) ? originRectInfoToRangeRectInfo(originRectInfo) : originRectInfo, isVisibleInView: true, position: [...position] }, calcVirtualFlatDetail(element, {
+            const newVirtualFlatItem = Object.assign({ type: element2.type, originRectInfo, rangeRectInfo: is.angle(element2.angle) ? originRectInfoToRangeRectInfo(originRectInfo) : originRectInfo, isVisibleInView: true, position: [...position] }, calcVirtualFlatDetail(element2, {
               tempContext: __classPrivateFieldGet$7(this, _Calculator_opts, "f").tempContext
             }));
-            virtualFlatItemMap[element.uuid] = newVirtualFlatItem;
+            virtualFlatItemMap[element2.uuid] = newVirtualFlatItem;
             __classPrivateFieldGet$7(this, _Calculator_store, "f").set("virtualFlatItemMap", virtualFlatItemMap);
-            if (type === "updateElement") {
+            if (type2 === "updateElement") {
               this.updateVisiableStatus({ viewScaleInfo, viewSizeInfo });
             }
           }
         }
-      } else if (type === "moveElement") {
-        this.resetVirtualFlatItemMap(data, { viewScaleInfo, viewSizeInfo });
+      } else if (type2 === "moveElement") {
+        this.resetVirtualFlatItemMap(data2, { viewScaleInfo, viewSizeInfo });
       }
     }
     getVirtualFlatItem(uuid) {
@@ -5797,7 +5845,7 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
     updateOptions(opts) {
       __classPrivateFieldSet$6(this, _Renderer_opts, opts, "f");
     }
-    drawData(data, opts) {
+    drawData(data2, opts) {
       const loader = __classPrivateFieldGet$6(this, _Renderer_loader, "f");
       const calculator = __classPrivateFieldGet$6(this, _Renderer_calculator, "f");
       const { sharer } = __classPrivateFieldGet$6(this, _Renderer_opts, "f");
@@ -5810,7 +5858,7 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
         h: opts.viewSizeInfo.height
       };
       if (opts.forceDrawAll === true) {
-        __classPrivateFieldGet$6(this, _Renderer_calculator, "f").resetVirtualFlatItemMap(data, {
+        __classPrivateFieldGet$6(this, _Renderer_calculator, "f").resetVirtualFlatItemMap(data2, {
           viewScaleInfo: opts.viewScaleInfo,
           viewSizeInfo: opts.viewSizeInfo
         });
@@ -5819,17 +5867,17 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
         loader,
         calculator,
         parentElementSize,
-        elementAssets: data.assets,
+        elementAssets: data2.assets,
         parentOpacity: 1,
         overrideElementMap: sharer === null || sharer === void 0 ? void 0 : sharer.getActiveOverrideElemenentMap()
       }, opts);
-      drawGlobalBackground(viewContext, data.global, drawOpts);
-      if (data.layout) {
-        drawLayout(viewContext, data.layout, drawOpts, () => {
-          drawElementList(viewContext, data, drawOpts);
+      drawGlobalBackground(viewContext, data2.global, drawOpts);
+      if (data2.layout) {
+        drawLayout(viewContext, data2.layout, drawOpts, () => {
+          drawElementList(viewContext, data2, drawOpts);
         });
       } else {
-        drawElementList(viewContext, data, drawOpts);
+        drawElementList(viewContext, data2, drawOpts);
       }
     }
     scale(num) {
@@ -5837,9 +5885,9 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
       if (!sharer) {
         return;
       }
-      const { data, offsetTop, offsetBottom, offsetLeft, offsetRight, width, height, contextHeight, contextWidth, devicePixelRatio } = sharer.getActiveStoreSnapshot();
-      if (data) {
-        this.drawData(data, {
+      const { data: data2, offsetTop, offsetBottom, offsetLeft, offsetRight, width, height, contextHeight, contextWidth, devicePixelRatio } = sharer.getActiveStoreSnapshot();
+      if (data2) {
+        this.drawData(data2, {
           viewScaleInfo: {
             scale: num,
             offsetTop,
@@ -6199,9 +6247,9 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
       __classPrivateFieldSet$3(this, _Viewer_opts, opts, "f");
       __classPrivateFieldGet$3(this, _Viewer_instances, "m", _Viewer_init).call(this);
     }
-    resetVirtualFlatItemMap(data, opts) {
-      if (data) {
-        __classPrivateFieldGet$3(this, _Viewer_opts, "f").calculator.resetVirtualFlatItemMap(data, opts);
+    resetVirtualFlatItemMap(data2, opts) {
+      if (data2) {
+        __classPrivateFieldGet$3(this, _Viewer_opts, "f").calculator.resetVirtualFlatItemMap(data2, opts);
       }
     }
     drawFrame() {
@@ -6415,17 +6463,17 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
     getRenderer() {
       return __classPrivateFieldGet$2(this, _Board_renderer, "f");
     }
-    setData(data) {
+    setData(data2) {
       const sharer = __classPrivateFieldGet$2(this, _Board_sharer, "f");
-      __classPrivateFieldGet$2(this, _Board_sharer, "f").setActiveStorage("data", data);
+      __classPrivateFieldGet$2(this, _Board_sharer, "f").setActiveStorage("data", data2);
       const viewSizeInfo = sharer.getActiveViewSizeInfo();
       const viewScaleInfo = sharer.getActiveViewScaleInfo();
-      const newViewContextSize = calcElementsContextSize(data.elements, {
+      const newViewContextSize = calcElementsContextSize(data2.elements, {
         viewWidth: viewSizeInfo.width,
         viewHeight: viewSizeInfo.height,
         extend: true
       });
-      __classPrivateFieldGet$2(this, _Board_viewer, "f").resetVirtualFlatItemMap(data, {
+      __classPrivateFieldGet$2(this, _Board_viewer, "f").resetVirtualFlatItemMap(data2, {
         viewSizeInfo,
         viewScaleInfo
       });
@@ -6435,8 +6483,8 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
       return { viewSizeInfo: newViewSizeInfo };
     }
     getData() {
-      const { data } = __classPrivateFieldGet$2(this, _Board_sharer, "f").getActiveStoreSnapshot();
-      return data;
+      const { data: data2 } = __classPrivateFieldGet$2(this, _Board_sharer, "f").getActiveStoreSnapshot();
+      return data2;
     }
     use(middleware, config) {
       var _a, _b, _c;
@@ -7076,7 +7124,7 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
     if (!controller) {
       return;
     }
-    const { hideControllers, style, rotateControllerPattern, viewSizeInfo, element } = opts;
+    const { hideControllers, style, rotateControllerPattern, viewSizeInfo, element: element2 } = opts;
     const { devicePixelRatio = 1 } = viewSizeInfo;
     const { activeColor: activeColor2 } = style;
     const { elementWrapper, topLeft, topRight, bottomLeft, bottomRight, rotate } = controller;
@@ -7093,7 +7141,7 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
       drawVertexes(ctx, calcViewVertexes(topRight.vertexes, opts), ctrlOpts);
       drawVertexes(ctx, calcViewVertexes(bottomLeft.vertexes, opts), ctrlOpts);
       drawVertexes(ctx, calcViewVertexes(bottomRight.vertexes, opts), ctrlOpts);
-      if (((_a = element === null || element === void 0 ? void 0 : element.operations) === null || _a === void 0 ? void 0 : _a.rotatable) !== false) {
+      if (((_a = element2 === null || element2 === void 0 ? void 0 : element2.operations) === null || _a === void 0 ? void 0 : _a.rotatable) !== false) {
         drawCircleController(ctx, calcViewPointSize(rotate.center, opts), Object.assign(Object.assign({}, ctrlOpts), { size: rotate.size, borderWidth: 0 }));
         const rotateCenter = calcViewPointSize(rotate.center, opts);
         ctx.drawImage(rotateControllerPattern.canvas, 0, 0, rotateControllerPattern.canvas.width / devicePixelRatio, rotateControllerPattern.canvas.height / devicePixelRatio, rotateCenter.x - rotate.size / 2, rotateCenter.y - rotate.size / 2, rotate.size, rotate.size);
@@ -7225,7 +7273,7 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
       groupQueue: [],
       groupQueueVertexesList: []
     };
-    const { ctx, data, calculator, selectedElements, viewScaleInfo, viewSizeInfo, areaSize, groupQueue, selectedElementController } = opts;
+    const { ctx, data: data2, calculator, selectedElements, viewScaleInfo, viewSizeInfo, areaSize, groupQueue, selectedElementController } = opts;
     if (selectedElementController) {
       const { left, right, top, bottom, topLeft, topRight, bottomLeft, bottomRight, rotate } = selectedElementController;
       const ctrls = [left, right, top, bottom, topLeft, topRight, bottomLeft, bottomRight];
@@ -7274,10 +7322,10 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
         return target;
       }
     }
-    if (data) {
-      const { index, element } = calculator.getPointElement(p, { data, viewScaleInfo, viewSizeInfo });
-      if (index >= 0 && element && ((_e = element === null || element === void 0 ? void 0 : element.operations) === null || _e === void 0 ? void 0 : _e.invisible) !== true) {
-        target.elements = [element];
+    if (data2) {
+      const { index, element: element2 } = calculator.getPointElement(p, { data: data2, viewScaleInfo, viewSizeInfo });
+      if (index >= 0 && element2 && ((_e = element2 === null || element2 === void 0 ? void 0 : element2.operations) === null || _e === void 0 ? void 0 : _e.invisible) !== true) {
+        target.elements = [element2];
         target.type = "over-element";
         return target;
       }
@@ -7829,21 +7877,21 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
       angle: endAngle
     };
   }
-  function getSelectedListArea(data, opts) {
+  function getSelectedListArea(data2, opts) {
     var _a;
     const indexes = [];
     const uuids = [];
     const elements = [];
     const { viewScaleInfo, start, end } = opts;
-    if (!(Array.isArray(data.elements) && start && end)) {
+    if (!(Array.isArray(data2.elements) && start && end)) {
       return { indexes, uuids, elements };
     }
     const startX = Math.min(start.x, end.x);
     const endX = Math.max(start.x, end.x);
     const startY = Math.min(start.y, end.y);
     const endY = Math.max(start.y, end.y);
-    for (let idx = 0; idx < data.elements.length; idx++) {
-      const elem = data.elements[idx];
+    for (let idx = 0; idx < data2.elements.length; idx++) {
+      const elem = data2.elements[idx];
       if (((_a = elem === null || elem === void 0 ? void 0 : elem.operations) === null || _a === void 0 ? void 0 : _a.locked) === true) {
         continue;
       }
@@ -7966,8 +8014,8 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
   const isEqualNum = (a, b) => Math.abs(a - b) < 1e-5;
   function calcReferenceInfo(uuid, opts) {
     var _a, _b;
-    const { data, groupQueue, calculator, viewScaleInfo, viewSizeInfo } = opts;
-    let targetElements = data.elements || [];
+    const { data: data2, groupQueue, calculator, viewScaleInfo, viewSizeInfo } = opts;
+    let targetElements = data2.elements || [];
     if ((groupQueue === null || groupQueue === void 0 ? void 0 : groupQueue.length) > 0) {
       targetElements = ((_b = (_a = groupQueue[groupQueue.length - 1]) === null || _a === void 0 ? void 0 : _a.detail) === null || _b === void 0 ? void 0 : _b.children) || [];
     }
@@ -8303,9 +8351,9 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
       return false;
     };
     const getLayoutSize = () => {
-      const data = sharer.getActiveStorage("data");
-      if (data === null || data === void 0 ? void 0 : data.layout) {
-        const { x: x2, y: y2, w: w2, h: h2 } = data.layout;
+      const data2 = sharer.getActiveStorage("data");
+      if (data2 === null || data2 === void 0 ? void 0 : data2.layout) {
+        const { x: x2, y: y2, w: w2, h: h2 } = data2.layout;
         return { x: x2, y: y2, w: w2, h: h2 };
       }
       return null;
@@ -8336,10 +8384,10 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
       }
     };
     const resetControlType = (e) => {
-      const data = sharer.getActiveStorage("data");
+      const data2 = sharer.getActiveStorage("data");
       const controller = sharer.getSharedStorage(keyLayoutController);
       let controllerType = null;
-      if (controller && (data === null || data === void 0 ? void 0 : data.layout) && (e === null || e === void 0 ? void 0 : e.point)) {
+      if (controller && (data2 === null || data2 === void 0 ? void 0 : data2.layout) && (e === null || e === void 0 ? void 0 : e.point)) {
         let layoutControlType = null;
         if (controller) {
           const { topLeft, top, topRight, right, bottomRight, bottom, bottomLeft, left } = controller;
@@ -8402,8 +8450,8 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
         }
         if (sharer.getSharedStorage(keyLayoutIsSelected) === true) {
           const prevLayoutActionType = sharer.getSharedStorage(keyLayoutActionType);
-          const data = sharer.getActiveStorage("data");
-          if (data === null || data === void 0 ? void 0 : data.layout) {
+          const data2 = sharer.getActiveStorage("data");
+          if (data2 === null || data2 === void 0 ? void 0 : data2.layout) {
             if (prevLayoutActionType !== "resize") {
               resetController();
               const layoutControlType = resetControlType(e);
@@ -8444,9 +8492,9 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
           }
           sharer.setSharedStorage(keyLayoutIsSelected, false);
         }
-        const data = sharer.getActiveStorage("data");
-        if (data === null || data === void 0 ? void 0 : data.layout) {
-          pointStartLayoutSize = getElementSize(data.layout);
+        const data2 = sharer.getActiveStorage("data");
+        if (data2 === null || data2 === void 0 ? void 0 : data2.layout) {
+          pointStartLayoutSize = getElementSize(data2.layout);
         } else {
           pointStartLayoutSize = null;
         }
@@ -8473,8 +8521,8 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
         }
         const layoutActionType = sharer.getSharedStorage(keyLayoutActionType);
         const layoutControlType = sharer.getSharedStorage(keyLayoutControlType);
-        const data = sharer.getActiveStorage("data");
-        if (layoutActionType === "resize" && layoutControlType && (data === null || data === void 0 ? void 0 : data.layout)) {
+        const data2 = sharer.getActiveStorage("data");
+        if (layoutActionType === "resize" && layoutControlType && (data2 === null || data2 === void 0 ? void 0 : data2.layout)) {
           if (prevPoint) {
             sharer.setSharedStorage(keyLayoutIsBusyMoving, true);
             const scale = sharer.getActiveStorage("scale");
@@ -8482,65 +8530,65 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
             const viewMoveY = e.point.y - prevPoint.y;
             const moveX = viewMoveX / scale;
             const moveY = viewMoveY / scale;
-            const { x: x2, y: y2, w: w2, h: h2, operations = {} } = data.layout;
+            const { x: x2, y: y2, w: w2, h: h2, operations = {} } = data2.layout;
             const { position = "absolute" } = operations;
             if (layoutControlType === "top") {
               if (position === "relative") {
-                data.layout.h = calculator.toGridNum(h2 - moveY);
+                data2.layout.h = calculator.toGridNum(h2 - moveY);
                 viewer.scroll({ moveY: viewMoveY });
               } else {
-                data.layout.y = calculator.toGridNum(y2 + moveY);
-                data.layout.h = calculator.toGridNum(h2 - moveY);
+                data2.layout.y = calculator.toGridNum(y2 + moveY);
+                data2.layout.h = calculator.toGridNum(h2 - moveY);
               }
             } else if (layoutControlType === "right") {
-              data.layout.w = calculator.toGridNum(w2 + moveX);
+              data2.layout.w = calculator.toGridNum(w2 + moveX);
             } else if (layoutControlType === "bottom") {
-              data.layout.h = calculator.toGridNum(h2 + moveY);
+              data2.layout.h = calculator.toGridNum(h2 + moveY);
             } else if (layoutControlType === "left") {
               if (position === "relative") {
-                data.layout.w = calculator.toGridNum(w2 - moveX);
+                data2.layout.w = calculator.toGridNum(w2 - moveX);
                 viewer.scroll({ moveX: viewMoveX });
               } else {
-                data.layout.x = calculator.toGridNum(x2 + moveX);
-                data.layout.w = calculator.toGridNum(w2 - moveX);
+                data2.layout.x = calculator.toGridNum(x2 + moveX);
+                data2.layout.w = calculator.toGridNum(w2 - moveX);
               }
             } else if (layoutControlType === "top-left") {
               if (position === "relative") {
-                data.layout.w = calculator.toGridNum(w2 - moveX);
-                data.layout.h = calculator.toGridNum(h2 - moveY);
+                data2.layout.w = calculator.toGridNum(w2 - moveX);
+                data2.layout.h = calculator.toGridNum(h2 - moveY);
                 viewer.scroll({ moveX: viewMoveX, moveY: viewMoveY });
               } else {
-                data.layout.x = calculator.toGridNum(x2 + moveX);
-                data.layout.y = calculator.toGridNum(y2 + moveY);
-                data.layout.w = calculator.toGridNum(w2 - moveX);
-                data.layout.h = calculator.toGridNum(h2 - moveY);
+                data2.layout.x = calculator.toGridNum(x2 + moveX);
+                data2.layout.y = calculator.toGridNum(y2 + moveY);
+                data2.layout.w = calculator.toGridNum(w2 - moveX);
+                data2.layout.h = calculator.toGridNum(h2 - moveY);
               }
             } else if (layoutControlType === "top-right") {
               if (position === "relative") {
                 viewer.scroll({
                   moveY: viewMoveY
                 });
-                data.layout.w = calculator.toGridNum(w2 + moveX);
-                data.layout.h = calculator.toGridNum(h2 - moveY);
+                data2.layout.w = calculator.toGridNum(w2 + moveX);
+                data2.layout.h = calculator.toGridNum(h2 - moveY);
               } else {
-                data.layout.y = calculator.toGridNum(y2 + moveY);
-                data.layout.w = calculator.toGridNum(w2 + moveX);
-                data.layout.h = calculator.toGridNum(h2 - moveY);
+                data2.layout.y = calculator.toGridNum(y2 + moveY);
+                data2.layout.w = calculator.toGridNum(w2 + moveX);
+                data2.layout.h = calculator.toGridNum(h2 - moveY);
               }
             } else if (layoutControlType === "bottom-right") {
-              data.layout.w = calculator.toGridNum(w2 + moveX);
-              data.layout.h = calculator.toGridNum(h2 + moveY);
+              data2.layout.w = calculator.toGridNum(w2 + moveX);
+              data2.layout.h = calculator.toGridNum(h2 + moveY);
             } else if (layoutControlType === "bottom-left") {
               if (position === "relative") {
                 viewer.scroll({
                   moveX: viewMoveX
                 });
-                data.layout.w = calculator.toGridNum(w2 - moveX);
-                data.layout.h = calculator.toGridNum(h2 + moveY);
+                data2.layout.w = calculator.toGridNum(w2 - moveX);
+                data2.layout.h = calculator.toGridNum(h2 + moveY);
               } else {
-                data.layout.x = calculator.toGridNum(x2 + moveX);
-                data.layout.w = calculator.toGridNum(w2 - moveX);
-                data.layout.h = calculator.toGridNum(h2 + moveY);
+                data2.layout.x = calculator.toGridNum(x2 + moveX);
+                data2.layout.w = calculator.toGridNum(w2 - moveX);
+                data2.layout.h = calculator.toGridNum(h2 + moveY);
               }
             }
           }
@@ -8557,8 +8605,8 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
         sharer.setSharedStorage(keyLayoutIsBusyMoving, false);
         const layoutActionType = sharer.getSharedStorage(keyLayoutActionType);
         const layoutControlType = sharer.getSharedStorage(keyLayoutControlType);
-        const data = sharer.getActiveStorage("data");
-        if (data && layoutActionType === "resize" && layoutControlType) {
+        const data2 = sharer.getActiveStorage("data");
+        if (data2 && layoutActionType === "resize" && layoutControlType) {
           let modifyRecord = void 0;
           if (pointStartLayoutSize) {
             modifyRecord = {
@@ -8567,13 +8615,13 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
               content: {
                 method: "modifyLayout",
                 before: toFlattenLayout(pointStartLayoutSize),
-                after: toFlattenLayout(getElementSize(data.layout))
+                after: toFlattenLayout(getElementSize(data2.layout))
               }
             };
           }
           eventHub.trigger(coreEventKeys.CHANGE, {
             type: "resizeLayout",
-            data,
+            data: data2,
             modifyRecord
           });
         }
@@ -9124,8 +9172,8 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
       }
       if ((opts2 === null || opts2 === void 0 ? void 0 : opts2.triggerEvent) === true) {
         const uuids = list.map((elem) => elem.uuid);
-        const data = sharer.getActiveStorage("data");
-        const positionMap = getElementPositionMapFromList(uuids, (data === null || data === void 0 ? void 0 : data.elements) || []);
+        const data2 = sharer.getActiveStorage("data");
+        const positionMap = getElementPositionMapFromList(uuids, (data2 === null || data2 === void 0 ? void 0 : data2.elements) || []);
         eventHub.trigger(coreEventKeys.SELECT, {
           type: "clickCanvas",
           uuids,
@@ -9168,11 +9216,11 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
     const selectCallback = ({ uuids = [], positions }) => {
       let elements = [];
       const actionType = sharer.getSharedStorage(keyActionType);
-      const data = sharer.getActiveStorage("data");
+      const data2 = sharer.getActiveStorage("data");
       if (positions && Array.isArray(positions)) {
-        elements = findElementsFromListByPositions(positions, (data === null || data === void 0 ? void 0 : data.elements) || []);
+        elements = findElementsFromListByPositions(positions, (data2 === null || data2 === void 0 ? void 0 : data2.elements) || []);
       } else {
-        elements = findElementsFromList(uuids, (data === null || data === void 0 ? void 0 : data.elements) || []);
+        elements = findElementsFromList(uuids, (data2 === null || data2 === void 0 ? void 0 : data2.elements) || []);
       }
       let needRefresh = false;
       if (!actionType && elements.length === 1) {
@@ -9183,7 +9231,7 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
       }
       if (needRefresh) {
         const elem = elements[0];
-        const groupQueue = getGroupQueueFromList(elem.uuid, (data === null || data === void 0 ? void 0 : data.elements) || []);
+        const groupQueue = getGroupQueueFromList(elem.uuid, (data2 === null || data2 === void 0 ? void 0 : data2.elements) || []);
         sharer.setSharedStorage(keyGroupQueue, groupQueue);
         updateSelectedElementList(elements);
         viewer.drawFrame();
@@ -9387,7 +9435,7 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
       pointMove: (e) => {
         var _a, _b, _c;
         sharer.setSharedStorage(keyIsMoving, true);
-        const data = sharer.getActiveStorage("data");
+        const data2 = sharer.getActiveStorage("data");
         const elems = getActiveElements();
         const scale = sharer.getActiveStorage("scale") || 1;
         const viewScaleInfo = sharer.getActiveViewScaleInfo();
@@ -9403,14 +9451,14 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
           hasChangedData = true;
           inBusyMode = "drag";
           eventHub.trigger(MIDDLEWARE_INTERNAL_EVENT_SHOW_INFO_ANGLE, { show: false });
-          if (data && (elems === null || elems === void 0 ? void 0 : elems.length) === 1 && moveOriginalStartElementSize && originalStart && end && ((_b = (_a = elems[0]) === null || _a === void 0 ? void 0 : _a.operations) === null || _b === void 0 ? void 0 : _b.locked) !== true) {
+          if (data2 && (elems === null || elems === void 0 ? void 0 : elems.length) === 1 && moveOriginalStartElementSize && originalStart && end && ((_b = (_a = elems[0]) === null || _a === void 0 ? void 0 : _a.operations) === null || _b === void 0 ? void 0 : _b.locked) !== true) {
             const { moveX, moveY } = calcPointMoveElementInGroup(originalStart, end, groupQueue);
             let totalMoveX = calculator.toGridNum(moveX / scale);
             let totalMoveY = calculator.toGridNum(moveY / scale);
             if (enableSnapToGrid === true) {
               const referenceInfo = calcReferenceInfo(elems[0].uuid, {
                 calculator,
-                data,
+                data: data2,
                 groupQueue,
                 viewScaleInfo,
                 viewSizeInfo
@@ -9431,7 +9479,7 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
             elems[0].x = calculator.toGridNum(moveOriginalStartElementSize.x + totalMoveX);
             elems[0].y = calculator.toGridNum(moveOriginalStartElementSize.y + totalMoveY);
             updateSelectedElementList([elems[0]]);
-            calculator.modifyVirtualFlatItemMap(data, {
+            calculator.modifyVirtualFlatItemMap(data2, {
               modifyInfo: {
                 type: "updateElement",
                 content: {
@@ -9447,7 +9495,7 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
         } else if (actionType === "drag-list") {
           hasChangedData = true;
           inBusyMode = "drag-list";
-          if (data && originalStart && start && end && (elems === null || elems === void 0 ? void 0 : elems.length) > 1) {
+          if (data2 && originalStart && start && end && (elems === null || elems === void 0 ? void 0 : elems.length) > 1) {
             const moveX = (end.x - start.x) / scale;
             const moveY = (end.y - start.y) / scale;
             elems.forEach((elem) => {
@@ -9455,12 +9503,12 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
               if (elem && ((_a2 = elem === null || elem === void 0 ? void 0 : elem.operations) === null || _a2 === void 0 ? void 0 : _a2.locked) !== true) {
                 elem.x = calculator.toGridNum(elem.x + moveX);
                 elem.y = calculator.toGridNum(elem.y + moveY);
-                calculator.modifyVirtualFlatItemMap(data, {
+                calculator.modifyVirtualFlatItemMap(data2, {
                   modifyInfo: {
                     type: "updateElement",
                     content: {
                       element: elem,
-                      position: getElementPositionFromList(elem.uuid, data.elements) || []
+                      position: getElementPositionFromList(elem.uuid, data2.elements) || []
                     }
                   },
                   viewSizeInfo,
@@ -9468,11 +9516,11 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
                 });
               }
             });
-            sharer.setActiveStorage("data", data);
+            sharer.setActiveStorage("data", data2);
           }
           viewer.drawFrame();
         } else if (actionType === "resize") {
-          if (data && (elems === null || elems === void 0 ? void 0 : elems.length) === 1 && originalStart && moveOriginalStartElementSize && (resizeType === null || resizeType === void 0 ? void 0 : resizeType.startsWith("resize-"))) {
+          if (data2 && (elems === null || elems === void 0 ? void 0 : elems.length) === 1 && originalStart && moveOriginalStartElementSize && (resizeType === null || resizeType === void 0 ? void 0 : resizeType.startsWith("resize-"))) {
             hasChangedData = true;
             inBusyMode = "resize";
             const pointGroupQueue = [];
@@ -9535,7 +9583,7 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
               }
             }
             updateSelectedElementList([elems[0]]);
-            calculator.modifyVirtualFlatItemMap(data, {
+            calculator.modifyVirtualFlatItemMap(data2, {
               modifyInfo: {
                 type: "updateElement",
                 content: {
@@ -9558,7 +9606,7 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
       pointEnd(e) {
         inBusyMode = null;
         sharer.setSharedStorage(keyIsMoving, false);
-        const data = sharer.getActiveStorage("data");
+        const data2 = sharer.getActiveStorage("data");
         const selectedElements = sharer.getSharedStorage(keySelectedElementList);
         const hoverElement = sharer.getSharedStorage(keyHoverElement);
         const resizeType = sharer.getSharedStorage(keyResizeType);
@@ -9576,11 +9624,11 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
           needDrawFrame = true;
         } else if (actionType === "area") {
           sharer.setSharedStorage(keyActionType, null);
-          if (data) {
+          if (data2) {
             const start = sharer.getSharedStorage(keyAreaStart);
             const end = sharer.getSharedStorage(keyAreaEnd);
             if (start && end) {
-              const { elements } = getSelectedListArea(data, {
+              const { elements } = getSelectedListArea(data2, {
                 start,
                 end,
                 viewScaleInfo: sharer.getActiveViewScaleInfo(),
@@ -9596,9 +9644,9 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
         } else if (actionType === "drag-list") {
           sharer.setSharedStorage(keyActionType, "drag-list-end");
           needDrawFrame = true;
-        } else if (data) {
+        } else if (data2) {
           const result = calculator.getPointElement(e.point, {
-            data,
+            data: data2,
             viewScaleInfo: sharer.getActiveViewScaleInfo(),
             viewSizeInfo: sharer.getActiveViewSizeInfo()
           });
@@ -9617,13 +9665,13 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
           if (!needDrawFrame) {
             return;
           }
-          if (data && Array.isArray(data === null || data === void 0 ? void 0 : data.elements) && ["drag", "drag-list"].includes(actionType)) {
-            const viewInfo = calcElementsViewInfo(data.elements, viewSizeInfo, { extend: true });
+          if (data2 && Array.isArray(data2 === null || data2 === void 0 ? void 0 : data2.elements) && ["drag", "drag-list"].includes(actionType)) {
+            const viewInfo = calcElementsViewInfo(data2.elements, viewSizeInfo, { extend: true });
             sharer.setActiveStorage("contextHeight", viewInfo.contextSize.contextHeight);
             sharer.setActiveStorage("contextWidth", viewInfo.contextSize.contextWidth);
           }
-          if (data && ["drag", "drag-list", "drag-list-end", "resize"].includes(actionType)) {
-            let type = "resizeElement";
+          if (data2 && ["drag", "drag-list", "drag-list-end", "resize"].includes(actionType)) {
+            let type2 = "resizeElement";
             if (hasChangedData) {
               const startSize = pointStartElementSizeList[0];
               let modifyRecord = null;
@@ -9652,7 +9700,7 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
                   }
                 };
               }
-              eventHub.trigger(coreEventKeys.CHANGE, { data, type, selectedElements, hoverElement, modifyRecord });
+              eventHub.trigger(coreEventKeys.CHANGE, { data: data2, type: type2, selectedElements, hoverElement, modifyRecord });
               hasChangedData = false;
             }
           }
@@ -10611,7 +10659,7 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
       return div;
     };
     const resetTextArea = (e) => {
-      const { viewScaleInfo, element, groupQueue } = e;
+      const { viewScaleInfo, element: element2, groupQueue } = e;
       const { scale, offsetTop, offsetLeft } = viewScaleInfo;
       if (canvasWrapper.children) {
         Array.from(canvasWrapper.children).forEach((child) => {
@@ -10636,16 +10684,16 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
         }
         parent = createBox({ size, parent });
       }
-      const detail = Object.assign(Object.assign({}, defaultElementDetail), element.detail);
-      let elemX = element.x * scale + offsetLeft;
-      let elemY = element.y * scale + offsetTop;
-      let elemW = element.w * scale;
-      let elemH = element.h * scale;
+      const detail = Object.assign(Object.assign({}, defaultElementDetail), element2.detail);
+      let elemX = element2.x * scale + offsetLeft;
+      let elemY = element2.y * scale + offsetTop;
+      let elemW = element2.w * scale;
+      let elemH = element2.h * scale;
       if (groupQueue.length > 0) {
-        elemX = element.x * scale;
-        elemY = element.y * scale;
-        elemW = element.w * scale;
-        elemH = element.h * scale;
+        elemX = element2.x * scale;
+        elemY = element2.y * scale;
+        elemW = element2.w * scale;
+        elemH = element2.h * scale;
       }
       let justifyContent = "center";
       let alignItems = "center";
@@ -10667,7 +10715,7 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
       textarea.style.top = `${elemY - 1}px`;
       textarea.style.width = `${elemW + 2}px`;
       textarea.style.height = `${elemH + 2}px`;
-      textarea.style.transform = `rotate(${limitAngle(element.angle || 0)}deg)`;
+      textarea.style.transform = `rotate(${limitAngle(element2.angle || 0)}deg)`;
       textarea.style.boxSizing = "border-box";
       textarea.style.border = "1px solid #1973ba";
       textarea.style.resize = "none";
@@ -10729,18 +10777,18 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
           },
           position: [...activePosition]
         });
-        const data = sharer.getActiveStorage("data") || { elements: [] };
+        const data2 = sharer.getActiveStorage("data") || { elements: [] };
         const updateContent = {
           detail: {
             text: activeElem.detail.text
           }
         };
-        updateElementInList(activeElem.uuid, updateContent, data.elements);
+        updateElementInList(activeElem.uuid, updateContent, data2.elements);
         eventHub.trigger(coreEventKeys.CHANGE, {
           selectedElements: [
             Object.assign(Object.assign({}, activeElem), { detail: Object.assign(Object.assign({}, activeElem.detail), updateContent.detail) })
           ],
-          data,
+          data: data2,
           type: "modifyElement",
           modifyRecord: {
             type: "modifyElement",
@@ -10973,10 +11021,10 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
     resetMiddlewareConfig(middleware, config) {
       __classPrivateFieldGet(this, _Core_board, "f").resetMiddlewareConfig(middleware, config);
     }
-    setData(data) {
+    setData(data2) {
       const loader = __classPrivateFieldGet(this, _Core_board, "f").getRenderer().getLoader();
       loader.reset();
-      __classPrivateFieldGet(this, _Core_instances, "m", _Core_resetData).call(this, data);
+      __classPrivateFieldGet(this, _Core_instances, "m", _Core_resetData).call(this, data2);
     }
     getData() {
       return __classPrivateFieldGet(this, _Core_board, "f").getData();
@@ -11024,10 +11072,10 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
       const renderer = __classPrivateFieldGet(this, _Core_board, "f").getRenderer();
       const calculator = renderer.getCalculator();
       const loader = renderer.getLoader();
-      const data = this.getData();
-      if (data) {
+      const data2 = this.getData();
+      if (data2) {
         const { viewScaleInfo, viewSizeInfo } = this.getViewInfo();
-        calculator.resetVirtualFlatItemMap(data, {
+        calculator.resetVirtualFlatItemMap(data2, {
           viewScaleInfo,
           viewSizeInfo
         });
@@ -11047,27 +11095,27 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
     offBoardWatcherEvents() {
       __classPrivateFieldGet(this, _Core_board, "f").offWatcherEvents();
     }
-    createElement(type, element, opts) {
+    createElement(type2, element2, opts) {
       const { viewScaleInfo, viewSizeInfo } = this.getViewInfo();
-      return createElement$1(type, element || {}, (opts === null || opts === void 0 ? void 0 : opts.viewCenter) === true ? {
+      return createElement$1(type2, element2 || {}, (opts === null || opts === void 0 ? void 0 : opts.viewCenter) === true ? {
         viewScaleInfo,
         viewSizeInfo
       } : void 0);
     }
-    updateElement(element) {
-      const data = this.getData() || { elements: [] };
-      const uuid = element.uuid;
-      const position = getElementPositionFromList(uuid, data.elements);
-      const beforeElem = findElementFromListByPosition(position, data.elements);
+    updateElement(element2) {
+      const data2 = this.getData() || { elements: [] };
+      const uuid = element2.uuid;
+      const position = getElementPositionFromList(uuid, data2.elements);
+      const beforeElem = findElementFromListByPosition(position, data2.elements);
       if (!beforeElem) {
         return null;
       }
       const before = toFlattenElement(beforeElem);
-      const updatedElement = updateElementInListByPosition(position, element, data.elements, { strict: true });
+      const updatedElement = updateElementInListByPosition(position, element2, data2.elements, { strict: true });
       const after = toFlattenElement(updatedElement);
       const loader = __classPrivateFieldGet(this, _Core_board, "f").getRenderer().getLoader();
-      loader.resetElementAsset(element);
-      __classPrivateFieldGet(this, _Core_instances, "m", _Core_resetData).call(this, data);
+      loader.resetElementAsset(element2);
+      __classPrivateFieldGet(this, _Core_instances, "m", _Core_resetData).call(this, data2);
       this.refresh();
       const modifyRecord = {
         type: "updateElement",
@@ -11076,46 +11124,46 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
       };
       return modifyRecord;
     }
-    modifyElement(element) {
-      const { uuid } = element, restElement = __rest(element, ["uuid"]);
-      const data = this.getData() || { elements: [] };
-      const position = getElementPositionFromList(uuid, data.elements);
-      const beforeElem = findElementFromListByPosition(position, data.elements);
+    modifyElement(element2) {
+      const { uuid } = element2, restElement = __rest(element2, ["uuid"]);
+      const data2 = this.getData() || { elements: [] };
+      const position = getElementPositionFromList(uuid, data2.elements);
+      const beforeElem = findElementFromListByPosition(position, data2.elements);
       if (!beforeElem) {
         return null;
       }
       const modifyRecord = getModifyElementRecord({
-        modifiedElement: element,
+        modifiedElement: element2,
         beforeElement: beforeElem
       });
-      updateElementInListByPosition(position, restElement, data.elements);
+      updateElementInListByPosition(position, restElement, data2.elements);
       const loader = __classPrivateFieldGet(this, _Core_board, "f").getRenderer().getLoader();
-      loader.resetElementAsset(Object.assign(Object.assign({}, element), { type: beforeElem.type }));
-      __classPrivateFieldGet(this, _Core_instances, "m", _Core_resetData).call(this, data);
+      loader.resetElementAsset(Object.assign(Object.assign({}, element2), { type: beforeElem.type }));
+      __classPrivateFieldGet(this, _Core_instances, "m", _Core_resetData).call(this, data2);
       this.refresh();
       return modifyRecord;
     }
     modifyElements(elements) {
-      const data = this.getData() || { elements: [] };
+      const data2 = this.getData() || { elements: [] };
       let modifyRecord = null;
       const before = [];
       const after = [];
-      elements.forEach((element) => {
-        const { uuid } = element, restElement = __rest(element, ["uuid"]);
-        const position = getElementPositionFromList(uuid, data.elements);
-        const beforeElem = findElementFromListByPosition(position, data.elements);
+      elements.forEach((element2) => {
+        const { uuid } = element2, restElement = __rest(element2, ["uuid"]);
+        const position = getElementPositionFromList(uuid, data2.elements);
+        const beforeElem = findElementFromListByPosition(position, data2.elements);
         if (!beforeElem) {
           return null;
         }
         const tempRecord = getModifyElementRecord({
-          modifiedElement: element,
+          modifiedElement: element2,
           beforeElement: beforeElem
         });
         if (tempRecord.content) {
           before.push(Object.assign(Object.assign({}, tempRecord.content.before), { uuid }));
           after.push(Object.assign(Object.assign({}, tempRecord.content.after), { uuid }));
         }
-        updateElementInListByPosition(position, restElement, data.elements);
+        updateElementInListByPosition(position, restElement, data2.elements);
       });
       modifyRecord = {
         type: "modifyElements",
@@ -11126,63 +11174,63 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
           after
         }
       };
-      __classPrivateFieldGet(this, _Core_instances, "m", _Core_resetData).call(this, data);
+      __classPrivateFieldGet(this, _Core_instances, "m", _Core_resetData).call(this, data2);
       this.refresh();
       return modifyRecord;
     }
-    addElement(element, opts) {
+    addElement(element2, opts) {
       var _a;
-      const data = this.getData() || { elements: [] };
+      const data2 = this.getData() || { elements: [] };
       if (!opts || !((_a = opts === null || opts === void 0 ? void 0 : opts.position) === null || _a === void 0 ? void 0 : _a.length)) {
-        data.elements.push(element);
+        data2.elements.push(element2);
       } else if (opts === null || opts === void 0 ? void 0 : opts.position) {
         const position2 = [...(opts === null || opts === void 0 ? void 0 : opts.position) || []];
-        insertElementToListByPosition(element, position2, data.elements);
+        insertElementToListByPosition(element2, position2, data2.elements);
       }
-      const position = getElementPositionFromList(element.uuid, data.elements);
+      const position = getElementPositionFromList(element2.uuid, data2.elements);
       const modifyRecord = {
         type: "addElement",
         time: Date.now(),
-        content: { method: "addElement", uuid: element.uuid, position, element: deepClone(element) }
+        content: { method: "addElement", uuid: element2.uuid, position, element: deepClone(element2) }
       };
-      __classPrivateFieldGet(this, _Core_instances, "m", _Core_resetData).call(this, data);
+      __classPrivateFieldGet(this, _Core_instances, "m", _Core_resetData).call(this, data2);
       this.refresh();
       return modifyRecord;
     }
     deleteElement(uuid) {
-      const data = this.getData() || { elements: [] };
-      const position = getElementPositionFromList(uuid, data.elements);
-      const element = findElementFromListByPosition(position, data.elements);
+      const data2 = this.getData() || { elements: [] };
+      const position = getElementPositionFromList(uuid, data2.elements);
+      const element2 = findElementFromListByPosition(position, data2.elements);
       const modifyRecord = {
         type: "deleteElement",
         time: Date.now(),
-        content: { method: "deleteElement", uuid, position, element: element ? deepClone(element) : null }
+        content: { method: "deleteElement", uuid, position, element: element2 ? deepClone(element2) : null }
       };
-      if (element) {
+      if (element2) {
         const loader = __classPrivateFieldGet(this, _Core_board, "f").getRenderer().getLoader();
-        loader.resetElementAsset(element);
+        loader.resetElementAsset(element2);
       }
-      deleteElementInList(uuid, data.elements);
-      __classPrivateFieldGet(this, _Core_instances, "m", _Core_resetData).call(this, data);
+      deleteElementInList(uuid, data2.elements);
+      __classPrivateFieldGet(this, _Core_instances, "m", _Core_resetData).call(this, data2);
       this.refresh();
       return modifyRecord;
     }
     moveElement(uuid, to) {
-      const data = this.getData() || { elements: [] };
-      const from = getElementPositionFromList(uuid, data.elements);
+      const data2 = this.getData() || { elements: [] };
+      const from = getElementPositionFromList(uuid, data2.elements);
       const modifyRecord = {
         type: "moveElement",
         time: Date.now(),
         content: { method: "moveElement", uuid, from: [...from], to: [...to] }
       };
-      const { elements: list } = moveElementPosition(data.elements, { from, to });
-      data.elements = list;
-      __classPrivateFieldGet(this, _Core_instances, "m", _Core_resetData).call(this, data);
+      const { elements: list } = moveElementPosition(data2.elements, { from, to });
+      data2.elements = list;
+      __classPrivateFieldGet(this, _Core_instances, "m", _Core_resetData).call(this, data2);
       this.refresh();
       return modifyRecord;
     }
-    modifyLayout(layout) {
-      const data = this.getData() || { elements: [] };
+    modifyLayout(layout2) {
+      const data2 = this.getData() || { elements: [] };
       const modifyRecord = {
         type: "modifyLayout",
         time: Date.now(),
@@ -11192,21 +11240,21 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
           after: null
         }
       };
-      if (layout === null) {
-        if (data.layout) {
-          modifyRecord.content.before = toFlattenLayout(data.layout);
-          delete data["layout"];
-          __classPrivateFieldGet(this, _Core_instances, "m", _Core_resetData).call(this, data);
+      if (layout2 === null) {
+        if (data2.layout) {
+          modifyRecord.content.before = toFlattenLayout(data2.layout);
+          delete data2["layout"];
+          __classPrivateFieldGet(this, _Core_instances, "m", _Core_resetData).call(this, data2);
           this.refresh();
           return modifyRecord;
         } else {
           return modifyRecord;
         }
       }
-      const beforeLayout = data.layout;
+      const beforeLayout = data2.layout;
       let before = {};
-      const after = toFlattenLayout(layout);
-      if (data.layout) {
+      const after = toFlattenLayout(layout2);
+      if (data2.layout) {
         Object.keys(after).forEach((key2) => {
           let val = get(beforeLayout, key2);
           if (val === void 0 && /(borderRadius|borderWidth)\[[0-9]{1,}\]$/.test(key2)) {
@@ -11218,16 +11266,16 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
         before = toFlattenLayout(before);
         modifyRecord.content.before = before;
       } else {
-        data.layout = {};
+        data2.layout = {};
       }
       modifyRecord.content.after = after;
-      mergeLayout(data.layout, layout);
-      __classPrivateFieldGet(this, _Core_instances, "m", _Core_resetData).call(this, data);
+      mergeLayout(data2.layout, layout2);
+      __classPrivateFieldGet(this, _Core_instances, "m", _Core_resetData).call(this, data2);
       this.refresh();
       return modifyRecord;
     }
     modifyGlobal(global) {
-      const data = this.getData() || { elements: [] };
+      const data2 = this.getData() || { elements: [] };
       const modifyRecord = {
         type: "modifyGlobal",
         time: Date.now(),
@@ -11238,31 +11286,31 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
         }
       };
       if (global === null) {
-        if (data.global) {
-          modifyRecord.content.before = toFlattenGlobal(data.global);
-          delete data["global"];
-          __classPrivateFieldGet(this, _Core_instances, "m", _Core_resetData).call(this, data);
+        if (data2.global) {
+          modifyRecord.content.before = toFlattenGlobal(data2.global);
+          delete data2["global"];
+          __classPrivateFieldGet(this, _Core_instances, "m", _Core_resetData).call(this, data2);
           this.refresh();
           return modifyRecord;
         } else {
           return modifyRecord;
         }
       }
-      const beforeGlobal = data.global;
+      const beforeGlobal = data2.global;
       let before = {};
       const after = toFlattenGlobal(global);
-      if (data.global) {
+      if (data2.global) {
         Object.keys(after).forEach((key2) => {
           before[key2] = get(beforeGlobal, key2);
         });
         before = toFlattenGlobal(before);
         modifyRecord.content.before = before;
       } else {
-        data.global = {};
+        data2.global = {};
       }
       modifyRecord.content.after = after;
-      mergeGlobal(data.global, global);
-      __classPrivateFieldGet(this, _Core_instances, "m", _Core_resetData).call(this, data);
+      mergeGlobal(data2.global, global);
+      __classPrivateFieldGet(this, _Core_instances, "m", _Core_resetData).call(this, data2);
       this.refresh();
       return modifyRecord;
     }
@@ -11270,9 +11318,9 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
   _Core_board = /* @__PURE__ */ new WeakMap(), _Core_canvas = /* @__PURE__ */ new WeakMap(), _Core_container = /* @__PURE__ */ new WeakMap(), _Core_instances = /* @__PURE__ */ new WeakSet(), _Core_initContainer = function _Core_initContainer2() {
     const container = __classPrivateFieldGet(this, _Core_container, "f");
     container.style.position = "relative";
-  }, _Core_resetData = function _Core_resetData2(data) {
-    validateElements((data === null || data === void 0 ? void 0 : data.elements) || []);
-    __classPrivateFieldGet(this, _Core_board, "f").setData(data);
+  }, _Core_resetData = function _Core_resetData2(data2) {
+    validateElements((data2 === null || data2 === void 0 ? void 0 : data2.elements) || []);
+    __classPrivateFieldGet(this, _Core_board, "f").setData(data2);
   };
   const defaultMode = "select";
   const defaultSettings = {
@@ -11499,64 +11547,64 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
     store.set("enableInfo", enableInfo);
     runMiddlewares(core, store);
   }
-  function createElement(depOptions, type, element, opts) {
+  function createElement(depOptions, type2, element2, opts) {
     const { core } = depOptions;
-    return core.createElement(type, element, opts);
+    return core.createElement(type2, element2, opts);
   }
-  function updateElement(depOptions, element) {
+  function updateElement(depOptions, element2) {
     const { core } = depOptions;
-    const modifyRecord = core.updateElement(element);
+    const modifyRecord = core.updateElement(element2);
     if (!modifyRecord) {
       return;
     }
-    const data = core.getData();
-    if (!data) {
+    const data2 = core.getData();
+    if (!data2) {
       return;
     }
-    core.trigger(coreEventKeys.CHANGE, { data, type: "updateElement", modifyRecord });
+    core.trigger(coreEventKeys.CHANGE, { data: data2, type: "updateElement", modifyRecord });
   }
-  function modifyElement(depOptions, element) {
+  function modifyElement(depOptions, element2) {
     const { core } = depOptions;
-    const modifyRecord = core.modifyElement(element);
+    const modifyRecord = core.modifyElement(element2);
     if (!modifyRecord) {
       return;
     }
-    const data = core.getData();
-    if (!data) {
+    const data2 = core.getData();
+    if (!data2) {
       return;
     }
-    core.trigger(coreEventKeys.CHANGE, { data, type: "modifyElement", modifyRecord });
+    core.trigger(coreEventKeys.CHANGE, { data: data2, type: "modifyElement", modifyRecord });
   }
-  function addElement(depOptions, element, opts) {
+  function addElement(depOptions, element2, opts) {
     const { core } = depOptions;
-    const modifyRecord = core.addElement(element, opts);
-    const data = core.getData();
-    core.trigger(coreEventKeys.CHANGE, { data, type: "addElement", modifyRecord });
-    return data;
+    const modifyRecord = core.addElement(element2, opts);
+    const data2 = core.getData();
+    core.trigger(coreEventKeys.CHANGE, { data: data2, type: "addElement", modifyRecord });
+    return data2;
   }
   function deleteElement(depOptions, uuid) {
     const { core } = depOptions;
     const modifyRecord = core.deleteElement(uuid);
-    const data = core.getData();
-    core.trigger(coreEventKeys.CHANGE, { data, type: "deleteElement", modifyRecord });
+    const data2 = core.getData();
+    core.trigger(coreEventKeys.CHANGE, { data: data2, type: "deleteElement", modifyRecord });
   }
   function moveElement(depOptions, uuid, to) {
     const { core } = depOptions;
     const modifyRecord = core.moveElement(uuid, to);
-    const data = core.getData();
-    core.trigger(coreEventKeys.CHANGE, { data, type: "moveElement", modifyRecord });
+    const data2 = core.getData();
+    core.trigger(coreEventKeys.CHANGE, { data: data2, type: "moveElement", modifyRecord });
   }
-  function modifyLayout(depOptions, layout) {
+  function modifyLayout(depOptions, layout2) {
     const { core } = depOptions;
-    const modifyRecord = core.modifyLayout(layout);
-    const data = core.getData();
-    core.trigger(coreEventKeys.CHANGE, { data, type: "modifyLayout", modifyRecord });
+    const modifyRecord = core.modifyLayout(layout2);
+    const data2 = core.getData();
+    core.trigger(coreEventKeys.CHANGE, { data: data2, type: "modifyLayout", modifyRecord });
   }
   function modifyGlobal(depOptions, global) {
     const { core } = depOptions;
     const modifyRecord = core.modifyGlobal(global);
-    const data = core.getData();
-    core.trigger(coreEventKeys.CHANGE, { data, type: "modifyGlobal", modifyRecord });
+    const data2 = core.getData();
+    core.trigger(coreEventKeys.CHANGE, { data: data2, type: "modifyGlobal", modifyRecord });
   }
   function changeStyles(styles, core, store) {
     const { selector, info, ruler, scroller, layoutSelector } = styles;
@@ -11626,7 +11674,7 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
     }
   }
   async function exportImageFileBlobURL(opts) {
-    const { data, width, height, devicePixelRatio, viewScaleInfo, viewSizeInfo, loadItemMap } = opts;
+    const { data: data2, width, height, devicePixelRatio, viewScaleInfo, viewSizeInfo, loadItemMap } = opts;
     let viewContext = createOffscreenContext2D({ width, height, devicePixelRatio });
     let tempContext = createOffscreenContext2D({ width, height, devicePixelRatio });
     let renderer = new Renderer({
@@ -11634,7 +11682,7 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
       tempContext
     });
     renderer.setLoadItemMap(loadItemMap);
-    renderer.drawData(data, {
+    renderer.drawData(data2, {
       viewScaleInfo,
       viewSizeInfo,
       forceDrawAll: true
@@ -11657,14 +11705,14 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
     };
   }
   async function getImageBlobURL(depOptions, opts) {
-    const { data, viewSizeInfo, core } = depOptions;
+    const { data: data2, viewSizeInfo, core } = depOptions;
     const { devicePixelRatio } = opts || { devicePixelRatio: 1 };
-    const outputSize = calcElementListSize(data.elements);
+    const outputSize = calcVisiableViewSize(data2);
     return await exportImageFileBlobURL({
       width: outputSize.w,
       height: outputSize.h,
       devicePixelRatio,
-      data,
+      data: data2,
       viewScaleInfo: { scale: 1, offsetLeft: -outputSize.x, offsetTop: -outputSize.y, offsetBottom: 0, offsetRight: 0 },
       viewSizeInfo: {
         ...viewSizeInfo,
@@ -11716,14 +11764,14 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
           const uuid = record.content.uuid;
           undoRecord = core.deleteElement(uuid);
         } else if (record.content.method === "deleteElement") {
-          const { element, position } = record.content;
-          if (!element) {
+          const { element: element2, position } = record.content;
+          if (!element2) {
             return;
           }
-          if (!element) {
+          if (!element2) {
             return;
           }
-          undoRecord = core.addElement(element, { position });
+          undoRecord = core.addElement(element2, { position });
         } else if (record.content.method === "moveElement") {
           const uuid = record.content.uuid;
           const moveResult = calcResultMovePosition({
@@ -11772,11 +11820,11 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
           const uuid = record.content.uuid;
           redoRecord = core.deleteElement(uuid);
         } else if (record.content.method === "deleteElement") {
-          const { element, position } = record.content;
-          if (!element) {
+          const { element: element2, position } = record.content;
+          if (!element2) {
             return;
           }
-          redoRecord = core.addElement(element, { position });
+          redoRecord = core.addElement(element2, { position });
         } else if (record.content.method === "moveElement") {
           const uuid = record.content.uuid;
           const moveResult = calcResultMovePosition({
@@ -11898,19 +11946,19 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
     disable(feat) {
       __privateMethod(this, _iDraw_instances, setFeature_fn).call(this, feat, false);
     }
-    setData(data) {
+    setData(data2) {
       const core = __privateGet(this, _core);
-      core.setData(data);
-      core.trigger(coreEventKeys.CHANGE, { data, type: "setData" });
+      core.setData(data2);
+      core.trigger(coreEventKeys.CHANGE, { data: data2, type: "setData" });
     }
     getData(opts) {
-      const data = __privateGet(this, _core).getData();
-      if (data && (opts == null ? void 0 : opts.compact) === true) {
-        return filterCompactData(data, {
+      const data2 = __privateGet(this, _core).getData();
+      if (data2 && (opts == null ? void 0 : opts.compact) === true) {
+        return filterCompactData(data2, {
           loadItemMap: __privateGet(this, _core).getLoadItemMap()
         });
       }
-      return data;
+      return data2;
     }
     getViewInfo() {
       return __privateGet(this, _core).getViewInfo();
@@ -11924,10 +11972,10 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
       core.refresh();
     }
     centerContent(opts) {
-      const data = (opts == null ? void 0 : opts.data) || __privateGet(this, _core).getData();
+      const data2 = (opts == null ? void 0 : opts.data) || __privateGet(this, _core).getData();
       const { viewSizeInfo } = this.getViewInfo();
-      if ((data == null ? void 0 : data.layout) || Array.isArray(data == null ? void 0 : data.elements) && (data == null ? void 0 : data.elements.length) > 0) {
-        const result = calcViewCenterContent(data, { viewSizeInfo });
+      if ((data2 == null ? void 0 : data2.layout) || Array.isArray(data2 == null ? void 0 : data2.elements) && (data2 == null ? void 0 : data2.elements.length) > 0) {
+        const result = calcViewCenterContent(data2, { viewSizeInfo });
         this.setViewScale(result);
       }
     }
@@ -11958,17 +12006,17 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
     cancelElements() {
       this.trigger(coreEventKeys.CLEAR_SELECT, { uuids: [] });
     }
-    createElement(type, element, opts) {
-      return createElement({ core: __privateGet(this, _core) }, type, element, opts);
+    createElement(type2, element2, opts) {
+      return createElement({ core: __privateGet(this, _core) }, type2, element2, opts);
     }
-    updateElement(element) {
-      return updateElement({ core: __privateGet(this, _core) }, element);
+    updateElement(element2) {
+      return updateElement({ core: __privateGet(this, _core) }, element2);
     }
-    modifyElement(element) {
-      return modifyElement({ core: __privateGet(this, _core) }, element);
+    modifyElement(element2) {
+      return modifyElement({ core: __privateGet(this, _core) }, element2);
     }
-    addElement(element, opts) {
-      return addElement({ core: __privateGet(this, _core) }, element, opts);
+    addElement(element2, opts) {
+      return addElement({ core: __privateGet(this, _core) }, element2, opts);
     }
     deleteElement(uuid) {
       return deleteElement({ core: __privateGet(this, _core) }, uuid);
@@ -11976,16 +12024,16 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
     moveElement(uuid, to) {
       return moveElement({ core: __privateGet(this, _core) }, uuid, to);
     }
-    modifyLayout(layout) {
-      return modifyLayout({ core: __privateGet(this, _core) }, layout);
+    modifyLayout(layout2) {
+      return modifyLayout({ core: __privateGet(this, _core) }, layout2);
     }
     modifyGlobal(global) {
       return modifyGlobal({ core: __privateGet(this, _core) }, global);
     }
     async getImageBlobURL(opts) {
-      const data = this.getData() || { elements: [] };
+      const data2 = this.getData() || { elements: [] };
       const { viewSizeInfo } = this.getViewInfo();
-      return await getImageBlobURL({ data, viewSizeInfo, core: __privateGet(this, _core) }, opts);
+      return await getImageBlobURL({ data: data2, viewSizeInfo, core: __privateGet(this, _core) }, opts);
     }
     isDestroyed() {
       return __privateGet(this, _core).isDestroyed();

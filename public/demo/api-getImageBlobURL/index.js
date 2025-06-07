@@ -10,6 +10,7 @@ const options = {
 const idraw = new iDraw(app, options);
 idraw.setData(data);
 idraw.setMode('select');
+idraw.centerContent();
 
 const btn = document.querySelector('#btn-getImageBlobURL');
 const preview = document.querySelector('#box-preview');

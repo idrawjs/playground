@@ -50,5 +50,14 @@ export default {
         locked: true
       }
     }
-  ]
+  ],
+  layout: {
+    x: -100,
+    y: -100,
+    w: 800,
+    h: 600,
+    detail: {
+      background: '#0000ff1F'
+    }
+  }
 };
