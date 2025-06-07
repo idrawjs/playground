@@ -32,7 +32,7 @@ const demoList: TypeDemoList = [
     ]
   },
   {
-    name: "Elements' Types",
+    name: 'Data Rendering',
     list: [
       {
         name: 'Text',
@@ -72,6 +72,11 @@ const demoList: TypeDemoList = [
       {
         name: 'Path',
         key: 'elem-path',
+        exclude: ['data.js']
+      },
+      {
+        name: 'Layout',
+        key: 'data-layout',
         exclude: ['data.js']
       }
     ]
