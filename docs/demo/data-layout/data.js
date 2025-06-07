@@ -45,9 +45,6 @@ export default {
         borderRadius: 20,
         borderWidth: 10,
         borderColor: '#ff9800'
-      },
-      operations: {
-        locked: true
       }
     }
   ],
