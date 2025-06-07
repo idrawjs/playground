@@ -76,8 +76,7 @@ const demoList: TypeDemoList = [
       },
       {
         name: 'Layout',
-        key: 'data-layout',
-        exclude: ['data.js']
+        key: 'data-layout'
       }
     ]
   },
