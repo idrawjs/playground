@@ -1,4 +1,4 @@
-import { iDraw } from 'idraw';
+import { iDraw, createUUID } from 'idraw';
 import data from './data';
 
 const app = document.querySelector('#app');
@@ -11,6 +11,7 @@ const idraw = new iDraw(app, options);
 idraw.setData(data);
 
 idraw.addElement({
+  uuid: createUUID(),
   name: 'rect-001',
   x: 140,
   y: 120,
