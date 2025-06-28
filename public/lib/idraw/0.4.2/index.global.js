@@ -6072,6 +6072,9 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
       __classPrivateFieldGet$5(this, _BoardWatcher_instances, "m", _BoardWatcher_init).call(this);
     }
     onEvents() {
+      if (__classPrivateFieldGet$5(this, _BoardWatcher_opts, "f").disabled === true) {
+        return;
+      }
       if (__classPrivateFieldGet$5(this, _BoardWatcher_hasDestroyed, "f")) {
         return;
       }
@@ -6086,6 +6089,9 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
       container.addEventListener("contextmenu", __classPrivateFieldGet$5(this, _BoardWatcher_onContextMenu, "f"));
     }
     offEvents() {
+      if (__classPrivateFieldGet$5(this, _BoardWatcher_opts, "f").disabled === true) {
+        return;
+      }
       const container = window;
       const canvas = __classPrivateFieldGet$5(this, _BoardWatcher_opts, "f").boardContent.boardContext.canvas;
       container.removeEventListener("mousemove", __classPrivateFieldGet$5(this, _BoardWatcher_onHover, "f"));
@@ -6416,7 +6422,8 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
       const sharer = new Sharer();
       const watcher = new BoardWatcher({
         boardContent,
-        sharer
+        sharer,
+        disabled: opts === null || opts === void 0 ? void 0 : opts.disableWatcher
       });
       const renderer = new Renderer({
         viewContext: boardContent.viewContext,
@@ -9234,6 +9241,7 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
         const groupQueue = getGroupQueueFromList(elem.uuid, (data2 === null || data2 === void 0 ? void 0 : data2.elements) || []);
         sharer.setSharedStorage(keyGroupQueue, groupQueue);
         updateSelectedElementList(elements);
+        pointStartElementSizeList = [Object.assign(Object.assign({}, getElementSize(elements[0])), { uuid: elements[0].uuid })];
         viewer.drawFrame();
       }
     };
@@ -9673,32 +9681,34 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
           if (data2 && ["drag", "drag-list", "drag-list-end", "resize"].includes(actionType)) {
             let type2 = "resizeElement";
             if (hasChangedData) {
-              const startSize = pointStartElementSizeList[0];
               let modifyRecord = null;
-              if (selectedElements.length === 1) {
-                modifyRecord = {
-                  type: "resizeElement",
-                  time: 0,
-                  content: {
-                    method: "modifyElement",
-                    uuid: startSize.uuid,
-                    before: toFlattenElement(startSize),
-                    after: toFlattenElement(getElementSize(selectedElements[0]))
+              if (Array.isArray(pointStartElementSizeList) && pointStartElementSizeList.length) {
+                const startSize = pointStartElementSizeList[0];
+                if (selectedElements.length === 1) {
+                  modifyRecord = {
+                    type: "resizeElement",
+                    time: 0,
+                    content: {
+                      method: "modifyElement",
+                      uuid: startSize.uuid,
+                      before: toFlattenElement(startSize),
+                      after: toFlattenElement(getElementSize(selectedElements[0]))
+                    }
+                  };
+                  if (selectedElements[0].type === "group" && startResizeGroupRecord && endResizeGroupRecord) {
+                    modifyRecord = Object.assign(Object.assign({}, endResizeGroupRecord), { content: Object.assign(Object.assign({}, endResizeGroupRecord.content), { before: startResizeGroupRecord.content.before }) });
                   }
-                };
-                if (selectedElements[0].type === "group" && startResizeGroupRecord && endResizeGroupRecord) {
-                  modifyRecord = Object.assign(Object.assign({}, endResizeGroupRecord), { content: Object.assign(Object.assign({}, endResizeGroupRecord.content), { before: startResizeGroupRecord.content.before }) });
+                } else if (selectedElements.length > 1) {
+                  modifyRecord = {
+                    type: "resizeElements",
+                    time: 0,
+                    content: {
+                      method: "modifyElements",
+                      before: pointStartElementSizeList.map((item) => Object.assign(Object.assign({}, toFlattenElement(item)), { uuid: item.uuid })),
+                      after: selectedElements.map((item) => Object.assign(Object.assign({}, toFlattenElement(getElementSize(item))), { uuid: item.uuid }))
+                    }
+                  };
                 }
-              } else if (selectedElements.length > 1) {
-                modifyRecord = {
-                  type: "resizeElements",
-                  time: 0,
-                  content: {
-                    method: "modifyElements",
-                    before: pointStartElementSizeList.map((item) => Object.assign(Object.assign({}, toFlattenElement(item)), { uuid: item.uuid })),
-                    after: selectedElements.map((item) => Object.assign(Object.assign({}, toFlattenElement(getElementSize(item))), { uuid: item.uuid }))
-                  }
-                };
               }
               eventHub.trigger(coreEventKeys.CHANGE, { data: data2, type: type2, selectedElements, hoverElement, modifyRecord });
               hasChangedData = false;
@@ -11886,9 +11896,11 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
       while ((doRecords == null ? void 0 : doRecords.length) > 0) {
         doRecords.pop();
       }
+      doRecords = [];
       while ((undoRecords == null ? void 0 : undoRecords.length) > 0) {
         undoRecords.pop();
       }
+      undoRecords = [];
     };
     const getDoRecords = () => doRecords;
     const getUndoRecords = () => undoRecords;
@@ -11918,8 +11930,8 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
       __privateAdd(this, _historyHandler, null);
       const opts = { ...defaultSettings, ...defaultOptions, ...options };
       __privateGet(this, _store).set("middlewareStyles", parseStyles(opts));
-      const { width, height, devicePixelRatio } = opts;
-      const core = new Core(mount, { width, height, devicePixelRatio });
+      const { width, height, devicePixelRatio, disableWatcher } = opts;
+      const core = new Core(mount, { width, height, devicePixelRatio, disableWatcher });
       __privateSet(this, _core, core);
       __privateSet(this, _opts, opts);
       __privateMethod(this, _iDraw_instances, init_fn).call(this);
@@ -12068,6 +12080,10 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
     undo() {
       var _a;
       (_a = __privateGet(this, _historyHandler)) == null ? void 0 : _a.undo();
+    }
+    clearHistory() {
+      var _a;
+      (_a = __privateGet(this, _historyHandler)) == null ? void 0 : _a.clear();
     }
   }
   _core = new WeakMap();
