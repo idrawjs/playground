@@ -10718,6 +10718,7 @@ var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "acce
         alignItems = "end";
       }
       textarea.style.display = "inline-flex";
+      textarea.style.flexDirection = "column";
       textarea.style.justifyContent = justifyContent;
       textarea.style.alignItems = alignItems;
       textarea.style.position = "absolute";
